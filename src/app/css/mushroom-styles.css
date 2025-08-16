@@ -1,0 +1,106 @@
+/* Mushroom Image Styles for Transparent Backgrounds */
+
+.mushroom-image {
+  /* Ensures transparent background */
+  background-color: transparent;
+  
+  /* Helps with image quality */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  
+  /* Smooth scaling */
+  transition: transform 0.3s ease;
+}
+
+.mushroom-image:hover {
+  transform: scale(1.05);
+}
+
+/* For images with white backgrounds that need to be removed */
+.mushroom-image-remove-white {
+  mix-blend-mode: multiply;
+  filter: contrast(1.1);
+}
+
+/* For images that need better contrast on light backgrounds */
+.mushroom-image-light-bg {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* For images that need better contrast on dark backgrounds */
+.mushroom-image-dark-bg {
+  filter: drop-shadow(0 2px 4px rgba(255, 255, 255, 0.1));
+}
+
+/* Container for mushroom images */
+.mushroom-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+/* Mushroom card styles */
+.mushroom-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.mushroom-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Responsive image sizing */
+.mushroom-image-responsive {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+/* For specific mushroom types */
+.medicinal-mushroom {
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+}
+
+.edible-mushroom {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+}
+
+.powder-mushroom {
+  background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+}
+
+/* Animation for mushroom images */
+@keyframes mushroomFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.mushroom-float {
+  animation: mushroomFloat 3s ease-in-out infinite;
+}
+
+/* Loading state for mushroom images */
+.mushroom-loading {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
