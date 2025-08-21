@@ -17,7 +17,7 @@ const PromoBanner = () => {
             </h2>
 
             <p>
-              Ganoderma 
+              Experience the wellness benefits of our premium Ganoderma extracts.
             </p>
 
             <a
@@ -30,14 +30,12 @@ const PromoBanner = () => {
 
           <Image
             src="/images/promo/ganoderma_tinctures.png"
-            alt="promo img"
-            className="absolute bottom-0 right-4 lg:right-26 -z-1"
+            alt="Ganoderma Tinctures Promo"
+            className="absolute top-1/2 -translate-y-1/2 right-4 lg:right-26 -z-1 rounded-lg"
             width={274}
             height={350}
           />
         </div>
-
-        
       </div>
     </section>
   );
