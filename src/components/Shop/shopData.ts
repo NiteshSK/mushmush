@@ -9,15 +9,15 @@ const shopData: Product[] = [
     imgs: {
       thumbnails: [
         "/images/products/ganoderma_sticker.png",
-        "/images/products/ganoderma.png",
         "/images/products/ganoderma_package.png",
         "/images/products/ganoderma_specs.png",
+        "/images/products/ganoderma.png",
       ],
       previews: [
         "/images/products/ganoderma_sticker.png",
-        "/images/products/ganoderma.png",
         "/images/products/ganoderma_package.png",
         "/images/products/ganoderma_specs.png",
+        "/images/products/ganoderma.png",
       ],
     },
     description: "Our <strong>Ganoderma lucidum</strong>, commonly known as Reishi or Lingzhi, is cultivated and processed under the strictest quality standards to deliver a product of exceptional purity and potency. Revered for centuries in traditional medicine as the &quot;Mushroom of Immortality,&quot; our Reishi extract is designed to support modern wellness goals.",
@@ -79,13 +79,14 @@ const shopData: Product[] = [
     imgs: {
       thumbnails: [
         "/images/products/oyster_sticker.png",
-        "/images/products/oyster.png",
         "/images/products/oyster_package.png",
+        "/images/products/oyster.png",
       ],
       previews: [
         "/images/products/oyster_sticker.png",
-        "/images/products/oyster.png",
         "/images/products/oyster_package.png",
+        "/images/products/oyster.png",
+        
       ],
     },
     description: "<strong>Oyster mushrooms</strong>, scientifically known as <strong>Pleurotus</strong>, are a popular and versatile variety of edible fungi cherished for their delicate flavor and velvety texture. Their name is derived from their characteristic shell-like appearance, with a cap that resembles an oyster. Found in temperate and tropical forests worldwide, they typically grow in shelf-like clusters on dead or dying deciduous trees",
@@ -145,13 +146,13 @@ const shopData: Product[] = [
     imgs: {
       thumbnails: [
         "/images/products/chantrelle_sticker.png",
-        "/images/products/chantrelle.png",
         "/images/products/chantrelle_package.png",
+        "/images/products/chantrelle.png",
       ],
       previews: [
        "/images/products/chantrelle_sticker.png",
-       "/images/products/chantrelle.png",
        "/images/products/chantrelle_package.png",
+       "/images/products/chantrelle.png",
       ],
     },
   "description": "Chanterelle <i>(Cantharellus cibarius)</i> is a celebrated wild mushroom, famous for its beautiful golden color, delicate texture, and a subtle, fruity aroma reminiscent of apricots. Unlike cultivated mushrooms, chanterelles are foraged from forests, growing in symbiotic relationships with trees. They are a true gourmet delicacy, sought after by chefs and food lovers around the world.",
