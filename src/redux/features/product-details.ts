@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Product } from "@/types/product";
 
 type InitialState = {
@@ -25,12 +25,8 @@ export const productDetails = createSlice({
   name: "productDetails",
   initialState,
   reducers: {
-    updateproductDetails: (_, action) => {
-      return {
-        value: {
-          ...action.payload,
-        },
-      };
+    updateproductDetails: (state, action: PayloadAction<Product>) => {
+      state.value = action.payload;
     },
   },
 });
