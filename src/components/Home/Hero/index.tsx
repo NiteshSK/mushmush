@@ -14,12 +14,12 @@ const Hero = () => {
               <span className="text-blue block">
                 Mushrooms
                 <Image
-      src="/images/categories/sticker_1.png"
-      alt="Sticker"
-      width={40}
-      height={40}
-      className="ml-2 inline-block bg-white rounded-full p-1"
-    />
+                  src="/images/categories/sticker_1.png"
+                  alt="Sticker"
+                  width={40}
+                  height={40}
+                  className="ml-2 inline-block bg-white rounded-full p-1"
+                />
               </span>
             </h1>
             <p className="text-lg text-gray-600 leading-relaxed mb-8">
@@ -37,13 +37,14 @@ const Hero = () => {
 
           {/* <!-- Right Image --> */}
           <div className="lg:w-1/2">
-            <div className="relative">
+            {/* This is the div where the "relative" class was removed */}
+            <div>
               <Image
                 src="/images/categories/hero_mushroom_wb.png"
                 alt="Premium Mushrooms Collection"
                 width={500}
                 height={300}
-                className="object-contain rounded-lg opacity-100" // Added opacity-100 here
+                className="object-contain rounded-lg opacity-100"
               />
             </div>
           </div>
