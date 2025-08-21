@@ -211,11 +211,15 @@ const shopData: Product[] = [
       thumbnails: [
         "/images/products/shitake_sticker.png",
         "/images/products/shitake_package.png",
+        "/images/products/shitake_package_2.png",
+        "/images/products/shitake_on_log.png",
         "/images/products/shitake.png",
       ],
       previews: [
        "/images/products/shitake_sticker.png",
        "/images/products/shitake_package.png",
+       "/images/products/shitake_package_2.png",
+       "/images/products/shitake_on_log.png",
        "/images/products/shitake.png",
       ],
     },
