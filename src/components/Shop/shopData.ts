@@ -73,8 +73,8 @@ const shopData: Product[] = [
   {
     title: "Oyster Mushroom",
     reviews: 5,
-    price: 110,
-    discountedPrice: 99,
+    price: 169,
+    discountedPrice: 149,
     id: 2,
     imgs: {
       thumbnails: [
