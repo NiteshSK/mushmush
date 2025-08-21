@@ -80,12 +80,12 @@ const shopData: Product[] = [
       thumbnails: [
         "/images/products/oyster_sticker.png",
         "/images/products/oyster.png",
-        "/images/products/dry_oyster_package.png",
+        "/images/products/oyster_package.png",
       ],
       previews: [
         "/images/products/oyster_sticker.png",
         "/images/products/oyster.png",
-        "/images/products/dry_oyster_package.png",
+        "/images/products/oyster_package.png",
       ],
     },
     description: "<strong>Oyster mushrooms</strong>, scientifically known as <strong>Pleurotus</strong>, are a popular and versatile variety of edible fungi cherished for their delicate flavor and velvety texture. Their name is derived from their characteristic shell-like appearance, with a cap that resembles an oyster. Found in temperate and tropical forests worldwide, they typically grow in shelf-like clusters on dead or dying deciduous trees",
@@ -208,11 +208,13 @@ const shopData: Product[] = [
     imgs: {
       thumbnails: [
         "/images/products/shitake_sticker.png",
-        "/images/products/shitake.png"
+        "/images/products/shitake.png",
+        "/images/products/shitake_package.png",
       ],
       previews: [
        "/images/products/shitake_sticker.png",
-       "/images/products/shitake.png"
+       "/images/products/shitake.png",
+       "/images/products/shitake_package.png",
       ],
     },
       "description": "Shiitake <i>(Lentinula edodes)</i> is one of the most popular and cultivated mushrooms worldwide, prized for its rich, savory taste and significant health benefits. Native to East Asia, it grows on decaying hardwood trees and has been a staple in Asian cuisine and traditional medicine for centuries. Its deep, umami flavor makes it a culinary cornerstone in many dishes.",
