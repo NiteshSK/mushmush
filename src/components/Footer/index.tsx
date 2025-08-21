@@ -264,7 +264,7 @@ const Footer = () => {
             </ul>
           </div>
 
-          <div className="w-full sm:w-auto">
+          {/* <div className="w-full sm:w-auto">
             <h2 className="mb-7.5 text-custom-1 font-medium text-dark lg:text-right">
               Download App
             </h2>
@@ -328,7 +328,7 @@ const Footer = () => {
                 </a>
               </li>
             </ul>
-          </div>
+          </div> */}
         </div>
         {/* <!-- footer menu end --> */}
       </div>
@@ -353,28 +353,12 @@ const Footer = () => {
                     height={22}
                   />
                 </a>
-                <a href="#" aria-label="payment system with paypal">
-                  <Image
-                    src="/images/payment/payment-02.svg"
-                    alt="paypal"
-                    width={18}
-                    height={21}
-                  />
-                </a>
                 <a href="#" aria-label="payment system with master card">
                   <Image
                     src="/images/payment/payment-03.svg"
                     alt="master card"
                     width={33}
                     height={24}
-                  />
-                </a>
-                <a href="#" aria-label="payment system with apple pay">
-                  <Image
-                    src="/images/payment/payment-04.svg"
-                    alt="apple pay"
-                    width={52.94}
-                    height={22}
                   />
                 </a>
                 <a href="#" aria-label="payment system with google pay">

@@ -6,6 +6,7 @@ import Newsletter from "../Common/Newsletter";
 import RecentlyViewdItems from "./RecentlyViewd";
 import { usePreviewSlider } from "@/app/context/PreviewSliderContext";
 import { useAppSelector } from "@/redux/store";
+import shopData from "@/components/Shop/shopData";
 
 const ShopDetails = () => {
   const [activeColor, setActiveColor] = useState("blue");
@@ -39,7 +40,16 @@ const ShopDetails = () => {
     (state) => state.productDetailsReducer.value
   );
 
-  const product = alreadyExist ? JSON.parse(alreadyExist) : productFromStorage;
+  const product = productFromStorage && productFromStorage.title
+  ? productFromStorage
+  : alreadyExist
+    ? JSON.parse(alreadyExist)
+    : {};
+
+  const shopProductData = shopData.find((p) => p.id === product.id);
+  const displayProduct = shopProductData
+    ? { ...shopProductData, ...product }
+    : product;
 
   useEffect(() => {
     localStorage.setItem("productDetails", JSON.stringify(product));
@@ -89,7 +99,13 @@ const ShopDetails = () => {
                       </button>
 
                       <Image
-                        src={product.imgs?.previews[previewImg]}
+                        src={
+                          product.imgs?.previews?.slice(1)[previewImg] ??
+                          product.imgs?.previews?.[0] ??
+                          product.imgs?.thumbnails?.slice(1)[previewImg] ??
+                          product.imgs?.thumbnails?.[0] ??
+                          "/images/placeholder.png"
+                        }
                         alt="products-details"
                         width={400}
                         height={400}
@@ -99,7 +115,7 @@ const ShopDetails = () => {
 
                   {/* ?  &apos;border-blue &apos; :  &apos;border-transparent&apos; */}
                   <div className="flex flex-wrap sm:flex-nowrap gap-4.5 mt-6">
-                    {product.imgs?.thumbnails.map((item, key) => (
+                    {product.imgs?.thumbnails.slice(1).map((item, key) => (
                       <button
                         onClick={() => setPreviewImg(key)}
                         key={key}
@@ -276,11 +292,11 @@ const ShopDetails = () => {
 
                   <h3 className="font-medium text-custom-1 mb-4.5">
                     <span className="text-sm sm:text-base text-dark">
-                      Price: ₹{product.price}
+                      Price: ₹{product.discountedPrice}
                     </span>
                     <span className="line-through">
                       {" "}
-                      ₹{product.discountedPrice}{" "}
+                      ₹{product.price}{" "}
                     </span>
                   </h3>
 
@@ -446,8 +462,9 @@ const ShopDetails = () => {
 
               {/* <!--== tab content start ==--> */}
               {/* <!-- tab content one start --> */}
-              <div>
-                <div
+              
+              {/* <!-- tab content one end --> */}
+                                <div
                   className={`flex-col sm:flex-row gap-7.5 xl:gap-12.5 mt-12.5 ${
                     activeTab === "tabOne" ? "flex" : "hidden"
                   }`}
@@ -456,69 +473,46 @@ const ShopDetails = () => {
                     <h2 className="font-medium text-2xl text-dark mb-7">
                       Specifications:
                     </h2>
-
-                    <div className="space-y-4">
-  <p className="mb-4">
-    Our Ganoderma lucidum, commonly known as Reishi or Lingzhi, is cultivated and processed under the strictest quality standards to deliver a product of exceptional purity and potency. Revered for centuries in traditional medicine as the "Mushroom of Immortality," our Reishi extract is designed to support modern wellness goals.
-  </p>
-
-  <div>
-    <h3 className="text-lg font-semibold mb-2">Processing & Potency</h3>
-    <ul className="list-disc list-inside space-y-1">
-      <li>
-        <strong>Extraction Method:</strong> Advanced Dual-Extraction (temperature-controlled hot water and alcohol) to ensure the bioavailability of both water-soluble and alcohol-soluble compounds like triterpenes.
-      </li>
-      <li>
-        <strong>Extraction Ratio:</strong> A potent 10:1 extract ratio, meaning 10kg of raw mushroom is used to produce 1kg of extract powder.
-      </li>
-      <li>
-        <strong>Drying Method:</strong> Spray-dried to preserve the integrity and potency of the active compounds.
-      </li>
-    </ul>
-  </div>
-
-  <div>
-    <h3 className="text-lg font-semibold mb-2">Active Compound Analysis</h3>
-    <ul className="list-disc list-inside space-y-1">
-      <li><strong>Polysaccharides:</strong> ≥ 30%</li>
-      <li><strong>Beta-Glucans:</strong> ≥ 20%</li>
-      <li><strong>Triterpenes:</strong> ≥ 4%</li>
-    </ul>
-  </div>
-</div>
-                    
+                      {displayProduct.description || displayProduct.specifications ? (
+                        <div className="space-y-4">
+                          {displayProduct.description &&  (<p
+    className="mb-4"
+    dangerouslySetInnerHTML={{ __html: displayProduct.description }}
+  />)}
+                          {Array.isArray(displayProduct.specifications) && (
+                            <div>
+                              <h3 className="text-lg font-semibold mb-2">Processing & Potency</h3>
+                                <ul className="list-disc list-inside space-y-1">
+                                  {displayProduct.specifications.map((spec: string, idx: number) => (
+                                    <li key={idx} dangerouslySetInnerHTML={{ __html: spec }} />
+                                  ))}
+                                </ul>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <p className="mb-4">No specifications available for this product.</p>
+                        </div>
+                      )}
                   </div>
-
-                  <div className="max-w-[447px] w-full">
-                    <h2 className="font-medium text-2xl text-dark mb-7">
-                      How to consume?
-                    </h2>
-
-                    <ul className="list-disc list-inside mb-6 space-y-2">
-  <li>
-    <strong>As a Simple Tea:</strong> Mix about half a teaspoon of Ganoderma powder in a cup of hot water. Add honey, jaggery, or a squeeze of lemon to balance the natural bitterness.
-  </li>
-  <li>
-    <strong>Stir into Coffee or Chai:</strong> Add a serving of the powder directly to your daily coffee or masala chai. The strong flavours of these beverages effectively mask the mushroom's taste.
-  </li>
-  <li>
-    <strong>Blend into Smoothies:</strong> Add the powder to your fruit or vegetable smoothies. The other ingredients will completely hide the taste while you still get all the benefits.
-  </li>
-  <li>
-    <strong>Add to Soups and Food:</strong> Stir the powder into warm soups, dals, or broths. Its earthy, umami flavour can enhance the taste of savoury dishes.
-  </li>
-  <li>
-    <strong>Take as Capsules:</strong> For the most convenient and taste-free option, take Ganoderma in capsule form and swallow with water as per the dosage instructions.
-  </li>
-  <li>
-    <strong>Brew from Dried Slices:</strong> If you have whole dried Reishi, simmer a few pieces in water for at least one hour to create a traditional, potent health tonic.
-  </li>
+  
+                    <div className="max-w-[447px] w-full">
+                      <h2 className="font-medium text-2xl text-dark mb-7">
+                        How to consume?
+                      </h2>
+                        <ul className="list-disc list-inside mb-6 space-y-2">
+  {displayProduct.howToConsume?.length ? (
+    displayProduct.howToConsume.map((step: string, i: number) => (
+      // use innerHTML if your shopData strings include <strong> etc.
+      <li key={i} dangerouslySetInnerHTML={{ __html: step }} />
+    ))
+  ) : (
+    <li>No usage instructions available.</li>
+  )}
 </ul>
+                    </div>
                   </div>
-                </div>
-              </div>
-              {/* <!-- tab content one end --> */}
-
               {/* <!-- tab content two start --> */}
               <div>
                 <div
@@ -528,98 +522,22 @@ const ShopDetails = () => {
                 >
 
                   {/* <!-- info item --> */}
-                  <div className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
-                    <div className="max-w-[450px] min-w-[140px] w-full">
-                      <p className="text-sm sm:text-base text-dark">
-                      Product Name
-                      </p>
-                    </div>
-                    <div className="w-full">
-                      <p className="text-sm sm:text-base text-dark">
-                        Organic Reishi Mushroom Powder (or Extract)
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* <!-- info item --> */}
-                  <div className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
-                    <div className="max-w-[450px] min-w-[140px] w-full">
-                      <p className="text-sm sm:text-base text-dark">
-                      Botanical Name
-                      </p>
-                    </div>
-                    <div className="w-full">
-                      <p className="text-sm sm:text-base text-dark">
-                      Ganoderma lucidum
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* <!-- info item --> */}
-                  <div className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
-                    <div className="max-w-[450px] min-w-[140px] w-full">
-                      <p className="text-sm sm:text-base text-dark">
-                      Common Names
-                      </p>
-                    </div>
-                    <div className="w-full">
-                      <p className="text-sm sm:text-base text-dark">
-                      Reishi, Lingzhi
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* <!-- info item --> */}
-                  <div className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
-                    <div className="max-w-[450px] min-w-[140px] w-full">
-                      <p className="text-sm sm:text-base text-dark">Part Used</p>
-                    </div>
-                    <div className="w-full">
-                      <p className="text-sm sm:text-base text-dark">
-                      100% Fruiting Body
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* <!-- info item --> */}
-                  <div className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
-                    <div className="max-w-[450px] min-w-[140px] w-full">
-                      <p className="text-sm sm:text-base text-dark">Appearance</p>
-                    </div>
-                    <div className="w-full">
-                      <p className="text-sm sm:text-base text-dark">
-                      Fine, reddish-brown powder
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* <!-- info item --> */}
-                  <div className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
-                    <div className="max-w-[450px] min-w-[140px] w-full">
-                      <p className="text-sm sm:text-base text-dark">
-                      Taste
-                      </p>
-                    </div>
-                    <div className="w-full">
-                      <p className="text-sm sm:text-base text-dark">
-                      Characteristically bitter (a key indicator of high triterpene content)
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* <!-- info item --> */}
-                  <div className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
-                    <div className="max-w-[450px] min-w-[140px] w-full">
-                      <p className="text-sm sm:text-base text-dark">
-                      Odor
-                      </p>
-                    </div>
-                    <div className="w-full">
-                      <p className="text-sm sm:text-base text-dark">
-                      Mild, earthy aroma
-                      </p>
-                    </div>
-                  </div>
+                  {Array.isArray(displayProduct.additionalInfo) && displayProduct.additionalInfo.length ? (
+                 displayProduct.additionalInfo.map((info, idx) => (
+                   <div key={idx} className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
+                     <div className="max-w-[450px] min-w-[140px] w-full">
+                       <p className="text-sm sm:text-base text-dark">{info.label}</p>
+                     </div>
+                     <div className="w-full">
+                       <p className="text-sm sm:text-base text-dark">{info.value}</p>
+                     </div>
+                   </div>
+                 ))
+               ) : (
+                 <div className="space-y-4">
+                   <p className="mb-4">No additional information available for this product.</p>
+                 </div>
+               )}
                 </div>
               </div>
               {/* <!-- tab content two end --> */}
@@ -632,354 +550,53 @@ const ShopDetails = () => {
                   }`}
                 >
                   <div className="max-w-[570px] w-full">
-                    <h2 className="font-medium text-2xl text-dark mb-9">
-                      03 Review for this product
-                    </h2>
+  <h2 className="font-medium text-2xl text-dark mb-9">
+    {displayProduct.reviewsList?.length ?? 0} Review{(displayProduct.reviewsList?.length ?? 0) !== 1 ? "s" : ""} for this product
+  </h2>
 
-                    <div className="flex flex-col gap-6">
-                      {/* <!-- review item --> */}
-                      <div className="rounded-xl bg-white shadow-1 p-4 sm:p-6">
-                        <div className="flex items-center justify-between">
-                          <a href="#" className="flex items-center gap-4">
-                            <div className="w-12.5 h-12.5 rounded-full overflow-hidden">
-                              <Image
-                                src="/images/users/user-01.jpg"
-                                alt="author"
-                                className="w-12.5 h-12.5 rounded-full overflow-hidden"
-                                width={50}
-                                height={50}
-                              />
-                            </div>
+  <div className="flex flex-col gap-6">
+    {displayProduct.reviewsList && displayProduct.reviewsList.length ? (
+      displayProduct.reviewsList.map((r, idx) => (
+        <div key={idx} className="rounded-xl bg-white shadow-1 p-4 sm:p-6">
+          <div className="flex items-center justify-between">
+            <a href="#" className="flex items-center gap-4">
+              <div className="w-12.5 h-12.5 rounded-full overflow-hidden">
+                <Image
+                  src={r.avatar ?? "/images/users/user-01.jpg"}
+                  alt={r.name}
+                  width={50}
+                  height={50}
+                />
+              </div>
 
-                            <div>
-                              <h3 className="font-medium text-dark">
-                                Davis Dorwart
-                              </h3>
-                              <p className="text-custom-sm">
-                                Serial Entrepreneur
-                              </p>
-                            </div>
-                          </a>
+              <div>
+                <h3 className="font-medium text-dark">{r.name}</h3>
+                {r.role && <p className="text-custom-sm">{r.role}</p>}
+              </div>
+            </a>
 
-                          <div className="flex items-center gap-1">
-                            <span className="cursor-pointer text-[#FBB040]">
-                              <svg
-                                className="fill-current"
-                                width="15"
-                                height="16"
-                                viewBox="0 0 15 16"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M14.6604 5.90785L9.97461 5.18335L7.85178 0.732874C7.69645 0.422375 7.28224 0.422375 7.12691 0.732874L5.00407 5.20923L0.344191 5.90785C0.0076444 5.9596 -0.121797 6.39947 0.137085 6.63235L3.52844 10.1255L2.72591 15.0158C2.67413 15.3522 3.01068 15.6368 3.32134 15.4298L7.54112 13.1269L11.735 15.4298C12.0198 15.5851 12.3822 15.3263 12.3046 15.0158L11.502 10.1255L14.8934 6.63235C15.1005 6.39947 14.9969 5.9596 14.6604 5.90785Z"
-                                  fill=""
-                                />
-                              </svg>
-                            </span>
+            <div className="flex items-center gap-1">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <span key={i} className={i < r.rating ? "cursor-pointer text-[#FBB040]" : "cursor-pointer text-gray-5"}>
+                  <svg className="fill-current" width="15" height="16" viewBox="0 0 15 16" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M14.6604 5.90785L9.97461 5.18335L7.85178 0.732874C7.69645 0.422375 7.28224 0.422375 7.12691 0.732874L5.00407 5.20923L0.344191 5.90785C0.0076444 5.9596 -0.121797 6.39947 0.137085 6.63235L3.52844 10.1255L2.72591 15.0158C2.67413 15.3522 3.01068 15.6368 3.32134 15.4298L7.54112 13.1269L11.735 15.4298C12.0198 15.5851 12.3822 15.3263 12.3046 15.0158L11.502 10.1255L14.8934 6.63235C15.1005 6.39947 14.9969 5.9596 14.6604 5.90785Z" />
+                  </svg>
+                </span>
+              ))}
+            </div>
+          </div>
 
-                            <span className="cursor-pointer text-[#FBB040]">
-                              <svg
-                                className="fill-current"
-                                width="15"
-                                height="16"
-                                viewBox="0 0 15 16"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M14.6604 5.90785L9.97461 5.18335L7.85178 0.732874C7.69645 0.422375 7.28224 0.422375 7.12691 0.732874L5.00407 5.20923L0.344191 5.90785C0.0076444 5.9596 -0.121797 6.39947 0.137085 6.63235L3.52844 10.1255L2.72591 15.0158C2.67413 15.3522 3.01068 15.6368 3.32134 15.4298L7.54112 13.1269L11.735 15.4298C12.0198 15.5851 12.3822 15.3263 12.3046 15.0158L11.502 10.1255L14.8934 6.63235C15.1005 6.39947 14.9969 5.9596 14.6604 5.90785Z"
-                                  fill=""
-                                />
-                              </svg>
-                            </span>
-
-                            <span className="cursor-pointer text-[#FBB040]">
-                              <svg
-                                className="fill-current"
-                                width="15"
-                                height="16"
-                                viewBox="0 0 15 16"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M14.6604 5.90785L9.97461 5.18335L7.85178 0.732874C7.69645 0.422375 7.28224 0.422375 7.12691 0.732874L5.00407 5.20923L0.344191 5.90785C0.0076444 5.9596 -0.121797 6.39947 0.137085 6.63235L3.52844 10.1255L2.72591 15.0158C2.67413 15.3522 3.01068 15.6368 3.32134 15.4298L7.54112 13.1269L11.735 15.4298C12.0198 15.5851 12.3822 15.3263 12.3046 15.0158L11.502 10.1255L14.8934 6.63235C15.1005 6.39947 14.9969 5.9596 14.6604 5.90785Z"
-                                  fill=""
-                                />
-                              </svg>
-                            </span>
-
-                            <span className="cursor-pointer text-[#FBB040]">
-                              <svg
-                                className="fill-current"
-                                width="15"
-                                height="16"
-                                viewBox="0 0 15 16"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M14.6604 5.90785L9.97461 5.18335L7.85178 0.732874C7.69645 0.422375 7.28224 0.422375 7.12691 0.732874L5.00407 5.20923L0.344191 5.90785C0.0076444 5.9596 -0.121797 6.39947 0.137085 6.63235L3.52844 10.1255L2.72591 15.0158C2.67413 15.3522 3.01068 15.6368 3.32134 15.4298L7.54112 13.1269L11.735 15.4298C12.0198 15.5851 12.3822 15.3263 12.3046 15.0158L11.502 10.1255L14.8934 6.63235C15.1005 6.39947 14.9969 5.9596 14.6604 5.90785Z"
-                                  fill=""
-                                />
-                              </svg>
-                            </span>
-
-                            <span className="cursor-pointer text-[#FBB040]">
-                              <svg
-                                className="fill-current"
-                                width="15"
-                                height="16"
-                                viewBox="0 0 15 16"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M14.6604 5.90785L9.97461 5.18335L7.85178 0.732874C7.69645 0.422375 7.28224 0.422375 7.12691 0.732874L5.00407 5.20923L0.344191 5.90785C0.0076444 5.9596 -0.121797 6.39947 0.137085 6.63235L3.52844 10.1255L2.72591 15.0158C2.67413 15.3522 3.01068 15.6368 3.32134 15.4298L7.54112 13.1269L11.735 15.4298C12.0198 15.5851 12.3822 15.3263 12.3046 15.0158L11.502 10.1255L14.8934 6.63235C15.1005 6.39947 14.9969 5.9596 14.6604 5.90785Z"
-                                  fill=""
-                                />
-                              </svg>
-                            </span>
-                          </div>
-                        </div>
-
-                        <p className="text-dark mt-6">
-                          “Lorem ipsum dolor sit amet, adipiscing elit. Donec
-                          malesuada justo vitaeaugue suscipit beautiful
-                          vehicula’’
-                        </p>
-                      </div>
-
-                      {/* <!-- review item --> */}
-                      <div className="rounded-xl bg-white shadow-1 p-4 sm:p-6">
-                        <div className="flex items-center justify-between">
-                          <a href="#" className="flex items-center gap-4">
-                            <div className="w-12.5 h-12.5 rounded-full overflow-hidden">
-                              <Image
-                                src="/images/users/user-01.jpg"
-                                alt="author"
-                                className="w-12.5 h-12.5 rounded-full overflow-hidden"
-                                width={50}
-                                height={50}
-                              />
-                            </div>
-
-                            <div>
-                              <h3 className="font-medium text-dark">
-                                Davis Dorwart
-                              </h3>
-                              <p className="text-custom-sm">
-                                Serial Entrepreneur
-                              </p>
-                            </div>
-                          </a>
-
-                          <div className="flex items-center gap-1">
-                            <span className="cursor-pointer text-[#FBB040]">
-                              <svg
-                                className="fill-current"
-                                width="15"
-                                height="16"
-                                viewBox="0 0 15 16"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M14.6604 5.90785L9.97461 5.18335L7.85178 0.732874C7.69645 0.422375 7.28224 0.422375 7.12691 0.732874L5.00407 5.20923L0.344191 5.90785C0.0076444 5.9596 -0.121797 6.39947 0.137085 6.63235L3.52844 10.1255L2.72591 15.0158C2.67413 15.3522 3.01068 15.6368 3.32134 15.4298L7.54112 13.1269L11.735 15.4298C12.0198 15.5851 12.3822 15.3263 12.3046 15.0158L11.502 10.1255L14.8934 6.63235C15.1005 6.39947 14.9969 5.9596 14.6604 5.90785Z"
-                                  fill=""
-                                />
-                              </svg>
-                            </span>
-
-                            <span className="cursor-pointer text-[#FBB040]">
-                              <svg
-                                className="fill-current"
-                                width="15"
-                                height="16"
-                                viewBox="0 0 15 16"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M14.6604 5.90785L9.97461 5.18335L7.85178 0.732874C7.69645 0.422375 7.28224 0.422375 7.12691 0.732874L5.00407 5.20923L0.344191 5.90785C0.0076444 5.9596 -0.121797 6.39947 0.137085 6.63235L3.52844 10.1255L2.72591 15.0158C2.67413 15.3522 3.01068 15.6368 3.32134 15.4298L7.54112 13.1269L11.735 15.4298C12.0198 15.5851 12.3822 15.3263 12.3046 15.0158L11.502 10.1255L14.8934 6.63235C15.1005 6.39947 14.9969 5.9596 14.6604 5.90785Z"
-                                  fill=""
-                                />
-                              </svg>
-                            </span>
-
-                            <span className="cursor-pointer text-[#FBB040]">
-                              <svg
-                                className="fill-current"
-                                width="15"
-                                height="16"
-                                viewBox="0 0 15 16"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M14.6604 5.90785L9.97461 5.18335L7.85178 0.732874C7.69645 0.422375 7.28224 0.422375 7.12691 0.732874L5.00407 5.20923L0.344191 5.90785C0.0076444 5.9596 -0.121797 6.39947 0.137085 6.63235L3.52844 10.1255L2.72591 15.0158C2.67413 15.3522 3.01068 15.6368 3.32134 15.4298L7.54112 13.1269L11.735 15.4298C12.0198 15.5851 12.3822 15.3263 12.3046 15.0158L11.502 10.1255L14.8934 6.63235C15.1005 6.39947 14.9969 5.9596 14.6604 5.90785Z"
-                                  fill=""
-                                />
-                              </svg>
-                            </span>
-
-                            <span className="cursor-pointer text-[#FBB040]">
-                              <svg
-                                className="fill-current"
-                                width="15"
-                                height="16"
-                                viewBox="0 0 15 16"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M14.6604 5.90785L9.97461 5.18335L7.85178 0.732874C7.69645 0.422375 7.28224 0.422375 7.12691 0.732874L5.00407 5.20923L0.344191 5.90785C0.0076444 5.9596 -0.121797 6.39947 0.137085 6.63235L3.52844 10.1255L2.72591 15.0158C2.67413 15.3522 3.01068 15.6368 3.32134 15.4298L7.54112 13.1269L11.735 15.4298C12.0198 15.5851 12.3822 15.3263 12.3046 15.0158L11.502 10.1255L14.8934 6.63235C15.1005 6.39947 14.9969 5.9596 14.6604 5.90785Z"
-                                  fill=""
-                                />
-                              </svg>
-                            </span>
-
-                            <span className="cursor-pointer text-[#FBB040]">
-                              <svg
-                                className="fill-current"
-                                width="15"
-                                height="16"
-                                viewBox="0 0 15 16"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M14.6604 5.90785L9.97461 5.18335L7.85178 0.732874C7.69645 0.422375 7.28224 0.422375 7.12691 0.732874L5.00407 5.20923L0.344191 5.90785C0.0076444 5.9596 -0.121797 6.39947 0.137085 6.63235L3.52844 10.1255L2.72591 15.0158C2.67413 15.3522 3.01068 15.6368 3.32134 15.4298L7.54112 13.1269L11.735 15.4298C12.0198 15.5851 12.3822 15.3263 12.3046 15.0158L11.502 10.1255L14.8934 6.63235C15.1005 6.39947 14.9969 5.9596 14.6604 5.90785Z"
-                                  fill=""
-                                />
-                              </svg>
-                            </span>
-                          </div>
-                        </div>
-
-                        <p className="text-dark mt-6">
-                          “Lorem ipsum dolor sit amet, adipiscing elit. Donec
-                          malesuada justo vitaeaugue suscipit beautiful
-                          vehicula’’
-                        </p>
-                      </div>
-
-                      {/* <!-- review item --> */}
-                      <div className="rounded-xl bg-white shadow-1 p-4 sm:p-6">
-                        <div className="flex items-center justify-between">
-                          <a href="#" className="flex items-center gap-4">
-                            <div className="w-12.5 h-12.5 rounded-full overflow-hidden">
-                              <Image
-                                src="/images/users/user-01.jpg"
-                                alt="author"
-                                className="w-12.5 h-12.5 rounded-full overflow-hidden"
-                                width={50}
-                                height={50}
-                              />
-                            </div>
-
-                            <div>
-                              <h3 className="font-medium text-dark">
-                                Davis Dorwart
-                              </h3>
-                              <p className="text-custom-sm">
-                                Serial Entrepreneur
-                              </p>
-                            </div>
-                          </a>
-
-                          <div className="flex items-center gap-1">
-                            <span className="cursor-pointer text-[#FBB040]">
-                              <svg
-                                className="fill-current"
-                                width="15"
-                                height="16"
-                                viewBox="0 0 15 16"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M14.6604 5.90785L9.97461 5.18335L7.85178 0.732874C7.69645 0.422375 7.28224 0.422375 7.12691 0.732874L5.00407 5.20923L0.344191 5.90785C0.0076444 5.9596 -0.121797 6.39947 0.137085 6.63235L3.52844 10.1255L2.72591 15.0158C2.67413 15.3522 3.01068 15.6368 3.32134 15.4298L7.54112 13.1269L11.735 15.4298C12.0198 15.5851 12.3822 15.3263 12.3046 15.0158L11.502 10.1255L14.8934 6.63235C15.1005 6.39947 14.9969 5.9596 14.6604 5.90785Z"
-                                  fill=""
-                                />
-                              </svg>
-                            </span>
-
-                            <span className="cursor-pointer text-[#FBB040]">
-                              <svg
-                                className="fill-current"
-                                width="15"
-                                height="16"
-                                viewBox="0 0 15 16"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M14.6604 5.90785L9.97461 5.18335L7.85178 0.732874C7.69645 0.422375 7.28224 0.422375 7.12691 0.732874L5.00407 5.20923L0.344191 5.90785C0.0076444 5.9596 -0.121797 6.39947 0.137085 6.63235L3.52844 10.1255L2.72591 15.0158C2.67413 15.3522 3.01068 15.6368 3.32134 15.4298L7.54112 13.1269L11.735 15.4298C12.0198 15.5851 12.3822 15.3263 12.3046 15.0158L11.502 10.1255L14.8934 6.63235C15.1005 6.39947 14.9969 5.9596 14.6604 5.90785Z"
-                                  fill=""
-                                />
-                              </svg>
-                            </span>
-
-                            <span className="cursor-pointer text-[#FBB040]">
-                              <svg
-                                className="fill-current"
-                                width="15"
-                                height="16"
-                                viewBox="0 0 15 16"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M14.6604 5.90785L9.97461 5.18335L7.85178 0.732874C7.69645 0.422375 7.28224 0.422375 7.12691 0.732874L5.00407 5.20923L0.344191 5.90785C0.0076444 5.9596 -0.121797 6.39947 0.137085 6.63235L3.52844 10.1255L2.72591 15.0158C2.67413 15.3522 3.01068 15.6368 3.32134 15.4298L7.54112 13.1269L11.735 15.4298C12.0198 15.5851 12.3822 15.3263 12.3046 15.0158L11.502 10.1255L14.8934 6.63235C15.1005 6.39947 14.9969 5.9596 14.6604 5.90785Z"
-                                  fill=""
-                                />
-                              </svg>
-                            </span>
-
-                            <span className="cursor-pointer text-[#FBB040]">
-                              <svg
-                                className="fill-current"
-                                width="15"
-                                height="16"
-                                viewBox="0 0 15 16"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M14.6604 5.90785L9.97461 5.18335L7.85178 0.732874C7.69645 0.422375 7.28224 0.422375 7.12691 0.732874L5.00407 5.20923L0.344191 5.90785C0.0076444 5.9596 -0.121797 6.39947 0.137085 6.63235L3.52844 10.1255L2.72591 15.0158C2.67413 15.3522 3.01068 15.6368 3.32134 15.4298L7.54112 13.1269L11.735 15.4298C12.0198 15.5851 12.3822 15.3263 12.3046 15.0158L11.502 10.1255L14.8934 6.63235C15.1005 6.39947 14.9969 5.9596 14.6604 5.90785Z"
-                                  fill=""
-                                />
-                              </svg>
-                            </span>
-
-                            <span className="cursor-pointer text-[#FBB040]">
-                              <svg
-                                className="fill-current"
-                                width="15"
-                                height="16"
-                                viewBox="0 0 15 16"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M14.6604 5.90785L9.97461 5.18335L7.85178 0.732874C7.69645 0.422375 7.28224 0.422375 7.12691 0.732874L5.00407 5.20923L0.344191 5.90785C0.0076444 5.9596 -0.121797 6.39947 0.137085 6.63235L3.52844 10.1255L2.72591 15.0158C2.67413 15.3522 3.01068 15.6368 3.32134 15.4298L7.54112 13.1269L11.735 15.4298C12.0198 15.5851 12.3822 15.3263 12.3046 15.0158L11.502 10.1255L14.8934 6.63235C15.1005 6.39947 14.9969 5.9596 14.6604 5.90785Z"
-                                  fill=""
-                                />
-                              </svg>
-                            </span>
-                          </div>
-                        </div>
-
-                        <p className="text-dark mt-6">
-                          “Lorem ipsum dolor sit amet, adipiscing elit. Donec
-                          malesuada justo vitaeaugue suscipit beautiful
-                          vehicula’’
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+          <p className="text-dark mt-6">{r.comment}</p>
+        </div>
+      ))
+    ) : (
+      <div className="rounded-xl bg-white shadow-1 p-4 sm:p-6">
+        <p>No reviews yet for this product.</p>
+      </div>
+    )}
+  </div>
+</div>
+                  
 
                   <div className="max-w-[550px] w-full">
                     <form>
