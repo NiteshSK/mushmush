@@ -29,10 +29,10 @@ const Categories = () => {
   }, []);
 
   return (
-    <section className="overflow-hidden pt-17.5">
+    <section className="overflow-hidden">
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0 pb-15 border-b border-gray-3">
         <div className="swiper categories-carousel common-carousel">
-          {/* <!-- section title --> */}
+          {/* */}
           <div className="mb-10 flex items-center justify-between">
             <div>
               <span className="flex items-center gap-2.5 font-medium text-dark mb-1.5">
@@ -121,7 +121,6 @@ const Categories = () => {
             slidesPerView={6}
             spaceBetween={21}
             breakpoints={{
-              // when window width is >= 640px
               0: {
                 slidesPerView: 2,
                 spaceBetween: 14,
@@ -130,7 +129,6 @@ const Categories = () => {
                 slidesPerView: 3,
                 spaceBetween: 21,
               },
-              // when window width is >= 768px
               1200: {
                 slidesPerView: 4,
                 spaceBetween: 28,
