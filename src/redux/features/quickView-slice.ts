@@ -15,6 +15,11 @@ const initialState = {
     id: 0,
     images: [],
     imgs: { thumbnails: [], previews: [] },
+    description: "",
+    specifications: [],
+    howToConsume: [],
+    additionalInfo: [],
+    reviewsList: [],
   } as Product,
 } as InitialState;
 
