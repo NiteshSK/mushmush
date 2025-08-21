@@ -265,6 +265,69 @@ const shopData: Product[] = [
       },
     ],
   },
+    {
+    title: "Chantrelle",
+    reviews: 6,
+    price: 699,
+    discountedPrice: 629,
+    id: 5,
+    imgs: {
+      thumbnails: [
+        "/images/products/chantrelle_sticker.png",
+        "/images/products/chantrelle.png",
+        "/images/products/chantrelle_package.png",
+      ],
+      previews: [
+       "/images/products/chantrelle_sticker.png",
+       "/images/products/chantrelle.png",
+       "/images/products/chantrelle_package.png",
+      ],
+    },
+  "description": "Chanterelle <i>(Cantharellus cibarius)</i> is a celebrated wild mushroom, famous for its beautiful golden color, delicate texture, and a subtle, fruity aroma reminiscent of apricots. Unlike cultivated mushrooms, chanterelles are foraged from forests, growing in symbiotic relationships with trees. They are a true gourmet delicacy, sought after by chefs and food lovers around the world.",
+  "specifications": [
+    "<strong>Appearance</strong>: Chanterelles are typically trumpet or funnel-shaped, with a wavy, irregular cap. Their color ranges from a vibrant yellow to a deep golden-orange. Instead of true gills, they have distinctive blunt, forked ridges that run down the stem.",
+    "<strong>Flavor and Aroma</strong>: They have a unique and complex flavor that is both peppery and fruity, with distinct notes of apricot or peach. The texture is wonderfully chewy and firm, yet tender when cooked.",
+    "<strong>Nutritional Value</strong>: Chanterelles are a great source of vitamins D and B, particularly niacin and riboflavin. They also provide essential minerals like iron and potassium, and are rich in polysaccharides, which are known for their immune-supporting properties."
+  ],
+  "howToConsume": [
+    "<strong>Simple Sauté</strong>: This is the best way to enjoy their unique flavor. Sauté them in butter or olive oil with a little garlic and fresh thyme or parsley. Their flavor is delicate, so they don't need much.",
+    "<strong>Creamy Sauces</strong>: Chanterelles are famously used in creamy pasta sauces or served over steak or chicken. Their firm texture holds up beautifully in rich sauces.",
+    "<strong>Soups and Risottos</strong>: Add them to risottos or creamy soups to impart a luxurious, earthy, and fruity flavor.",
+    "<strong>Preserving</strong>: Chanterelles don't rehydrate well from a fully dried state. The best way to preserve them is to sauté them first and then freeze them in an airtight container."
+  ],
+  "additionalInfo": [
+    { "label": "Product Name", "value": "Wild Foraged Chanterelle Mushrooms (Fresh)" },
+    { "label": "Botanical Name", "value": "Cantharellus cibarius" },
+    { "label": "Common Names", "value": "Chanterelle, Golden Chanterelle, Girolle" },
+    { "label": "Part Used", "value": "100% Fruiting Body" },
+    { "label": "Appearance", "value": "Fresh: Golden-orange, trumpet-shaped with forked ridges." },
+    { "label": "Taste", "value": "Delicate, peppery, and fruity with notes of apricot" },
+    { "label": "Odor", "value": "Distinctive fruity aroma, often compared to apricots" }
+  ],
+  reviewsList: [
+{
+        "name": "Geeta Negi",
+        "role": "Local Resident",
+        "rating": 5,
+        "comment": "Ordered these for a family dinner. They were incredibly fresh, much better than the Sabzi Mandi. Made a delicious Pahadi-style mushroom stir-fry.",
+        "avatar": "/images/users/user-12.jpg"
+      },
+      {
+        "name": "Sandeep",
+        "role": "Hotel Supplier",
+        "rating": 4,
+        "comment": "Good bulk pricing and dependable quality for our hotel kitchen. Sometimes the delivery schedule can be a bit rigid, but the product is solid.",
+        "avatar": "/images/users/user-13.jpg"
+      },
+      {
+        "name": "Pooja",
+        "role": "Student",
+        "rating": 5,
+        "comment": "The grow kit is a fantastic project. It's so cool to watch them grow right in my room, especially during this monsoon season. And they taste amazing!",
+        "avatar": "/images/users/user-14.jpg"
+      },
+    ],
+  },
 ];
 
 export default shopData;
