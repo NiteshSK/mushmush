@@ -136,69 +136,70 @@ const shopData: Product[] = [
       }
     ],
   },
-  {
-    title: "Lion's Mane",
-    reviews: 5,
-    price: 1599,
-    discountedPrice: 1439,
+      {
+    title: "Chantrelle",
+    reviews: 6,
+    price: 699,
+    discountedPrice: 629,
     id: 3,
     imgs: {
       thumbnails: [
-        "/images/products/lions_mane.png",
+        "/images/products/chantrelle_sticker.png",
+        "/images/products/chantrelle.png",
+        "/images/products/chantrelle_package.png",
       ],
       previews: [
-        "/images/products/lions_mane.png",
+       "/images/products/chantrelle_sticker.png",
+       "/images/products/chantrelle.png",
+       "/images/products/chantrelle_package.png",
       ],
     },
-    description: "Lion's Mane (Hericium erinaceus), also known as the \"pom-pom mushroom,\" is a unique and increasingly popular edible and medicinal fungus. Its striking appearance and remarkable health benefits have garnered significant attention in both culinary and wellness circles. Native to North America, Europe, and Asia, this mushroom typically grows on dead or dying hardwood trees, particularly oak and beech.",
-    specifications: [
-      "<strong>Appearance</strong>: Lion's Mane is easily identifiable by its shaggy, icicle-like spines that cascade downwards, resembling a lion's mane or a frozen waterfall. Unlike traditional mushrooms with caps and gills, it has a single, clump-like structure that is white to off-white in color. As it matures, the tips of the spines may turn a slightly brownish hue. The texture is soft, spongy, and somewhat stringy, often compared to seafood like crab or lobster.",
-      "<strong>Flavor and Aroma</strong>: When cooked, Lion's Mane has a mild, savory flavor that is often described as seafood-like, with a subtle sweetness. Its aroma is delicate and earthy. The texture is tender and chewy, which makes it a popular meat substitute in vegetarian and vegan dishes.",
-      "<strong>Nutritional Value</strong>: This mushroom is a good source of protein, fiber, potassium, and various antioxidants. It is low in calories and fat. What truly sets Lion's Mane apart are its unique bioactive compounds, including hericenones and erinacines, which are believed to be responsible for its cognitive-enhancing properties."
-    ],
-  howToConsume: [
-    "<strong>Sautéing</strong>: This is one of the most popular and straightforward ways to prepare Lion's Mane. Heat a pan with a bit of butter or oil over medium heat. Add the sliced or torn mushroom and cook for about 5-7 minutes on each side, until it's golden brown and slightly crispy. Season with salt, pepper, garlic, and fresh herbs like thyme or parsley.",
-    "<strong>Roasting</strong>: Roasting enhances the mushroom's natural sweetness and gives it a meatier texture. Toss the mushroom pieces with olive oil and your favorite seasonings. Spread them on a baking sheet and roast at 200°C (400°F) for 15-20 minutes, or until the edges are crispy.",
-    "<strong>Crab Cakes</strong>: Due to its crab-like texture, Lion's Mane is an excellent ingredient for vegan or vegetarian \"crab\" cakes. Shred the mushroom, mix it with breadcrumbs, mayonnaise (or a vegan alternative), and seasonings, then form into patties and pan-fry until golden.",
-    "<strong>Soups and Stews</strong>: Add chunks of Lion's Mane to soups and stews to impart a savory depth of flavor and a satisfying, meaty texture. It absorbs the surrounding flavors well.",
-    "<strong>Sandwiches and Tacos</strong>: Sautéed or roasted Lion's Mane makes a delicious and hearty filling for sandwiches, tacos, and wraps. It's often used as a substitute for pulled pork or shredded chicken.",
-    "<i>Medicinal Consumption: Beyond its culinary uses, Lion's Mane is widely consumed for its potential health benefits, particularly for cognitive function. For this purpose, it is available in various forms:</i",
-    "<strong>Supplements</strong>: Capsules, powders, and tinctures are popular ways to consume Lion's Mane for its medicinal properties. These can be found at health food stores and online.",
-    "<strong>Mushroom Coffee and Tea</strong>: Lion's Mane powder is often added to coffee, tea, and other beverages for a daily cognitive boost."
+  "description": "Chanterelle <i>(Cantharellus cibarius)</i> is a celebrated wild mushroom, famous for its beautiful golden color, delicate texture, and a subtle, fruity aroma reminiscent of apricots. Unlike cultivated mushrooms, chanterelles are foraged from forests, growing in symbiotic relationships with trees. They are a true gourmet delicacy, sought after by chefs and food lovers around the world.",
+  "specifications": [
+    "<strong>Appearance</strong>: Chanterelles are typically trumpet or funnel-shaped, with a wavy, irregular cap. Their color ranges from a vibrant yellow to a deep golden-orange. Instead of true gills, they have distinctive blunt, forked ridges that run down the stem.",
+    "<strong>Flavor and Aroma</strong>: They have a unique and complex flavor that is both peppery and fruity, with distinct notes of apricot or peach. The texture is wonderfully chewy and firm, yet tender when cooked.",
+    "<strong>Nutritional Value</strong>: Chanterelles are a great source of vitamins D and B, particularly niacin and riboflavin. They also provide essential minerals like iron and potassium, and are rich in polysaccharides, which are known for their immune-supporting properties."
   ],
-    "additionalInfo": [
-    { "label": "Product Name", "value": "Organic Lion's Mane Mushroom Powder (or Fresh/Dried)" },
-    { "label": "Botanical Name", "value": "Hericium erinaceus" },
-    { "label": "Common Names", "value": "Lion's Mane, Pom Pom Mushroom, Yamabushitake" },
+  "howToConsume": [
+    "<strong>Simple Sauté</strong>: This is the best way to enjoy their unique flavor. Sauté them in butter or olive oil with a little garlic and fresh thyme or parsley. Their flavor is delicate, so they don't need much.",
+    "<strong>Creamy Sauces</strong>: Chanterelles are famously used in creamy pasta sauces or served over steak or chicken. Their firm texture holds up beautifully in rich sauces.",
+    "<strong>Soups and Risottos</strong>: Add them to risottos or creamy soups to impart a luxurious, earthy, and fruity flavor.",
+    "<strong>Preserving</strong>: Chanterelles don't rehydrate well from a fully dried state. The best way to preserve them is to sauté them first and then freeze them in an airtight container."
+  ],
+  "additionalInfo": [
+    { "label": "Product Name", "value": "Wild Foraged Chanterelle Mushrooms (Fresh)" },
+    { "label": "Botanical Name", "value": "Cantharellus cibarius" },
+    { "label": "Common Names", "value": "Chanterelle, Golden Chanterelle, Girolle" },
     { "label": "Part Used", "value": "100% Fruiting Body" },
-    { "label": "Appearance", "value": "Fresh: White, cascading, icicle-like spines. Powder: Creamy white to light beige." },
-    { "label": "Taste", "value": "Savory and mild, with a texture and flavor reminiscent of crab or lobster" },
-    { "label": "Odor", "value": "Subtle, earthy, and slightly sweet" }
+    { "label": "Appearance", "value": "Fresh: Golden-orange, trumpet-shaped with forked ridges." },
+    { "label": "Taste", "value": "Delicate, peppery, and fruity with notes of apricot" },
+    { "label": "Odor", "value": "Distinctive fruity aroma, often compared to apricots" }
   ],
-    reviewsList: [
- {
-        "name": "Sunita Devi",
-        "role": "Home Gardener",
+  reviewsList: [
+{
+        "name": "Geeta Negi",
+        "role": "Local Resident",
         "rating": 5,
-        "comment": "My first time growing mushrooms! The kit was so easy to use here in the Dehradun climate. I got my first harvest in just over a week. So fresh!",
-        "avatar": "/images/users/user-09.jpg"
+        "comment": "Ordered these for a family dinner. They were incredibly fresh, much better than the Sabzi Mandi. Made a delicious Pahadi-style mushroom stir-fry.",
+        "avatar": "/images/users/user-12.jpg"
       },
       {
-        "name": "Manish Bist",
-        "role": "Cafe Owner",
-        "rating": 5,
-        "comment": "We use these for our cafe's special mushroom sandwich. The quality is consistently top-notch. Fast and reliable local delivery.",
-        "avatar": "/images/users/user-10.jpg"
-      },
-      {
-        "name": "Ajay Verma",
-        "role": "Fitness Trainer",
+        "name": "Sandeep",
+        "role": "Hotel Supplier",
         "rating": 4,
-        "comment": "Excellent source of lean protein. The last batch was a bit smaller than usual, but the freshness is always reliable.",
-        "avatar": "/images/users/user-11.jpg"
+        "comment": "Good bulk pricing and dependable quality for our hotel kitchen. Sometimes the delivery schedule can be a bit rigid, but the product is solid.",
+        "avatar": "/images/users/user-13.jpg"
+      },
+      {
+        "name": "Pooja",
+        "role": "Student",
+        "rating": 5,
+        "comment": "The grow kit is a fantastic project. It's so cool to watch them grow right in my room, especially during this monsoon season. And they taste amazing!",
+        "avatar": "/images/users/user-14.jpg"
       },
     ],
   },
+
   {
     title: "Shitake",
     reviews: 6,
@@ -266,65 +267,65 @@ const shopData: Product[] = [
     ],
   },
     {
-    title: "Chantrelle",
-    reviews: 6,
-    price: 699,
-    discountedPrice: 629,
+    title: "Lion's Mane",
+    reviews: 5,
+    price: 1599,
+    discountedPrice: 1439,
     id: 5,
     imgs: {
       thumbnails: [
-        "/images/products/chantrelle_sticker.png",
-        "/images/products/chantrelle.png",
-        "/images/products/chantrelle_package.png",
+        "/images/products/lions_mane.png",
       ],
       previews: [
-       "/images/products/chantrelle_sticker.png",
-       "/images/products/chantrelle.png",
-       "/images/products/chantrelle_package.png",
+        "/images/products/lions_mane.png",
       ],
     },
-  "description": "Chanterelle <i>(Cantharellus cibarius)</i> is a celebrated wild mushroom, famous for its beautiful golden color, delicate texture, and a subtle, fruity aroma reminiscent of apricots. Unlike cultivated mushrooms, chanterelles are foraged from forests, growing in symbiotic relationships with trees. They are a true gourmet delicacy, sought after by chefs and food lovers around the world.",
-  "specifications": [
-    "<strong>Appearance</strong>: Chanterelles are typically trumpet or funnel-shaped, with a wavy, irregular cap. Their color ranges from a vibrant yellow to a deep golden-orange. Instead of true gills, they have distinctive blunt, forked ridges that run down the stem.",
-    "<strong>Flavor and Aroma</strong>: They have a unique and complex flavor that is both peppery and fruity, with distinct notes of apricot or peach. The texture is wonderfully chewy and firm, yet tender when cooked.",
-    "<strong>Nutritional Value</strong>: Chanterelles are a great source of vitamins D and B, particularly niacin and riboflavin. They also provide essential minerals like iron and potassium, and are rich in polysaccharides, which are known for their immune-supporting properties."
+    description: "Lion's Mane (Hericium erinaceus), also known as the \"pom-pom mushroom,\" is a unique and increasingly popular edible and medicinal fungus. Its striking appearance and remarkable health benefits have garnered significant attention in both culinary and wellness circles. Native to North America, Europe, and Asia, this mushroom typically grows on dead or dying hardwood trees, particularly oak and beech.",
+    specifications: [
+      "<strong>Appearance</strong>: Lion's Mane is easily identifiable by its shaggy, icicle-like spines that cascade downwards, resembling a lion's mane or a frozen waterfall. Unlike traditional mushrooms with caps and gills, it has a single, clump-like structure that is white to off-white in color. As it matures, the tips of the spines may turn a slightly brownish hue. The texture is soft, spongy, and somewhat stringy, often compared to seafood like crab or lobster.",
+      "<strong>Flavor and Aroma</strong>: When cooked, Lion's Mane has a mild, savory flavor that is often described as seafood-like, with a subtle sweetness. Its aroma is delicate and earthy. The texture is tender and chewy, which makes it a popular meat substitute in vegetarian and vegan dishes.",
+      "<strong>Nutritional Value</strong>: This mushroom is a good source of protein, fiber, potassium, and various antioxidants. It is low in calories and fat. What truly sets Lion's Mane apart are its unique bioactive compounds, including hericenones and erinacines, which are believed to be responsible for its cognitive-enhancing properties."
+    ],
+  howToConsume: [
+    "<strong>Sautéing</strong>: This is one of the most popular and straightforward ways to prepare Lion's Mane. Heat a pan with a bit of butter or oil over medium heat. Add the sliced or torn mushroom and cook for about 5-7 minutes on each side, until it's golden brown and slightly crispy. Season with salt, pepper, garlic, and fresh herbs like thyme or parsley.",
+    "<strong>Roasting</strong>: Roasting enhances the mushroom's natural sweetness and gives it a meatier texture. Toss the mushroom pieces with olive oil and your favorite seasonings. Spread them on a baking sheet and roast at 200°C (400°F) for 15-20 minutes, or until the edges are crispy.",
+    "<strong>Crab Cakes</strong>: Due to its crab-like texture, Lion's Mane is an excellent ingredient for vegan or vegetarian \"crab\" cakes. Shred the mushroom, mix it with breadcrumbs, mayonnaise (or a vegan alternative), and seasonings, then form into patties and pan-fry until golden.",
+    "<strong>Soups and Stews</strong>: Add chunks of Lion's Mane to soups and stews to impart a savory depth of flavor and a satisfying, meaty texture. It absorbs the surrounding flavors well.",
+    "<strong>Sandwiches and Tacos</strong>: Sautéed or roasted Lion's Mane makes a delicious and hearty filling for sandwiches, tacos, and wraps. It's often used as a substitute for pulled pork or shredded chicken.",
+    "<i>Medicinal Consumption: Beyond its culinary uses, Lion's Mane is widely consumed for its potential health benefits, particularly for cognitive function. For this purpose, it is available in various forms:</i",
+    "<strong>Supplements</strong>: Capsules, powders, and tinctures are popular ways to consume Lion's Mane for its medicinal properties. These can be found at health food stores and online.",
+    "<strong>Mushroom Coffee and Tea</strong>: Lion's Mane powder is often added to coffee, tea, and other beverages for a daily cognitive boost."
   ],
-  "howToConsume": [
-    "<strong>Simple Sauté</strong>: This is the best way to enjoy their unique flavor. Sauté them in butter or olive oil with a little garlic and fresh thyme or parsley. Their flavor is delicate, so they don't need much.",
-    "<strong>Creamy Sauces</strong>: Chanterelles are famously used in creamy pasta sauces or served over steak or chicken. Their firm texture holds up beautifully in rich sauces.",
-    "<strong>Soups and Risottos</strong>: Add them to risottos or creamy soups to impart a luxurious, earthy, and fruity flavor.",
-    "<strong>Preserving</strong>: Chanterelles don't rehydrate well from a fully dried state. The best way to preserve them is to sauté them first and then freeze them in an airtight container."
-  ],
-  "additionalInfo": [
-    { "label": "Product Name", "value": "Wild Foraged Chanterelle Mushrooms (Fresh)" },
-    { "label": "Botanical Name", "value": "Cantharellus cibarius" },
-    { "label": "Common Names", "value": "Chanterelle, Golden Chanterelle, Girolle" },
+    "additionalInfo": [
+    { "label": "Product Name", "value": "Organic Lion's Mane Mushroom Powder (or Fresh/Dried)" },
+    { "label": "Botanical Name", "value": "Hericium erinaceus" },
+    { "label": "Common Names", "value": "Lion's Mane, Pom Pom Mushroom, Yamabushitake" },
     { "label": "Part Used", "value": "100% Fruiting Body" },
-    { "label": "Appearance", "value": "Fresh: Golden-orange, trumpet-shaped with forked ridges." },
-    { "label": "Taste", "value": "Delicate, peppery, and fruity with notes of apricot" },
-    { "label": "Odor", "value": "Distinctive fruity aroma, often compared to apricots" }
+    { "label": "Appearance", "value": "Fresh: White, cascading, icicle-like spines. Powder: Creamy white to light beige." },
+    { "label": "Taste", "value": "Savory and mild, with a texture and flavor reminiscent of crab or lobster" },
+    { "label": "Odor", "value": "Subtle, earthy, and slightly sweet" }
   ],
-  reviewsList: [
-{
-        "name": "Geeta Negi",
-        "role": "Local Resident",
+    reviewsList: [
+ {
+        "name": "Sunita Devi",
+        "role": "Home Gardener",
         "rating": 5,
-        "comment": "Ordered these for a family dinner. They were incredibly fresh, much better than the Sabzi Mandi. Made a delicious Pahadi-style mushroom stir-fry.",
-        "avatar": "/images/users/user-12.jpg"
+        "comment": "My first time growing mushrooms! The kit was so easy to use here in the Dehradun climate. I got my first harvest in just over a week. So fresh!",
+        "avatar": "/images/users/user-09.jpg"
       },
       {
-        "name": "Sandeep",
-        "role": "Hotel Supplier",
+        "name": "Manish Bist",
+        "role": "Cafe Owner",
+        "rating": 5,
+        "comment": "We use these for our cafe's special mushroom sandwich. The quality is consistently top-notch. Fast and reliable local delivery.",
+        "avatar": "/images/users/user-10.jpg"
+      },
+      {
+        "name": "Ajay Verma",
+        "role": "Fitness Trainer",
         "rating": 4,
-        "comment": "Good bulk pricing and dependable quality for our hotel kitchen. Sometimes the delivery schedule can be a bit rigid, but the product is solid.",
-        "avatar": "/images/users/user-13.jpg"
-      },
-      {
-        "name": "Pooja",
-        "role": "Student",
-        "rating": 5,
-        "comment": "The grow kit is a fantastic project. It's so cool to watch them grow right in my room, especially during this monsoon season. And they taste amazing!",
-        "avatar": "/images/users/user-14.jpg"
+        "comment": "Excellent source of lean protein. The last batch was a bit smaller than usual, but the freshness is always reliable.",
+        "avatar": "/images/users/user-11.jpg"
       },
     ],
   },
