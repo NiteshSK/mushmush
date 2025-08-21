@@ -210,13 +210,13 @@ const shopData: Product[] = [
     imgs: {
       thumbnails: [
         "/images/products/shitake_sticker.png",
-        "/images/products/shitake.png",
         "/images/products/shitake_package.png",
+        "/images/products/shitake.png",
       ],
       previews: [
        "/images/products/shitake_sticker.png",
-       "/images/products/shitake.png",
        "/images/products/shitake_package.png",
+       "/images/products/shitake.png",
       ],
     },
       "description": "Shiitake <i>(Lentinula edodes)</i> is one of the most popular and cultivated mushrooms worldwide, prized for its rich, savory taste and significant health benefits. Native to East Asia, it grows on decaying hardwood trees and has been a staple in Asian cuisine and traditional medicine for centuries. Its deep, umami flavor makes it a culinary cornerstone in many dishes.",
