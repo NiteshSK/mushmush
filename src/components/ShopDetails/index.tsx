@@ -144,7 +144,7 @@ const ShopDetails = () => {
                     </h2>
 
                     <div className="inline-flex font-medium text-custom-sm text-white bg-blue rounded py-0.5 px-2.5">
-                      30% OFF
+                      10% OFF
                     </div>
                   </div>
 
@@ -342,7 +342,7 @@ const ShopDetails = () => {
                           fill="#3C50E0"
                         />
                       </svg>
-                      Sales 30% Off Use Code: PROMO30
+                      Weight : 100gm
                     </li>
                   </ul>
 

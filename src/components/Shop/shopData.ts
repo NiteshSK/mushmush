@@ -2,9 +2,9 @@ import { Product } from "@/types/product";
 const shopData: Product[] = [
   {
     title: "Ganoderma lucidum",
-    reviews: 15,
-    price: 8,
-    discountedPrice: 5,
+    reviews: 3,
+    price: 999,
+    discountedPrice: 899,
     id: 1,
     imgs: {
       thumbnails: [
@@ -73,8 +73,8 @@ const shopData: Product[] = [
   {
     title: "Oyster Mushroom",
     reviews: 5,
-    price: 5.0,
-    discountedPrice: 2,
+    price: 110,
+    discountedPrice: 99,
     id: 2,
     imgs: {
       thumbnails: [
@@ -137,8 +137,8 @@ const shopData: Product[] = [
   {
     title: "Lion's Mane",
     reviews: 5,
-    price: 10.0,
-    discountedPrice: 8.0,
+    price: 1599,
+    discountedPrice: 1439,
     id: 3,
     imgs: {
       thumbnails: [
@@ -200,8 +200,8 @@ const shopData: Product[] = [
   {
     title: "Shitake",
     reviews: 6,
-    price: 59.0,
-    discountedPrice: 29.0,
+    price: 499,
+    discountedPrice: 449,
     id: 4,
     imgs: {
       thumbnails: [

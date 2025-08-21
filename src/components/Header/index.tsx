@@ -63,7 +63,7 @@ const Header = () => {
             <Image
               src="/images/logo/logo.png"
               alt="Logo"
-              width={100}
+              width={150}
               height={10}
               className="object-contain"
             />
