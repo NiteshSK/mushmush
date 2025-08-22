@@ -6,6 +6,8 @@ const shopData: Product[] = [
     price: 999,
     discountedPrice: 899,
     id: 1,
+    measurement: { value: 100, type: "gm" }, // Added measurement
+    inStock: true,
     imgs: {
       thumbnails: [
         "/images/products/ganoderma_sticker.png",
@@ -76,6 +78,8 @@ const shopData: Product[] = [
     price: 169,
     discountedPrice: 149,
     id: 2,
+    measurement: { value: 100, type: "gm" }, // Added measurement
+    inStock: true,
     imgs: {
       thumbnails: [
         "/images/products/oyster_sticker.png",
@@ -137,12 +141,14 @@ const shopData: Product[] = [
       }
     ],
   },
-      {
+  {
     title: "Chantrelle",
     reviews: 6,
     price: 699,
     discountedPrice: 629,
     id: 3,
+    measurement: { value: 100, type: "gm" }, // Added measurement
+    inStock: true,
     imgs: {
       thumbnails: [
         "/images/products/chantrelle_sticker.png",
@@ -200,13 +206,14 @@ const shopData: Product[] = [
       },
     ],
   },
-
   {
     title: "Shitake",
     reviews: 6,
     price: 499,
     discountedPrice: 449,
     id: 4,
+    measurement: { value: 100, type: "gm" }, // Added measurement
+    inStock: false,
     imgs: {
       thumbnails: [
         "/images/products/shitake_sticker.png",
@@ -271,12 +278,14 @@ const shopData: Product[] = [
       },
     ],
   },
-    {
+  {
     title: "Lion's Mane",
     reviews: 5,
     price: 1599,
     discountedPrice: 1439,
     id: 5,
+    measurement: { value: 100, type: "gm" }, // Added measurement
+    inStock: false,
     imgs: {
       thumbnails: [
         "/images/products/lions_mane.png",
@@ -333,6 +342,67 @@ const shopData: Product[] = [
         "avatar": "/images/users/user-11.jpg"
       },
     ],
+  },
+  {
+    title: "Ganoderma's Tincture",
+    reviews: 6,
+    price: 1599,
+    discountedPrice: 1439,
+    id: 5,
+    measurement: { value: 10, type: "ml" }, // Added measurement
+    inStock: false,
+    imgs: {
+      thumbnails: [
+        "/images/products/ganoderma_tincture_sticker.png",
+      ],
+      previews: [
+        "/images/products/ganoderma_tincture_sticker.png",
+      ],
+    },
+    "description": "Ganoderma Tincture, derived from the revered <i>Ganoderma lucidum</i> mushroom, is a potent liquid extract designed for modern wellness. Known for centuries in traditional medicine as 'Reishi' or the 'Mushroom of Immortality,' this tincture concentrates the mushroom's powerful adaptogenic properties. It's crafted to support stress management, enhance immune function, and promote overall vitality, making it a cornerstone for any natural health regimen.",
+  "specifications": [
+    "<strong>Appearance</strong>: The tincture is a rich, dark-brown liquid. It is derived from the Ganoderma mushroom, which is known for its glossy, reddish-brown, kidney-shaped cap and woody texture.",
+    "<strong>Flavor and Aroma</strong>: Ganoderma is famous for its distinctly bitter and woody taste, a sign of its potent compounds. The aroma is deep and earthy, reflecting its natural forest origins.",
+    "<strong>Active Compounds</strong>: This tincture is a concentrated source of Ganoderma's key bioactive compounds, primarily triterpenoids and polysaccharides (like beta-glucans). These are studied for their significant roles in supporting the immune system and helping the body adapt to stress."
+  ],
+  "howToConsume": [
+    "<strong>Sublingual (Under the Tongue)</strong>: For fastest absorption, place a full dropper (approximately 1ml) directly under your tongue and hold it for 60-90 seconds before swallowing.",
+    "<strong>Add to Beverages</strong>: Easily mix a dropperful into your morning coffee, tea, smoothie, or even a glass of water. The potent flavor is often best diluted in a drink.",
+    "<strong>Consistent Daily Use</strong>: For best results, take 1-2 droppers daily. As an adaptogen, Ganoderma's benefits are most pronounced with consistent, long-term use.",
+    "<strong>Evening Routine</strong>: Many users prefer taking Ganoderma tincture in the evening to help promote relaxation and support a restful night's sleep."
+  ],
+  "additionalInfo": [
+    { "label": "Product Name", "value": "Organic Ganoderma Tincture (Reishi Extract)" },
+    { "label": "Botanical Name", "value": "Ganoderma lucidum" },
+    { "label": "Common Names", "value": "Reishi, Lingzhi, Mushroom of Immortality" },
+    { "label": "Part Used", "value": "100% Fruiting Body" },
+    { "label": "Appearance", "value": "Dark, rich brown liquid extract" },
+    { "label": "Taste", "value": "Characteristically bitter and earthy" },
+    { "label": "Odor", "value": "Mild, woody, and earthy aroma" }
+  ],
+  "reviewsList": [
+      {
+        "name": "Anjali Mehta",
+        "role": "IT Professional",
+        "rating": 5,
+        "comment": "I've been using this tincture for a month to manage work stress. I add it to my evening tea. I feel much calmer and my sleep has improved. A must-try product from a great local Dehradun brand!",
+        "avatar": "/images/users/user-04.jpg"
+      },
+      {
+        "name": "Vikram Rawat",
+        "role": "Wellness Enthusiast",
+        "rating": 5,
+        "comment": "The bitterness tells you it's the real deal! This is a high-quality Reishi extract. I've tried many brands, and MushMush's tincture feels the most potent. Excellent for immune support.",
+        "avatar": "/images/users/user-05.jpg"
+      },
+      {
+        "name": "Mrs. Kapoor",
+        "role": "Retired Teacher",
+        "rating": 4,
+        "comment": "My son bought this for me to help with my overall vitality. It's easy to take with water. I feel more energetic throughout the day. The taste took some getting used to, but the benefits are worth it.",
+        "avatar": "/images/users/user-06.jpg"
+      }
+    ]
   },
 ];
 

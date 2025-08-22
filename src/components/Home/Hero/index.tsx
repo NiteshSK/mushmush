@@ -39,7 +39,7 @@ const Hero = () => {
           <div className="lg:w-1/2">
             <div>
               <Image
-                src="/images/categories/hero_mushroom_wb.png"
+                src="/images/categories/hero_mushroom.png"
                 alt="Premium Mushrooms Collection"
                 width={500}
                 height={300}

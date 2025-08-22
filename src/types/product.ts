@@ -19,4 +19,9 @@ export type Product = {
     comment: string;
     avatar?: string;
   }[];
+  inStock?: boolean;
+  measurement?: {
+    value: number;
+    type: string;
+  };
 };
