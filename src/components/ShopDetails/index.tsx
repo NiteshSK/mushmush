@@ -140,6 +140,7 @@ const ShopDetails = () => {
                           <path d="M12.5 7.5L7.5 12.5" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                           <path d="M7.5 7.5L12.5 12.5" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
+                        {/* --- UPDATED: Changed text color to red --- */}
                         <span className="font-medium text-red-500"> Out of Stock </span>
                       </div>
                     )}
@@ -200,7 +201,6 @@ const ShopDetails = () => {
                           </button>
                       )}
 
-                      {/* --- UPDATED: Conditionally render Wishlist or Notify Me button --- */}
                       {displayProduct.inStock ? (
                         <a href="#" className="flex items-center justify-center w-12 h-12 rounded-md border border-gray-3 ease-out duration-200 hover:text-white hover:bg-dark hover:border-transparent">
                           <svg className="fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -42,8 +42,8 @@ const SingleItem = ({ item }: { item: Product }) => {
 
   return (
     <div className="group flex flex-col h-full bg-white rounded-lg shadow-1 overflow-hidden transition-shadow duration-300 hover:shadow-2">
-      {/* Image container with a fixed aspect ratio */}
-      <div className="relative aspect-square">
+      {/* --- UPDATED: Added classes to resize and center the image container --- */}
+      <div className="relative aspect-square w-[70%] mx-auto mt-4">
         <Link href="/shop-details" onClick={handleNavigateToDetails} className="block w-full h-full">
           <Image
             src={item.imgs.previews[0]}
