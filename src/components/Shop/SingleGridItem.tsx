@@ -1,3 +1,5 @@
+"use client";
+import React from "react";
 import { Product } from "@/types/product";
 import { useModalContext } from "@/app/context/QuickViewModalContext";
 import { updateQuickView } from "@/redux/features/quickView-slice";
@@ -8,7 +10,12 @@ import { AppDispatch } from "@/redux/store";
 import Link from "next/link";
 import Image from "next/image";
 
-const SingleGridItem = ({ item }: { item: Product }) => {
+type Props = {
+  item: Product;
+  priority?: boolean;
+};
+
+const SingleGridItem = ({ item, priority = false }: Props) => {
   const { openModal } = useModalContext();
   const dispatch = useDispatch<AppDispatch>();
 
@@ -24,24 +31,28 @@ const SingleGridItem = ({ item }: { item: Product }) => {
     dispatch(addItemToWishlist({ ...item, quantity: 1 }));
   };
 
-  // UPDATED: This function now ONLY sets localStorage, which is very fast.
   const handleNavigateToDetails = () => {
     localStorage.setItem("productDetails", JSON.stringify(item));
   };
-  // --- FIX ENDS HERE ---
 
   return (
     <div className="group">
       <div className="relative overflow-hidden flex items-center justify-center rounded-lg bg-white shadow-1 min-h-[270px] mb-4">
-        <Image src={item.imgs.previews[0]} alt={item.title} width={250} height={250} />
+        <Image
+          src={item.imgs.previews[0]}
+          alt={item.title}
+          width={250}
+          height={250}
+          priority={priority}
+        />
 
         <div className="absolute left-0 bottom-0 translate-y-full w-full flex items-center justify-center gap-2.5 pb-5 ease-linear duration-200 group-hover:translate-y-0">
+          {/* --- VIEW ICON RESTORED --- */}
           <button
             onClick={() => {
               openModal();
               handleQuickViewUpdate();
             }}
-            id="newOne"
             aria-label="button for quick view"
             className="flex items-center justify-center w-9 h-9 rounded-[5px] shadow-1 ease-out duration-200 text-dark bg-white hover:text-blue"
           >
@@ -68,15 +79,15 @@ const SingleGridItem = ({ item }: { item: Product }) => {
             </svg>
           </button>
           <button
-            onClick={() => handleAddToCart()}
+            onClick={handleAddToCart}
             className="inline-flex font-medium text-custom-sm py-[7px] px-5 rounded-[5px] bg-blue text-white ease-out duration-200 hover:bg-blue-dark"
           >
             Add to cart
           </button>
+          {/* --- WISHLIST ICON RESTORED --- */}
           <button
-            onClick={() => handleItemToWishList()}
+            onClick={handleItemToWishList}
             aria-label="button for favorite select"
-            id="favOne"
             className="flex items-center justify-center w-9 h-9 rounded-[5px] shadow-1 ease-out duration-200 text-dark bg-white hover:text-blue"
           >
             <svg
@@ -110,7 +121,6 @@ const SingleGridItem = ({ item }: { item: Product }) => {
       </div>
 
       <h3 className="font-medium text-dark ease-out duration-200 hover:text-blue mb-1.5">
-        {/* --- FIX APPLIED HERE --- */}
         <Link href="/shop-details" onClick={handleNavigateToDetails}>
           {item.title}
         </Link>
