@@ -346,8 +346,8 @@ const shopData: Product[] = [
   {
     title: "Ganoderma's Tincture",
     reviews: 6,
-    price: 1599,
-    discountedPrice: 1439,
+    price: 1699,
+    discountedPrice: 1529,
     id: 6,
     measurement: { value: 10, type: "ml" }, // Added measurement
     inStock: false,
