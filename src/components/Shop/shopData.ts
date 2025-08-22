@@ -7,7 +7,7 @@ const shopData: Product[] = [
     discountedPrice: 899,
     id: 1,
     measurement: { value: 100, type: "gm" }, // Added measurement
-    inStock: true,
+    inStock: false,
     imgs: {
       thumbnails: [
         "/images/products/ganoderma_sticker.png",
@@ -74,7 +74,7 @@ const shopData: Product[] = [
   },
   {
     title: "Oyster Mushroom",
-    reviews: 5,
+    reviews: 15,
     price: 169,
     discountedPrice: 149,
     id: 2,
@@ -143,7 +143,7 @@ const shopData: Product[] = [
   },
   {
     title: "Chantrelle",
-    reviews: 6,
+    reviews: 16,
     price: 699,
     discountedPrice: 629,
     id: 3,
@@ -208,7 +208,7 @@ const shopData: Product[] = [
   },
   {
     title: "Shitake",
-    reviews: 6,
+    reviews: 9,
     price: 499,
     discountedPrice: 449,
     id: 4,
@@ -345,7 +345,7 @@ const shopData: Product[] = [
   },
   {
     title: "Ganoderma's Tincture",
-    reviews: 6,
+    reviews: 20,
     price: 1699,
     discountedPrice: 1529,
     id: 6,
