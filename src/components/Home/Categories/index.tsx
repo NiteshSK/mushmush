@@ -1,16 +1,18 @@
 "use client";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { useCallback, useRef, useEffect } from "react";
+import { useCallback, useRef, useEffect, useState } from "react";
 import data from "./categoryData";
 import Image from "next/image";
+import Link from "next/link";
 
 // Import Swiper styles
 import "swiper/css/navigation";
 import "swiper/css";
-import SingleItem from "./SingleItem";
 
 const Categories = () => {
   const sliderRef = useRef(null);
+  const [isBeginning, setIsBeginning] = useState(true);
+  const [isEnd, setIsEnd] = useState(false);
 
   const handlePrev = useCallback(() => {
     if (!sliderRef.current) return;
@@ -22,17 +24,28 @@ const Categories = () => {
     sliderRef.current.swiper.slideNext();
   }, []);
 
+  // Effect to check the swiper's state on initialization and resize
   useEffect(() => {
     if (sliderRef.current) {
-      sliderRef.current.swiper.init();
+      const swiperInstance = sliderRef.current.swiper;
+      const checkSliderState = () => {
+        if (swiperInstance) {
+          setIsBeginning(swiperInstance.isBeginning);
+          setIsEnd(swiperInstance.isEnd);
+        }
+      };
+      checkSliderState(); // Initial check
+      swiperInstance.on('resize', checkSliderState); // Check on resize
+      return () => {
+        swiperInstance.off('resize', checkSliderState); // Cleanup listener
+      };
     }
-  }, []);
+  }, [data]);
 
   return (
     <section className="overflow-hidden">
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0 pb-15 border-b border-gray-3">
         <div className="swiper categories-carousel common-carousel">
-          {/* */}
           <div className="mb-10 flex items-center justify-between">
             <div>
               <span className="flex items-center gap-2.5 font-medium text-dark mb-1.5">
@@ -43,6 +56,7 @@ const Categories = () => {
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
+                  {/* SVG paths */}
                   <g clipPath="url(#clip0_834_7356)">
                     <path
                       d="M3.94024 13.4474C2.6523 12.1595 2.00832 11.5155 1.7687 10.68C1.52908 9.84449 1.73387 8.9571 2.14343 7.18231L2.37962 6.15883C2.72419 4.66569 2.89648 3.91912 3.40771 3.40789C3.91894 2.89666 4.66551 2.72437 6.15865 2.3798L7.18213 2.14361C8.95692 1.73405 9.84431 1.52927 10.6798 1.76889C11.5153 2.00851 12.1593 2.65248 13.4472 3.94042L14.9719 5.46512C17.2128 7.70594 18.3332 8.82635 18.3332 10.2186C18.3332 11.6109 17.2128 12.7313 14.9719 14.9721C12.7311 17.2129 11.6107 18.3334 10.2184 18.3334C8.82617 18.3334 7.70576 17.2129 5.46494 14.9721L3.94024 13.4474Z"
@@ -77,8 +91,13 @@ const Categories = () => {
               </h2>
             </div>
 
+            {/* Navigation Buttons */}
             <div className="flex items-center gap-3">
-              <button onClick={handlePrev} className="swiper-button-prev">
+              <button
+                onClick={handlePrev}
+                className="swiper-button-prev disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isBeginning}
+              >
                 <svg
                   className="fill-current"
                   width="24"
@@ -96,7 +115,11 @@ const Categories = () => {
                 </svg>
               </button>
 
-              <button onClick={handleNext} className="swiper-button-next">
+              <button
+                onClick={handleNext}
+                className="swiper-button-next disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isEnd}
+              >
                 <svg
                   className="fill-current"
                   width="24"
@@ -116,28 +139,48 @@ const Categories = () => {
             </div>
           </div>
 
+          {/* Swiper Component */}
           <Swiper
             ref={sliderRef}
-            slidesPerView={6}
-            spaceBetween={21}
+            // FIX #2: Changed default slidesPerView
+            slidesPerView={4}
+            spaceBetween={30}
+            // FIX #2: Updated breakpoints for a 2 -> 3 -> 4 icon layout
             breakpoints={{
-              0: {
-                slidesPerView: 2,
-                spaceBetween: 14,
-              },
-              1000: {
-                slidesPerView: 3,
-                spaceBetween: 21,
-              },
-              1200: {
-                slidesPerView: 4,
-                spaceBetween: 28,
-              },
+              0: { slidesPerView: 2, spaceBetween: 15 },
+              768: { slidesPerView: 3, spaceBetween: 20 },
+              1024: { slidesPerView: 4, spaceBetween: 30 },
+            }}
+            onSlideChange={(swiper) => {
+              setIsBeginning(swiper.isBeginning);
+              setIsEnd(swiper.isEnd);
+            }}
+            onInit={(swiper) => {
+              setIsBeginning(swiper.isBeginning);
+              setIsEnd(swiper.isEnd);
             }}
           >
-            {data.map((item, key) => (
-              <SwiperSlide key={key}>
-                <SingleItem item={item} />
+            {data.map((category) => (
+              <SwiperSlide key={category.id}>
+                <Link href={category.path} className="group block">
+                  <div className="flex flex-col items-center gap-4 text-center">
+                    {/* FIX #1: Removed group-hover:scale-105 from this div */}
+                    <div className="relative w-full aspect-square rounded-full overflow-hidden border-2 border-gray-200/60 group-hover:border-blue-500 transition-colors duration-300">
+                      <Image
+                        src={category.img}
+                        alt={category.title}
+                        fill
+                        // FIX #1: Added scaling and transition to the Image itself
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-dark group-hover:text-blue transition-colors duration-300">
+                        {category.title}
+                      </h3>
+                    </div>
+                  </div>
+                </Link>
               </SwiperSlide>
             ))}
           </Swiper>

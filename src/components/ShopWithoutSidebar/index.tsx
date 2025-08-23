@@ -1,30 +1,50 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Breadcrumb from "../Common/Breadcrumb";
 import SingleGridItem from "../Shop/SingleGridItem";
 import SingleListItem from "../Shop/SingleListItem";
 import CustomSelect from "../ShopWithSidebar/CustomSelect";
 import shopData from "../Shop/shopData";
+import { Product } from "@/types/product";
 
 const ShopWithoutSidebar = () => {
   const [productStyle, setProductStyle] = useState("grid");
-
-  // --- PAGINATION LOGIC START ---
-
-  // State to track the current page number
   const [currentPage, setCurrentPage] = useState(1);
-  // Number of products to display on each page
   const productsPerPage = 8;
 
-  // Calculate the products to display for the current page
+  // Get the category from the URL search parameters
+  const searchParams = useSearchParams();
+  const category = searchParams.get("category");
+
+  // Filter products based on the category from the URL
+  // useMemo is used for performance, so the filtering only re-runs when the category changes.
+  const filteredProducts: Product[] = useMemo(() => {
+    // If there's no category in the URL, return all products
+    if (!category) {
+      return shopData;
+    }
+    // Otherwise, filter the products where the product's category array includes the URL category
+    return shopData.filter((product) =>
+      product.category?.includes(category.toLowerCase())
+    );
+  }, [category]);
+
+  // Reset to the first page whenever the category changes to avoid being on an empty page
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [category]);
+
+
+  // --- PAGINATION LOGIC (now uses the filtered product list) ---
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = shopData.slice(indexOfFirstProduct, indexOfLastProduct);
-
-  // Calculate the total number of pages needed
-  const totalPages = Math.ceil(shopData.length / productsPerPage);
-
-  // --- PAGINATION LOGIC END ---
+  const currentProducts = filteredProducts.slice(
+    indexOfFirstProduct,
+    indexOfLastProduct
+  );
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+  // --- END OF PAGINATION LOGIC ---
 
   const options = [
     { label: "Latest Products", value: "0" },
@@ -38,26 +58,25 @@ const ShopWithoutSidebar = () => {
         title={"Explore All Products"}
         pages={["shop", "/", "shop without sidebar"]}
       />
-      <section className="overflow-hidden relative pb-20 pt-5 lg:pt-20 xl:pt-28 bg-[#f3f4f6]">
+      <section className="overflow-hidden relative pb-20 pt-5 lg:pt-20 xl:pt-5 bg-[#f3f4f6]">
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
           <div className="flex gap-7.5">
-            {/* // */}
             <div className="w-full">
               <div className="rounded-lg bg-white shadow-1 pl-3 pr-2.5 py-2.5 mb-6">
                 <div className="flex items-center justify-between">
-                  {/* */}
+                  {/* Product count and sorting dropdown */}
                   <div className="flex flex-wrap items-center gap-4">
                     <CustomSelect options={options} />
                     <p>
                       Showing{" "}
                       <span className="text-dark">
-                        {currentProducts.length} of {shopData.length}
+                        {currentProducts.length} of {filteredProducts.length}
                       </span>{" "}
                       Products
                     </p>
                   </div>
 
-                  {/* */}
+                  {/* Grid/List view style buttons */}
                   <div className="flex items-center gap-2.5">
                     <button
                       onClick={() => setProductStyle("grid")}
@@ -112,7 +131,7 @@ const ShopWithoutSidebar = () => {
                 </div>
               </div>
 
-              {/* */}
+              {/* Product Grid / List */}
               <div
                 className={`${
                   productStyle === "grid"
@@ -122,22 +141,31 @@ const ShopWithoutSidebar = () => {
               >
                 {currentProducts.map((item, index) =>
                   productStyle === "grid" ? (
-                    <SingleGridItem item={item} key={item.id} priority={index < 4} />
+                    <SingleGridItem
+                      item={item}
+                      key={item.id}
+                      priority={index < 4}
+                    />
                   ) : (
-                    <SingleListItem item={item} key={item.id} priority={index < 2} />
+                    <SingleListItem
+                      item={item}
+                      key={item.id}
+                      priority={index < 2}
+                    />
                   )
                 )}
               </div>
-              {/* */}
 
-              {/* */}
+              {/* Pagination Controls */}
               <div className="flex justify-center mt-15">
                 <div className="bg-white shadow-1 rounded-md p-2">
                   <ul className="flex items-center">
                     <li>
                       <button
                         aria-label="button for previous page"
-                        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                        onClick={() =>
+                          setCurrentPage((prev) => Math.max(prev - 1, 1))
+                        }
                         disabled={currentPage === 1}
                         className="flex items-center justify-center w-8 h-9 ease-out duration-200 rounded-[3px] disabled:text-gray-4 disabled:cursor-not-allowed"
                       >
@@ -176,7 +204,9 @@ const ShopWithoutSidebar = () => {
                       <button
                         aria-label="button for next page"
                         onClick={() =>
-                          setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                          setCurrentPage((prev) =>
+                            Math.min(prev + 1, totalPages)
+                          )
                         }
                         disabled={currentPage === totalPages}
                         className="flex items-center justify-center w-8 h-9 ease-out duration-200 rounded-[3px] hover:text-white hover:bg-blue disabled:text-gray-4 disabled:cursor-not-allowed"
@@ -199,9 +229,7 @@ const ShopWithoutSidebar = () => {
                   </ul>
                 </div>
               </div>
-              {/* */}
             </div>
-            {/* // */}
           </div>
         </div>
       </section>

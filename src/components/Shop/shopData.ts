@@ -6,6 +6,7 @@ const shopData: Product[] = [
     price: 999,
     discountedPrice: 899,
     id: 1,
+    category: ["medicinal", "powders"],
     measurement: { value: 100, type: "gm" }, // Added measurement
     inStock: false,
     imgs: {
@@ -78,6 +79,7 @@ const shopData: Product[] = [
     price: 169,
     discountedPrice: 149,
     id: 2,
+    category: ["edible"],
     measurement: { value: 100, type: "gm" }, // Added measurement
     inStock: true,
     imgs: {
@@ -147,6 +149,7 @@ const shopData: Product[] = [
     price: 699,
     discountedPrice: 629,
     id: 3,
+    category: ["edible"],
     measurement: { value: 100, type: "gm" }, // Added measurement
     inStock: true,
     imgs: {
@@ -212,6 +215,7 @@ const shopData: Product[] = [
     price: 499,
     discountedPrice: 449,
     id: 4,
+    category: ["edible", "medicinal"],
     measurement: { value: 100, type: "gm" }, // Added measurement
     inStock: false,
     imgs: {
@@ -284,6 +288,7 @@ const shopData: Product[] = [
     price: 1599,
     discountedPrice: 1439,
     id: 5,
+    category: ["edible", "medicinal"],
     measurement: { value: 100, type: "gm" }, // Added measurement
     inStock: false,
     imgs: {
@@ -349,6 +354,7 @@ const shopData: Product[] = [
     price: 1699,
     discountedPrice: 1529,
     id: 6,
+    category: ["tinctures", "medicinal"],
     measurement: { value: 10, type: "ml" }, // Added measurement
     inStock: false,
     imgs: {

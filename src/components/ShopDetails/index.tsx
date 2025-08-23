@@ -57,7 +57,7 @@ const ShopDetails = () => {
         </div>
       ) : (
         <>
-          <section className="overflow-hidden relative pb-20 pt-5 lg:pt-20 xl:pt-28">
+          <section className="overflow-hidden relative pb-20 pt-5 lg:pt-20 xl:pt-5">
             <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
               <div className="flex flex-col lg:flex-row gap-7.5 xl:gap-17.5">
                 <div className="lg:max-w-[570px] w-full">
@@ -140,7 +140,6 @@ const ShopDetails = () => {
                           <path d="M12.5 7.5L7.5 12.5" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                           <path d="M7.5 7.5L12.5 12.5" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
-                        {/* --- UPDATED: Changed text color to red --- */}
                         <span className="font-medium text-red-500"> Out of Stock </span>
                       </div>
                     )}
@@ -151,7 +150,8 @@ const ShopDetails = () => {
                     </span>
                     <span className="line-through"> ₹{displayProduct.price} </span>
                   </h3>
-                  <ul className="flex flex-col gap-2">
+                  
+                  <ul className="flex flex-col gap-2 mb-6">
                     <li className="flex items-center gap-2.5">
                       <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M13.3589 8.35863C13.603 8.11455 13.603 7.71882 13.3589 7.47475C13.1149 7.23067 12.7191 7.23067 12.4751 7.47475L8.75033 11.1995L7.5256 9.97474C7.28152 9.73067 6.8858 9.73067 6.64172 9.97474C6.39764 10.2188 6.39764 10.6146 6.64172 10.8586L8.30838 12.5253C8.55246 12.7694 8.94819 12.7694 9.19227 12.5253L13.3589 8.35863Z" fill="#3C50E0" />
@@ -169,50 +169,48 @@ const ShopDetails = () => {
                       </li>
                     )}
                   </ul>
+
+                  {/* --- UPDATED: Description is now fetched dynamically --- */}
+                  {displayProduct.description && (
+                    <p
+                      className="mb-8 text-dark-4"
+                      dangerouslySetInnerHTML={{ __html: displayProduct.description }}
+                    />
+                  )}
+
                   <form onSubmit={(e) => e.preventDefault()}>
-                    <div className="flex flex-col gap-1.5 border-y border-gray-3 mt-6.5 mb-6 py-6"></div>
                     <div className="flex flex-wrap items-center gap-4.5">
-                      
                       {displayProduct.inStock && (
-                        <div className="flex items-center rounded-md border border-gray-3">
-                          <button aria-label="button for remove product" className="flex items-center justify-center w-12 h-12 ease-out duration-200 hover:text-blue" onClick={() => quantity > 1 && setQuantity(quantity - 1)}>
-                            <svg className="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.33301 10.0001C3.33301 9.53984 3.7061 9.16675 4.16634 9.16675H15.833C16.2932 9.16675 16.6663 9.53984 16.6663 10.0001C16.6663 10.4603 16.2932 10.8334 15.833 10.8334H4.16634C3.7061 10.8334 3.33301 10.4603 3.33301 10.0001Z" /></svg>
-                          </button>
-                          <span className="flex items-center justify-center w-16 h-12 border-x border-gray-4">{quantity}</span>
-                          <button onClick={() => setQuantity(quantity + 1)} aria-label="button for add product" className="flex items-center justify-center w-12 h-12 ease-out duration-200 hover:text-blue">
-                            <svg className="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.33301 10C3.33301 9.5398 3.7061 9.16671 4.16634 9.16671H15.833C16.2932 9.16671 16.6663 9.5398 16.6663 10C16.6663 10.4603 16.2932 10.8334 15.833 10.8334H4.16634C3.7061 10.8334 3.33301 10.4603 3.33301 10Z" /><path d="M9.99967 16.6667C9.53944 16.6667 9.16634 16.2936 9.16634 15.8334L9.16634 4.16671C9.16634 3.70647 9.53944 3.33337 9.99967 3.33337C10.4599 3.33337 10.833 3.70647 10.833 4.16671L10.833 15.8334C10.833 16.2936 10.4599 16.6667 9.99967 16.6667Z" /></svg>
-                          </button>
-                        </div>
-                      )}
-                      
-                      {displayProduct.inStock ? (
+                        <>
+                          <div className="flex items-center rounded-md border border-gray-3">
+                            <button aria-label="button for remove product" className="flex items-center justify-center w-12 h-12 ease-out duration-200 hover:text-blue" onClick={() => quantity > 1 && setQuantity(quantity - 1)}>
+                              <svg className="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.33301 10.0001C3.33301 9.53984 3.7061 9.16675 4.16634 9.16675H15.833C16.2932 9.16675 16.6663 9.53984 16.6663 10.0001C16.6663 10.4603 16.2932 10.8334 15.833 10.8334H4.16634C3.7061 10.8334 3.33301 10.4603 3.33301 10.0001Z" /></svg>
+                            </button>
+                            <span className="flex items-center justify-center w-16 h-12 border-x border-gray-4">{quantity}</span>
+                            <button onClick={() => setQuantity(quantity + 1)} aria-label="button for add product" className="flex items-center justify-center w-12 h-12 ease-out duration-200 hover:text-blue">
+                              <svg className="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.33301 10C3.33301 9.5398 3.7061 9.16671 4.16634 9.16671H15.833C16.2932 9.16671 16.6663 9.5398 16.6663 10C16.6663 10.4603 16.2932 10.8334 15.833 10.8334H4.16634C3.7061 10.8334 3.33301 10.4603 3.33301 10Z" /><path d="M9.99967 16.6667C9.53944 16.6667 9.16634 16.2936 9.16634 15.8334L9.16634 4.16671C9.16634 3.70647 9.53944 3.33337 9.99967 3.33337C10.4599 3.33337 10.833 3.70647 10.833 4.16671L10.833 15.8334C10.833 16.2936 10.4599 16.6667 9.99967 16.6667Z" /></svg>
+                            </button>
+                          </div>
                           <a
                             href="#"
                             className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark"
                           >
                             Purchase Now
                           </a>
-                      ) : (
-                          <button
-                            disabled
-                            className="inline-flex font-medium text-white bg-gray-400 py-3 px-7 rounded-md cursor-not-allowed"
-                          >
-                            Out of Stock
-                          </button>
+                          <a href="#" className="flex items-center justify-center w-12 h-12 rounded-md border border-gray-3 ease-out duration-200 hover:text-white hover:bg-dark hover:border-transparent">
+                            <svg className="fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path fillRule="evenodd" clipRule="evenodd" d="M5.62436 4.42423C3.96537 5.18256 2.75 6.98626 2.75 9.13713C2.75 11.3345 3.64922 13.0283 4.93829 14.4798C6.00072 15.6761 7.28684 16.6677 8.54113 17.6346C8.83904 17.8643 9.13515 18.0926 9.42605 18.3219C9.95208 18.7366 10.4213 19.1006 10.8736 19.3649C11.3261 19.6293 11.6904 19.75 12 19.75C12.3096 19.75 12.6739 19.6293 13.1264 19.3649C13.5787 19.1006 14.0479 18.7366 14.574 18.3219C14.8649 18.0926 15.161 17.8643 15.4589 17.6346C16.7132 16.6677 17.9993 15.6761 19.0617 14.4798C20.3508 13.0283 21.25 11.3345 21.25 9.13713C21.25 6.98626 20.0346 5.18256 18.3756 4.42423C16.7639 3.68751 14.5983 3.88261 12.5404 6.02077C12.399 6.16766 12.2039 6.25067 12 6.25067C11.7961 6.25067 11.601 6.16766 11.4596 6.02077C9.40166 3.88261 7.23607 3.68751 5.62436 4.42423ZM12 4.45885C9.68795 2.39027 7.09896 2.1009 5.00076 3.05999C2.78471 4.07296 1.25 6.42506 1.25 9.13713C1.25 11.8027 2.3605 13.8361 3.81672 15.4758C4.98287 16.789 6.41022 17.888 7.67083 18.8586C7.95659 19.0786 8.23378 19.2921 8.49742 19.4999C9.00965 19.9037 9.55954 20.3343 10.1168 20.66C10.6739 20.9855 11.3096 21.25 12 21.25C12.6904 21.25 13.3261 20.9855 13.8832 20.66C14.4405 20.3343 14.9903 19.9037 15.5026 19.4999C15.7662 19.2921 16.0434 19.0786 16.3292 18.8586C17.5898 17.888 19.0171 16.789 20.1833 15.4758C21.6395 13.8361 22.75 11.8027 22.75 9.13713C22.75 6.42506 21.2153 4.07296 18.9992 3.05999C16.901 2.1009 14.3121 2.39027 12 4.45885Z" />
+                            </svg>
+                          </a>
+                        </>
                       )}
-
-                      {displayProduct.inStock ? (
-                        <a href="#" className="flex items-center justify-center w-12 h-12 rounded-md border border-gray-3 ease-out duration-200 hover:text-white hover:bg-dark hover:border-transparent">
-                          <svg className="fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path fillRule="evenodd" clipRule="evenodd" d="M5.62436 4.42423C3.96537 5.18256 2.75 6.98626 2.75 9.13713C2.75 11.3345 3.64922 13.0283 4.93829 14.4798C6.00072 15.6761 7.28684 16.6677 8.54113 17.6346C8.83904 17.8643 9.13515 18.0926 9.42605 18.3219C9.95208 18.7366 10.4213 19.1006 10.8736 19.3649C11.3261 19.6293 11.6904 19.75 12 19.75C12.3096 19.75 12.6739 19.6293 13.1264 19.3649C13.5787 19.1006 14.0479 18.7366 14.574 18.3219C14.8649 18.0926 15.161 17.8643 15.4589 17.6346C16.7132 16.6677 17.9993 15.6761 19.0617 14.4798C20.3508 13.0283 21.25 11.3345 21.25 9.13713C21.25 6.98626 20.0346 5.18256 18.3756 4.42423C16.7639 3.68751 14.5983 3.88261 12.5404 6.02077C12.399 6.16766 12.2039 6.25067 12 6.25067C11.7961 6.25067 11.601 6.16766 11.4596 6.02077C9.40166 3.88261 7.23607 3.68751 5.62436 4.42423ZM12 4.45885C9.68795 2.39027 7.09896 2.1009 5.00076 3.05999C2.78471 4.07296 1.25 6.42506 1.25 9.13713C1.25 11.8027 2.3605 13.8361 3.81672 15.4758C4.98287 16.789 6.41022 17.888 7.67083 18.8586C7.95659 19.0786 8.23378 19.2921 8.49742 19.4999C9.00965 19.9037 9.55954 20.3343 10.1168 20.66C10.6739 20.9855 11.3096 21.25 12 21.25C12.6904 21.25 13.3261 20.9855 13.8832 20.66C14.4405 20.3343 14.9903 19.9037 15.5026 19.4999C15.7662 19.2921 16.0434 19.0786 16.3292 18.8586C17.5898 17.888 19.0171 16.789 20.1833 15.4758C21.6395 13.8361 22.75 11.8027 22.75 9.13713C22.75 6.42506 21.2153 4.07296 18.9992 3.05999C16.901 2.1009 14.3121 2.39027 12 4.45885Z" />
-                        </svg>
-                      </a>
-                      ) : (
-                        <button
-                          className="inline-flex font-medium text-white bg-dark py-3 px-7 rounded-md ease-out duration-200 hover:bg-opacity-90"
-                        >
-                          Notify Me
-                        </button>
+                      
+                      {!displayProduct.inStock && (
+                          <button
+                            className="inline-flex font-medium text-white bg-dark py-3 px-7 rounded-md ease-out duration-200 hover:bg-opacity-90"
+                          >
+                            Notify Me
+                          </button>
                       )}
                     </div>
                   </form>
@@ -221,163 +219,163 @@ const ShopDetails = () => {
             </div>
           </section>
 
-          <section className="overflow-hidden bg-gray-2 py-20">
-    <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
-        <div className="flex flex-wrap items-center bg-white rounded-[10px] shadow-1 gap-5 xl:gap-12.5 py-4.5 px-4 sm:px-6">
-            {tabs.map((item, key) => (
-                <button
-                    key={key}
-                    onClick={() => setActiveTab(item.id)}
-                    className={`font-medium lg:text-lg ease-out duration-200 hover:text-blue relative before:h-0.5 before:bg-blue before:absolute before:left-0 before:bottom-0 before:ease-out before:duration-200 hover:before:w-full ${
-                        activeTab === item.id ? "text-blue before:w-full" : "text-dark before:w-0"
-                    }`}
-                >
-                    {item.title}
-                </button>
-            ))}
-        </div>
+          <section className="overflow-hidden bg-gray-2 py-20 pb-20 pt-5 lg:pt-20 xl:pt-5">
+            <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
+                <div className="flex flex-wrap items-center bg-white rounded-[10px] shadow-1 gap-5 xl:gap-12.5 py-4.5 px-4 sm:px-6">
+                    {tabs.map((item, key) => (
+                        <button
+                            key={key}
+                            onClick={() => setActiveTab(item.id)}
+                            className={`font-medium lg:text-lg ease-out duration-200 hover:text-blue relative before:h-0.5 before:bg-blue before:absolute before:left-0 before:bottom-0 before:ease-out before:duration-200 hover:before:w-full ${
+                                activeTab === item.id ? "text-blue before:w-full" : "text-dark before:w-0"
+                            }`}
+                        >
+                            {item.title}
+                        </button>
+                    ))}
+                </div>
 
-        <div className={`flex-col sm:flex-row gap-7.5 xl:gap-12.5 mt-12.5 ${activeTab === "tabOne" ? "flex" : "hidden"}`}>
-            <div className="max-w-[670px] w-full">
-                <h2 className="font-medium text-2xl text-dark mb-7">Specifications:</h2>
-                {displayProduct.description || displayProduct.specifications ? (
-                    <div className="space-y-4">
-                        {displayProduct.description && <p className="mb-4" dangerouslySetInnerHTML={{ __html: displayProduct.description }} />}
-                        {Array.isArray(displayProduct.specifications) && (
-                            <div>
-                                <h3 className="text-lg font-semibold mb-2">Processing & Potency</h3>
-                                <ul className="list-disc list-inside space-y-1">
-                                    {displayProduct.specifications.map((spec, idx) => (
-                                        <li key={idx} dangerouslySetInnerHTML={{ __html: spec }} />
-                                    ))}
-                                </ul>
+                <div className={`flex-col sm:flex-row gap-7.5 xl:gap-12.5 mt-12.5 ${activeTab === "tabOne" ? "flex" : "hidden"}`}>
+                    <div className="max-w-[670px] w-full">
+                        <h2 className="font-medium text-2xl text-dark mb-7">Specifications:</h2>
+                        {displayProduct.description || displayProduct.specifications ? (
+                            <div className="space-y-4">
+                                {displayProduct.description && <p className="mb-4" dangerouslySetInnerHTML={{ __html: displayProduct.description }} />}
+                                {Array.isArray(displayProduct.specifications) && (
+                                    <div>
+                                        <h3 className="text-lg font-semibold mb-2">Processing & Potency</h3>
+                                        <ul className="list-disc list-inside space-y-1">
+                                            {displayProduct.specifications.map((spec, idx) => (
+                                                <li key={idx} dangerouslySetInnerHTML={{ __html: spec }} />
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                <p className="mb-4">No specifications available for this product.</p>
                             </div>
                         )}
                     </div>
-                ) : (
-                    <div className="space-y-4">
-                        <p className="mb-4">No specifications available for this product.</p>
+                    <div className="max-w-[447px] w-full">
+                        <h2 className="font-medium text-2xl text-dark mb-7">How to consume?</h2>
+                        <ul className="list-disc list-inside mb-6 space-y-2">
+                            {displayProduct.howToConsume?.length ? (
+                                displayProduct.howToConsume.map((step, i) => (
+                                    <li key={i} dangerouslySetInnerHTML={{ __html: step }} />
+                                ))
+                            ) : (
+                                <li>No usage instructions available.</li>
+                            )}
+                        </ul>
                     </div>
-                )}
-            </div>
-            <div className="max-w-[447px] w-full">
-                <h2 className="font-medium text-2xl text-dark mb-7">How to consume?</h2>
-                <ul className="list-disc list-inside mb-6 space-y-2">
-                    {displayProduct.howToConsume?.length ? (
-                        displayProduct.howToConsume.map((step, i) => (
-                            <li key={i} dangerouslySetInnerHTML={{ __html: step }} />
-                        ))
-                    ) : (
-                        <li>No usage instructions available.</li>
-                    )}
-                </ul>
-            </div>
-        </div>
+                </div>
 
-        <div>
-            <div className={`rounded-xl bg-white shadow-1 p-4 sm:p-6 mt-10 ${activeTab === "tabTwo" ? "block" : "hidden"}`}>
-                {Array.isArray(displayProduct.additionalInfo) && displayProduct.additionalInfo.length ? (
-                    displayProduct.additionalInfo.map((info, idx) => (
-                        <div key={idx} className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
-                            <div className="max-w-[450px] min-w-[140px] w-full">
-                                <p className="text-sm sm:text-base text-dark">{info.label}</p>
-                            </div>
-                            <div className="w-full">
-                                <p className="text-sm sm:text-base text-dark">{info.value}</p>
-                            </div>
-                        </div>
-                    ))
-                ) : (
-                    <div className="space-y-4">
-                        <p className="mb-4">No additional information available for this product.</p>
-                    </div>
-                )}
-            </div>
-        </div>
-
-        <div>
-            <div className={`flex-col sm:flex-row gap-7.5 xl:gap-12.5 mt-12.5 ${activeTab === "tabThree" ? "flex" : "hidden"}`}>
-                <div className="max-w-[570px] w-full">
-                    <h2 className="font-medium text-2xl text-dark mb-9">
-                        {displayProduct.reviewsList?.length ?? 0} Review{displayProduct.reviewsList?.length !== 1 ? "s" : ""} for this product
-                    </h2>
-                    <div className="flex flex-col gap-6">
-                        {displayProduct.reviewsList && displayProduct.reviewsList.length ? (
-                            displayProduct.reviewsList.map((r, idx) => (
-                                <div key={idx} className="rounded-xl bg-white shadow-1 p-4 sm:p-6">
-                                    <div className="flex items-center justify-between">
-                                        <a href="#" className="flex items-center gap-4">
-                                            <div className="w-12.5 h-12.5 rounded-full overflow-hidden">
-                                                <Image src={r.avatar ?? "/images/users/user-01.jpg"} alt={r.name} width={50} height={50} />
-                                            </div>
-                                            <div>
-                                                <h3 className="font-medium text-dark">{r.name}</h3>
-                                                {r.role && <p className="text-custom-sm">{r.role}</p>}
-                                            </div>
-                                        </a>
-                                        <div className="flex items-center gap-1">
-                                            {Array.from({ length: 5 }).map((_, i) => (
-                                                <span key={i} className={i < r.rating ? "cursor-pointer text-[#FBB040]" : "cursor-pointer text-gray-5"}>
-                                                    <svg className="fill-current" width="15" height="16" viewBox="0 0 15 16" xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M14.6604 5.90785L9.97461 5.18335L7.85178 0.732874C7.69645 0.422375 7.28224 0.422375 7.12691 0.732874L5.00407 5.20923L0.344191 5.90785C0.0076444 5.9596 -0.121797 6.39947 0.137085 6.63235L3.52844 10.1255L2.72591 15.0158C2.67413 15.3522 3.01068 15.6368 3.32134 15.4298L7.54112 13.1269L11.735 15.4298C12.0198 15.5851 12.3822 15.3263 12.3046 15.0158L11.502 10.1255L14.8934 6.63235C15.1005 6.39947 14.9969 5.9596 14.6604 5.90785Z" />
-                                                    </svg>
-                                                </span>
-                                            ))}
-                                        </div>
+                <div>
+                    <div className={`rounded-xl bg-white shadow-1 p-4 sm:p-6 mt-10 ${activeTab === "tabTwo" ? "block" : "hidden"}`}>
+                        {Array.isArray(displayProduct.additionalInfo) && displayProduct.additionalInfo.length ? (
+                            displayProduct.additionalInfo.map((info, idx) => (
+                                <div key={idx} className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
+                                    <div className="max-w-[450px] min-w-[140px] w-full">
+                                        <p className="text-sm sm:text-base text-dark">{info.label}</p>
                                     </div>
-                                    <p className="text-dark mt-6">{r.comment}</p>
+                                    <div className="w-full">
+                                        <p className="text-sm sm:text-base text-dark">{info.value}</p>
+                                    </div>
                                 </div>
                             ))
                         ) : (
-                            <div className="rounded-xl bg-white shadow-1 p-4 sm:p-6">
-                                <p>No reviews yet for this product.</p>
+                            <div className="space-y-4">
+                                <p className="mb-4">No additional information available for this product.</p>
                             </div>
                         )}
                     </div>
                 </div>
-                <div className="max-w-[550px] w-full">
-                    <form>
-                        <h2 className="font-medium text-2xl text-dark mb-3.5">Add a Review</h2>
-                        <p className="mb-6">Your email address will not be published. Required fields are marked *</p>
-                        <div className="flex items-center gap-3 mb-7.5">
-                            <span>Your Rating*</span>
-                            <div className="flex items-center gap-1">
-                                {[...Array(5)].map((_, i) => (
-                                    <span key={i} className="cursor-pointer text-[#FBB040]">
-                                        <svg className="fill-current" width="15" height="16" viewBox="0 0 15 16" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M14.6604 5.90785L9.97461 5.18335L7.85178 0.732874C7.69645 0.422375 7.28224 0.422375 7.12691 0.732874L5.00407 5.20923L0.344191 5.90785C0.0076444 5.9596 -0.121797 6.39947 0.137085 6.63235L3.52844 10.1255L2.72591 15.0158C2.67413 15.3522 3.01068 15.6368 3.32134 15.4298L7.54112 13.1269L11.735 15.4298C12.0198 15.5851 12.3822 15.3263 12.3046 15.0158L11.502 10.1255L14.8934 6.63235C15.1005 6.39947 14.9969 5.9596 14.6604 5.90785Z" />
-                                        </svg>
-                                    </span>
-                                ))}
+
+                <div>
+                    <div className={`flex-col sm:flex-row gap-7.5 xl:gap-12.5 mt-12.5 ${activeTab === "tabThree" ? "flex" : "hidden"}`}>
+                        <div className="max-w-[570px] w-full">
+                            <h2 className="font-medium text-2xl text-dark mb-9">
+                                {displayProduct.reviewsList?.length ?? 0} Review{displayProduct.reviewsList?.length !== 1 ? "s" : ""} for this product
+                            </h2>
+                            <div className="flex flex-col gap-6">
+                                {displayProduct.reviewsList && displayProduct.reviewsList.length ? (
+                                    displayProduct.reviewsList.map((r, idx) => (
+                                        <div key={idx} className="rounded-xl bg-white shadow-1 p-4 sm:p-6">
+                                            <div className="flex items-center justify-between">
+                                                <a href="#" className="flex items-center gap-4">
+                                                    <div className="w-12.5 h-12.5 rounded-full overflow-hidden">
+                                                        <Image src={r.avatar ?? "/images/users/user-01.jpg"} alt={r.name} width={50} height={50} />
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="font-medium text-dark">{r.name}</h3>
+                                                        {r.role && <p className="text-custom-sm">{r.role}</p>}
+                                                    </div>
+                                                </a>
+                                                <div className="flex items-center gap-1">
+                                                    {Array.from({ length: 5 }).map((_, i) => (
+                                                        <span key={i} className={i < r.rating ? "cursor-pointer text-[#FBB040]" : "cursor-pointer text-gray-5"}>
+                                                            <svg className="fill-current" width="15" height="16" viewBox="0 0 15 16" xmlns="http://www.w3.org/2000/svg">
+                                                                <path d="M14.6604 5.90785L9.97461 5.18335L7.85178 0.732874C7.69645 0.422375 7.28224 0.422375 7.12691 0.732874L5.00407 5.20923L0.344191 5.90785C0.0076444 5.9596 -0.121797 6.39947 0.137085 6.63235L3.52844 10.1255L2.72591 15.0158C2.67413 15.3522 3.01068 15.6368 3.32134 15.4298L7.54112 13.1269L11.735 15.4298C12.0198 15.5851 12.3822 15.3263 12.3046 15.0158L11.502 10.1255L14.8934 6.63235C15.1005 6.39947 14.9969 5.9596 14.6604 5.90785Z" />
+                                                            </svg>
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <p className="text-dark mt-6">{r.comment}</p>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="rounded-xl bg-white shadow-1 p-4 sm:p-6">
+                                        <p>No reviews yet for this product.</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
-                        <div className="rounded-xl bg-white shadow-1 p-4 sm:p-6">
-                            <div className="mb-5">
-                                <label htmlFor="comments" className="block mb-2.5">Comments</label>
-                                <textarea name="comments" id="comments" rows={5} placeholder="Your comments" className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full p-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"></textarea>
-                                <span className="flex items-center justify-between mt-2.5">
-                                    <span className="text-custom-sm text-dark-4">Maximum</span>
-                                    <span className="text-custom-sm text-dark-4">0/250</span>
-                                </span>
-                            </div>
-                            <div className="flex flex-col lg:flex-row gap-5 sm:gap-7.5 mb-5.5">
-                                <div>
-                                    <label htmlFor="name" className="block mb-2.5">Name</label>
-                                    <input type="text" name="name" id="name" placeholder="Your name" className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20" />
+                        <div className="max-w-[550px] w-full">
+                            <form>
+                                <h2 className="font-medium text-2xl text-dark mb-3.5">Add a Review</h2>
+                                <p className="mb-6">Your email address will not be published. Required fields are marked *</p>
+                                <div className="flex items-center gap-3 mb-7.5">
+                                    <span>Your Rating*</span>
+                                    <div className="flex items-center gap-1">
+                                        {[...Array(5)].map((_, i) => (
+                                            <span key={i} className="cursor-pointer text-[#FBB040]">
+                                                <svg className="fill-current" width="15" height="16" viewBox="0 0 15 16" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M14.6604 5.90785L9.97461 5.18335L7.85178 0.732874C7.69645 0.422375 7.28224 0.422375 7.12691 0.732874L5.00407 5.20923L0.344191 5.90785C0.0076444 5.9596 -0.121797 6.39947 0.137085 6.63235L3.52844 10.1255L2.72591 15.0158C2.67413 15.3522 3.01068 15.6368 3.32134 15.4298L7.54112 13.1269L11.735 15.4298C12.0198 15.5851 12.3822 15.3263 12.3046 15.0158L11.502 10.1255L14.8934 6.63235C15.1005 6.39947 14.9969 5.9596 14.6604 5.90785Z" />
+                                                </svg>
+                                            </span>
+                                        ))}
+                                    </div>
                                 </div>
-                                <div>
-                                    <label htmlFor="email" className="block mb-2.5">Email</label>
-                                    <input type="email" name="email" id="email" placeholder="Your email" className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20" />
+                                <div className="rounded-xl bg-white shadow-1 p-4 sm:p-6">
+                                    <div className="mb-5">
+                                        <label htmlFor="comments" className="block mb-2.5">Comments</label>
+                                        <textarea name="comments" id="comments" rows={5} placeholder="Your comments" className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full p-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"></textarea>
+                                        <span className="flex items-center justify-between mt-2.5">
+                                            <span className="text-custom-sm text-dark-4">Maximum</span>
+                                            <span className="text-custom-sm text-dark-4">0/250</span>
+                                        </span>
+                                    </div>
+                                    <div className="flex flex-col lg:flex-row gap-5 sm:gap-7.5 mb-5.5">
+                                        <div>
+                                            <label htmlFor="name" className="block mb-2.5">Name</label>
+                                            <input type="text" name="name" id="name" placeholder="Your name" className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20" />
+                                        </div>
+                                        <div>
+                                            <label htmlFor="email" className="block mb-2.5">Email</label>
+                                            <input type="email" name="email" id="email" placeholder="Your email" className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20" />
+                                        </div>
+                                    </div>
+                                    <button type="submit" className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark">Submit Reviews</button>
                                 </div>
-                            </div>
-                            <button type="submit" className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark">Submit Reviews</button>
+                            </form>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-</section>
+          </section>
 
           <RecentlyViewdItems />
           <Newsletter />

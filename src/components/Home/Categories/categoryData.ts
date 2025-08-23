@@ -1,4 +1,13 @@
-const data = [
+// Defines the structure for a single category item
+export interface Category {
+  id: number;
+  title: string;
+  img: string; // Changed from imageUrl to img
+  path: string; // Path for navigation
+}
+
+// Array of all the shop categories
+const data: Category[] = [
   {
     title: "All Mushrooms",
     id: 1,
@@ -29,31 +38,6 @@ const data = [
     img: "/images/categories/powders.png",
     path: "/shop-without-sidebar?category=powders",
   },
-    // {
-    //   title: "Games & Videos",
-    //   id: 4,
-    //   img: "/images/categories/categories-04.png",
-    // },
-    // {
-    //   title: "Home Appliances",
-    //   id: 5,
-    //   img: "/images/categories/categories-05.png",
-    // },
-    // {
-    //   title: "Health & Sports",
-    //   id: 6,
-    //   img: "/images/categories/categories-06.png",
-    // },
-    // {
-    //   title: "Watches",
-    //   id: 7,
-    //   img: "/images/categories/categories-07.png",
-    // },
-    // {
-    //   title: "Televisions",
-    //   id: 8,
-    //   img: "/images/categories/categories-04.png",
-    // },
 ];
 
 export default data;
