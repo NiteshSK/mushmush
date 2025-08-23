@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link"; // Import the Link component for navigation
 import HeroFeature from "./HeroFeature";
 import Image from "next/image";
 
@@ -29,9 +30,13 @@ const Hero = () => {
               <button className="bg-blue hover:bg-blue-dark text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-300">
                 Shop Now
               </button>
-              <button className="border-2 border-blue text-blue hover:bg-blue hover:text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-300">
+              {/* The "Learn More" button has been replaced with a Link component */}
+              <Link 
+                href="blogs/blog-details" // Assuming the blog page route is "/blog"
+                className="border-2 border-blue text-blue hover:bg-blue hover:text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-300"
+              >
                 Learn More
-              </button>
+              </Link>
             </div>
           </div>
 
