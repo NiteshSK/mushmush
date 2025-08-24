@@ -14,29 +14,35 @@ export const menuData: Menu[] = [
     path: "/shop-with-sidebar",
   },
   {
+    id: 72,
+    title: "Blogs",
+    newTab: false,
+    path: "/blogs/blog-grid",
+},
+  {
     id: 3,
     title: "Contact",
     newTab: false,
     path: "/contact",
   },
-  {
-    id: 7,
-    title: "blogs",
-    newTab: false,
-    path: "/",
-    submenu: [
-      {
-        id: 72,
-        title: "Blog Grid",
-        newTab: false,
-        path: "/blogs/blog-grid",
-      },
-      {
-        id: 74,
-        title: "Blog details",
-        newTab: false,
-        path: "/blogs/blog-details",
-      },
-    ],
-  },
+  // {
+  //   id: 7,
+  //   title: "blogs",
+  //   newTab: false,
+  //   path: "/",
+  //   submenu: [
+  //     {
+  //       id: 72,
+  //       title: "Blog Grid",
+  //       newTab: false,
+  //       path: "/blogs/blog-grid",
+  //     },
+  //     {
+  //       id: 74,
+  //       title: "Blog details",
+  //       newTab: false,
+  //       path: "/blogs/blog-details",
+  //     },
+  //   ],
+  // },
 ];

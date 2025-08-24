@@ -27,12 +27,15 @@ const Hero = () => {
               At MushMush, we're obsessed with the incredible world of fungi. We specialize in cultivating premium edible and medicinal mushrooms, all grown to the highest organic standards. Our passion is to provide you with the purest, most potent mushrooms on the market, whether you're looking to create a culinary masterpiece or enhance your daily wellness routine. Explore our collection and discover the MushMush difference.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <button className="bg-blue hover:bg-blue-dark text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-300">
+              <Link 
+                href="shop-with-sidebar" // Assuming the blog page route is "/blog"
+                className="border-2 border-blue text-blue hover:bg-blue hover:text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-300"
+              >
                 Shop Now
-              </button>
+              </Link>
               {/* The "Learn More" button has been replaced with a Link component */}
               <Link 
-                href="blogs/blog-details" // Assuming the blog page route is "/blog"
+                href="blogs/blog-grid" // Assuming the blog page route is "/blog"
                 className="border-2 border-blue text-blue hover:bg-blue hover:text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-300"
               >
                 Learn More
