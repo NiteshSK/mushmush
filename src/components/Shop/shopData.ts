@@ -50,27 +50,20 @@ const shopData: Product[] = [
      { label: "Odor", value: "Mild, earthy aroma" },
    ],
     reviewsList: [
-{
-        "name": "Anjali",
-        "role": "Home Chef",
-        "rating": 5,
-        "comment": "Absolutely fresh and delicious! They were perfect for my pasta dish. The mild, savory flavor is just unbeatable.",
-        "avatar": "/images/users/user-03.jpg"
-      },
-      {
-        "name": "Rohan Singh",
-        "role": "Urban Farmer",
-        "rating": 5,
-        "comment": "The spawn was of excellent quality. I got a massive first flush from my grow bags here in Dehradun. Very happy.",
-        "avatar": "/images/users/user-04.jpg"
-      },
-      {
-        "name": "Priya Sharma",
-        "role": "Food Blogger",
-        "rating": 4,
-        "comment": "Lovely texture and very versatile in the kitchen. They stir-fry beautifully. A bit pricey, but the quality is worth it.",
-        "avatar": "/images/users/user-05.jpg"
-      },
+//       {
+//         "name": "Rohan Singh",
+//         "role": "Urban Farmer",
+//         "rating": 5,
+//         "comment": "The spawn was of excellent quality. I got a massive first flush from my grow bags here in Dehradun. Very happy.",
+//         "avatar": "/images/users/user-04.jpg"
+//       },
+//       {
+//         "name": "Priya Sharma",
+//         "role": "Food Blogger",
+//         "rating": 4,
+//         "comment": "Lovely texture and very versatile in the kitchen. They stir-fry beautifully. A bit pricey, but the quality is worth it.",
+//         "avatar": "/images/users/user-05.jpg"
+//       },
     ],
   },
   {
@@ -120,27 +113,34 @@ const shopData: Product[] = [
     { "label": "Odor", "value": "Delicate, earthy aroma, sometimes with a faint hint of anise" }
   ],
   reviewsList: [
-      {
-        "name": "Sameer",
-        "role": "Restaurant Owner",
-        "rating": 5,
-        "comment": "Consistent quality and size, which is crucial for my restaurant. Our customers love the cream of oyster mushroom soup we make.",
-        "avatar": "/images/users/user-06.jpg"
-      },
-      {
-        "name": "Kavita",
-        "role": "Health Enthusiast",
+    {
+        "name": "Rohan Kapoor",
+        "role": "Head Chef, The Olive Grove",
         "rating": 4,
-        "comment": "A fantastic, low-calorie source of protein. I add them to my salads and omelettes. Wish they offered a subscription service.",
-        "avatar": "/images/users/user-07.jpg"
+        "comment": "Absolutely thrilled with the freshness of the oyster mushrooms! As a chef, quality is everything. The delivery was prompt, right to my restaurant here in Dehradun. Mushmush is a game-changer.",
+        "avatar": "/images/users/user-01.jpg"
       },
-      {
-        "name": "Deepak Kumar",
-        "role": "Mushroom Hobbyist",
-        "rating": 3,
-        "comment": "The grow kit worked, but the yield was smaller than I expected. The mushrooms that did grow tasted good though.",
-        "avatar": "/images/users/user-08.jpg"
-      }
+      // {
+      //   "name": "Sameer",
+      //   "role": "Restaurant Owner",
+      //   "rating": 5,
+      //   "comment": "Consistent quality and size, which is crucial for my restaurant. Our customers love the cream of oyster mushroom soup we make.",
+      //   "avatar": "/images/users/user-06.jpg"
+      // },
+      // {
+      //   "name": "Kavita",
+      //   "role": "Health Enthusiast",
+      //   "rating": 4,
+      //   "comment": "A fantastic, low-calorie source of protein. I add them to my salads and omelettes. Wish they offered a subscription service.",
+      //   "avatar": "/images/users/user-07.jpg"
+      // },
+      // {
+      //   "name": "Deepak Kumar",
+      //   "role": "Mushroom Hobbyist",
+      //   "rating": 3,
+      //   "comment": "The grow kit worked, but the yield was smaller than I expected. The mushrooms that did grow tasted good though.",
+      //   "avatar": "/images/users/user-08.jpg"
+      // }
     ],
   },
   {
@@ -186,27 +186,27 @@ const shopData: Product[] = [
     { "label": "Odor", "value": "Distinctive fruity aroma, often compared to apricots" }
   ],
   reviewsList: [
-{
-        "name": "Geeta Negi",
-        "role": "Local Resident",
-        "rating": 5,
-        "comment": "Ordered these for a family dinner. They were incredibly fresh, much better than the Sabzi Mandi. Made a delicious Pahadi-style mushroom stir-fry.",
-        "avatar": "/images/users/user-12.jpg"
-      },
-      {
-        "name": "Sandeep",
-        "role": "Hotel Supplier",
-        "rating": 4,
-        "comment": "Good bulk pricing and dependable quality for our hotel kitchen. Sometimes the delivery schedule can be a bit rigid, but the product is solid.",
-        "avatar": "/images/users/user-13.jpg"
-      },
-      {
-        "name": "Pooja",
-        "role": "Student",
-        "rating": 5,
-        "comment": "The grow kit is a fantastic project. It's so cool to watch them grow right in my room, especially during this monsoon season. And they taste amazing!",
-        "avatar": "/images/users/user-14.jpg"
-      },
+// {
+//         "name": "Geeta Negi",
+//         "role": "Local Resident",
+//         "rating": 5,
+//         "comment": "Ordered these for a family dinner. They were incredibly fresh, much better than the Sabzi Mandi. Made a delicious Pahadi-style mushroom stir-fry.",
+//         "avatar": "/images/users/user-12.jpg"
+//       },
+//       {
+//         "name": "Sandeep",
+//         "role": "Hotel Supplier",
+//         "rating": 4,
+//         "comment": "Good bulk pricing and dependable quality for our hotel kitchen. Sometimes the delivery schedule can be a bit rigid, but the product is solid.",
+//         "avatar": "/images/users/user-13.jpg"
+//       },
+//       {
+//         "name": "Pooja",
+//         "role": "Student",
+//         "rating": 5,
+//         "comment": "The grow kit is a fantastic project. It's so cool to watch them grow right in my room, especially during this monsoon season. And they taste amazing!",
+//         "avatar": "/images/users/user-14.jpg"
+//       },
     ],
   },
   {
@@ -259,27 +259,27 @@ const shopData: Product[] = [
     { "label": "Odor", "value": "Distinctive, savory, and earthy aroma" }
   ],
   reviewsList: [
-{
-        "name": "Geeta Negi",
-        "role": "Local Resident",
-        "rating": 5,
-        "comment": "Ordered these for a family dinner. They were incredibly fresh, much better than the Sabzi Mandi. Made a delicious Pahadi-style mushroom stir-fry.",
-        "avatar": "/images/users/user-12.jpg"
-      },
-      {
-        "name": "Sandeep",
-        "role": "Hotel Supplier",
-        "rating": 4,
-        "comment": "Good bulk pricing and dependable quality for our hotel kitchen. Sometimes the delivery schedule can be a bit rigid, but the product is solid.",
-        "avatar": "/images/users/user-13.jpg"
-      },
-      {
-        "name": "Pooja",
-        "role": "Student",
-        "rating": 5,
-        "comment": "The grow kit is a fantastic project. It's so cool to watch them grow right in my room, especially during this monsoon season. And they taste amazing!",
-        "avatar": "/images/users/user-14.jpg"
-      },
+// {
+//         "name": "Geeta Negi",
+//         "role": "Local Resident",
+//         "rating": 5,
+//         "comment": "Ordered these for a family dinner. They were incredibly fresh, much better than the Sabzi Mandi. Made a delicious Pahadi-style mushroom stir-fry.",
+//         "avatar": "/images/users/user-12.jpg"
+//       },
+//       {
+//         "name": "Sandeep",
+//         "role": "Hotel Supplier",
+//         "rating": 4,
+//         "comment": "Good bulk pricing and dependable quality for our hotel kitchen. Sometimes the delivery schedule can be a bit rigid, but the product is solid.",
+//         "avatar": "/images/users/user-13.jpg"
+//       },
+//       {
+//         "name": "Pooja",
+//         "role": "Student",
+//         "rating": 5,
+//         "comment": "The grow kit is a fantastic project. It's so cool to watch them grow right in my room, especially during this monsoon season. And they taste amazing!",
+//         "avatar": "/images/users/user-14.jpg"
+//       },
     ],
   },
   {
@@ -325,27 +325,27 @@ const shopData: Product[] = [
     { "label": "Odor", "value": "Subtle, earthy, and slightly sweet" }
   ],
     reviewsList: [
- {
-        "name": "Sunita Devi",
-        "role": "Home Gardener",
-        "rating": 5,
-        "comment": "My first time growing mushrooms! The kit was so easy to use here in the Dehradun climate. I got my first harvest in just over a week. So fresh!",
-        "avatar": "/images/users/user-09.jpg"
-      },
-      {
-        "name": "Manish Bist",
-        "role": "Cafe Owner",
-        "rating": 5,
-        "comment": "We use these for our cafe's special mushroom sandwich. The quality is consistently top-notch. Fast and reliable local delivery.",
-        "avatar": "/images/users/user-10.jpg"
-      },
-      {
-        "name": "Ajay Verma",
-        "role": "Fitness Trainer",
-        "rating": 4,
-        "comment": "Excellent source of lean protein. The last batch was a bit smaller than usual, but the freshness is always reliable.",
-        "avatar": "/images/users/user-11.jpg"
-      },
+    // {
+    //     "name": "Sunita Devi",
+    //     "role": "Home Gardener",
+    //     "rating": 5,
+    //     "comment": "My first time growing mushrooms! The kit was so easy to use here in the Dehradun climate. I got my first harvest in just over a week. So fresh!",
+    //     "avatar": "/images/users/user-09.jpg"
+    //   },
+    //   {
+    //     "name": "Manish Bist",
+    //     "role": "Cafe Owner",
+    //     "rating": 5,
+    //     "comment": "We use these for our cafe's special mushroom sandwich. The quality is consistently top-notch. Fast and reliable local delivery.",
+    //     "avatar": "/images/users/user-10.jpg"
+    //   },
+    //   {
+    //     "name": "Ajay Verma",
+    //     "role": "Fitness Trainer",
+    //     "rating": 4,
+    //     "comment": "Excellent source of lean protein. The last batch was a bit smaller than usual, but the freshness is always reliable.",
+    //     "avatar": "/images/users/user-11.jpg"
+    //   },
     ],
   },
   {
@@ -387,27 +387,27 @@ const shopData: Product[] = [
     { "label": "Odor", "value": "Mild, woody, and earthy aroma" }
   ],
   "reviewsList": [
-      {
-        "name": "Anjali Mehta",
-        "role": "IT Professional",
-        "rating": 5,
-        "comment": "I've been using this tincture for a month to manage work stress. I add it to my evening tea. I feel much calmer and my sleep has improved. A must-try product from a great local Dehradun brand!",
-        "avatar": "/images/users/user-04.jpg"
-      },
-      {
-        "name": "Vikram Rawat",
-        "role": "Wellness Enthusiast",
-        "rating": 5,
-        "comment": "The bitterness tells you it's the real deal! This is a high-quality Reishi extract. I've tried many brands, and MushMush's tincture feels the most potent. Excellent for immune support.",
-        "avatar": "/images/users/user-05.jpg"
-      },
-      {
-        "name": "Mrs. Kapoor",
-        "role": "Retired Teacher",
-        "rating": 4,
-        "comment": "My son bought this for me to help with my overall vitality. It's easy to take with water. I feel more energetic throughout the day. The taste took some getting used to, but the benefits are worth it.",
-        "avatar": "/images/users/user-06.jpg"
-      }
+      // {
+      //   "name": "Anjali Mehta",
+      //   "role": "IT Professional",
+      //   "rating": 5,
+      //   "comment": "I've been using this tincture for a month to manage work stress. I add it to my evening tea. I feel much calmer and my sleep has improved. A must-try product from a great local Dehradun brand!",
+      //   "avatar": "/images/users/user-04.jpg"
+      // },
+      // {
+      //   "name": "Vikram Rawat",
+      //   "role": "Wellness Enthusiast",
+      //   "rating": 5,
+      //   "comment": "The bitterness tells you it's the real deal! This is a high-quality Reishi extract. I've tried many brands, and MushMush's tincture feels the most potent. Excellent for immune support.",
+      //   "avatar": "/images/users/user-05.jpg"
+      // },
+      // {
+      //   "name": "Mrs. Kapoor",
+      //   "role": "Retired Teacher",
+      //   "rating": 4,
+      //   "comment": "My son bought this for me to help with my overall vitality. It's easy to take with water. I feel more energetic throughout the day. The taste took some getting used to, but the benefits are worth it.",
+      //   "avatar": "/images/users/user-06.jpg"
+      // }
     ]
   },
 ];
