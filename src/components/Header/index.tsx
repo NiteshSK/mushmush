@@ -277,7 +277,7 @@ const Header = () => {
             </div>
 
             {/* Nav Right */}
-            <div className="hidden xl:block">
+            {/* <div className="hidden xl:block">
               <ul className="flex items-center gap-5.5">
                 <li className="py-4">
                   <a
@@ -326,7 +326,7 @@ const Header = () => {
                   </Link>
                 </li>
               </ul>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
