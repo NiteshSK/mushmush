@@ -1,14 +1,39 @@
-import React from "react";
-import Link from "next/link"; // Import the Link component for navigation
+"use client";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import HeroFeature from "./HeroFeature";
 import Image from "next/image";
 
 const Hero = () => {
+  // Array of image sources
+  const images = [
+    // "/images/categories/hero_mushrooms.png",
+    // "/images/categories/hero_mushrooms_1.png", // Add the path to your second image
+    "/images/categories/hero_mushrooms_2.png",
+    "/images/categories/hero_mushrooms_3.png", // Add the path to your third image
+    "/images/categories/hero_mushrooms_4.png",
+  ];
+
+  // State to keep track of the current image index
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    // Set up an interval to change the image every 3 seconds (3000 milliseconds)
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) =>
+        prevIndex === images.length - 1 ? 0 : prevIndex + 1
+      );
+    }, 3000);
+
+    // Clean up the interval when the component unmounts
+    return () => clearInterval(interval);
+  }, [images.length]);
+
   return (
     <section className="overflow-hidden pb-0 lg:pb-1 xl:pb-2 mt-32 bg-white" style={{ marginTop: '200px' }}>
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
         <div className="flex flex-col lg:flex-row gap-8 items-center mb-8">
-          {/* <!-- Left Content --> */}
+          {/* */}
           <div className="lg:w-1/2">
             <h1 className="text-4xl lg:text-5xl xl:text-4xl text-dark mb-6">
               Discover the Power of
@@ -27,15 +52,14 @@ const Hero = () => {
               At MushMush, we're obsessed with the incredible world of fungi. We specialize in cultivating premium edible and medicinal mushrooms, all grown to the highest organic standards. Our passion is to provide you with the purest, most potent mushrooms on the market, whether you're looking to create a culinary masterpiece or enhance your daily wellness routine. Explore our collection and discover the MushMush difference.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link 
-                href="shop-with-sidebar" // Assuming the blog page route is "/blog"
+              <Link
+                href="shop-with-sidebar"
                 className="border-2 border-blue text-blue hover:bg-blue hover:text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-300"
               >
                 Shop Now
               </Link>
-              {/* The "Learn More" button has been replaced with a Link component */}
-              <Link 
-                href="blogs/blog-grid" // Assuming the blog page route is "/blog"
+              <Link
+                href="blogs/blog-grid"
                 className="border-2 border-blue text-blue hover:bg-blue hover:text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-300"
               >
                 Learn More
@@ -43,22 +67,22 @@ const Hero = () => {
             </div>
           </div>
 
-          {/* <!-- Right Image --> */}
+          {/* */}
           <div className="lg:w-1/2">
             <div>
               <Image
-                src="/images/categories/hero_mushroom.png"
+                src={images[currentImageIndex]} // Use the current image from the state
                 alt="Premium Mushrooms Collection"
                 width={500}
                 height={300}
-                className="object-contain rounded-lg opacity-100"
+                className="object-contain rounded-lg opacity-1000"
               />
             </div>
           </div>
         </div>
       </div>
 
-      {/* <!-- Hero features --> */}
+      {/* */}
       <HeroFeature />
     </section>
   );
