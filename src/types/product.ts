@@ -1,26 +1,33 @@
 export type Product = {
-  title: string;
-  reviews: number;
-  price: number;
-  discountedPrice: number;
   id: number;
-  category?: string[];
-  imgs?: {
+  title: string;
+  slug: string;
+  description: string;
+  price: number;
+  discountedPrice?: number;
+  measurementValue: number;
+  measurementType: string;
+  inStock: boolean;
+  featured: boolean;
+  imgs: {
     thumbnails: string[];
     previews: string[];
   };
-  description: string;
   specifications: string[];
   howToConsume: string[];
-  additionalInfo?: { label: string; value: string }[];
+  additionalInfo: { label: string; value: string }[];
+  categories: { category: { id: number; title: string; slug: string } }[];
+  averageRating?: number;
+  reviewCount?: number;
+  reviews?: number; // For backward compatibility
+  category?: string[]; // For backward compatibility
   reviewsList?: {
     name: string;
     role?: string;
-    rating: number; // 1-5
+    rating: number;
     comment: string;
     avatar?: string;
   }[];
-  inStock?: boolean;
   measurement?: {
     value: number;
     type: string;

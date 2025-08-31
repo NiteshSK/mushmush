@@ -7,10 +7,8 @@ import Breadcrumb from "../Common/Breadcrumb";
 import SingleGridItem from "../Shop/SingleGridItem";
 import SingleListItem from "../Shop/SingleListItem";
 import CustomSelect from "../ShopWithSidebar/CustomSelect";
-import shopData from "../Shop/shopData";
+import { useProducts } from "@/hooks/useProducts";
 import { Product } from "@/types/product";
-// Removed PriceDropdown as it's now handled internally
-// Removed CategoryDropdown import as it's no longer needed here
 
 const ShopWithSidebar = () => {
   const [productStyle, setProductStyle] = useState("grid");
@@ -20,19 +18,20 @@ const ShopWithSidebar = () => {
   const [stickyMenu, setStickyMenu] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const { products, loading, error } = useProducts();
+
   // --- PRICE FILTER STATE ---
-  // Dynamically find the highest price from the product data to set the slider's max range
-  const maxPrice = useMemo(() => Math.ceil(Math.max(...shopData.map(p => p.price)) / 100) * 100, []);
+  const maxPrice = useMemo(() => {
+    if (products.length === 0) return 1700;
+    return Math.ceil(Math.max(...products.map(p => p.price)) / 100) * 100;
+  }, [products]);
   const [priceValue, setPriceValue] = useState<number>(maxPrice);
 
-  // Effect to reset the price slider when the component loads or maxPrice changes
   useEffect(() => {
     setPriceValue(maxPrice);
   }, [maxPrice]);
-
-
-  const router = useRouter();
-  const dispatch = useDispatch();
 
   const handleProductClick = (product: Product) => {
     dispatch(updateproductDetails(product));
@@ -41,17 +40,17 @@ const ShopWithSidebar = () => {
 
   const categoriesWithCounts = useMemo(() => {
     const categoryCount: { [key: string]: number } = {};
-    shopData.forEach(product => {
-      product.category?.forEach(cat => {
-        const capitalizedCat = cat.charAt(0).toUpperCase() + cat.slice(1);
-        categoryCount[capitalizedCat] = (categoryCount[capitalizedCat] || 0) + 1;
+    products.forEach(product => {
+      product.categories?.forEach(cat => {
+        const categoryTitle = cat.category.title;
+        categoryCount[categoryTitle] = (categoryCount[categoryTitle] || 0) + 1;
       });
     });
     return Object.entries(categoryCount).map(([name, count]) => ({
       name: name,
       products: count,
     }));
-  }, []);
+  }, [products]);
 
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get("category");
@@ -75,27 +74,26 @@ const ShopWithSidebar = () => {
 
   // --- COMBINED FILTERING LOGIC ---
   const filteredProducts: Product[] = useMemo(() => {
-    let products = shopData;
+    let filteredProducts = products;
 
     // 1. Filter by category
     if (selectedCategories.length > 0) {
-      const lowerCaseSelected = selectedCategories.map(c => c.toLowerCase().trim());
-      products = products.filter(product =>
-        product.category?.some(cat =>
-          lowerCaseSelected.includes(cat.toLowerCase().trim())
+      filteredProducts = filteredProducts.filter(product =>
+        product.categories?.some(cat =>
+          selectedCategories.includes(cat.category.title)
         )
       );
     }
 
-    // 2. Filter by price on the result of the category filter
-    products = products.filter(product => product.discountedPrice <= priceValue);
+    // 2. Filter by price
+    filteredProducts = filteredProducts.filter(product => product.price <= priceValue);
 
-    return products;
-  }, [selectedCategories, priceValue]); // Re-run when either categories or price changes
+    return filteredProducts;
+  }, [products, selectedCategories, priceValue]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedCategories, priceValue]); // Reset page when any filter changes
+  }, [selectedCategories, priceValue]);
 
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
@@ -113,6 +111,22 @@ const ShopWithSidebar = () => {
     { label: "Best Selling", value: "1" },
     { label: "Old Products", value: "2" },
   ];
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-20">
+        <p className="text-red-600">Error loading products: {error}</p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -197,11 +211,9 @@ const ShopWithSidebar = () => {
                       Products
                     </p>
                   </div>
-                  {/* Grid/List view buttons would go here */}
                 </div>
               </div>
 
-              {/* --- FIX: ADDED NO PRODUCTS FOUND MESSAGE --- */}
               {currentProducts.length > 0 ? (
                 <div
                   className={`${
@@ -226,7 +238,6 @@ const ShopWithSidebar = () => {
                 </div>
               )}
 
-              {/* --- FIX: HIDE PAGINATION IF NO PRODUCTS --- */}
               {totalPages > 0 && (
                 <div className="flex justify-center mt-15">
                   <div className="bg-white shadow-1 rounded-md p-2">
@@ -238,7 +249,7 @@ const ShopWithSidebar = () => {
                           disabled={currentPage === 1}
                           className="flex items-center justify-center w-8 h-9 ease-out duration-200 rounded-[3px] disabled:text-gray-4 disabled:cursor-not-allowed"
                         >
-                         {/* SVG for previous page */}
+                          ←
                         </button>
                       </li>
                       {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNumber) => (
@@ -260,7 +271,7 @@ const ShopWithSidebar = () => {
                           disabled={currentPage === totalPages}
                           className="flex items-center justify-center w-8 h-9 ease-out duration-200 rounded-[3px] hover:text-white hover:bg-blue disabled:text-gray-4 disabled:cursor-not-allowed"
                         >
-                          {/* SVG for next page */}
+                          →
                         </button>
                       </li>
                     </ul>

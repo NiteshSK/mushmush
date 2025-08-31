@@ -1,5 +1,5 @@
 "use client"
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, ReactNode } from "react";
 
 interface ModalContextType {
   isModalOpen: boolean;
@@ -17,7 +17,11 @@ export const useModalContext = () => {
   return context;
 };
 
-export const QuickViewModalProvider = ({ children }: { children: React.ReactNode }) => {
+interface ModalProviderProps {
+  children: ReactNode;
+}
+
+export const ModalProvider = ({ children }: ModalProviderProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const openModal = () => {
@@ -33,4 +37,4 @@ export const QuickViewModalProvider = ({ children }: { children: React.ReactNode
       {children}
     </ModalContext.Provider>
   );
-}; 
+};

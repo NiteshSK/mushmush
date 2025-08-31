@@ -6,7 +6,6 @@ import Newsletter from "../Common/Newsletter";
 import RecentlyViewdItems from "./RecentlyViewd";
 import { usePreviewSlider } from "@/app/context/PreviewSliderContext";
 import { useAppSelector } from "@/redux/store";
-import shopData from "@/components/Shop/shopData";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { addItemToCart } from "@/redux/features/cart-slice";
@@ -57,10 +56,7 @@ const ShopDetails = () => {
       ? JSON.parse(alreadyExist)
       : {};
 
-  const shopProductData = shopData.find((p) => p.id === product.id);
-  const displayProduct = shopProductData
-    ? { ...shopProductData, ...product }
-    : product;
+  const displayProduct = product;
 
   useEffect(() => {
     if (product.title) {

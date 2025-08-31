@@ -3,11 +3,12 @@ import React from "react";
 import SingleItem from "./SingleItem";
 import Image from "next/image";
 import Link from "next/link";
-import shopData from "@/components/Shop/shopData";
 import { Product } from "@/types/product";
+import { useProducts } from "@/hooks/useProducts";
 
 const BestSeller = () => {
-  const bestSellers = shopData
+  const { products, loading, error } = useProducts();
+  const bestSellers = products
     .sort((a: Product, b: Product) => (b.reviews ?? 0) - (a.reviews ?? 0))
     .slice(0, 3);
 

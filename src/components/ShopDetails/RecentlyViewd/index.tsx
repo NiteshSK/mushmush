@@ -1,13 +1,16 @@
 "use client";
 import React, { useCallback, useRef } from "react";
-import shopData from "@/components/Shop/shopData";
+import { useProducts } from "@/hooks/useProducts";
 import SingleItem from "@/components/Shop/SingleItem";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css/navigation";
 import "swiper/css";
 
-const RecentlyViewdItems = () => {
+const RecentlyViewedItems = () => {
+  const { products } = useProducts();
+  const recentlyViewed = products.slice(0, 4);
+
   const sliderRef = useRef(null);
 
   const handlePrev = useCallback(() => {
@@ -88,7 +91,7 @@ const RecentlyViewdItems = () => {
                 1024: { slidesPerView: 3 },
             }}
           >
-            {shopData.map((item) => (
+            {recentlyViewed.map((item, key) => (
               <SwiperSlide key={item.id}>
                 <SingleItem item={item} />
               </SwiperSlide>
@@ -100,4 +103,4 @@ const RecentlyViewdItems = () => {
   );
 };
 
-export default RecentlyViewdItems;
+export default RecentlyViewedItems;
