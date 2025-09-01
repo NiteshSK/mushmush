@@ -3,6 +3,9 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
   try {
+    // Test database connection first
+    await prisma.$connect();
+    
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q') || '';
     const category = searchParams.get('category') || '';
@@ -45,26 +48,21 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Add category filter
+    // Add category filter - handle both ID and name
     if (category && category !== '0') {
-      const categoryMap: { [key: string]: string } = {
-        '1': 'Edible',
-        '2': 'Medicinal',
-        '3': 'Tinctures',
-      };
-      
-      const categoryName = categoryMap[category];
-      if (categoryName) {
-        where.AND.push({
-          categories: {
-            some: {
-              category: {
-                title: categoryName,
+      // First try as category name directly
+      where.AND.push({
+        categories: {
+          some: {
+            category: {
+              title: {
+                contains: category,
+                mode: 'insensitive',
               },
             },
           },
-        });
-      }
+        },
+      });
     }
 
     // Get products with pagination

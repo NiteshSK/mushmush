@@ -12,6 +12,7 @@ import LoadingProvider from "../context/LoadingContext";
 import { Toaster } from "react-hot-toast";
 import { CartModalProvider } from "../context/CartSidebarModalContext";
 import { PreviewSliderProvider } from "../context/PreviewSliderContext";
+import { WishlistProvider } from "../context/WishlistContext";
 import PreviewSliderModal from "@/components/Common/PreviewSlider";
 import QuickViewModal from "@/components/Common/QuickViewModal";
 import CartSidebarModal from "@/components/Common/CartSidebarModal";
@@ -32,30 +33,32 @@ export default function RootLayout({
   return (
     <AuthSessionProvider>
       <ReduxProvider>
-        <ModalProvider>
-          <QuickViewModalProvider>
-            <CartModalProvider>
-              <PreviewSliderProvider>
-                <LoadingProvider>
-                  <html lang="en">
-                    <body className={`${loading ? "overflow-hidden" : ""}`}>
-                      <Toaster />
-                      {loading && <PreLoader />}
-                      <Header />
-                      {children}
-                      <Footer />
-                      <ScrollToTop />
-                      <PreviewSliderModal />
-                      <QuickViewModal />
-                      <CartSidebarModal />
-                    </body>
-                  </html>
-                </LoadingProvider>
-              </PreviewSliderProvider>
-            </CartModalProvider>
-          </QuickViewModalProvider>
-        </ModalProvider>
-      </ReduxProvider>
-    </AuthSessionProvider>
+        <WishlistProvider>
+          <ModalProvider>
+            <QuickViewModalProvider>
+              <CartModalProvider>
+                <PreviewSliderProvider>
+                    <LoadingProvider>
+                      <html lang="en">
+                        <body className={`${loading ? "overflow-hidden" : ""}`}>
+                          <Toaster />
+                          {loading && <PreLoader />}
+                          <Header />
+                          {children}
+                          <Footer />
+                          <ScrollToTop />
+                          <PreviewSliderModal />
+                          <QuickViewModal />
+                          <CartSidebarModal />
+                        </body>
+                      </html>
+                    </LoadingProvider>
+                  </PreviewSliderProvider>
+                </CartModalProvider>
+              </QuickViewModalProvider>
+            </ModalProvider>
+          </WishlistProvider>
+        </ReduxProvider>
+      </AuthSessionProvider>
   );
 }

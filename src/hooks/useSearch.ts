@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Product } from '@/types/product';
 
 interface SearchParams {
@@ -20,12 +20,21 @@ interface SearchResult {
   };
 }
 
-export const useSearch = (params: SearchParams = {}) => {
+export const useSearch = () => {
   const [data, setData] = useState<SearchResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-  const searchProducts = async (searchParams: SearchParams) => {
+  const searchProducts = useCallback(async (searchParams: SearchParams) => {
+    // Cancel previous request if it exists
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create new abort controller for this request
+    abortControllerRef.current = new AbortController();
+
     setLoading(true);
     setError(null);
 
@@ -39,26 +48,36 @@ export const useSearch = (params: SearchParams = {}) => {
       if (searchParams.page) urlParams.set('page', searchParams.page.toString());
       if (searchParams.limit) urlParams.set('limit', searchParams.limit.toString());
 
-      const response = await fetch(`/api/products/search?${urlParams.toString()}`);
+      const response = await fetch(`/api/products/search?${urlParams.toString()}`, {
+        signal: abortControllerRef.current.signal
+      });
       
       if (!response.ok) {
-        throw new Error('Failed to search products');
+        throw new Error(`Failed to search products: ${response.status}`);
       }
 
       const result = await response.json();
       setData(result);
     } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        // Request was cancelled, don't update error state
+        return;
+      }
       setError(err instanceof Error ? err.message : 'An error occurred');
+      setData(null);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
+  // Cleanup function to cancel ongoing requests
   useEffect(() => {
-    if (Object.keys(params).length > 0) {
-      searchProducts(params);
-    }
-  }, [JSON.stringify(params)]);
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
 
   return {
     data,

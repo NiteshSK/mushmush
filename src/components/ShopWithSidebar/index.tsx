@@ -20,7 +20,16 @@ const ShopWithSidebar = () => {
 
   const router = useRouter();
   const dispatch = useDispatch();
-  const { products, loading, error } = useProducts();
+  
+  // Get initial category from URL params
+  const searchParams = useSearchParams();
+  const initialCategory = searchParams.get("category");
+  
+  // Use API filtering instead of client-side filtering
+  const { products, loading, error } = useProducts({
+    category: selectedCategories.length === 1 ? 
+      selectedCategories[0].toLowerCase().replace(/\s+/g, '-') : undefined
+  });
 
   // --- PRICE FILTER STATE ---
   const maxPrice = useMemo(() => {
@@ -52,44 +61,49 @@ const ShopWithSidebar = () => {
     }));
   }, [products]);
 
-  const searchParams = useSearchParams();
-  const initialCategory = searchParams.get("category");
-
   useEffect(() => {
     if (initialCategory) {
-      const capitalizedInitialCat = initialCategory.charAt(0).toUpperCase() + initialCategory.slice(1);
-      setSelectedCategories([capitalizedInitialCat]);
+      // Find the category by slug and use its title
+      const matchingCategory = categoriesWithCounts.find(cat => 
+        cat.name.toLowerCase() === initialCategory.toLowerCase() ||
+        cat.name.toLowerCase().replace(/\s+/g, '-') === initialCategory
+      );
+      if (matchingCategory) {
+        setSelectedCategories([matchingCategory.name]);
+      } else {
+        // Fallback to capitalizing the slug
+        const capitalizedInitialCat = initialCategory.charAt(0).toUpperCase() + initialCategory.slice(1);
+        setSelectedCategories([capitalizedInitialCat]);
+      }
     } else {
       setSelectedCategories([]);
     }
-  }, [initialCategory]);
+  }, [initialCategory, categoriesWithCounts]);
 
   const handleCategoryChange = (categoryName: string) => {
-    setSelectedCategories(prev =>
-      prev.includes(categoryName)
-        ? prev.filter(c => c !== categoryName)
-        : [...prev, categoryName]
-    );
+    const newCategories = selectedCategories.includes(categoryName)
+      ? selectedCategories.filter(c => c !== categoryName)
+      : [...selectedCategories, categoryName];
+    
+    setSelectedCategories(newCategories);
+    
+    // Update URL to reflect category filter (outside of setState)
+    const categorySlug = newCategories.length === 1 ? 
+      newCategories[0].toLowerCase().replace(/\s+/g, '-') : '';
+    
+    if (categorySlug) {
+      router.push(`?category=${categorySlug}`, { scroll: false });
+    } else {
+      router.push(window.location.pathname, { scroll: false });
+    }
   };
 
-  // --- COMBINED FILTERING LOGIC ---
+  // --- CLIENT-SIDE PRICE FILTERING ONLY ---
+  // Category filtering is now handled by the API
   const filteredProducts: Product[] = useMemo(() => {
-    let filteredProducts = products;
-
-    // 1. Filter by category
-    if (selectedCategories.length > 0) {
-      filteredProducts = filteredProducts.filter(product =>
-        product.categories?.some(cat =>
-          selectedCategories.includes(cat.category.title)
-        )
-      );
-    }
-
-    // 2. Filter by price
-    filteredProducts = filteredProducts.filter(product => product.price <= priceValue);
-
-    return filteredProducts;
-  }, [products, selectedCategories, priceValue]);
+    // Only filter by price on client-side since category filtering is handled by API
+    return products.filter(product => product.price <= priceValue);
+  }, [products, priceValue]);
 
   useEffect(() => {
     setCurrentPage(1);

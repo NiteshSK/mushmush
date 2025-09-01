@@ -7,10 +7,15 @@ import Link from "next/link";
 
 export default function SignUp() {
   const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
   const router = useRouter();
 
   useEffect(() => {
-    // Check if user is already signed in
     getSession().then((session) => {
       if (session) {
         router.push("/");
@@ -29,13 +34,58 @@ export default function SignUp() {
     }
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords don't match!");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert(`Account created successfully for ${formData.email}! You can now sign in.`);
+        router.push('/auth/signin');
+      } else {
+        alert(`Error: ${data.error}`);
+      }
+    } catch (error) {
+      console.error("Sign up error:", error);
+      alert("An error occurred during registration. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
           <Link href="/">
             <Image
-              src="/images/logo/logo.svg"
+              src="/images/logo/logo.png"
               alt="MushMush"
               width={120}
               height={40}
@@ -97,7 +147,7 @@ export default function SignUp() {
             </div>
 
             {/* Email Sign Up Form */}
-            <form className="space-y-6">
+            <form className="space-y-6" onSubmit={handleSubmit}>
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                   Full name
@@ -109,6 +159,8 @@ export default function SignUp() {
                     type="text"
                     autoComplete="name"
                     required
+                    value={formData.name}
+                    onChange={handleInputChange}
                     className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     placeholder="Enter your full name"
                   />
@@ -126,6 +178,8 @@ export default function SignUp() {
                     type="email"
                     autoComplete="email"
                     required
+                    value={formData.email}
+                    onChange={handleInputChange}
                     className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     placeholder="Enter your email"
                   />
@@ -143,6 +197,8 @@ export default function SignUp() {
                     type="password"
                     autoComplete="new-password"
                     required
+                    value={formData.password}
+                    onChange={handleInputChange}
                     className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     placeholder="Create a password"
                   />
@@ -150,16 +206,18 @@ export default function SignUp() {
               </div>
 
               <div>
-                <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
                   Confirm password
                 </label>
                 <div className="mt-1">
                   <input
-                    id="confirm-password"
-                    name="confirm-password"
+                    id="confirmPassword"
+                    name="confirmPassword"
                     type="password"
                     autoComplete="new-password"
                     required
+                    value={formData.confirmPassword}
+                    onChange={handleInputChange}
                     className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     placeholder="Confirm your password"
                   />
@@ -189,9 +247,16 @@ export default function SignUp() {
               <div>
                 <button
                   type="submit"
-                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                  disabled={isLoading}
+                  className="w-full py-3 px-4 rounded-md font-medium transition-colors duration-200 disabled:opacity-50"
+                  style={{
+                    backgroundColor: '#1e40af !important',
+                    color: 'white !important',
+                    border: 'none !important',
+                    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+                  }}
                 >
-                  Create account
+                  {isLoading ? "Creating account..." : "Create account"}
                 </button>
               </div>
             </form>

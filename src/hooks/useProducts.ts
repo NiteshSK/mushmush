@@ -34,7 +34,15 @@ export function useProducts(params?: {
     }
 
     fetchProducts()
-  }, [params?.category, params?.featured, params?.inStock, params?.page, params?.limit])
+  }, [
+    params?.category, 
+    params?.featured, 
+    params?.inStock, 
+    params?.page, 
+    params?.limit,
+    // Add JSON.stringify to ensure object changes trigger re-fetch
+    JSON.stringify(params)
+  ])
 
   return { products, loading, error, pagination }
 }

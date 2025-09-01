@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { useSearch } from "@/hooks/useSearch";
 import SingleGridItem from "../Shop/SingleGridItem";
@@ -11,17 +11,40 @@ const SearchResults = () => {
   const category = searchParams.get('category') || '';
   
   const { data, loading, error, searchProducts } = useSearch();
+  const [hasSearched, setHasSearched] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (query || category) {
-      searchProducts({
-        query,
-        category,
-        page: 1,
-        limit: 12,
-      });
+    // Clear previous timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
     }
-  }, [query, category, searchProducts]);
+
+    // Only search if we have query or category and haven't searched yet
+    if ((query || category) && !hasSearched) {
+      // Debounce the search to prevent multiple calls
+      timeoutRef.current = setTimeout(() => {
+        searchProducts({
+          query,
+          category,
+          page: 1,
+          limit: 12,
+        });
+        setHasSearched(true);
+      }, 300);
+    }
+
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [query, category, searchProducts, hasSearched]);
+
+  // Reset hasSearched when query or category changes
+  useEffect(() => {
+    setHasSearched(false);
+  }, [query, category]);
 
   if (loading) {
     return (
@@ -55,17 +78,17 @@ const SearchResults = () => {
     <>
       <Breadcrumb title="Search Results" pages={["Search Results"]} />
       
-      <section className="pt-35 pb-20 lg:pt-45 lg:pb-25 xl:pt-50 xl:pb-30">
-        <div className="mx-auto max-w-c-1390 px-4 md:px-8 2xl:px-0">
+      <section className="overflow-hidden relative pb-20 pt-5 lg:pt-20 xl:pt-5 bg-[#f3f4f6]">
+        <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
           
-          {/* Search Info */}
-          <div className="mb-8">
+          {/* Search Info Header */}
+          <div className="mb-8 bg-white shadow-1 rounded-lg p-6">
             <h1 className="text-2xl font-bold text-dark mb-2">
               Search Results
             </h1>
             {query && (
               <p className="text-gray-600 mb-2">
-                Showing results for: <span className="font-semibold">"{query}"</span>
+                Showing results for: <span className="font-semibold text-blue">"{query}"</span>
               </p>
             )}
             <p className="text-gray-600">
@@ -75,13 +98,13 @@ const SearchResults = () => {
 
           {/* Results */}
           {products.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-7.5 gap-y-9">
               {products.map((product) => (
                 <SingleGridItem key={product.id} item={product} />
               ))}
             </div>
           ) : (
-            <div className="text-center py-20">
+            <div className="bg-white shadow-1 rounded-lg p-12 text-center">
               <div className="mb-6">
                 <svg
                   className="mx-auto h-24 w-24 text-gray-400"
@@ -97,7 +120,7 @@ const SearchResults = () => {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              <h3 className="text-xl font-semibold text-dark mb-2">
                 No products found
               </h3>
               <p className="text-gray-600 mb-6">
