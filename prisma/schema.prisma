@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,28 +7,26 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// User model for authentication and orders
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime?
-  image         String?
-  password      String?   // For credentials authentication
-  phone         String?
-  address       String?
-  role          UserRole  @default(CUSTOMER)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  // NextAuth.js relations
-  accounts Account[]
-  sessions Session[]
-
-  // App relations
-  orders   Order[]
-  reviews  Review[]
-  wishlist WishlistItem[]
+  id             String           @id @default(cuid())
+  email          String           @unique
+  name           String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  address        String?
+  emailVerified  DateTime?
+  image          String?
+  phone          String?
+  role           UserRole         @default(CUSTOMER)
+  password       String?
+  resetToken     String?
+  resetTokenExpiry DateTime?
+  accounts       Account[]
+  orders         Order[]
+  recentlyViewed RecentlyViewed[]
+  reviews        Review[]
+  sessions       Session[]
+  wishlist       WishlistItem[]
 
   @@map("users")
 }
@@ -42,15 +37,14 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@map("accounts")
@@ -75,117 +69,148 @@ model VerificationToken {
   @@map("verificationtokens")
 }
 
-enum UserRole {
-  CUSTOMER
-  ADMIN
-}
-
-// Category model
 model Category {
-  id          Int       @id @default(autoincrement())
-  title       String    @unique
-  slug        String    @unique
+  id          Int               @id @default(autoincrement())
+  title       String            @unique
+  slug        String            @unique
   img         String
   path        String
   description String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  
-  // Relations
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
   products    ProductCategory[]
-  
+
   @@map("categories")
 }
 
-// Product model
 model Product {
-  id               Int      @id @default(autoincrement())
+  id               Int               @id @default(autoincrement())
   title            String
-  slug             String   @unique
+  slug             String            @unique
   description      String
   price            Float
   discountedPrice  Float?
   measurementValue Int
   measurementType  String
-  inStock          Boolean  @default(true)
-  featured         Boolean  @default(false)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  
-  // JSON fields for complex data
-  imgs             Json     // {thumbnails: string[], previews: string[]}
-  specifications   Json     // string[]
-  howToConsume     Json     // string[]
-  additionalInfo   Json     // {label: string, value: string}[]
-  
-  // Relations
-  categories       ProductCategory[]
-  reviews          Review[]
+  inStock          Boolean           @default(true)
+  featured         Boolean           @default(false)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  imgs             Json
+  specifications   Json
+  howToConsume     Json
+  additionalInfo   Json
   orderItems       OrderItem[]
+  categories       ProductCategory[]
+  recentlyViewed   RecentlyViewed[]
+  reviews          Review[]
   wishlistItems    WishlistItem[]
-  
+
   @@map("products")
 }
 
-// Many-to-many relation between Product and Category
 model ProductCategory {
   id         Int      @id @default(autoincrement())
   productId  Int
   categoryId Int
-  
-  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
   @@unique([productId, categoryId])
   @@map("product_categories")
 }
 
-// Review model
 model Review {
   id        Int      @id @default(autoincrement())
-  rating    Int      // 1-5 stars
-  comment   String
-  name      String
-  role      String?
-  avatar    String?
+  rating    Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
-  // Relations
   productId Int
   userId    String?
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  user      User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
-  
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id])
+
   @@map("reviews")
 }
 
-// Order model
 model Order {
-  id          String      @id @default(cuid())
-  orderNumber String      @unique
-  userId      String?
-  status      OrderStatus @default(PENDING)
-  total       Float
-  subtotal    Float
-  tax         Float       @default(0)
-  shipping    Float       @default(0)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  
-  // Customer info
-  customerName  String
-  customerEmail String
-  customerPhone String?
-  
-  // Shipping address
-  shippingAddress Json // {street, city, state, pincode, country}
-  
-  // Relations
-  user       User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
-  orderItems OrderItem[]
-  
+  id              String      @id @default(cuid())
+  orderNumber     String      @unique
+  status          OrderStatus @default(PENDING)
+  total           Float
+  subtotal        Float
+  tax             Float       @default(0)
+  shipping        Float       @default(0)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  customerName    String
+  customerEmail   String
+  customerPhone   String?
+  shippingAddress Json
+  userId          String?
+  orderItems      OrderItem[]
+  user            User?       @relation(fields: [userId], references: [id])
+
   @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  quantity  Int
+  price     Float
+  orderId   String
+  productId Int
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("order_items")
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  userId    String
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@map("wishlist_items")
+}
+
+model RecentlyViewed {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@map("recently_viewed")
+}
+
+model BlogPost {
+  id              Int      @id @default(autoincrement())
+  title           String
+  slug            String   @unique
+  content         String
+  excerpt         String?
+  img             String
+  views           Int      @default(0)
+  published       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  metaTitle       String?
+  metaDescription String?
+
+  @@map("blog_posts")
+}
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
 }
 
 enum OrderStatus {
@@ -194,54 +219,4 @@ enum OrderStatus {
   SHIPPED
   DELIVERED
   CANCELLED
-}
-
-// Order items
-model OrderItem {
-  id        String  @id @default(cuid())
-  orderId   String
-  productId Int
-  quantity  Int
-  price     Float
-  
-  // Relations
-  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  
-  @@map("order_items")
-}
-
-// Wishlist model
-model WishlistItem {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  
-  // Relations
-  userId    String
-  productId Int
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  
-  @@unique([userId, productId])
-  @@map("wishlist_items")
-}
-
-// Blog model
-model BlogPost {
-  id          Int      @id @default(autoincrement())
-  title       String
-  slug        String   @unique
-  content     String
-  excerpt     String?
-  img         String
-  views       Int      @default(0)
-  published   Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  // SEO fields
-  metaTitle       String?
-  metaDescription String?
-  
-  @@map("blog_posts")
 }

@@ -1,6 +1,6 @@
 "use client";
 import React, { useCallback, useRef } from "react";
-import { useProducts } from "@/hooks/useProducts";
+import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import SingleItem from "@/components/Shop/SingleItem";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -8,8 +8,7 @@ import "swiper/css/navigation";
 import "swiper/css";
 
 const RecentlyViewed = () => {
-  const { products } = useProducts();
-  const recentlyViewed = products.slice(0, 8);
+  const { items: recentlyViewed, loading } = useRecentlyViewed();
 
   const sliderRef = useRef(null);
 
@@ -23,8 +22,29 @@ const RecentlyViewed = () => {
     sliderRef.current.swiper.slideNext();
   }, []);
 
+  if (loading) {
+    return (
+      <section className="overflow-hidden pt-17.5">
+        <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0 pb-15 border-b border-gray-3">
+          <div className="text-center py-10">
+            <p>Loading recently viewed products...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   if (recentlyViewed.length === 0) {
-    return null;
+    return (
+      <section className="overflow-hidden pt-17.5">
+        <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0 pb-15 border-b border-gray-3">
+          <div className="text-center py-10">
+            <h3 className="text-lg font-medium text-gray-600">No recently viewed products</h3>
+            <p className="text-sm text-gray-500 mt-2">Products you view will appear here</p>
+          </div>
+        </div>
+      </section>
+    );
   }
 
   return (
@@ -88,17 +108,21 @@ const RecentlyViewed = () => {
             ref={sliderRef}
             slidesPerView={4}
             spaceBetween={30}
-            className="justify-between"
+            className="recently-viewed-swiper"
+            loop={recentlyViewed.length > 4}
             breakpoints={{
-                0: { slidesPerView: 1 },
-                768: { slidesPerView: 2 },
-                1024: { slidesPerView: 3 },
-                1200: { slidesPerView: 4 },
+                0: { slidesPerView: 1, spaceBetween: 20 },
+                640: { slidesPerView: 2, spaceBetween: 20 },
+                768: { slidesPerView: 2, spaceBetween: 25 },
+                1024: { slidesPerView: 3, spaceBetween: 30 },
+                1200: { slidesPerView: 4, spaceBetween: 30 },
             }}
           >
             {recentlyViewed.map((item) => (
-              <SwiperSlide key={item.id}>
-                <SingleItem item={item} />
+              <SwiperSlide key={item.id} className="h-auto">
+                <div className="h-full">
+                  <SingleItem item={item.product} />
+                </div>
               </SwiperSlide>
             ))}
           </Swiper>

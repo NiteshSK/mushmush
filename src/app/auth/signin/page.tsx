@@ -156,9 +156,9 @@ export default function SignIn() {
                 />
                 <span className="ml-2 text-sm text-gray-900">Remember me</span>
               </label>
-              <a href="#" className="text-sm text-blue-600 hover:text-blue-500">
+              <Link href="/auth/forgot-password" className="text-sm text-blue-600 hover:text-blue-500">
                 Forgot password?
-              </a>
+              </Link>
             </div>
 
             <button

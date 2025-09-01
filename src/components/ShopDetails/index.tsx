@@ -9,12 +9,14 @@ import { useAppSelector } from "@/redux/store";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { addItemToCart } from "@/redux/features/cart-slice";
+import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 
 const ShopDetails = () => {
   const { openPreviewModal } = usePreviewSlider();
   const [previewImg, setPreviewImg] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("tabOne");
+  const { addToRecentlyViewed } = useRecentlyViewed();
 
   const dispatch = useDispatch();
   const router = useRouter();
@@ -61,8 +63,12 @@ const ShopDetails = () => {
   useEffect(() => {
     if (product.title) {
         localStorage.setItem("productDetails", JSON.stringify(product));
+        // Track product view in recently viewed
+        if (product.id) {
+          addToRecentlyViewed(product.id);
+        }
     }
-  }, [product]);
+  }, [product, addToRecentlyViewed]);
 
   const handlePreviewSlider = () => {
     openPreviewModal();

@@ -2,13 +2,14 @@
 import { useState, useEffect } from "react";
 import "../css/euclid-circular-a-font.css";
 import "../css/style.css";
+import "../globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { ReduxProvider } from "@/redux/provider";
 import { ModalProvider } from "../context/ModalContext";
 import { QuickViewModalProvider } from "../context/QuickViewModalContext";
 import AuthSessionProvider from "@/components/Providers/SessionProvider";
-import LoadingProvider from "../context/LoadingContext";
+import { LoadingProvider } from "../context/LoadingContext";
 import { Toaster } from "react-hot-toast";
 import { CartModalProvider } from "../context/CartSidebarModalContext";
 import { PreviewSliderProvider } from "../context/PreviewSliderContext";

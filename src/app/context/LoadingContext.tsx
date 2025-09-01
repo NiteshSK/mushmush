@@ -34,4 +34,5 @@ const LoadingProvider = ({ children }: LoadingProviderProps) => {
   );
 };
 
+export { LoadingProvider };
 export default LoadingProvider;
