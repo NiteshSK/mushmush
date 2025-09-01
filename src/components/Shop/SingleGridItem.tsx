@@ -130,7 +130,6 @@ const SingleGridItem = ({ item, priority = false }: Props) => {
       </div>
 
       <h3 className="font-medium text-dark ease-out duration-200 hover:text-blue mb-1.5">
-        {/* --- UPDATED: Link is now always active --- */}
         <Link href="/shop-details" onClick={handleNavigateToDetails}> 
           {item.title} 
         </Link>
