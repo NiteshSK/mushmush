@@ -83,11 +83,15 @@ const SingleGridItem = ({ item, priority = false }: Props) => {
           }`}
         />
         
-        {!item.inStock && (
+        {!item.inStock ? (
           <div className="absolute top-3 right-3 bg-dark text-white text-xs font-semibold px-3 py-1 rounded-full z-10">
             Out of Stock
           </div>
-        )}
+        ) : item.hasDiscount && item.discountPercentage ? (
+          <div className="absolute top-3 left-3 bg-green text-white text-xs font-semibold px-3 py-1.5 rounded-full z-10">
+            {item.discountPercentage}% OFF
+          </div>
+        ) : null}
 
         <div className={`absolute left-0 bottom-0 w-full flex items-center justify-center gap-2.5 pb-5 transition-transform duration-300 ${
             item.inStock ? 'translate-y-full group-hover:translate-y-0' : ''
@@ -136,8 +140,14 @@ const SingleGridItem = ({ item, priority = false }: Props) => {
       </h3>
 
       <span className="flex items-center gap-2 font-medium text-lg">
-        <span className="text-dark">₹{item.discountedPrice}</span>
-        <span className="text-dark-4 line-through">₹{item.price}</span>
+        {item.hasDiscount ? (
+          <>
+            <span className="text-dark">₹{item.discountedPrice}</span>
+            <span className="text-dark-4 line-through">₹{item.price}</span>
+          </>
+        ) : (
+          <span className="text-dark">₹{item.price}</span>
+        )}
       </span>
     </div>
   );

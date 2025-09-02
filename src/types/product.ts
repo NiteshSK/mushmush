@@ -7,8 +7,12 @@ export type Product = {
   discountedPrice?: number;
   measurementValue: number;
   measurementType: string;
+  quantity?: number;
   inStock: boolean;
   featured: boolean;
+  isOutOfStock?: boolean;
+  hasDiscount?: boolean;
+  discountPercentage?: number;
   imgs: {
     thumbnails: string[];
     previews: string[];
