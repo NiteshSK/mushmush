@@ -153,7 +153,6 @@ export async function POST(request: NextRequest) {
         slug,
         description,
         price,
-        discountedPrice,
         measurementValue,
         measurementType,
         inStock,
