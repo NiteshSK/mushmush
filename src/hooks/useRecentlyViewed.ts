@@ -36,10 +36,7 @@ export function useRecentlyViewed() {
   const [error, setError] = useState<string | null>(null)
 
   const fetchRecentlyViewed = async () => {
-    console.log('fetchRecentlyViewed called, session:', session?.user?.email)
-    
     if (!session?.user) {
-      console.log('No session user, setting empty items')
       setItems([])
       return
     }
@@ -48,19 +45,13 @@ export function useRecentlyViewed() {
       setLoading(true)
       setError(null)
       
-      console.log('Making GET request to /api/recently-viewed')
-      const response = await fetch('/api/recently-viewed', {
-        cache: 'no-store'
-      })
-      
-      console.log('GET Response status:', response.status)
+      const response = await fetch('/api/recently-viewed')
       
       if (!response.ok) {
         throw new Error('Failed to fetch recently viewed products')
       }
       
       const data = await response.json()
-      console.log('GET Response data:', data)
       setItems(data.items || [])
     } catch (err) {
       console.error('Recently viewed fetch error:', err)
@@ -72,35 +63,32 @@ export function useRecentlyViewed() {
   }
 
   const addToRecentlyViewed = async (productId: number): Promise<boolean> => {
-    console.log('addToRecentlyViewed called with productId:', productId)
-    console.log('Session user:', session?.user?.email)
-    
     if (!session?.user) {
-      console.log('No session user, skipping tracking')
       return false
     }
 
+    // Debounce to prevent excessive calls
+    const now = Date.now()
+    const lastCall = (window as any).lastRecentlyViewedCall || 0
+    if (now - lastCall < 1000) { // 1 second debounce
+      return false
+    }
+    (window as any).lastRecentlyViewedCall = now
+
     try {
-      console.log('Making POST request to /api/recently-viewed')
       const response = await fetch('/api/recently-viewed', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ productId }),
-        cache: 'no-store'
       })
-
-      console.log('Response status:', response.status)
-      const responseData = await response.json()
-      console.log('Response data:', responseData)
 
       if (!response.ok) {
         throw new Error('Failed to add to recently viewed')
       }
 
-      // Refresh the list after adding
-      await fetchRecentlyViewed()
+      // Don't refresh immediately to prevent query spam
       return true
     } catch (err) {
       console.error('Add to recently viewed error:', err)
@@ -110,11 +98,9 @@ export function useRecentlyViewed() {
   }
 
   useEffect(() => {
-    console.log('useRecentlyViewed useEffect triggered, session status:', session?.user?.email)
     if (session?.user) {
       fetchRecentlyViewed()
     } else {
-      console.log('No session in useEffect, setting empty items')
       setItems([])
     }
   }, [session?.user])
