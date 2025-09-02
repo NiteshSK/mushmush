@@ -160,11 +160,20 @@ const ShopDetails = () => {
         })
       });
       
-      const responseData = await response.json();
-      
       if (!response.ok) {
-        throw new Error(responseData.error || 'Failed to submit review');
+        // Handle non-JSON error responses
+        let errorMessage = 'Failed to submit review';
+        try {
+          const responseData = await response.json();
+          errorMessage = responseData.error || errorMessage;
+        } catch (jsonError) {
+          // If response is not JSON, use status text or generic message
+          errorMessage = response.statusText || `Server error (${response.status})`;
+        }
+        throw new Error(errorMessage);
       }
+      
+      const responseData = await response.json();
       
       // Reset form and refresh reviews
       setReviewForm({ rating: 5, comment: '', name: '', email: '' });
