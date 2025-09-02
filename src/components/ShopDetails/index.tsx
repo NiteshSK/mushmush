@@ -148,6 +148,12 @@ const ShopDetails = () => {
     
     try {
       setIsSubmittingReview(true);
+      console.log('Submitting review:', {
+        productId: product.id,
+        rating: reviewForm.rating,
+        comment: reviewForm.comment.trim()
+      });
+
       const response = await fetch('/api/reviews', {
         method: 'POST',
         headers: {
@@ -159,6 +165,9 @@ const ShopDetails = () => {
           comment: reviewForm.comment.trim()
         })
       });
+
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
       
       if (!response.ok) {
         // Handle non-JSON error responses
