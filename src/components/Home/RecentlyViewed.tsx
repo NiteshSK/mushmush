@@ -35,16 +35,7 @@ const RecentlyViewed = () => {
   }
 
   if (recentlyViewed.length === 0) {
-    return (
-      <section className="overflow-hidden pt-17.5">
-        <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0 pb-15 border-b border-gray-3">
-          <div className="text-center py-10">
-            <h3 className="text-lg font-medium text-gray-600">No recently viewed products</h3>
-            <p className="text-sm text-gray-500 mt-2">Products you view will appear here</p>
-          </div>
-        </div>
-      </section>
-    );
+    return null;
   }
 
   return (
