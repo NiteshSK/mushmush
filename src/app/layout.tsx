@@ -15,7 +15,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="font-euclid-circular-a">
+      <body>
         <ClientRootLayout>
           {children}
         </ClientRootLayout>
