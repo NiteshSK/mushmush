@@ -1,20 +1,23 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { Product } from "@/types/product";
 import { useModalContext } from "@/app/context/QuickViewModalContext";
 import { updateQuickView } from "@/redux/features/quickView-slice";
 import { addItemToCart } from "@/redux/features/cart-slice";
-import { addItemToWishlist } from "@/redux/features/wishlist-slice";
+import { useWishlist } from "@/app/context/WishlistContext";
 import { updateproductDetails } from "@/redux/features/product-details";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 const ProductItem = ({ item }: { item: Product }) => {
   const { openModal } = useModalContext();
-
   const dispatch = useDispatch<AppDispatch>();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const [isWishlistLoading, setIsWishlistLoading] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   // update the QuickView state
   const handleQuickViewUpdate = () => {
@@ -25,20 +28,40 @@ const ProductItem = ({ item }: { item: Product }) => {
   const handleAddToCart = () => {
     dispatch(
       addItemToCart({
-        ...item,
+        id: item.id,
+        title: item.title,
+        price: item.price,
+        discountedPrice: item.discountedPrice,
         quantity: 1,
+        imgs: item.imgs,
       })
     );
+    toast.success("Added to cart!");
   };
 
-  const handleItemToWishList = () => {
-    dispatch(
-      addItemToWishlist({
-        ...item,
-        status: "available",
-        quantity: 1,
-      })
-    );
+  const handleItemToWishList = async () => {
+    setIsWishlistLoading(true);
+    setIsAnimating(true);
+    
+    try {
+      if (isInWishlist(item.id)) {
+        const success = await removeFromWishlist(item.id);
+        if (success) {
+          toast.success("Removed from wishlist");
+        }
+      } else {
+        const success = await addToWishlist(item.id);
+        if (success) {
+          toast.success("Added to wishlist!");
+        }
+      }
+    } catch (error) {
+      toast.error("Please sign in to manage wishlist");
+    } finally {
+      setIsWishlistLoading(false);
+      // Reset animation after a delay
+      setTimeout(() => setIsAnimating(false), 600);
+    }
   };
 
   const handleProductDetails = () => {
@@ -92,9 +115,16 @@ const ProductItem = ({ item }: { item: Product }) => {
 
           <button
             onClick={() => handleItemToWishList()}
-            aria-label="button for favorite select"
+            disabled={isWishlistLoading}
+            aria-label={isInWishlist(item.id) ? "Remove from wishlist" : "Add to wishlist"}
             id="favOne"
-            className="flex items-center justify-center w-9 h-9 rounded-[5px] shadow-1 ease-out duration-200 text-dark bg-white hover:text-blue"
+            className={`flex items-center justify-center w-9 h-9 rounded-[5px] shadow-1 ease-out duration-200 transform transition-all ${
+              isInWishlist(item.id) 
+                ? "text-white bg-red hover:bg-red-dark" 
+                : "text-dark bg-white hover:text-blue"
+            } ${isWishlistLoading ? "opacity-50" : ""} ${
+              isAnimating ? "scale-125 animate-bounce" : "scale-100"
+            }`}
           >
             <svg
               className="fill-current"

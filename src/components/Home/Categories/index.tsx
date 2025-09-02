@@ -1,7 +1,7 @@
 "use client";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { useCallback, useRef, useEffect, useState } from "react";
-import data from "./categoryData";
+import { useCategories } from "@/hooks/useCategories";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -10,6 +10,7 @@ import "swiper/css/navigation";
 import "swiper/css";
 
 const Categories = () => {
+  const { categories, loading, error } = useCategories();
   const sliderRef = useRef(null);
   const [isBeginning, setIsBeginning] = useState(true);
   const [isEnd, setIsEnd] = useState(false);
@@ -40,7 +41,7 @@ const Categories = () => {
         swiperInstance.off('resize', checkSliderState); // Cleanup listener
       };
     }
-  }, [data]);
+  }, [categories]);
 
   return (
     <section className="overflow-hidden">
@@ -160,29 +161,49 @@ const Categories = () => {
               setIsEnd(swiper.isEnd);
             }}
           >
-            {data.map((category) => (
-              <SwiperSlide key={category.id}>
-                <Link href={category.path} className="group block">
+            {loading ? (
+              // Loading skeleton
+              Array.from({ length: 4 }).map((_, index) => (
+                <SwiperSlide key={`skeleton-${index}`}>
                   <div className="flex flex-col items-center gap-4 text-center">
-                    {/* FIX #1: Removed group-hover:scale-105 from this div */}
-                    <div className="relative w-full aspect-square rounded-full overflow-hidden border-2 border-gray-200/60 group-hover:border-blue-500 transition-colors duration-300">
-                      <Image
-                        src={category.img}
-                        alt={category.title}
-                        fill
-                        // FIX #1: Added scaling and transition to the Image itself
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
+                    <div className="relative w-full aspect-square rounded-full overflow-hidden border-2 border-gray-200/60 bg-gray-200 animate-pulse">
                     </div>
-                    <div>
-                      <h3 className="font-medium text-dark group-hover:text-blue transition-colors duration-300">
-                        {category.title}
-                      </h3>
-                    </div>
+                    <div className="h-4 bg-gray-200 rounded animate-pulse w-20"></div>
                   </div>
-                </Link>
-              </SwiperSlide>
-            ))}
+                </SwiperSlide>
+              ))
+            ) : error ? (
+              <div className="col-span-full text-center text-red-500 py-8">
+                Error loading categories: {error}
+              </div>
+            ) : (
+              categories.map((category) => (
+                <SwiperSlide key={category.id}>
+                  <Link href={category.path} className="group block">
+                    <div className="flex flex-col items-center gap-4 text-center">
+                      <div className="relative w-full aspect-square rounded-full overflow-hidden border-2 border-gray-200/60 group-hover:border-blue-500 transition-colors duration-300">
+                        <Image
+                          src={category.img}
+                          alt={category.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-dark group-hover:text-blue transition-colors duration-300">
+                          {category.title}
+                        </h3>
+                        {category.productCount && (
+                          <p className="text-sm text-gray-500">
+                            {category.productCount} products
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                </SwiperSlide>
+              ))
+            )}
           </Swiper>
         </div>
       </div>

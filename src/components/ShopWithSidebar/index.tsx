@@ -7,10 +7,8 @@ import Breadcrumb from "../Common/Breadcrumb";
 import SingleGridItem from "../Shop/SingleGridItem";
 import SingleListItem from "../Shop/SingleListItem";
 import CustomSelect from "../ShopWithSidebar/CustomSelect";
-import shopData from "../Shop/shopData";
+import { useProducts } from "@/hooks/useProducts";
 import { Product } from "@/types/product";
-// Removed PriceDropdown as it's now handled internally
-// Removed CategoryDropdown import as it's no longer needed here
 
 const ShopWithSidebar = () => {
   const [productStyle, setProductStyle] = useState("grid");
@@ -20,19 +18,29 @@ const ShopWithSidebar = () => {
   const [stickyMenu, setStickyMenu] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
+  const router = useRouter();
+  const dispatch = useDispatch();
+  
+  // Get initial category from URL params
+  const searchParams = useSearchParams();
+  const initialCategory = searchParams.get("category");
+  
+  // Use API filtering for categories, client-side for price
+  const { products, loading, error } = useProducts({
+    category: selectedCategories.length === 1 ? selectedCategories[0] : undefined
+  });
+
   // --- PRICE FILTER STATE ---
-  // Dynamically find the highest price from the product data to set the slider's max range
-  const maxPrice = useMemo(() => Math.ceil(Math.max(...shopData.map(p => p.price)) / 100) * 100, []);
+  const maxPrice = useMemo(() => {
+    if (products.length === 0) return 1700;
+    return Math.ceil(Math.max(...products.map(p => p.price)) / 100) * 100;
+  }, [products]);
   const [priceValue, setPriceValue] = useState<number>(maxPrice);
 
-  // Effect to reset the price slider when the component loads or maxPrice changes
   useEffect(() => {
     setPriceValue(maxPrice);
   }, [maxPrice]);
 
-
-  const router = useRouter();
-  const dispatch = useDispatch();
 
   const handleProductClick = (product: Product) => {
     dispatch(updateproductDetails(product));
@@ -40,58 +48,52 @@ const ShopWithSidebar = () => {
   };
 
   const categoriesWithCounts = useMemo(() => {
-    const categoryCount: { [key: string]: number } = {};
-    shopData.forEach(product => {
-      product.category?.forEach(cat => {
-        const capitalizedCat = cat.charAt(0).toUpperCase() + cat.slice(1);
-        categoryCount[capitalizedCat] = (categoryCount[capitalizedCat] || 0) + 1;
+    const map: Record<string, { name: string; slug: string; products: number }> = {};
+    products.forEach(product => {
+      product.categories?.forEach(cat => {
+        const title = cat.category.title;
+        const slug = cat.category.slug;
+        if (!map[slug]) {
+          map[slug] = { name: title, slug, products: 0 };
+        }
+        map[slug].products += 1;
       });
     });
-    return Object.entries(categoryCount).map(([name, count]) => ({
-      name: name,
-      products: count,
-    }));
-  }, []);
-
-  const searchParams = useSearchParams();
-  const initialCategory = searchParams.get("category");
+    return Object.values(map);
+  }, [products]);
 
   useEffect(() => {
     if (initialCategory) {
-      const capitalizedInitialCat = initialCategory.charAt(0).toUpperCase() + initialCategory.slice(1);
-      setSelectedCategories([capitalizedInitialCat]);
+      const exists = categoriesWithCounts.some(cat => cat.slug === initialCategory);
+      setSelectedCategories(exists ? [initialCategory] : []);
     } else {
       setSelectedCategories([]);
     }
-  }, [initialCategory]);
+  }, [initialCategory, categoriesWithCounts]);
 
-  const handleCategoryChange = (categoryName: string) => {
-    setSelectedCategories(prev =>
-      prev.includes(categoryName)
-        ? prev.filter(c => c !== categoryName)
-        : [...prev, categoryName]
-    );
+  const handleCategoryChange = (categorySlug: string) => {
+    const newCategories = selectedCategories.includes(categorySlug)
+      ? selectedCategories.filter(c => c !== categorySlug)
+      : [...selectedCategories, categorySlug];
+
+    setSelectedCategories(newCategories);
+
+    // Update URL to reflect category filter using slug
+    const singleSlug = newCategories.length === 1 ? newCategories[0] : '';
+
+    if (singleSlug) {
+      router.push(`?category=${singleSlug}`, { scroll: false });
+    } else {
+      router.push(window.location.pathname, { scroll: false });
+    }
   };
 
-  // --- COMBINED FILTERING LOGIC ---
+  // --- CLIENT-SIDE PRICE FILTERING ONLY ---
+  // Category filtering is now handled by the API
   const filteredProducts: Product[] = useMemo(() => {
-    let products = shopData;
-
-    // 1. Filter by category
-    if (selectedCategories.length > 0) {
-      const lowerCaseSelected = selectedCategories.map(c => c.toLowerCase().trim());
-      products = products.filter(product =>
-        product.category?.some(cat =>
-          lowerCaseSelected.includes(cat.toLowerCase().trim())
-        )
-      );
-    }
-
-    // 2. Filter by price on the result of the category filter
-    products = products.filter(product => product.discountedPrice <= priceValue);
-
-    return products;
-  }, [selectedCategories, priceValue]); // Re-run when either categories or price changes
+    // Only filter by price on client-side since category filtering is handled by API
+    return products.filter(product => product.price <= priceValue);
+  }, [products, priceValue]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -114,90 +116,168 @@ const ShopWithSidebar = () => {
     { label: "Old Products", value: "2" },
   ];
 
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-20">
+        <p className="text-red-600">Error loading products: {error}</p>
+      </div>
+    );
+  }
+
   return (
     <>
       <Breadcrumb
         title={"Explore All Products"}
         pages={["shop", "/", "shop with sidebar"]}
       />
-      <section className="overflow-hidden relative pb-20 pt-5 lg:pt-20 xl:pt-5 bg-[#f3f4f6]">
+      <section className="overflow-hidden relative pb-4 pt-5 lg:pt-10 xl:pt-2 bg-[#f3f4f6]">
+        {/* Mobile sidebar overlay */}
+        {productSidebar && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-9998 lg:hidden"
+            onClick={() => setProductSidebar(false)}
+          />
+        )}
+
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
+
           <div className="flex gap-7.5">
+            {/* Sidebar */}
             <div
-              className={`sidebar-content fixed xl:z-1 z-9999 left-0 top-0 xl:translate-x-0 xl:static max-w-[310px] xl:max-w-[270px] w-full ease-out duration-200 ${
+              className={`sidebar-content fixed lg:z-1 z-9999 left-0 top-0 lg:translate-x-0 lg:static w-full lg:w-[270px] lg:flex-none lg:shrink-0 ease-out duration-200 ${
                 productSidebar ? "translate-x-0 bg-white p-5 h-screen overflow-y-auto" : "-translate-x-full"
               }`}
             >
-              <form onSubmit={(e) => e.preventDefault()}>
-                <div className="flex flex-col gap-6">
-                  <div className="bg-white shadow-1 rounded-lg py-4 px-5">
-                    <div className="flex items-center justify-between">
-                      <p>Filters:</p>
-                      <button onClick={() => {
+              <div className="lg:hidden flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-dark">Filters</h3>
+                <button
+                  onClick={() => setProductSidebar(false)}
+                  className="p-2 hover:bg-gray-100 rounded"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="space-y-6">
+                {/* Filters header card inside sidebar */}
+                <div className="bg-white shadow-1 rounded-lg py-4 px-5">
+                  <div className="flex items-center justify-between">
+                    <p>Filters:</p>
+                    <button
+                      onClick={() => {
                         setSelectedCategories([]);
                         setPriceValue(maxPrice);
-                      }} className="text-blue">Clean All</button>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-white shadow-1 rounded-lg p-5">
-                    <h4 className="font-semibold text-lg text-dark mb-5">Category</h4>
-                    <div className="flex flex-col gap-4">
-                      {categoriesWithCounts.map((category) => (
-                        <div key={category.name} className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <input
-                              type="checkbox"
-                              id={`category-${category.name}`}
-                              checked={selectedCategories.includes(category.name)}
-                              onChange={() => handleCategoryChange(category.name)}
-                              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-                            />
-                            <label htmlFor={`category-${category.name}`} className="cursor-pointer text-base text-dark">
-                              {category.name}
-                            </label>
-                          </div>
-                          <span className="text-sm text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                            {category.products}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="bg-white shadow-1 rounded-lg p-5">
-                    <h4 className="font-semibold text-lg text-dark mb-4">Price</h4>
-                    <input
-                      type="range"
-                      min="0"
-                      max={maxPrice}
-                      value={priceValue}
-                      onChange={(e) => setPriceValue(Number(e.target.value))}
-                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
-                    />
-                    <div className="flex items-center justify-between mt-2">
-                      <span className="text-sm text-dark font-medium">₹0</span>
-                      <span className="text-sm text-dark font-medium">₹{priceValue}</span>
-                    </div>
+                        setCurrentPage(1);
+                        // Remove category query param so effect doesn't re-apply it
+                        if (typeof window !== 'undefined') {
+                          router.push(window.location.pathname, { scroll: false });
+                        }
+                      }}
+                      className="text-blue"
+                    >
+                      Clean All
+                    </button>
                   </div>
                 </div>
-              </form>
+                <div className="bg-white shadow-1 rounded-lg p-5">
+                  <h4 className="font-semibold text-lg text-dark mb-5">Category</h4>
+                  <div className="flex flex-col gap-4">
+                    {categoriesWithCounts.map((category) => (
+                      <div key={category.slug} className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="checkbox"
+                            id={`category-${category.slug}`}
+                            checked={selectedCategories.includes(category.slug)}
+                            onChange={() => handleCategoryChange(category.slug)}
+                            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                          />
+                          <label htmlFor={`category-${category.slug}`} className="cursor-pointer text-base text-dark">
+                            {category.name}
+                          </label>
+                        </div>
+                        <span className="text-sm text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                          {category.products}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-white shadow-1 rounded-lg p-5">
+                  <h4 className="font-semibold text-lg text-dark mb-4">Price</h4>
+                  <input
+                    type="range"
+                    min="0"
+                    max={maxPrice}
+                    value={priceValue}
+                    onChange={(e) => setPriceValue(Number(e.target.value))}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                  />
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="text-sm text-dark font-medium">₹0</span>
+                    <span className="text-sm text-dark font-medium">₹{priceValue}</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="xl:max-w-[870px] w-full">
-              <div className="rounded-lg bg-white shadow-1 pl-3 pr-2.5 py-2.5 mb-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex flex-wrap items-center gap-4">
-                    <CustomSelect options={options} />
-                    <p>
-                      Showing{" "}
-                      <span className="text-dark">
-                        {currentProducts.length} of {filteredProducts.length}
-                      </span>{" "}
-                      Products
-                    </p>
-                  </div>
-                  {/* Grid/List view buttons would go here */}
+            {/* Main content area */}
+            <div className="w-full lg:flex-1">
+              <button
+                onClick={() => setProductSidebar(!productSidebar)}
+                className="lg:hidden flex items-center gap-2 text-dark hover:text-blue mb-4 bg-white px-4 py-2 rounded-lg shadow-1"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+                Show Filters
+              </button>
+
+              {/* Compact header with sort and count */}
+              <div className="rounded-lg bg-white shadow-1 pl-3 pr-2.5 py-2.5 mb-6 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <CustomSelect options={options} />
+                  <p>
+                    Showing {" "}
+                    <span className="text-dark">
+                      {currentProducts.length} of {filteredProducts.length}
+                    </span>{" "}
+                    Products
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setProductStyle("grid")}
+                    className={`p-2 rounded ${
+                      productStyle === "grid" ? "bg-blue text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
+                  >
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => setProductStyle("list")}
+                    className={`p-2 rounded ${
+                      productStyle === "list" ? "bg-blue text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
+                  >
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+                    </svg>
+                  </button>
                 </div>
               </div>
 
@@ -236,9 +316,11 @@ const ShopWithSidebar = () => {
                           aria-label="button for previous page"
                           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                           disabled={currentPage === 1}
-                          className="flex items-center justify-center w-8 h-9 ease-out duration-200 rounded-[3px] disabled:text-gray-4 disabled:cursor-not-allowed"
+                          className="flex items-center justify-center w-8 h-9 ease-out duration-200 rounded-[3px] disabled:text-gray-4 disabled:cursor-not-allowed hover:text-white hover:bg-blue"
                         >
-                         {/* SVG for previous page */}
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                          </svg>
                         </button>
                       </li>
                       {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNumber) => (
@@ -260,7 +342,9 @@ const ShopWithSidebar = () => {
                           disabled={currentPage === totalPages}
                           className="flex items-center justify-center w-8 h-9 ease-out duration-200 rounded-[3px] hover:text-white hover:bg-blue disabled:text-gray-4 disabled:cursor-not-allowed"
                         >
-                          {/* SVG for next page */}
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
                         </button>
                       </li>
                     </ul>

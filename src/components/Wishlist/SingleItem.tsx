@@ -1,24 +1,31 @@
 import React from "react";
 import { AppDispatch } from "@/redux/store";
 import { useDispatch } from "react-redux";
-
-import { removeItemFromWishlist } from "@/redux/features/wishlist-slice";
 import { addItemToCart } from "@/redux/features/cart-slice";
-
+import { Product } from "@/types/product";
 import Image from "next/image";
 
-const SingleItem = ({ item }) => {
+interface SingleItemProps {
+  item: Product;
+  onRemoveFromWishlist: (productId: number) => Promise<boolean>;
+}
+
+const SingleItem = ({ item, onRemoveFromWishlist }: SingleItemProps) => {
   const dispatch = useDispatch<AppDispatch>();
 
-  const handleRemoveFromWishlist = () => {
-    dispatch(removeItemFromWishlist(item.id));
+  const handleRemoveFromWishlist = async () => {
+    await onRemoveFromWishlist(item.id);
   };
 
   const handleAddToCart = () => {
     dispatch(
       addItemToCart({
-        ...item,
+        id: item.id,
+        title: item.title,
+        price: item.price,
+        discountedPrice: item.discountedPrice,
         quantity: 1,
+        imgs: item.imgs,
       })
     );
   };

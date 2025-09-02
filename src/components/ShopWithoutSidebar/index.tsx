@@ -1,11 +1,11 @@
 "use client";
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Breadcrumb from "../Common/Breadcrumb";
 import SingleGridItem from "../Shop/SingleGridItem";
 import SingleListItem from "../Shop/SingleListItem";
 import CustomSelect from "../ShopWithSidebar/CustomSelect";
-import shopData from "../Shop/shopData";
+import { useProducts } from "@/hooks/useProducts";
 import { Product } from "@/types/product";
 
 const ShopWithoutSidebar = () => {
@@ -17,33 +17,17 @@ const ShopWithoutSidebar = () => {
   const searchParams = useSearchParams();
   const category = searchParams.get("category");
 
-  // Filter products based on the category from the URL
-  // useMemo is used for performance, so the filtering only re-runs when the category changes.
-  const filteredProducts: Product[] = useMemo(() => {
-    // If there's no category in the URL, return all products
-    if (!category) {
-      return shopData;
-    }
-    // Otherwise, filter the products where the product's category array includes the URL category
-    return shopData.filter((product) =>
-      product.category?.includes(category.toLowerCase())
-    );
-  }, [category]);
+  // Use the products hook with dynamic data
+  const { products, loading, error, pagination } = useProducts({
+    category: category || undefined,
+    page: currentPage,
+    limit: productsPerPage
+  });
 
-  // Reset to the first page whenever the category changes to avoid being on an empty page
+  // Reset to the first page whenever the category changes
   useEffect(() => {
     setCurrentPage(1);
   }, [category]);
-
-
-  // --- PAGINATION LOGIC (now uses the filtered product list) ---
-  const indexOfLastProduct = currentPage * productsPerPage;
-  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = filteredProducts.slice(
-    indexOfFirstProduct,
-    indexOfLastProduct
-  );
-  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
   // --- END OF PAGINATION LOGIC ---
 
   const options = [
@@ -58,7 +42,7 @@ const ShopWithoutSidebar = () => {
         title={"Explore All Products"}
         pages={["shop", "/", "shop without sidebar"]}
       />
-      <section className="overflow-hidden relative pb-20 pt-5 lg:pt-20 xl:pt-5 bg-[#f3f4f6]">
+      <section className="overflow-hidden relative pb-4 pt-5 lg:pt-10 xl:pt-2 bg-[#f3f4f6]">
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
           <div className="flex gap-7.5">
             <div className="w-full">
@@ -70,7 +54,7 @@ const ShopWithoutSidebar = () => {
                     <p>
                       Showing{" "}
                       <span className="text-dark">
-                        {currentProducts.length} of {filteredProducts.length}
+                        {products.length} of {pagination.total}
                       </span>{" "}
                       Products
                     </p>
@@ -132,29 +116,45 @@ const ShopWithoutSidebar = () => {
               </div>
 
               {/* Product Grid / List */}
-              <div
-                className={`${
-                  productStyle === "grid"
-                    ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-7.5 gap-y-9"
-                    : "flex flex-col gap-7.5"
-                }`}
-              >
-                {currentProducts.map((item, index) =>
-                  productStyle === "grid" ? (
-                    <SingleGridItem
-                      item={item}
-                      key={item.id}
-                      priority={index < 4}
-                    />
-                  ) : (
-                    <SingleListItem
-                      item={item}
-                      key={item.id}
-                      priority={index < 2}
-                    />
-                  )
-                )}
-              </div>
+              {loading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-7.5 gap-y-9">
+                  {Array.from({ length: 8 }).map((_, index) => (
+                    <div key={index} className="bg-white rounded-lg p-4 animate-pulse">
+                      <div className="w-full h-48 bg-gray-200 rounded mb-4"></div>
+                      <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                    </div>
+                  ))}
+                </div>
+              ) : error ? (
+                <div className="text-center text-red-500 py-8">
+                  Error loading products: {error}
+                </div>
+              ) : (
+                <div
+                  className={`${
+                    productStyle === "grid"
+                      ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-7.5 gap-y-9"
+                      : "flex flex-col gap-7.5"
+                  }`}
+                >
+                  {products.map((item, index) =>
+                    productStyle === "grid" ? (
+                      <SingleGridItem
+                        item={item}
+                        key={item.id}
+                        priority={index < 4}
+                      />
+                    ) : (
+                      <SingleListItem
+                        item={item}
+                        key={item.id}
+                        priority={index < 2}
+                      />
+                    )
+                  )}
+                </div>
+              )}
 
               {/* Pagination Controls */}
               <div className="flex justify-center mt-15">
@@ -184,7 +184,7 @@ const ShopWithoutSidebar = () => {
                         </svg>
                       </button>
                     </li>
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                    {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(
                       (pageNumber) => (
                         <li key={pageNumber}>
                           <button
@@ -205,10 +205,10 @@ const ShopWithoutSidebar = () => {
                         aria-label="button for next page"
                         onClick={() =>
                           setCurrentPage((prev) =>
-                            Math.min(prev + 1, totalPages)
+                            Math.min(prev + 1, pagination.totalPages)
                           )
                         }
-                        disabled={currentPage === totalPages}
+                        disabled={currentPage === pagination.totalPages}
                         className="flex items-center justify-center w-8 h-9 ease-out duration-200 rounded-[3px] hover:text-white hover:bg-blue disabled:text-gray-4 disabled:cursor-not-allowed"
                       >
                         <svg

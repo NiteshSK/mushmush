@@ -1,13 +1,15 @@
 "use client";
 import React, { useCallback, useRef } from "react";
-import shopData from "@/components/Shop/shopData";
+import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import SingleItem from "@/components/Shop/SingleItem";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css/navigation";
 import "swiper/css";
 
-const RecentlyViewdItems = () => {
+const RecentlyViewedItems = () => {
+  const { items: recentlyViewed, loading } = useRecentlyViewed();
+
   const sliderRef = useRef(null);
 
   const handlePrev = useCallback(() => {
@@ -77,27 +79,38 @@ const RecentlyViewdItems = () => {
             </div>
           </div>
 
-          <Swiper
-            ref={sliderRef}
-            slidesPerView={4}
-            spaceBetween={30}
-            className="justify-between"
-            breakpoints={{
-                0: { slidesPerView: 1 },
-                768: { slidesPerView: 2 },
-                1024: { slidesPerView: 3 },
-            }}
-          >
-            {shopData.map((item) => (
-              <SwiperSlide key={item.id}>
-                <SingleItem item={item} />
-              </SwiperSlide>
-            ))}
-          </Swiper>
+          {loading ? (
+            <div className="text-center py-10">
+              <p>Loading recently viewed products...</p>
+            </div>
+          ) : recentlyViewed.length === 0 ? (
+            <div className="text-center py-10">
+              <h3 className="text-lg font-medium text-gray-600">No recently viewed products</h3>
+              <p className="text-sm text-gray-500 mt-2">Products you view will appear here</p>
+            </div>
+          ) : (
+            <Swiper
+              ref={sliderRef}
+              slidesPerView={4}
+              spaceBetween={30}
+              className="justify-between"
+              breakpoints={{
+                  0: { slidesPerView: 1 },
+                  768: { slidesPerView: 2 },
+                  1024: { slidesPerView: 3 },
+              }}
+            >
+              {recentlyViewed.map((item) => (
+                <SwiperSlide key={item.id}>
+                  <SingleItem item={item.product} />
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          )}
         </div>
       </div>
     </section>
   );
 };
 
-export default RecentlyViewdItems;
+export default RecentlyViewedItems;
