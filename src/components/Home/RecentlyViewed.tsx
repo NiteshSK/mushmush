@@ -108,21 +108,16 @@ const RecentlyViewed = () => {
             ref={sliderRef}
             slidesPerView={4}
             spaceBetween={30}
-            className="recently-viewed-swiper"
-            loop={recentlyViewed.length > 4}
+            className="justify-between"
             breakpoints={{
-                0: { slidesPerView: 1, spaceBetween: 20 },
-                640: { slidesPerView: 2, spaceBetween: 20 },
-                768: { slidesPerView: 2, spaceBetween: 25 },
-                1024: { slidesPerView: 3, spaceBetween: 30 },
-                1200: { slidesPerView: 4, spaceBetween: 30 },
+              0: { slidesPerView: 1 },
+              768: { slidesPerView: 2 },
+              1024: { slidesPerView: 3 },
             }}
           >
             {recentlyViewed.map((item) => (
-              <SwiperSlide key={item.id} className="h-auto">
-                <div className="h-full">
-                  <SingleItem item={item.product} />
-                </div>
+              <SwiperSlide key={item.id}>
+                <SingleItem item={item.product} />
               </SwiperSlide>
             ))}
           </Swiper>

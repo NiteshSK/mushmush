@@ -63,13 +63,13 @@ const SingleItem = ({ item }: { item: Product }) => {
   return (
     <div className="group flex flex-col h-full bg-white rounded-lg shadow-1 overflow-hidden transition-shadow duration-300 hover:shadow-2">
       {/* Product Image */}
-      <div className="relative w-full h-48 overflow-hidden">
+      <div className="relative w-full aspect-square overflow-hidden bg-gray-1">
         <Link href="/shop-details" onClick={handleNavigateToDetails} className="block w-full h-full">
           <Image
             src={item.imgs.previews[0]}
             alt={item.title}
             fill
-            className={`object-cover transition-transform duration-300 group-hover:scale-105 ${
+            className={`object-contain transition-transform duration-300 group-hover:scale-105 ${
               !item.inStock ? "grayscale" : ""
             }`}
           />

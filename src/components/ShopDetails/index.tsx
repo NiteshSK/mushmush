@@ -11,6 +11,36 @@ import { useRouter } from "next/navigation";
 import { addItemToCart } from "@/redux/features/cart-slice";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 
+interface ProductDetails {
+  id?: number;
+  title?: string;
+  price?: number;
+  discountedPrice?: number;
+  inStock?: boolean;
+  imgs?: {
+    previews: string[];
+    thumbnails: string[];
+  };
+  measurement?: {
+    value: number;
+    type: string;
+  };
+  description?: string;
+  specifications?: string[];
+  howToConsume?: string[];
+  additionalInfo?: Array<{
+    label: string;
+    value: string;
+  }>;
+  reviewsList?: Array<{
+    name: string;
+    avatar?: string;
+    role?: string;
+    rating: number;
+    comment: string;
+  }>;
+}
+
 const ShopDetails = () => {
   const { openPreviewModal } = usePreviewSlider();
   const [previewImg, setPreviewImg] = useState(0);
@@ -28,8 +58,8 @@ const ShopDetails = () => {
     dispatch(
       addItemToCart({
         id: displayProduct.id,
-        title: displayProduct.title,
-        price: displayProduct.price,
+        title: displayProduct.title || "",
+        price: displayProduct.price || 0,
         discountedPrice: displayProduct.discountedPrice,
         quantity: quantity, // Use the state for quantity
         imgs: displayProduct.imgs,
@@ -46,17 +76,26 @@ const ShopDetails = () => {
     { id: "tabThree", title: "Reviews" },
   ];
 
-  const alreadyExist = typeof window !== 'undefined' ? localStorage.getItem("productDetails") : null;
+  const [product, setProduct] = useState<ProductDetails>({});
+  const [isClient, setIsClient] = useState(false);
+  
   const productFromStorage = useAppSelector(
     (state) => state.productDetailsReducer.value
   );
 
-  const product =
-    productFromStorage && productFromStorage.title
-      ? productFromStorage
-      : alreadyExist
-      ? JSON.parse(alreadyExist)
-      : {};
+  useEffect(() => {
+    setIsClient(true);
+    const alreadyExist = localStorage.getItem("productDetails");
+    
+    const resolvedProduct =
+      productFromStorage && productFromStorage.title
+        ? productFromStorage
+        : alreadyExist
+        ? JSON.parse(alreadyExist)
+        : {};
+    
+    setProduct(resolvedProduct);
+  }, [productFromStorage]);
 
   const displayProduct = product;
 
