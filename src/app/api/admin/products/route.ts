@@ -19,8 +19,10 @@ export async function GET() {
         discounts: {
           where: {
             isActive: true,
-            startDate: { lte: new Date() },
-            endDate: { gte: new Date() }
+            OR: [
+              { endDate: null },
+              { endDate: { gte: new Date() } }
+            ]
           }
         },
         reviews: true,

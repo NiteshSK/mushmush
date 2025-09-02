@@ -22,6 +22,8 @@ const ProductInventoryTable: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<number | null>(null);
+  const [editingPrice, setEditingPrice] = useState<number | null>(null);
+  const [newPrice, setNewPrice] = useState<string>('');
 
   useEffect(() => {
     fetchProducts();
@@ -46,19 +48,18 @@ const ProductInventoryTable: React.FC = () => {
   const toggleStock = async (productId: number, currentStock: boolean) => {
     setUpdating(productId);
     try {
-      const response = await fetch('/api/admin/products', {
+      const response = await fetch(`/api/admin/products/${productId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          productId,
-          inStock: !currentStock,
+          field: 'inStock',
+          value: !currentStock,
         }),
       });
 
       if (response.ok) {
-        const result = await response.json();
         setProducts(prev =>
           prev.map(product =>
             product.id === productId
@@ -66,7 +67,7 @@ const ProductInventoryTable: React.FC = () => {
               : product
           )
         );
-        toast.success(result.message);
+        toast.success(`Product ${!currentStock ? 'marked in stock' : 'marked out of stock'}`);
       } else {
         toast.error('Failed to update product stock');
       }
@@ -75,6 +76,56 @@ const ProductInventoryTable: React.FC = () => {
     } finally {
       setUpdating(null);
     }
+  };
+
+  const updatePrice = async (productId: number, price: string) => {
+    if (!price || isNaN(parseFloat(price))) {
+      toast.error('Please enter a valid price');
+      return;
+    }
+
+    setUpdating(productId);
+    try {
+      const response = await fetch(`/api/admin/products/${productId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          field: 'price',
+          value: parseFloat(price),
+        }),
+      });
+
+      if (response.ok) {
+        setProducts(prev =>
+          prev.map(product =>
+            product.id === productId
+              ? { ...product, price: parseFloat(price) }
+              : product
+          )
+        );
+        toast.success('Product price updated successfully');
+        setEditingPrice(null);
+        setNewPrice('');
+      } else {
+        toast.error('Failed to update product price');
+      }
+    } catch (error) {
+      toast.error('Error updating product price');
+    } finally {
+      setUpdating(null);
+    }
+  };
+
+  const startEditingPrice = (productId: number, currentPrice: number) => {
+    setEditingPrice(productId);
+    setNewPrice(currentPrice.toString());
+  };
+
+  const cancelEditingPrice = () => {
+    setEditingPrice(null);
+    setNewPrice('');
   };
 
   if (loading) {
@@ -154,9 +205,44 @@ const ProductInventoryTable: React.FC = () => {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-dark">
-                    ₹{product.price}
-                  </div>
+                  {editingPrice === product.id ? (
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="number"
+                        value={newPrice}
+                        onChange={(e) => setNewPrice(e.target.value)}
+                        className="w-20 px-2 py-1 text-sm border border-gray-3 rounded focus:outline-none focus:ring-2 focus:ring-blue"
+                        step="0.01"
+                        min="0"
+                      />
+                      <button
+                        onClick={() => updatePrice(product.id, newPrice)}
+                        disabled={updating === product.id}
+                        className="px-2 py-1 text-xs bg-green text-white rounded hover:bg-green-dark disabled:opacity-50"
+                      >
+                        ✓
+                      </button>
+                      <button
+                        onClick={cancelEditingPrice}
+                        className="px-2 py-1 text-xs bg-gray-5 text-white rounded hover:bg-gray-6"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                      <div className="text-sm font-medium text-dark">
+                        ₹{product.price}
+                      </div>
+                      <button
+                        onClick={() => startEditingPrice(product.id, product.price)}
+                        className="text-xs text-blue hover:text-blue-dark"
+                        title="Edit price"
+                      >
+                        ✏️
+                      </button>
+                    </div>
+                  )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-6">
