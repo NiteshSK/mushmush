@@ -101,11 +101,15 @@ const SingleItem = ({ item }: { item: Product }) => {
           </svg>
         </button>
         
-        {!item.inStock && (
+        {!item.inStock ? (
           <div className="absolute top-3 left-3 bg-dark text-white text-xs font-semibold px-3 py-1.5 rounded-full z-10">
             Out of Stock
           </div>
-        )}
+        ) : item.hasDiscount && item.discountPercentage ? (
+          <div className="absolute top-3 left-3 bg-green text-white text-xs font-semibold px-3 py-1.5 rounded-full z-10">
+            {item.discountPercentage}% OFF
+          </div>
+        ) : null}
       </div>
 
       {/* Content container */}
@@ -128,8 +132,14 @@ const SingleItem = ({ item }: { item: Product }) => {
 
         <div className="flex items-center justify-between mt-auto pt-2">
             <span className="flex items-center gap-2 font-medium text-lg">
-                <span className="text-dark">₹{item.discountedPrice}</span>
-                <span className="text-dark-4 line-through text-sm">₹{item.price}</span>
+                {item.hasDiscount ? (
+                  <>
+                    <span className="text-dark">₹{item.discountedPrice}</span>
+                    <span className="text-dark-4 line-through text-sm">₹{item.price}</span>
+                  </>
+                ) : (
+                  <span className="text-dark">₹{item.price}</span>
+                )}
             </span>
 
             {item.inStock ? (

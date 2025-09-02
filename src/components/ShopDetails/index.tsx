@@ -17,6 +17,8 @@ interface ProductDetails {
   price?: number;
   discountedPrice?: number;
   inStock?: boolean;
+  discountPercentage?: number;
+  hasDiscount?: boolean;
   imgs?: {
     previews: string[];
     thumbnails: string[];
@@ -84,6 +86,7 @@ const ShopDetails = () => {
   const [comment, setComment] = useState('');
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [productLoading, setProductLoading] = useState(false);
   
   const productFromStorage = useAppSelector(
     (state) => state.productDetailsReducer.value
@@ -101,7 +104,51 @@ const ShopDetails = () => {
         : {};
     
     setProduct(resolvedProduct);
+    
+    // Fetch fresh product data with discount information if we have a product ID
+    if (resolvedProduct.id) {
+      fetchProductWithDiscounts(resolvedProduct.id);
+    }
   }, [productFromStorage]);
+
+  const fetchProductWithDiscounts = async (productId: number) => {
+    try {
+      setProductLoading(true);
+      const response = await fetch(`/api/products?id=${productId}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch product');
+      }
+      
+      const data = await response.json();
+      
+      // Find the specific product from the response
+      const productWithDiscounts = data.products?.find((p: any) => p.id === productId);
+      
+      if (productWithDiscounts) {
+        // Merge the fresh data with existing product data, preserving structure
+        const updatedProduct = {
+          ...product,
+          ...productWithDiscounts,
+          discountPercentage: productWithDiscounts.discountPercentage,
+          hasDiscount: productWithDiscounts.hasDiscount,
+          discountedPrice: productWithDiscounts.discountedPrice,
+          // Preserve measurement structure
+          measurement: productWithDiscounts.measurementValue && productWithDiscounts.measurementType ? {
+            value: productWithDiscounts.measurementValue,
+            type: productWithDiscounts.measurementType
+          } : product.measurement
+        };
+        
+        setProduct(updatedProduct);
+        localStorage.setItem("productDetails", JSON.stringify(updatedProduct));
+      }
+    } catch (error) {
+      console.error('Error fetching product with discounts:', error);
+    } finally {
+      setProductLoading(false);
+    }
+  };
 
   // Fetch reviews when product changes
   useEffect(() => {
@@ -280,9 +327,11 @@ const ShopDetails = () => {
                     <h2 className="font-semibold text-xl sm:text-2xl xl:text-custom-3 text-dark">
                       {displayProduct.title}
                     </h2>
-                    <div className="inline-flex font-medium text-custom-sm text-white bg-blue rounded py-0.5 px-2.5">
-                      10% OFF
-                    </div>
+                    {displayProduct.hasDiscount && displayProduct.discountPercentage && (
+                      <div className="inline-flex font-medium text-custom-sm text-white bg-blue rounded py-0.5 px-2.5">
+                        {displayProduct.discountPercentage}% OFF
+                      </div>
+                    )}
                   </div>
                   <div className="flex flex-wrap items-center gap-5.5 mb-4.5">
                     <div className="flex items-center gap-2.5">

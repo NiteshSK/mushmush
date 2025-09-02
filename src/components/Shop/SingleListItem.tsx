@@ -78,11 +78,15 @@ const SingleListItem = ({ item, priority = false }: Props) => {
             !item.inStock ? "grayscale" : ""
           }`}
         />
-        {!item.inStock && (
+        {!item.inStock ? (
             <div className="absolute top-2 right-2 bg-dark text-white text-xs font-semibold px-3 py-1 rounded-full z-10">
                 Out of Stock
             </div>
-        )}
+        ) : item.hasDiscount && item.discountPercentage ? (
+          <div className="absolute top-2 left-2 bg-green text-white text-xs font-semibold px-3 py-1 rounded-full z-10">
+            {item.discountPercentage}% OFF
+          </div>
+        ) : null}
       </div>
 
       <div className="w-3/4">
@@ -104,8 +108,14 @@ const SingleListItem = ({ item, priority = false }: Props) => {
         
         <div className="flex items-center justify-between">
             <span className="flex items-center gap-2 font-medium text-xl">
-                <span className="text-dark">₹{item.discountedPrice}</span>
-                <span className="text-dark-4 line-through">₹{item.price}</span>
+                {item.hasDiscount ? (
+                  <>
+                    <span className="text-dark">₹{item.discountedPrice}</span>
+                    <span className="text-dark-4 line-through">₹{item.price}</span>
+                  </>
+                ) : (
+                  <span className="text-dark">₹{item.price}</span>
+                )}
             </span>
             
             <div className="flex items-center gap-2">

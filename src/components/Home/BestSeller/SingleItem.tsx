@@ -65,12 +65,15 @@ const SingleItem = ({ item }: { item: Product }) => {
     <div className="group">
       <div className="relative overflow-hidden rounded-lg bg-[#F6F7FB] min-h-[403px]">
         
-        {/* --- UPDATED: "Out of Stock" Badge --- */}
-        {!item.inStock && (
+        {!item.inStock ? (
           <div className="absolute top-4 right-4 bg-dark text-white text-xs font-semibold px-3 py-1.5 rounded-full z-10">
             Out of Stock
           </div>
-        )}
+        ) : item.hasDiscount && item.discountPercentage ? (
+          <div className="absolute top-4 left-4 bg-green text-white text-xs font-semibold px-3 py-1.5 rounded-full z-10">
+            {item.discountPercentage}% OFF
+          </div>
+        ) : null}
 
         <div className="text-center px-4 py-7.5">
           <div className="flex items-center justify-center gap-2.5 mb-2">
@@ -95,8 +98,14 @@ const SingleItem = ({ item }: { item: Product }) => {
           </h3>
 
           <span className="flex items-center justify-center gap-2 font-medium text-lg">
-            <span className="text-dark">₹{item.discountedPrice}</span>
-            <span className="text-dark-4 line-through">₹{item.price}</span>
+            {item.hasDiscount ? (
+              <>
+                <span className="text-dark">₹{item.discountedPrice}</span>
+                <span className="text-dark-4 line-through">₹{item.price}</span>
+              </>
+            ) : (
+              <span className="text-dark">₹{item.price}</span>
+            )}
           </span>
         </div>
 

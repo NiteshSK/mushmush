@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
     const category = searchParams.get('category')
     const featured = searchParams.get('featured')
     const inStock = searchParams.get('inStock')
@@ -13,6 +14,11 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit
 
     const where: any = {}
+    
+    // If ID is provided, fetch single product
+    if (id) {
+      where.id = parseInt(id)
+    }
     
     if (category) {
       where.categories = {
@@ -45,6 +51,15 @@ export async function GET(request: NextRequest) {
             select: {
               rating: true
             }
+          },
+          discounts: {
+            where: {
+              isActive: true,
+              OR: [
+                { endDate: null },
+                { endDate: { gte: new Date() } }
+              ]
+            }
           }
         },
         skip,
@@ -56,14 +71,40 @@ export async function GET(request: NextRequest) {
       prisma.product.count({ where })
     ])
 
-    // Calculate average rating for each product
-    const productsWithRatings = products.map(product => ({
-      ...product,
-      averageRating: product.reviews.length > 0 
+    // Calculate average rating, stock status, and dynamic pricing for each product
+    const productsWithRatings = products.map(product => {
+      // Calculate average rating
+      const averageRating = product.reviews.length > 0 
         ? product.reviews.reduce((sum, review) => sum + review.rating, 0) / product.reviews.length
-        : 0,
-      reviewCount: product.reviews.length
-    }))
+        : 0;
+
+      // Calculate discounted price ONLY if active discount records exist
+      let discountedPrice = null;
+      let discountPercentage = 0;
+      
+      if (product.discounts && product.discounts.length > 0) {
+        const activeDiscount = product.discounts[0]; // Get the first active discount
+        
+        if (activeDiscount.type === 'PERCENTAGE') {
+          discountedPrice = Math.ceil(product.price * (1 - activeDiscount.value / 100));
+          discountPercentage = activeDiscount.value;
+        } else if (activeDiscount.type === 'FIXED_AMOUNT') {
+          discountedPrice = Math.ceil(Math.max(0, product.price - activeDiscount.value));
+          discountPercentage = ((product.price - discountedPrice) / product.price) * 100;
+        }
+      }
+      // Removed fallback to old discountedPrice field - only use active discount records
+
+      return {
+        ...product,
+        averageRating,
+        reviewCount: product.reviews.length,
+        isOutOfStock: !product.inStock,
+        discountedPrice,
+        discountPercentage: Math.round(discountPercentage),
+        hasDiscount: discountedPrice !== null
+      };
+    })
 
     return NextResponse.json({
       products: productsWithRatings,
@@ -112,7 +153,6 @@ export async function POST(request: NextRequest) {
         slug,
         description,
         price,
-        discountedPrice,
         measurementValue,
         measurementType,
         inStock,

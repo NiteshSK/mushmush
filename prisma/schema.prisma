@@ -3,31 +3,31 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
 model User {
-  id             String           @id @default(cuid())
-  email          String           @unique
-  name           String?
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  address        String?
-  emailVerified  DateTime?
-  image          String?
-  phone          String?
-  role           UserRole         @default(CUSTOMER)
-  password       String?
-  resetToken     String?
+  id               String           @id @default(cuid())
+  email            String           @unique
+  name             String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  address          String?
+  emailVerified    DateTime?
+  image            String?
+  phone            String?
+  role             UserRole         @default(CUSTOMER)
+  password         String?
+  resetToken       String?
   resetTokenExpiry DateTime?
-  accounts       Account[]
-  orders         Order[]
-  recentlyViewed RecentlyViewed[]
-  reviews        Review[]
-  sessions       Session[]
-  wishlist       WishlistItem[]
+  accounts         Account[]
+  orders           Order[]
+  recentlyViewed   RecentlyViewed[]
+  reviews          Review[]
+  sessions         Session[]
+  wishlist         WishlistItem[]
 
   @@map("users")
 }
@@ -90,7 +90,6 @@ model Product {
   slug             String            @unique
   description      String
   price            Float
-  discountedPrice  Float?
   measurementValue Int
   measurementType  String
   inStock          Boolean           @default(true)
@@ -106,6 +105,7 @@ model Product {
   recentlyViewed   RecentlyViewed[]
   reviews          Review[]
   wishlistItems    WishlistItem[]
+  discounts        ProductDiscount[]
 
   @@map("products")
 }
@@ -124,11 +124,11 @@ model ProductCategory {
 model Review {
   id        Int      @id @default(autoincrement())
   rating    Int
-  comment   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   productId Int
   userId    String?
+  comment   String?
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   user      User?    @relation(fields: [userId], references: [id])
 
@@ -210,9 +210,29 @@ model BlogPost {
   @@map("blog_posts")
 }
 
+model ProductDiscount {
+  id          Int      @id @default(autoincrement())
+  productId   Int
+  type        DiscountType
+  value       Float    // Percentage (0-100) or fixed amount
+  startDate   DateTime @default(now())
+  endDate     DateTime?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_discounts")
+}
+
 enum UserRole {
   CUSTOMER
   ADMIN
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED_AMOUNT
 }
 
 enum OrderStatus {
