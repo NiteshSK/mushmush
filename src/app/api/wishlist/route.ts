@@ -95,7 +95,7 @@ export async function GET() {
       productIds: wishlistItems.map(item => item.product.id)
     });
 
-    return NextResponse.json({ items: transformedItems });
+    return NextResponse.json({ items: wishlistItems });
   } catch (error) {
     console.error('Wishlist fetch error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
