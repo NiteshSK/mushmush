@@ -25,8 +25,8 @@ function askPassword(question: string): Promise<string> {
     
     let password = '';
     
-    process.stdin.on('data', (char) => {
-      char = char.toString();
+    process.stdin.on('data', (data) => {
+      const char = data.toString();
       
       if (char === '\n' || char === '\r' || char === '\u0004') {
         process.stdin.setRawMode(false);
