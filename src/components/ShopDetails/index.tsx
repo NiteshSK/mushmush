@@ -80,7 +80,8 @@ const ShopDetails = () => {
   const [isClient, setIsClient] = useState(false);
   const [reviews, setReviews] = useState<any[]>([]);
   const [reviewStats, setReviewStats] = useState({ totalReviews: 0, averageRating: 0 });
-  const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '', name: '', email: '' });
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState('');
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   
@@ -141,7 +142,7 @@ const ShopDetails = () => {
       return;
     }
     
-    if (!reviewForm.comment.trim()) {
+    if (!comment.trim()) {
       alert('Please add a comment to your review');
       return;
     }
@@ -150,8 +151,8 @@ const ShopDetails = () => {
       setIsSubmittingReview(true);
       console.log('Submitting review:', {
         productId: product.id,
-        rating: reviewForm.rating,
-        comment: reviewForm.comment.trim()
+        rating: rating,
+        comment: comment.trim()
       });
 
       const response = await fetch('/api/reviews', {
@@ -161,8 +162,8 @@ const ShopDetails = () => {
         },
         body: JSON.stringify({
           productId: product.id,
-          rating: reviewForm.rating,
-          comment: reviewForm.comment.trim()
+          rating: rating,
+          comment: comment.trim()
         })
       });
 
@@ -185,7 +186,8 @@ const ShopDetails = () => {
       const responseData = await response.json();
       
       // Reset form and refresh reviews
-      setReviewForm({ rating: 5, comment: '', name: '', email: '' });
+      setRating(5);
+      setComment('');
       await fetchReviews();
       alert('Review submitted successfully!');
     } catch (error: any) {
@@ -528,8 +530,8 @@ const ShopDetails = () => {
                                             <button
                                                 key={i}
                                                 type="button"
-                                                onClick={() => setReviewForm({...reviewForm, rating: i + 1})}
-                                                className={`cursor-pointer ${i < reviewForm.rating ? "text-[#FBB040]" : "text-gray-5"}`}
+                                                onClick={() => setRating(i + 1)}
+                                                className={`cursor-pointer ${i < rating ? "text-[#FBB040]" : "text-gray-5"}`}
                                             >
                                                 <svg className="fill-current" width="15" height="16" viewBox="0 0 15 16" xmlns="http://www.w3.org/2000/svg">
                                                     <path d="M14.6604 5.90785L9.97461 5.18335L7.85178 0.732874C7.69645 0.422375 7.28224 0.422375 7.12691 0.732874L5.00407 5.20923L0.344191 5.90785C0.0076444 5.9596 -0.121797 6.39947 0.137085 6.63235L3.52844 10.1255L2.72591 15.0158C2.67413 15.3522 3.01068 15.6368 3.32134 15.4298L7.54112 13.1269L11.735 15.4298C12.0198 15.5851 12.3822 15.3263 12.3046 15.0158L11.502 10.1255L14.8934 6.63235C15.1005 6.39947 14.9969 5.9596 14.6604 5.90785Z" />
@@ -546,13 +548,13 @@ const ShopDetails = () => {
                                             id="comments" 
                                             rows={5} 
                                             placeholder="Your comments" 
-                                            value={reviewForm.comment}
-                                            onChange={(e) => setReviewForm({...reviewForm, comment: e.target.value})}
+                                            value={comment}
+                                            onChange={(e) => setComment(e.target.value)}
                                             className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full p-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                                         />
                                         <span className="flex items-center justify-between mt-2.5">
                                             <span className="text-custom-sm text-dark-4">Maximum 250 characters</span>
-                                            <span className="text-custom-sm text-dark-4">{reviewForm.comment.length}/250</span>
+                                            <span className="text-custom-sm text-dark-4">{comment.length}/250</span>
                                         </span>
                                     </div>
                                     <button 
