@@ -38,38 +38,75 @@ export async function GET(request: NextRequest) {
       where.inStock = true
     }
 
-    const [products, total] = await Promise.all([
-      prisma.product.findMany({
-        where,
-        include: {
-          categories: {
-            include: {
-              category: true
+    let products, total;
+    
+    try {
+      // Try to fetch products with discounts
+      [products, total] = await Promise.all([
+        prisma.product.findMany({
+          where,
+          include: {
+            categories: {
+              include: {
+                category: true
+              }
+            },
+            reviews: {
+              select: {
+                rating: true
+              }
+            },
+            discounts: {
+              where: {
+                isActive: true,
+                OR: [
+                  { endDate: null },
+                  { endDate: { gte: new Date() } }
+                ]
+              }
             }
           },
-          reviews: {
-            select: {
-              rating: true
-            }
-          },
-          discounts: {
-            where: {
-              isActive: true,
-              OR: [
-                { endDate: null },
-                { endDate: { gte: new Date() } }
-              ]
-            }
+          skip,
+          take: limit,
+          orderBy: {
+            createdAt: 'desc'
           }
-        },
-        skip,
-        take: limit,
-        orderBy: {
-          createdAt: 'desc'
-        }
-      }),
-      prisma.product.count({ where })
-    ])
+        }),
+        prisma.product.count({ where })
+      ]);
+    } catch (error) {
+      // Fallback: fetch products without discounts if table doesn't exist
+      console.log('Discounts table not found, fetching products without discounts');
+      [products, total] = await Promise.all([
+        prisma.product.findMany({
+          where,
+          include: {
+            categories: {
+              include: {
+                category: true
+              }
+            },
+            reviews: {
+              select: {
+                rating: true
+              }
+            }
+          },
+          skip,
+          take: limit,
+          orderBy: {
+            createdAt: 'desc'
+          }
+        }),
+        prisma.product.count({ where })
+      ]);
+      
+      // Add empty discounts array to each product
+      products = products.map(product => ({
+        ...product,
+        discounts: []
+      }));
+    }
 
     // Calculate average rating, stock status, and dynamic pricing for each product
     const productsWithRatings = products.map(product => {

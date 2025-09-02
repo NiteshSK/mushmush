@@ -30,11 +30,63 @@ export async function GET() {
                 category: true
               }
             },
-            reviews: true
+            reviews: {
+              select: {
+                rating: true
+              }
+            },
+            discounts: {
+              where: {
+                isActive: true,
+                OR: [
+                  { endDate: null },
+                  { endDate: { gte: new Date() } }
+                ]
+              }
+            }
           }
         }
       },
       orderBy: { createdAt: 'desc' }
+    });
+
+    // Transform the data to include discount calculations
+    const transformedItems = wishlistItems.map(item => {
+      const product = item.product;
+      const activeDiscount = product.discounts?.[0];
+      
+      let discountedPrice = product.price;
+      let discountPercentage = 0;
+      let hasDiscount = false;
+
+      if (activeDiscount) {
+        if (activeDiscount.type === 'PERCENTAGE') {
+          discountPercentage = activeDiscount.value;
+          discountedPrice = Math.round(product.price * (1 - activeDiscount.value / 100));
+        } else if (activeDiscount.type === 'FIXED_AMOUNT') {
+          discountedPrice = Math.max(0, product.price - activeDiscount.value);
+          discountPercentage = Math.round(((product.price - discountedPrice) / product.price) * 100);
+        }
+        hasDiscount = true;
+      }
+
+      // Calculate average rating
+      const averageRating = product.reviews?.length > 0 
+        ? product.reviews.reduce((sum, review) => sum + review.rating, 0) / product.reviews.length 
+        : 0;
+
+      return {
+        ...item,
+        product: {
+          ...product,
+          discountedPrice,
+          discountPercentage,
+          hasDiscount,
+          averageRating,
+          reviewCount: product.reviews?.length || 0,
+          reviews: product.reviews?.length || 0
+        }
+      };
     });
 
     console.log('GET - Wishlist items for user:', { 
@@ -43,7 +95,7 @@ export async function GET() {
       productIds: wishlistItems.map(item => item.product.id)
     });
 
-    return NextResponse.json({ items: wishlistItems });
+    return NextResponse.json({ items: transformedItems });
   } catch (error) {
     console.error('Wishlist fetch error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
