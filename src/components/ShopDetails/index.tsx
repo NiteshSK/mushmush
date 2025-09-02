@@ -78,6 +78,11 @@ const ShopDetails = () => {
 
   const [product, setProduct] = useState<ProductDetails>({});
   const [isClient, setIsClient] = useState(false);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviewStats, setReviewStats] = useState({ totalReviews: 0, averageRating: 0 });
+  const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '', name: '', email: '' });
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
   
   const productFromStorage = useAppSelector(
     (state) => state.productDetailsReducer.value
@@ -97,17 +102,96 @@ const ShopDetails = () => {
     setProduct(resolvedProduct);
   }, [productFromStorage]);
 
+  // Fetch reviews when product changes
+  useEffect(() => {
+    if (product.id) {
+      fetchReviews();
+    }
+  }, [product.id]);
+
+  const fetchReviews = async () => {
+    if (!product.id) return;
+    
+    try {
+      setReviewsLoading(true);
+      const response = await fetch(`/api/reviews?productId=${product.id}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch reviews');
+      }
+      
+      const data = await response.json();
+      setReviews(data.reviews);
+      setReviewStats({
+        totalReviews: data.totalReviews,
+        averageRating: data.averageRating
+      });
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!product.id) {
+      alert('Product not found');
+      return;
+    }
+    
+    if (!reviewForm.comment.trim()) {
+      alert('Please add a comment to your review');
+      return;
+    }
+    
+    try {
+      setIsSubmittingReview(true);
+      const response = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          productId: product.id,
+          rating: reviewForm.rating,
+          comment: reviewForm.comment.trim()
+        })
+      });
+      
+      const responseData = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(responseData.error || 'Failed to submit review');
+      }
+      
+      // Reset form and refresh reviews
+      setReviewForm({ rating: 5, comment: '', name: '', email: '' });
+      await fetchReviews();
+      alert('Review submitted successfully!');
+    } catch (error: any) {
+      console.error('Review submission error:', error);
+      alert(error.message || 'Failed to submit review. Please make sure you are signed in.');
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
+
   const displayProduct = product;
 
   useEffect(() => {
     if (product.title) {
         localStorage.setItem("productDetails", JSON.stringify(product));
-        // Track product view in recently viewed
+        // Track product view in recently viewed with debounce
         if (product.id) {
-          addToRecentlyViewed(product.id);
+          const timeoutId = setTimeout(() => {
+            addToRecentlyViewed(product.id);
+          }, 500);
+          return () => clearTimeout(timeoutId);
         }
     }
-  }, [product, addToRecentlyViewed]);
+  }, [product.id, addToRecentlyViewed]);
 
   const handlePreviewSlider = () => {
     openPreviewModal();
@@ -364,25 +448,38 @@ const ShopDetails = () => {
                     <div className={`flex-col sm:flex-row gap-7.5 xl:gap-12.5 mt-12.5 ${activeTab === "tabThree" ? "flex" : "hidden"}`}>
                         <div className="max-w-[570px] w-full">
                             <h2 className="font-medium text-2xl text-dark mb-9">
-                                {displayProduct.reviewsList?.length ?? 0} Review{displayProduct.reviewsList?.length !== 1 ? "s" : ""} for this product
+                                {reviewStats.totalReviews} Review{reviewStats.totalReviews !== 1 ? "s" : ""} for this product
+                                {reviewStats.averageRating > 0 && (
+                                    <span className="text-lg text-gray-600 ml-2">
+                                        (Average: {reviewStats.averageRating}/5)
+                                    </span>
+                                )}
                             </h2>
                             <div className="flex flex-col gap-6">
-                                {displayProduct.reviewsList && displayProduct.reviewsList.length ? (
-                                    displayProduct.reviewsList.map((r, idx) => (
+                                {reviewsLoading ? (
+                                    <div className="rounded-xl bg-white shadow-1 p-4 sm:p-6">
+                                        <p>Loading reviews...</p>
+                                    </div>
+                                ) : reviews && reviews.length ? (
+                                    reviews.map((review, idx) => (
                                         <div key={idx} className="rounded-xl bg-white shadow-1 p-4 sm:p-6">
                                             <div className="flex items-center justify-between">
-                                                <a href="#" className="flex items-center gap-4">
-                                                    <div className="w-12.5 h-12.5 rounded-full overflow-hidden">
-                                                        <Image src={r.avatar ?? "/images/users/user-01.jpg"} alt={r.name} width={50} height={50} />
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-12.5 h-12.5 rounded-full overflow-hidden bg-gray-2 flex items-center justify-center">
+                                                        <span className="text-lg font-medium text-dark">
+                                                            {review.user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                                                        </span>
                                                     </div>
                                                     <div>
-                                                        <h3 className="font-medium text-dark">{r.name}</h3>
-                                                        {r.role && <p className="text-custom-sm">{r.role}</p>}
+                                                        <h3 className="font-medium text-dark">{review.user?.name || 'Anonymous'}</h3>
+                                                        <p className="text-custom-sm text-gray-500">
+                                                            {new Date(review.createdAt).toLocaleDateString()}
+                                                        </p>
                                                     </div>
-                                                </a>
+                                                </div>
                                                 <div className="flex items-center gap-1">
                                                     {Array.from({ length: 5 }).map((_, i) => (
-                                                        <span key={i} className={i < r.rating ? "cursor-pointer text-[#FBB040]" : "cursor-pointer text-gray-5"}>
+                                                        <span key={i} className={i < review.rating ? "cursor-pointer text-[#FBB040]" : "cursor-pointer text-gray-5"}>
                                                             <svg className="fill-current" width="15" height="16" viewBox="0 0 15 16" xmlns="http://www.w3.org/2000/svg">
                                                                 <path d="M14.6604 5.90785L9.97461 5.18335L7.85178 0.732874C7.69645 0.422375 7.28224 0.422375 7.12691 0.732874L5.00407 5.20923L0.344191 5.90785C0.0076444 5.9596 -0.121797 6.39947 0.137085 6.63235L3.52844 10.1255L2.72591 15.0158C2.67413 15.3522 3.01068 15.6368 3.32134 15.4298L7.54112 13.1269L11.735 15.4298C12.0198 15.5851 12.3822 15.3263 12.3046 15.0158L11.502 10.1255L14.8934 6.63235C15.1005 6.39947 14.9969 5.9596 14.6604 5.90785Z" />
                                                             </svg>
@@ -390,7 +487,9 @@ const ShopDetails = () => {
                                                     ))}
                                                 </div>
                                             </div>
-                                            <p className="text-dark mt-6">{r.comment}</p>
+                                            {review.comment && (
+                                                <p className="text-dark mt-6">{review.comment}</p>
+                                            )}
                                         </div>
                                     ))
                                 ) : (
@@ -401,41 +500,50 @@ const ShopDetails = () => {
                             </div>
                         </div>
                         <div className="max-w-[550px] w-full">
-                            <form>
+                            <form onSubmit={handleReviewSubmit}>
                                 <h2 className="font-medium text-2xl text-dark mb-3.5">Add a Review</h2>
-                                <p className="mb-6">Your email address will not be published. Required fields are marked *</p>
+                                <p className="mb-6">Please sign in to submit a review. Required fields are marked *</p>
                                 <div className="flex items-center gap-3 mb-7.5">
                                     <span>Your Rating*</span>
                                     <div className="flex items-center gap-1">
                                         {[...Array(5)].map((_, i) => (
-                                            <span key={i} className="cursor-pointer text-[#FBB040]">
+                                            <button
+                                                key={i}
+                                                type="button"
+                                                onClick={() => setReviewForm({...reviewForm, rating: i + 1})}
+                                                className={`cursor-pointer ${i < reviewForm.rating ? "text-[#FBB040]" : "text-gray-5"}`}
+                                            >
                                                 <svg className="fill-current" width="15" height="16" viewBox="0 0 15 16" xmlns="http://www.w3.org/2000/svg">
                                                     <path d="M14.6604 5.90785L9.97461 5.18335L7.85178 0.732874C7.69645 0.422375 7.28224 0.422375 7.12691 0.732874L5.00407 5.20923L0.344191 5.90785C0.0076444 5.9596 -0.121797 6.39947 0.137085 6.63235L3.52844 10.1255L2.72591 15.0158C2.67413 15.3522 3.01068 15.6368 3.32134 15.4298L7.54112 13.1269L11.735 15.4298C12.0198 15.5851 12.3822 15.3263 12.3046 15.0158L11.502 10.1255L14.8934 6.63235C15.1005 6.39947 14.9969 5.9596 14.6604 5.90785Z" />
                                                 </svg>
-                                            </span>
+                                            </button>
                                         ))}
                                     </div>
                                 </div>
                                 <div className="rounded-xl bg-white shadow-1 p-4 sm:p-6">
                                     <div className="mb-5">
                                         <label htmlFor="comments" className="block mb-2.5">Comments</label>
-                                        <textarea name="comments" id="comments" rows={5} placeholder="Your comments" className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full p-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"></textarea>
+                                        <textarea 
+                                            name="comments" 
+                                            id="comments" 
+                                            rows={5} 
+                                            placeholder="Your comments" 
+                                            value={reviewForm.comment}
+                                            onChange={(e) => setReviewForm({...reviewForm, comment: e.target.value})}
+                                            className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full p-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                                        />
                                         <span className="flex items-center justify-between mt-2.5">
-                                            <span className="text-custom-sm text-dark-4">Maximum</span>
-                                            <span className="text-custom-sm text-dark-4">0/250</span>
+                                            <span className="text-custom-sm text-dark-4">Maximum 250 characters</span>
+                                            <span className="text-custom-sm text-dark-4">{reviewForm.comment.length}/250</span>
                                         </span>
                                     </div>
-                                    <div className="flex flex-col lg:flex-row gap-5 sm:gap-7.5 mb-5.5">
-                                        <div>
-                                            <label htmlFor="name" className="block mb-2.5">Name</label>
-                                            <input type="text" name="name" id="name" placeholder="Your name" className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20" />
-                                        </div>
-                                        <div>
-                                            <label htmlFor="email" className="block mb-2.5">Email</label>
-                                            <input type="email" name="email" id="email" placeholder="Your email" className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20" />
-                                        </div>
-                                    </div>
-                                    <button type="submit" className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark">Submit Reviews</button>
+                                    <button 
+                                        type="submit" 
+                                        disabled={isSubmittingReview}
+                                        className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {isSubmittingReview ? "Submitting..." : "Submit Review"}
+                                    </button>
                                 </div>
                             </form>
                         </div>
