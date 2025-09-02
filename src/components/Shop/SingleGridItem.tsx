@@ -126,7 +126,7 @@ const SingleGridItem = ({ item, priority = false }: Props) => {
                 <Image key={i} src="/images/icons/icon-star.svg" alt="star icon" width={15} height={15}/>
             ))}
         </div>
-        <p className="text-custom-sm">({item.reviews})</p>
+        <p className="text-custom-sm">({item.reviewCount || 0})</p>
       </div>
 
       <h3 className="font-medium text-dark ease-out duration-200 hover:text-blue mb-1.5">
