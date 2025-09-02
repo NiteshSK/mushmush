@@ -21,10 +21,10 @@ export default function SignIn() {
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
+      // For Google OAuth, let NextAuth handle the redirect naturally
       await signIn("google", { callbackUrl: "/" });
     } catch (error) {
       console.error("Sign in error:", error);
-    } finally {
       setIsLoading(false);
     }
   };
@@ -41,8 +41,8 @@ export default function SignIn() {
       });
       
       if (result?.ok) {
-        alert("Sign in successful!");
-        router.push("/");
+        // Force session refresh and redirect
+        window.location.href = "/";
       } else {
         alert("Invalid email or password. Please try again.");
       }

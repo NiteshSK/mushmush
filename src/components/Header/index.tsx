@@ -20,7 +20,7 @@ const Header = () => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("0");
   const { openCartModal } = useCartModalContext();
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
   const router = useRouter();
 
   const product = useAppSelector((state) => state.cartReducer.items);
@@ -58,6 +58,13 @@ const Header = () => {
       window.removeEventListener("scroll", handleStickyMenu);
     };
   }, []);
+
+  // Force session refresh on mount and when status changes
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      update();
+    }
+  }, [status, update]);
 
   const options = [
     { label: "All Mushrooms", value: "0" },
