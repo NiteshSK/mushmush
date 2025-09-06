@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { sendEmail, emailTemplates } from '@/lib/email';
+import { Product } from '@/types/product';
 
 export async function sendRestockNotifications(productId: number) {
   try {
@@ -13,7 +14,13 @@ export async function sendRestockNotifications(productId: number) {
         imgs: true,
         inStock: true
       }
-    });
+    }) as {
+      id: number;
+      title: string;
+      slug: string;
+      imgs: Product['imgs'];
+      inStock: boolean;
+    } | null;
 
     if (!product || !product.inStock) {
       console.log(`Product ${productId} not found or not in stock`);
@@ -35,7 +42,7 @@ export async function sendRestockNotifications(productId: number) {
 
     const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
     const productUrl = `${baseUrl}/shop-details?id=${product.id}`;
-    const productImage = product.imgs?.previews?.[0] || `${baseUrl}/images/placeholder.jpg`;
+    const productImage = (product.imgs as Product['imgs'])?.previews?.[0] || `${baseUrl}/images/placeholder.jpg`;
 
     // Send emails to all subscribers
     const emailPromises = notifications.map(async (notification) => {
