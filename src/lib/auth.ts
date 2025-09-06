@@ -4,7 +4,6 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { compare } from "bcryptjs"
 import { prisma } from "./prisma"
-import { SessionManager } from "./session-manager"
 
 // Build providers array conditionally to avoid runtime errors when env vars are missing
 const providers = [
