@@ -1,6 +1,7 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import SingleItem from "./SingleItem";
+import NotifyMeModal from "../../NotifyMeModal";
 import Image from "next/image";
 import Link from "next/link";
 import { Product } from "@/types/product";
@@ -11,6 +12,21 @@ const BestSeller = () => {
   const bestSellers = products
     .sort((a: Product, b: Product) => (b.reviews ?? 0) - (a.reviews ?? 0))
     .slice(0, 3);
+
+  // NotifyMe modal state
+  const [notifyModalOpen, setNotifyModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+  // Handle opening notify me modal
+  const handleNotifyMe = (product: Product) => {
+    setSelectedProduct(product);
+    setNotifyModalOpen(true);
+  };
+
+  const handleCloseNotifyModal = () => {
+    setNotifyModalOpen(false);
+    setSelectedProduct(null);
+  };
 
   return (
     // --- UPDATED: Removed bottom padding to eliminate all vertical space ---
@@ -35,7 +51,7 @@ const BestSeller = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7.5">
           {bestSellers.map((item) => (
-            <SingleItem item={item} key={item.id} />
+            <SingleItem item={item} key={item.id} onNotifyMe={handleNotifyMe} />
           ))}
         </div>
 
@@ -48,6 +64,16 @@ const BestSeller = () => {
           </Link>
         </div>
       </div>
+
+      {/* NotifyMe Modal */}
+      {selectedProduct && (
+        <NotifyMeModal
+          isOpen={notifyModalOpen}
+          onClose={handleCloseNotifyModal}
+          productId={selectedProduct.id}
+          productTitle={selectedProduct.title}
+        />
+      )}
     </section>
   );
 };

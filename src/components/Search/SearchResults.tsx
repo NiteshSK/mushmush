@@ -3,7 +3,9 @@ import React, { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { useSearch } from "@/hooks/useSearch";
 import SingleGridItem from "../Shop/SingleGridItem";
+import NotifyMeModal from "../NotifyMeModal";
 import Breadcrumb from "../Common/Breadcrumb";
+import { Product } from "@/types/product";
 
 const SearchResults = () => {
   const searchParams = useSearchParams();
@@ -13,6 +15,21 @@ const SearchResults = () => {
   const { data, loading, error, searchProducts } = useSearch();
   const [hasSearched, setHasSearched] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // NotifyMe modal state
+  const [notifyModalOpen, setNotifyModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+  // Handle opening notify me modal
+  const handleNotifyMe = (product: Product) => {
+    setSelectedProduct(product);
+    setNotifyModalOpen(true);
+  };
+
+  const handleCloseNotifyModal = () => {
+    setNotifyModalOpen(false);
+    setSelectedProduct(null);
+  };
 
   useEffect(() => {
     // Clear previous timeout
@@ -100,7 +117,7 @@ const SearchResults = () => {
           {products.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-7.5 gap-y-9">
               {products.map((product) => (
-                <SingleGridItem key={product.id} item={product} />
+                <SingleGridItem key={product.id} item={product} onNotifyMe={handleNotifyMe} />
               ))}
             </div>
           ) : (
@@ -138,6 +155,16 @@ const SearchResults = () => {
           )}
         </div>
       </section>
+
+      {/* NotifyMe Modal */}
+      {selectedProduct && (
+        <NotifyMeModal
+          isOpen={notifyModalOpen}
+          onClose={handleCloseNotifyModal}
+          productId={selectedProduct.id}
+          productTitle={selectedProduct.title}
+        />
+      )}
     </>
   );
 };

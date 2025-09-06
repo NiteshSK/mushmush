@@ -14,9 +14,10 @@ import toast from "react-hot-toast";
 type Props = {
   item: Product;
   priority?: boolean;
+  onNotifyMe?: (product: Product) => void;
 };
 
-const SingleListItem = ({ item, priority = false }: Props) => {
+const SingleListItem = ({ item, priority = false, onNotifyMe }: Props) => {
   const { openModal } = useModalContext();
   const dispatch = useDispatch<AppDispatch>();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
@@ -124,7 +125,10 @@ const SingleListItem = ({ item, priority = false }: Props) => {
                       Add to Cart
                   </button>
               ) : (
-                  <button className="inline-flex font-medium text-custom-sm py-[7px] px-5 rounded-[5px] bg-dark text-white ease-out duration-200 hover:bg-opacity-90">
+                  <button 
+                      onClick={() => onNotifyMe?.(item)}
+                      className="inline-flex font-medium text-custom-sm py-[7px] px-5 rounded-[5px] bg-dark text-white ease-out duration-200 hover:bg-opacity-90"
+                  >
                       Notify Me
                   </button>
               )}

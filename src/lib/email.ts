@@ -157,5 +157,63 @@ export const emailTemplates = {
       
       © 2024 MushMush. All rights reserved.
     `
+  }),
+
+  restockNotification: (productTitle: string, productUrl: string, productImage: string) => ({
+    subject: `🎉 ${productTitle} is Back in Stock!`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h1 style="color: #2d5016; margin: 0;">Great News!</h1>
+          <p style="color: #666; font-size: 16px;">Your requested product is back in stock</p>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 30px; border-radius: 10px; margin-bottom: 30px;">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <img src="${productImage}" alt="${productTitle}" style="max-width: 200px; height: auto; border-radius: 8px;">
+          </div>
+          <h2 style="color: #2d5016; margin-top: 0; text-align: center;">${productTitle}</h2>
+          <p style="color: #333; line-height: 1.6; margin-bottom: 20px; text-align: center;">
+            The product you requested to be notified about is now available! 
+            Don't wait too long - our fresh mushrooms sell out quickly.
+          </p>
+        </div>
+        
+        <div style="text-align: center; margin-bottom: 30px;">
+          <a href="${productUrl}" 
+             style="background: #2d5016; color: white; padding: 15px 40px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; font-size: 16px;">
+            Shop Now
+          </a>
+        </div>
+        
+        <div style="background: #e8f5e8; border: 1px solid #c3e6c3; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+          <p style="color: #2d5016; margin: 0; font-size: 14px; text-align: center;">
+            <strong>Limited Stock:</strong> Get yours before it's gone again!
+          </p>
+        </div>
+        
+        <div style="border-top: 1px solid #eee; padding-top: 20px; text-align: center;">
+          <p style="color: #666; font-size: 14px; margin: 0;">
+            You're receiving this because you requested to be notified when this product is restocked.
+          </p>
+          <p style="color: #666; font-size: 12px; margin-top: 10px;">
+            © 2024 MushMush. All rights reserved.
+          </p>
+        </div>
+      </div>
+    `,
+    text: `
+      Great News! ${productTitle} is Back in Stock!
+      
+      The product you requested to be notified about is now available.
+      
+      Shop now: ${productUrl}
+      
+      Don't wait too long - our fresh mushrooms sell out quickly!
+      
+      You're receiving this because you requested to be notified when this product is restocked.
+      
+      © 2024 MushMush. All rights reserved.
+    `
   })
 };

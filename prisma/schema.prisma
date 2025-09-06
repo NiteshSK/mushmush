@@ -85,17 +85,17 @@ model Category {
 }
 
 model Product {
-  id               Int               @id @default(autoincrement())
+  id               Int                   @id @default(autoincrement())
   title            String
-  slug             String            @unique
+  slug             String                @unique
   description      String
   price            Float
   measurementValue Int
   measurementType  String
-  inStock          Boolean           @default(true)
-  featured         Boolean           @default(false)
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+  inStock          Boolean               @default(true)
+  featured         Boolean               @default(false)
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
   imgs             Json
   specifications   Json
   howToConsume     Json
@@ -106,6 +106,7 @@ model Product {
   reviews          Review[]
   wishlistItems    WishlistItem[]
   discounts        ProductDiscount[]
+  notifications    ProductNotification[]
 
   @@map("products")
 }
@@ -208,6 +209,19 @@ model BlogPost {
   metaDescription String?
 
   @@map("blog_posts")
+}
+
+model ProductNotification {
+  id        String   @id @default(cuid())
+  email     String
+  productId Int
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([email, productId])
+  @@map("product_notifications")
 }
 
 model ProductDiscount {

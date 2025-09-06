@@ -5,6 +5,7 @@ import Breadcrumb from "../Common/Breadcrumb";
 import SingleGridItem from "../Shop/SingleGridItem";
 import SingleListItem from "../Shop/SingleListItem";
 import CustomSelect from "../ShopWithSidebar/CustomSelect";
+import NotifyMeModal from "../NotifyMeModal";
 import { useProducts } from "@/hooks/useProducts";
 import { Product } from "@/types/product";
 
@@ -12,6 +13,10 @@ const ShopWithoutSidebar = () => {
   const [productStyle, setProductStyle] = useState("grid");
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 8;
+  
+  // NotifyMe modal state
+  const [notifyModalOpen, setNotifyModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   // Get the category from the URL search parameters
   const searchParams = useSearchParams();
@@ -29,6 +34,17 @@ const ShopWithoutSidebar = () => {
     setCurrentPage(1);
   }, [category]);
   // --- END OF PAGINATION LOGIC ---
+
+  // Handle opening notify me modal
+  const handleNotifyMe = (product: Product) => {
+    setSelectedProduct(product);
+    setNotifyModalOpen(true);
+  };
+
+  const handleCloseNotifyModal = () => {
+    setNotifyModalOpen(false);
+    setSelectedProduct(null);
+  };
 
   const options = [
     { label: "Latest Products", value: "0" },
@@ -144,12 +160,14 @@ const ShopWithoutSidebar = () => {
                         item={item}
                         key={item.id}
                         priority={index < 4}
+                        onNotifyMe={handleNotifyMe}
                       />
                     ) : (
                       <SingleListItem
                         item={item}
                         key={item.id}
                         priority={index < 2}
+                        onNotifyMe={handleNotifyMe}
                       />
                     )
                   )}
@@ -233,6 +251,16 @@ const ShopWithoutSidebar = () => {
           </div>
         </div>
       </section>
+
+      {/* NotifyMe Modal */}
+      {selectedProduct && (
+        <NotifyMeModal
+          isOpen={notifyModalOpen}
+          onClose={handleCloseNotifyModal}
+          productId={selectedProduct.id}
+          productTitle={selectedProduct.title}
+        />
+      )}
     </>
   );
 };

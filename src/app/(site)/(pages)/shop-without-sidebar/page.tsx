@@ -1,5 +1,6 @@
 import React, { Suspense } from "react";
 import ShopWithoutSidebar from "@/components/ShopWithoutSidebar";
+import TestNotifyModal from "@/components/TestNotifyModal";
 
 import { Metadata } from "next";
 export const metadata: Metadata = {
@@ -14,6 +15,7 @@ const ShopWithoutSidebarPage = () => {
       <Suspense fallback={<div>Loading...</div>}>
         <ShopWithoutSidebar />
       </Suspense>
+      <TestNotifyModal />
     </main>
   );
 };

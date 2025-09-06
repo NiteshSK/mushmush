@@ -10,12 +10,16 @@ import { AppDispatch } from "@/redux/store";
 import Link from "next/link";
 import Image from "next/image";
 import toast from "react-hot-toast";
+import NotifyMeModal from "@/components/NotifyMeModal";
 
 const SingleItem = ({ item }: { item: Product }) => {
   const { openModal } = useModalContext();
   const dispatch = useDispatch<AppDispatch>();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const [isWishlistLoading, setIsWishlistLoading] = useState(false);
+  const [isNotifyModalOpen, setIsNotifyModalOpen] = useState(false);
+  
+  console.log('SingleItem render - isNotifyModalOpen:', isNotifyModalOpen, 'inStock:', item.inStock);
 
   const handleQuickViewUpdate = () => {
     dispatch(updateQuickView({ ...item }));
@@ -61,6 +65,7 @@ const SingleItem = ({ item }: { item: Product }) => {
   };
 
   return (
+    <>
     <div className="group flex flex-col h-full bg-white rounded-lg shadow-1 overflow-hidden transition-shadow duration-300 hover:shadow-2">
       {/* Product Image */}
       <div className="relative w-full aspect-square overflow-hidden bg-gray-1">
@@ -142,18 +147,40 @@ const SingleItem = ({ item }: { item: Product }) => {
                 )}
             </span>
 
-            {item.inStock ? (
-                <Link href="/shop-details" onClick={handleNavigateToDetails} className="inline-flex font-medium text-sm text-white bg-blue py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue-dark">
-                    View Details
-                </Link>
+            {!item.inStock ? (
+              <button 
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('Notify Me clicked for product:', item.id, item.title);
+                  console.log('Current modal state:', isNotifyModalOpen);
+                  setIsNotifyModalOpen(true);
+                }}
+                className="inline-flex font-medium text-sm text-white bg-dark py-2 px-4 rounded-md ease-out duration-200 hover:bg-opacity-90"
+              >
+                Notify Me
+              </button>
             ) : (
-                <button className="inline-flex font-medium text-sm text-white bg-dark py-2 px-4 rounded-md ease-out duration-200 hover:bg-opacity-90">
-                    Notify Me
-                </button>
+              <Link
+                href="/shop-details"
+                onClick={handleNavigateToDetails}
+                className="inline-flex font-medium text-sm text-white bg-blue py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue-dark"
+              >
+                View Details
+              </Link>
             )}
         </div>
       </div>
     </div>
+
+    {/* Notify Me Modal */}
+    <NotifyMeModal
+      isOpen={isNotifyModalOpen}
+      onClose={() => setIsNotifyModalOpen(false)}
+      productId={item.id}
+      productTitle={item.title}
+    />
+  </>
   );
 };
 

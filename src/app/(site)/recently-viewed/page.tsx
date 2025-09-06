@@ -8,6 +8,7 @@ import Breadcrumb from "@/components/Common/Breadcrumb";
 import SingleGridItem from "@/components/Shop/SingleGridItem";
 import SingleListItem from "@/components/Shop/SingleListItem";
 import CustomSelect from "@/components/ShopWithSidebar/CustomSelect";
+import NotifyMeModal from "@/components/NotifyMeModal";
 import { Product } from "@/types/product";
 
 const RecentlyViewedPage = () => {
@@ -15,6 +16,10 @@ const RecentlyViewedPage = () => {
   const [productStyle, setProductStyle] = useState("grid");
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 8;
+  
+  // NotifyMe modal state
+  const [notifyModalOpen, setNotifyModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   const router = useRouter();
   const dispatch = useDispatch();
@@ -22,6 +27,17 @@ const RecentlyViewedPage = () => {
   const handleProductClick = (product: Product) => {
     dispatch(updateproductDetails(product));
     router.push("/shop-details");
+  };
+
+  // Handle opening notify me modal
+  const handleNotifyMe = (product: Product) => {
+    setSelectedProduct(product);
+    setNotifyModalOpen(true);
+  };
+
+  const handleCloseNotifyModal = () => {
+    setNotifyModalOpen(false);
+    setSelectedProduct(null);
   };
 
   // Convert recently viewed items to products array
@@ -115,9 +131,9 @@ const RecentlyViewedPage = () => {
                   {currentProducts.map((item, index) => (
                     <div key={item.id} onClick={() => handleProductClick(item)} className="cursor-pointer">
                       {productStyle === "grid" ? (
-                        <SingleGridItem item={item} priority={index < 4} />
+                        <SingleGridItem item={item} priority={index < 4} onNotifyMe={handleNotifyMe} />
                       ) : (
-                        <SingleListItem item={item} priority={index < 2} />
+                        <SingleListItem item={item} priority={index < 2} onNotifyMe={handleNotifyMe} />
                       )}
                     </div>
                   ))}
@@ -179,6 +195,16 @@ const RecentlyViewedPage = () => {
           </div>
         </div>
       </section>
+
+      {/* NotifyMe Modal */}
+      {selectedProduct && (
+        <NotifyMeModal
+          isOpen={notifyModalOpen}
+          onClose={handleCloseNotifyModal}
+          productId={selectedProduct.id}
+          productTitle={selectedProduct.title}
+        />
+      )}
     </>
   );
 };

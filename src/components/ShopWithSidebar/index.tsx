@@ -7,6 +7,7 @@ import Breadcrumb from "../Common/Breadcrumb";
 import SingleGridItem from "../Shop/SingleGridItem";
 import SingleListItem from "../Shop/SingleListItem";
 import CustomSelect from "../ShopWithSidebar/CustomSelect";
+import NotifyMeModal from "../NotifyMeModal";
 import { useProducts } from "@/hooks/useProducts";
 import { Product } from "@/types/product";
 
@@ -17,6 +18,10 @@ const ShopWithSidebar = () => {
   const [productSidebar, setProductSidebar] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  
+  // NotifyMe modal state
+  const [notifyModalOpen, setNotifyModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   const router = useRouter();
   const dispatch = useDispatch();
@@ -45,6 +50,17 @@ const ShopWithSidebar = () => {
   const handleProductClick = (product: Product) => {
     dispatch(updateproductDetails(product));
     router.push("/shop-details");
+  };
+
+  // Handle opening notify me modal
+  const handleNotifyMe = (product: Product) => {
+    setSelectedProduct(product);
+    setNotifyModalOpen(true);
+  };
+
+  const handleCloseNotifyModal = () => {
+    setNotifyModalOpen(false);
+    setSelectedProduct(null);
   };
 
   const categoriesWithCounts = useMemo(() => {
@@ -293,9 +309,9 @@ const ShopWithSidebar = () => {
                   {currentProducts.map((item, index) => (
                     <div key={item.id} onClick={() => handleProductClick(item)} className="cursor-pointer">
                       {productStyle === "grid" ? (
-                        <SingleGridItem item={item} priority={index < 3} />
+                        <SingleGridItem item={item} priority={index < 3} onNotifyMe={handleNotifyMe} />
                       ) : (
-                        <SingleListItem item={item} priority={index < 2} />
+                        <SingleListItem item={item} priority={index < 2} onNotifyMe={handleNotifyMe} />
                       )}
                     </div>
                   ))}
@@ -355,6 +371,16 @@ const ShopWithSidebar = () => {
           </div>
         </div>
       </section>
+
+      {/* NotifyMe Modal */}
+      {selectedProduct && (
+        <NotifyMeModal
+          isOpen={notifyModalOpen}
+          onClose={handleCloseNotifyModal}
+          productId={selectedProduct.id}
+          productTitle={selectedProduct.title}
+        />
+      )}
     </>
   );
 };
