@@ -4,6 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { compare } from "bcryptjs"
 import { prisma } from "./prisma"
+import { SessionManager } from "./session-manager"
 
 // Build providers array conditionally to avoid runtime errors when env vars are missing
 const providers = [
@@ -56,8 +57,34 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV !== "production",
   callbacks: {
+    async signIn({ user, account, profile, email, credentials }) {
+      if (user?.id) {
+        try {
+          // CRITICAL: Invalidate all existing NextAuth sessions for single device login
+          await prisma.session.updateMany({
+            where: { 
+              userId: user.id,
+              expires: { gt: new Date() } // Only active sessions
+            },
+            data: { 
+              expires: new Date() // Expire immediately
+            }
+          });
+          
+          // Single device login - only NextAuth sessions are managed
+          
+          console.log(`Single device login: invalidated all existing sessions for user: ${user.id}`);
+        } catch (error) {
+          console.error('Single device login error:', error);
+          // Don't block login if session management fails
+        }
+      }
+      return true;
+    },
     session: async ({ session, token }) => {
       if (session?.user && token?.sub) {
+        // Session validation handled by NextAuth JWT with 15-minute expiration
+
         (session.user as any).id = token.sub;
         (session.user as any).role = token.role;
       }
@@ -73,6 +100,7 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: "jwt",
+    maxAge: 15 * 60, // 15 minutes
   },
   pages: {
     signIn: "/auth/signin",
