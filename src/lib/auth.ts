@@ -82,12 +82,10 @@ export const authOptions: NextAuthOptions = {
     },
     session: async ({ session, token }) => {
       if (session?.user && token?.sub) {
-        // Session validation handled by NextAuth JWT with 15-minute expiration
-
         (session.user as any).id = token.sub;
         (session.user as any).role = token.role;
       }
-      return session
+      return session;
     },
     jwt: async ({ user, token }) => {
       if (user) {
@@ -99,7 +97,8 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: "jwt",
-    maxAge: 15 * 60, // 15 minutes
+    maxAge: 30, // 30 seconds
+    updateAge: 0, // Update session on every request to trigger validation
   },
   pages: {
     signIn: "/auth/signin",

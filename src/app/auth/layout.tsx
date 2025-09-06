@@ -15,13 +15,9 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>
-        <AuthSessionProvider>
-          <Toaster />
-          {children}
-        </AuthSessionProvider>
-      </body>
-    </html>
+    <AuthSessionProvider>
+      <Toaster />
+      {children}
+    </AuthSessionProvider>
   );
 }
