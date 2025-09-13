@@ -80,6 +80,7 @@ model Category {
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
   products    ProductCategory[]
+  promotionalBanners PromotionalBanner[]
 
   @@map("categories")
 }
@@ -107,6 +108,7 @@ model Product {
   wishlistItems    WishlistItem[]
   discounts        ProductDiscount[]
   notifications    ProductNotification[]
+  promotionalBanners PromotionalBanner[]
 
   @@map("products")
 }
@@ -247,6 +249,31 @@ enum UserRole {
 enum DiscountType {
   PERCENTAGE
   FIXED_AMOUNT
+}
+
+model PromotionalBanner {
+  id          Int      @id @default(autoincrement())
+  title       String
+  subtitle    String?
+  description String?
+  discount    String?  // e.g., "UP TO 10% OFF", "50% OFF", etc.
+  buttonText  String   @default("Buy Now")
+  buttonLink  String?  // Can be product URL, category URL, or external link
+  productId   Int?     // Optional: link to specific product
+  categoryId  Int?     // Optional: link to specific category
+  imageUrl    String
+  bgColor     String   @default("#F5F5F7")
+  textColor   String   @default("#000000")
+  isActive    Boolean  @default(true)
+  startDate   DateTime @default(now())
+  endDate     DateTime?
+  priority    Int      @default(0) // Higher number = higher priority
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  product     Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@map("promotional_banners")
 }
 
 enum OrderStatus {

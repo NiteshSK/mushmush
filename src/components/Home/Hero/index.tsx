@@ -30,7 +30,7 @@ const Hero = () => {
   }, [images.length]);
 
   return (
-    <section className="overflow-hidden pb-0 lg:pb-1 xl:pb-2 mt-32 bg-white" style={{ marginTop: '200px' }}>
+    <section className="overflow-hidden pb-0 lg:pb-1 xl:pb-2 pt-8 bg-white">
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
         <div className="flex flex-col lg:flex-row gap-8 items-center mb-8">
           {/* */}

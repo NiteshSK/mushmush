@@ -13,13 +13,13 @@ import WishlistSection from "./WishlistSection";
 const Home = () => {
   return (
     <main>
+      <PromoBanner />
       <Hero />
       <BestSeller />
       <Categories />
       <RecentlyViewed />
       <WishlistSection />
       {/* <NewArrival /> */}
-      <PromoBanner />
       <Testimonials />
       <Newsletter />
     </main>

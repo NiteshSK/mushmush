@@ -12,7 +12,14 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "db:backup": "tsx scripts/backup-database.ts backup",
+    "db:restore": "tsx scripts/backup-database.ts restore",
+    "db:list": "tsx scripts/backup-database.ts list",
+    "db:clean": "tsx scripts/backup-database.ts clean",
+    "migrate:safe": "tsx scripts/safe-migrate.ts migrate",
+    "migrate:reset": "tsx scripts/safe-migrate.ts reset",
+    "migrate:status": "tsx scripts/safe-migrate.ts status"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",
