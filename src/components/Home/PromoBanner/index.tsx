@@ -1,43 +1,12 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { PromotionalBanner } from "@/types/promotional-banner";
+import { usePromotionalBanners } from "@/hooks/usePromotionalBanners";
 
 const PromoBanner = () => {
-  const [banners, setBanners] = useState<PromotionalBanner[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
-
-  useEffect(() => {
-    const fetchBanners = async () => {
-      try {
-        const response = await fetch('/api/promotional-banners?limit=5');
-        const data = await response.json();
-        
-        if (data.success && data.data.length > 0) {
-          setBanners(data.data);
-        }
-      } catch (error) {
-        console.error('Error fetching promotional banners:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBanners();
-  }, []);
-
-  // Auto-rotate banners every 5 seconds if multiple banners exist
-  useEffect(() => {
-    if (banners.length > 1) {
-      const interval = setInterval(() => {
-        setCurrentBannerIndex((prev) => (prev + 1) % banners.length);
-      }, 5000);
-
-      return () => clearInterval(interval);
-    }
-  }, [banners.length]);
+  const { banners, loading, currentBannerIndex, setCurrentBannerIndex } = usePromotionalBanners();
 
   const generateBannerLink = (banner: PromotionalBanner): string => {
     if (banner.buttonLink) {
@@ -54,8 +23,14 @@ const PromoBanner = () => {
 
   if (loading) {
     return (
-      <section className="overflow-hidden pt-20 pb-4">
+      <section className="overflow-hidden">
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
+          {/* --- Skeleton Loader for Title --- */}
+          <div className="mb-8">
+            <div className="h-5 bg-gray-300 rounded w-32 mb-2 animate-pulse"></div>
+            <div className="h-7 bg-gray-300 rounded w-48 animate-pulse"></div>
+          </div>
+          
           <div className="relative z-1 overflow-hidden rounded-lg bg-gray-200 animate-pulse py-8 lg:py-12 xl:py-16 px-4 sm:px-7.5 lg:px-14 xl:px-19 mb-4">
             <div className="max-w-[550px] w-full">
               <div className="h-6 bg-gray-300 rounded mb-3 w-48"></div>
@@ -77,8 +52,26 @@ const PromoBanner = () => {
   const currentBanner = banners[currentBannerIndex];
 
   return (
-    <section className="overflow-hidden pt-20 pb-4">
+    <section className="overflow-hidden pt-20 pb-0">
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
+        {/* --- ADDED: Title Section --- */}
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <span className="flex items-center gap-2.5 font-medium text-dark mb-1.5">
+              <Image
+                src="/images/icons/icon-07.svg"
+                alt="icon"
+                width={17}
+                height={17}
+              />
+              Special Offers
+            </span>
+            <h2 className="font-semibold text-xl xl:text-heading-5 text-dark">
+              Promotions
+            </h2>
+          </div>
+        </div>
+
         {/* Dynamic promotional banner */}
         <div 
           className="relative z-1 overflow-hidden rounded-lg py-8 lg:py-12 xl:py-16 px-4 sm:px-7.5 lg:px-14 xl:px-19 mb-4"

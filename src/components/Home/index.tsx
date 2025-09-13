@@ -13,8 +13,9 @@ import WishlistSection from "./WishlistSection";
 const Home = () => {
   return (
     <main>
-      <PromoBanner />
+      
       <Hero />
+      <PromoBanner />
       <BestSeller />
       <Categories />
       <RecentlyViewed />
