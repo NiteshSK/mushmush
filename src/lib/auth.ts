@@ -97,7 +97,7 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: "jwt",
-    maxAge: 30, // 30 seconds
+    maxAge: 15 * 60, // 15 minutes (900 seconds)
     updateAge: 0, // Update session on every request to trigger validation
   },
   pages: {
