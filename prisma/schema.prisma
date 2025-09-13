@@ -28,6 +28,7 @@ model User {
   reviews          Review[]
   sessions         Session[]
   wishlist         WishlistItem[]
+  trainingRegistrations TrainingRegistration[]
 
   @@map("users")
 }
@@ -274,6 +275,72 @@ model PromotionalBanner {
   category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
   @@map("promotional_banners")
+}
+
+model TrainingProgram {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  slug        String   @unique
+  description String
+  price       Float
+  duration    Int      // Duration in days
+  dailyHours  String   @default("5-6 hours")
+  type        TrainingType
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  registrations TrainingRegistration[]
+
+  @@map("training_programs")
+}
+
+model TrainingRegistration {
+  id                String   @id @default(cuid())
+  registrationNumber String  @unique
+  status            RegistrationStatus @default(PENDING)
+  participantName   String
+  participantEmail  String
+  participantPhone  String
+  participantAddress Json
+  preferredStartDate DateTime?
+  specialRequirements String?
+  totalAmount       Float
+  paymentStatus     PaymentStatus @default(PENDING)
+  paymentMethod     String?
+  paymentReference  String?
+  paymentDate       DateTime?
+  upiTransactionId  String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  trainingProgramId Int
+  userId            String?
+  trainingProgram   TrainingProgram @relation(fields: [trainingProgramId], references: [id], onDelete: Cascade)
+  user              User?    @relation(fields: [userId], references: [id])
+
+  @@map("training_registrations")
+}
+
+enum TrainingType {
+  OYSTER
+  BUTTON
+  SHIITAKE
+  GANODERMA
+}
+
+enum RegistrationStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
 }
 
 enum OrderStatus {
