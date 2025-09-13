@@ -115,6 +115,20 @@ const AdminDashboardContent: React.FC = () => {
       link: '/admin/orders',
       color: 'bg-teal'
     },
+    {
+      title: 'Training Programs',
+      description: 'Manage training programs',
+      icon: '🎓',
+      link: '/admin/training-programs',
+      color: 'bg-indigo'
+    },
+    {
+      title: 'Training Registrations',
+      description: 'View training registrations',
+      icon: '📝',
+      link: '/admin/training-registrations',
+      color: 'bg-pink'
+    },
   ];
 
   if (loading) {
