@@ -4,6 +4,7 @@ import Breadcrumb from "../Common/Breadcrumb";
 import Image from "next/image";
 import Newsletter from "../Common/Newsletter";
 import RecentlyViewdItems from "./RecentlyViewd";
+import NotifyMeModal from "../NotifyMeModal";
 import { usePreviewSlider } from "@/app/context/PreviewSliderContext";
 import { useAppSelector } from "@/redux/store";
 import { useDispatch } from "react-redux";
@@ -53,6 +54,9 @@ const ShopDetails = () => {
   const { addToRecentlyViewed } = useRecentlyViewed();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const [isWishlistLoading, setIsWishlistLoading] = useState(false);
+  
+  // NotifyMe modal state
+  const [notifyModalOpen, setNotifyModalOpen] = useState(false);
 
   const dispatch = useDispatch();
   const router = useRouter();
@@ -97,6 +101,14 @@ const ShopDetails = () => {
     } finally {
       setIsWishlistLoading(false);
     }
+  };
+
+  const handleNotifyMe = () => {
+    setNotifyModalOpen(true);
+  };
+
+  const handleCloseNotifyModal = () => {
+    setNotifyModalOpen(false);
   };
 
   const tabs = [
@@ -469,6 +481,7 @@ const ShopDetails = () => {
                       
                       {!displayProduct.inStock && (
                           <button
+                            onClick={handleNotifyMe}
                             className="inline-flex font-medium text-white bg-dark py-3 px-7 rounded-md ease-out duration-200 hover:bg-opacity-90"
                           >
                             Notify Me
@@ -666,6 +679,16 @@ const ShopDetails = () => {
           <RecentlyViewdItems />
           <Newsletter />
         </>
+      )}
+
+      {/* NotifyMe Modal */}
+      {displayProduct && (
+        <NotifyMeModal
+          isOpen={notifyModalOpen}
+          onClose={handleCloseNotifyModal}
+          productId={displayProduct.id || 0}
+          productTitle={displayProduct.title || "Product"}
+        />
       )}
     </>
   );

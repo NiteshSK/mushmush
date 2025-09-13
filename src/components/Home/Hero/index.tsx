@@ -54,7 +54,7 @@ const Hero = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
-                href="shop-with-sidebar"
+                href="/shop"
                 className="border-2 border-blue text-blue hover:bg-blue hover:text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-300"
               >
                 Shop Now
