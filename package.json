@@ -19,7 +19,8 @@
     "db:clean": "tsx scripts/backup-database.ts clean",
     "migrate:safe": "tsx scripts/safe-migrate.ts migrate",
     "migrate:reset": "tsx scripts/safe-migrate.ts reset",
-    "migrate:status": "tsx scripts/safe-migrate.ts status"
+    "migrate:status": "tsx scripts/safe-migrate.ts status",
+    "fix:production-migration": "node scripts/resolve-production-migration.js"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",
