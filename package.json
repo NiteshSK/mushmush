@@ -21,6 +21,7 @@
     "migrate:reset": "tsx scripts/safe-migrate.ts reset",
     "migrate:status": "tsx scripts/safe-migrate.ts status",
     "fix:production-migration": "node scripts/resolve-production-migration.js",
+    "fix:p3009": "node scripts/fix-p3009-production.js",
     "migrate:production": "tsx scripts/safe-production-migration.ts"
   },
   "dependencies": {
