@@ -54,9 +54,9 @@ const PromoBanner = () => {
 
   if (loading) {
     return (
-      <section className="overflow-hidden pt-20">
+      <section className="overflow-hidden pt-20 pb-4">
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
-          <div className="relative z-1 overflow-hidden rounded-lg bg-gray-200 animate-pulse py-12.5 lg:py-17.5 xl:py-22.5 px-4 sm:px-7.5 lg:px-14 xl:px-19 mb-7.5">
+          <div className="relative z-1 overflow-hidden rounded-lg bg-gray-200 animate-pulse py-8 lg:py-12 xl:py-16 px-4 sm:px-7.5 lg:px-14 xl:px-19 mb-4">
             <div className="max-w-[550px] w-full">
               <div className="h-6 bg-gray-300 rounded mb-3 w-48"></div>
               <div className="h-8 bg-gray-300 rounded mb-5 w-64"></div>
@@ -77,11 +77,11 @@ const PromoBanner = () => {
   const currentBanner = banners[currentBannerIndex];
 
   return (
-    <section className="overflow-hidden pt-80 pb-8">
+    <section className="overflow-hidden pt-20 pb-4">
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
         {/* Dynamic promotional banner */}
         <div 
-          className="relative z-1 overflow-hidden rounded-lg py-12.5 lg:py-17.5 xl:py-22.5 px-4 sm:px-7.5 lg:px-14 xl:px-19 mb-7.5"
+          className="relative z-1 overflow-hidden rounded-lg py-8 lg:py-12 xl:py-16 px-4 sm:px-7.5 lg:px-14 xl:px-19 mb-4"
           style={{ 
             backgroundColor: currentBanner.bgColor,
             color: currentBanner.textColor 
@@ -123,7 +123,7 @@ const PromoBanner = () => {
 
         {/* Banner indicators */}
         {banners.length > 1 && (
-          <div className="flex justify-center space-x-2 -mt-4 mb-4">
+          <div className="flex justify-center space-x-2 -mt-2 mb-2">
             {banners.map((_, index) => (
               <button
                 key={index}
