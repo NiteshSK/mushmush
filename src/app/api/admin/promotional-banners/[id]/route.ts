@@ -13,7 +13,7 @@ async function checkAdminAuth() {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const isAdmin = await checkAdminAuth();
@@ -24,7 +24,8 @@ export async function GET(
       );
     }
 
-    const bannerId = parseInt(params.id);
+    const { id } = await params;
+    const bannerId = parseInt(id);
     if (isNaN(bannerId)) {
       return NextResponse.json(
         { success: false, error: 'Invalid banner ID' },
@@ -77,7 +78,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const isAdmin = await checkAdminAuth();
@@ -88,7 +89,8 @@ export async function PUT(
       );
     }
 
-    const bannerId = parseInt(params.id);
+    const { id } = await params;
+    const bannerId = parseInt(id);
     if (isNaN(bannerId)) {
       return NextResponse.json(
         { success: false, error: 'Invalid banner ID' },
@@ -176,7 +178,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const isAdmin = await checkAdminAuth();
@@ -187,7 +189,8 @@ export async function DELETE(
       );
     }
 
-    const bannerId = parseInt(params.id);
+    const { id } = await params;
+    const bannerId = parseInt(id);
     if (isNaN(bannerId)) {
       return NextResponse.json(
         { success: false, error: 'Invalid banner ID' },
