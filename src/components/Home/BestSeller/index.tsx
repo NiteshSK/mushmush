@@ -6,9 +6,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { Product } from "@/types/product";
 import { useProducts } from "@/hooks/useProducts";
+import { usePromotionalBanners } from "@/hooks/usePromotionalBanners";
 
 const BestSeller = () => {
   const { products, loading, error } = useProducts();
+  const { hasBanners } = usePromotionalBanners();
   const bestSellers = products
     .sort((a: Product, b: Product) => (b.reviews ?? 0) - (a.reviews ?? 0))
     .slice(0, 3);
@@ -29,8 +31,7 @@ const BestSeller = () => {
   };
 
   return (
-    // --- UPDATED: Removed bottom padding to eliminate all vertical space ---
-    <section className="overflow-hidden">
+    <section className={`overflow-hidden ${hasBanners ? 'pt-20' : ''}`}>
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
         <div className="mb-10 flex items-center justify-between">
           <div>

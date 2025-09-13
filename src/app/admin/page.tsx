@@ -95,6 +95,13 @@ const AdminDashboardContent: React.FC = () => {
       color: 'bg-green'
     },
     {
+      title: 'Promotional Banners',
+      description: 'Manage promotional banners',
+      icon: '🎨',
+      link: '/admin/promotional-banners',
+      color: 'bg-purple'
+    },
+    {
       title: 'Manage Discounts',
       description: 'Update product discounts',
       icon: '🏷️',

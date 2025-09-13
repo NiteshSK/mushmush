@@ -8,7 +8,7 @@ const Hero = () => {
   // Array of image sources
   const images = [
     // "/images/categories/hero_mushrooms.png",
-    // "/images/categories/hero_mushrooms_1.png", // Add the path to your second image
+    // "/images/-categories/hero_mushrooms_1.png", // Add the path to your second image
     "/images/categories/hero_mushrooms_2.png",
     "/images/categories/hero_mushrooms_3.png", // Add the path to your third image
     "/images/categories/hero_mushrooms_4.png",
@@ -30,7 +30,8 @@ const Hero = () => {
   }, [images.length]);
 
   return (
-    <section className="overflow-hidden pb-0 lg:pb-1 xl:pb-2 mt-32 bg-white" style={{ marginTop: '200px' }}>
+    // --- UPDATED: Removed lg:pb-1 and xl:pb-2 to eliminate bottom padding ---
+    <section className="overflow-hidden pb-0 mt-32 bg-white" style={{ marginTop: '200px' }}>
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
         <div className="flex flex-col lg:flex-row gap-8 items-center mb-8">
           {/* */}
