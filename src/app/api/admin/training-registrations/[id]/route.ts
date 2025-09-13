@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 // GET /api/admin/training-registrations/[id] - Get specific training registration (admin only)
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -18,6 +18,7 @@ export async function GET(
       );
     }
 
+    const params = await context.params;
     const registration = await prisma.trainingRegistration.findUnique({
       where: { id: params.id },
       include: {
@@ -52,7 +53,7 @@ export async function GET(
 // PUT /api/admin/training-registrations/[id] - Update training registration status (admin only)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -64,6 +65,7 @@ export async function PUT(
       );
     }
 
+    const params = await context.params;
     const body = await request.json();
     const { status } = body;
 

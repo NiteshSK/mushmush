@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 // GET /api/admin/training-programs/[id] - Get specific training program (admin only)
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -18,6 +18,7 @@ export async function GET(
       );
     }
 
+    const params = await context.params;
     const id = parseInt(params.id);
     
     if (isNaN(id)) {
@@ -63,7 +64,7 @@ export async function GET(
 // PUT /api/admin/training-programs/[id] - Update training program (admin only)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -75,6 +76,7 @@ export async function PUT(
       );
     }
 
+    const params = await context.params;
     const id = parseInt(params.id);
     
     if (isNaN(id)) {
@@ -119,7 +121,7 @@ export async function PUT(
 // DELETE /api/admin/training-programs/[id] - Delete training program (admin only)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -131,6 +133,7 @@ export async function DELETE(
       );
     }
 
+    const params = await context.params;
     const id = parseInt(params.id);
     
     if (isNaN(id)) {

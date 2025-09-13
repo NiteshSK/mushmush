@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import TrainingProgramsAdmin from "@/components/Admin/TrainingPrograms";
 import PaymentVerification from "@/components/Admin/PaymentVerification";
+import AdminAuthWrapper from "@/components/Admin/AdminAuthWrapper";
 
 interface DashboardStats {
   totalProducts: number;
