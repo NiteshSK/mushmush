@@ -14,7 +14,7 @@ async function main() {
         title: 'All Mushrooms',
         slug: 'all-mushrooms',
         img: '/images/categories/mushrooms.png',
-        path: '/shop-without-sidebar',
+        path: '/shop',
         description: 'Complete collection of all mushroom varieties'
       }
     }),
@@ -25,7 +25,7 @@ async function main() {
         title: 'Edible',
         slug: 'edible',
         img: '/images/categories/edible_mushrooms.png',
-        path: '/shop-without-sidebar?category=edible',
+        path: '/shop?category=edible',
         description: 'Fresh edible mushrooms for culinary use'
       }
     }),
@@ -36,7 +36,7 @@ async function main() {
         title: 'Medicinal',
         slug: 'medicinal',
         img: '/images/categories/medicinal_mushrooms.png',
-        path: '/shop-without-sidebar?category=medicinal',
+        path: '/shop?category=medicinal',
         description: 'Medicinal mushrooms for health and wellness'
       }
     }),
@@ -47,7 +47,7 @@ async function main() {
         title: 'Tinctures',
         slug: 'tinctures',
         img: '/images/categories/generic_tincture.png',
-        path: '/shop-without-sidebar?category=tinctures',
+        path: '/shop?category=tinctures',
         description: 'Concentrated mushroom tinctures and extracts'
       }
     }),
@@ -58,7 +58,7 @@ async function main() {
         title: 'Dry Powder',
         slug: 'powders',
         img: '/images/categories/powders.png',
-        path: '/shop-without-sidebar?category=powders',
+        path: '/shop?category=powders',
         description: 'Dried mushroom powders and supplements'
       }
     })
