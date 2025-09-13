@@ -305,6 +305,11 @@ model TrainingRegistration {
   preferredStartDate DateTime?
   specialRequirements String?
   totalAmount       Float
+  paymentStatus     PaymentStatus @default(PENDING)
+  paymentMethod     String?
+  paymentReference  String?
+  paymentDate       DateTime?
+  upiTransactionId  String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   trainingProgramId Int
@@ -328,6 +333,14 @@ enum RegistrationStatus {
   IN_PROGRESS
   COMPLETED
   CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
 }
 
 enum OrderStatus {

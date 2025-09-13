@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
+import PaymentModal from "./PaymentModal";
 
 interface TrainingProgram {
   id: number;
@@ -22,6 +23,8 @@ const TrainingPrograms = () => {
   const [loading, setLoading] = useState(true);
   const [selectedProgram, setSelectedProgram] = useState<TrainingProgram | null>(null);
   const [showRegistrationModal, setShowRegistrationModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [pendingRegistration, setPendingRegistration] = useState<any>(null);
 
   // Fetch training programs
   useEffect(() => {
@@ -257,6 +260,26 @@ const TrainingPrograms = () => {
             setSelectedProgram(null);
           }}
           user={session?.user}
+          onRegistrationComplete={(registration) => {
+            setPendingRegistration(registration);
+            setShowPaymentModal(true);
+          }}
+        />
+      )}
+
+      {/* Payment Modal */}
+      {showPaymentModal && pendingRegistration && (
+        <PaymentModal
+          registration={pendingRegistration}
+          onClose={() => {
+            setShowPaymentModal(false);
+            setPendingRegistration(null);
+          }}
+          onPaymentComplete={(paymentData) => {
+            toast.success('Payment submitted! Check your email for confirmation.');
+            setShowPaymentModal(false);
+            setPendingRegistration(null);
+          }}
         />
       )}
     </div>
@@ -268,10 +291,12 @@ const RegistrationModal = ({
   program,
   onClose,
   user,
+  onRegistrationComplete,
 }: {
   program: TrainingProgram;
   onClose: () => void;
   user: any;
+  onRegistrationComplete: (registration: any) => void;
 }) => {
   const [formData, setFormData] = useState({
     participantName: user?.name || "",
@@ -308,6 +333,9 @@ const RegistrationModal = ({
       if (response.ok) {
         const registration = await response.json();
         toast.success(`Registration successful! Your registration number is ${registration.registrationNumber}`);
+        
+        // Show payment modal after successful registration
+        onRegistrationComplete(registration);
         onClose();
       } else {
         const error = await response.json();
@@ -479,7 +507,7 @@ const RegistrationModal = ({
               <button
                 type="submit"
                 disabled={loading}
-                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                className="w-full bg-blue hover:bg-blue-dark text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 border-0"
               >
                 {loading ? "Registering..." : "Register"}
               </button>

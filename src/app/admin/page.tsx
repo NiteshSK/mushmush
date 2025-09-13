@@ -1,7 +1,8 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import AdminAuthWrapper from '@/components/Admin/AdminAuthWrapper';
+import TrainingProgramsAdmin from "@/components/Admin/TrainingPrograms";
+import PaymentVerification from "@/components/Admin/PaymentVerification";
 
 interface DashboardStats {
   totalProducts: number;
@@ -128,6 +129,13 @@ const AdminDashboardContent: React.FC = () => {
       icon: '📝',
       link: '/admin/training-registrations',
       color: 'bg-pink'
+    },
+    {
+      title: 'Payment Verification',
+      description: 'Verify UPI payments',
+      icon: '💳',
+      link: '/admin/payment-verification',
+      color: 'bg-orange'
     },
   ];
 
