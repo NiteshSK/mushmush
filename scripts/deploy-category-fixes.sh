@@ -36,9 +36,9 @@ if [ ! -f "package.json" ]; then
     exit 1
 fi
 
-# 1. Create database backup
-echo "📦 Creating database backup..."
-npm run db:backup
+# 1. Create backup using TypeScript script
+echo "📦 Creating backup..."
+npx ts-node scripts/backup-production-db.ts
 if [ $? -eq 0 ]; then
     print_status "Database backup created successfully"
 else
@@ -80,7 +80,22 @@ else
     cat /tmp/category-check.txt
 fi
 
-# 5. Deploy to production (if using Vercel)
+# 5. Apply Prisma migrations (including P3009 conflict resolution)
+echo "📋 Step 4: Applying Prisma migrations (including P3009 conflict resolution)..."
+# Apply all pending migrations, including the one that resolves P3009 conflict
+npx prisma migrate deploy
+
+if [ $? -eq 0 ]; then
+    print_status "Migrations applied successfully"
+else
+    print_error "Migration failed - attempting to restore from backup"
+    # Restore from backup
+    npm run db:restore
+    print_warning "Backup restored"
+    exit 1
+fi
+
+# 6. Deploy to production (if using Vercel)
 if command -v vercel &> /dev/null; then
     echo "🚀 Deploying to Vercel..."
     vercel --prod
