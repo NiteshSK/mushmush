@@ -67,17 +67,14 @@ else
 fi
 
 # 4. Verify the changes
-echo "🔍 Verifying category path changes..."
-curl -s "${PRODUCTION_API_URL:-https://mushmush.vercel.app}/api/categories" | jq -r '.[] | "\(.title): \(.path)"' > /tmp/category-check.txt
+echo "🔍 Verifying category path changes directly in the database..."
+npx ts-node scripts/verify-category-paths.ts
 
-if grep -q "/shop-without-sidebar" /tmp/category-check.txt; then
-    print_error "Some category paths still contain /shop-without-sidebar"
-    cat /tmp/category-check.txt
-    exit 1
-else
+if [ $? -eq 0 ]; then
     print_status "All category paths verified successfully"
-    echo "📋 Updated category paths:"
-    cat /tmp/category-check.txt
+else
+    print_error "Verification of category paths failed."
+    exit 1
 fi
 
 # 5. Apply Prisma migrations (including P3009 conflict resolution)

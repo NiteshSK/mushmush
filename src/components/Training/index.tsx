@@ -96,56 +96,56 @@ const TrainingPrograms = () => {
   return (
     <div className="bg-gray-50 min-h-screen">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-green-600 to-blue-600 text-white py-20">
+      <div className="bg-gradient-to-r from-green-600 to-blue-600 text-white py-16 md:py-20">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6">
             Mushroom Cultivation Training Programs
           </h1>
-          <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
+          <p className="text-lg md:text-xl lg:text-2xl mb-6 md:mb-8 max-w-3xl mx-auto leading-relaxed">
             Master the art of mushroom cultivation with our comprehensive, hands-on training programs. 
             Learn from experts and start your journey in sustainable agriculture.
           </p>
-          <div className="flex flex-wrap justify-center gap-4 text-lg">
-            <div className="flex items-center">
-              <span className="mr-2">✓</span>
-              Theory & Practical Training
+          <div className="flex flex-wrap justify-center gap-6 md:gap-8 text-base md:text-lg">
+            <div className="flex items-center space-x-2">
+              <span className="text-green-300">✓</span>
+              <span>Theory & Practical Training</span>
             </div>
-            <div className="flex items-center">
-              <span className="mr-2">✓</span>
-              Expert Instructors
+            <div className="flex items-center space-x-2">
+              <span className="text-green-300">✓</span>
+              <span>Expert Instructors</span>
             </div>
-            <div className="flex items-center">
-              <span className="mr-2">✓</span>
-              Certification Provided
+            <div className="flex items-center space-x-2">
+              <span className="text-green-300">✓</span>
+              <span>Certification Provided</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Training Programs Grid */}
-      <div className="container mx-auto px-4 py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+      <div className="container mx-auto px-4 py-12 md:py-16">
+        <div className="text-center mb-8 md:mb-12">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3 md:mb-4">
             Choose Your Training Program
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
             We offer specialized training programs for different types of mushroom cultivation. 
             Each program includes both theoretical knowledge and hands-on practical experience.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 md:gap-8 max-w-6xl mx-auto">
           {trainingPrograms.map((program) => (
             <div
               key={program.id}
               className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
             >
-              <div className="p-8">
-                <div className="flex items-center justify-between mb-4">
+              <div className="p-6 md:p-8">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                   <div className="flex items-center">
-                    <span className="text-4xl mr-3">{getTypeIcon(program.type)}</span>
+                    <span className="text-3xl md:text-4xl mr-3">{getTypeIcon(program.type)}</span>
                     <div>
-                      <h3 className="text-2xl font-bold text-gray-900">{program.name}</h3>
+                      <h3 className="text-xl md:text-2xl font-bold text-gray-900">{program.name}</h3>
                       <span
                         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeColor(
                           program.type
@@ -155,8 +155,8 @@ const TrainingPrograms = () => {
                       </span>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-3xl font-bold text-green-600">
+                  <div className="text-left sm:text-right">
+                    <div className="text-2xl md:text-3xl font-bold text-green-600">
                       ₹{program.price.toLocaleString()}
                     </div>
                     <div className="text-sm text-gray-500">per participant</div>
@@ -179,20 +179,38 @@ const TrainingPrograms = () => {
                 </div>
 
                 <div className="mb-6">
-                  <h4 className="font-semibold text-gray-900 mb-2">What You'll Learn:</h4>
-                  <ul className="text-sm text-gray-600 space-y-1">
-                    <li>• Mushroom biology and lifecycle</li>
-                    <li>• Substrate preparation and sterilization</li>
-                    <li>• Inoculation techniques</li>
-                    <li>• Environmental control and monitoring</li>
-                    <li>• Harvesting and post-harvest handling</li>
-                    <li>• Business aspects and marketing</li>
+                  <h4 className="font-semibold text-gray-900 mb-3">What You'll Learn:</h4>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-0.5">•</span>
+                      <span>Mushroom biology and lifecycle</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-0.5">•</span>
+                      <span>Substrate preparation and sterilization</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-0.5">•</span>
+                      <span>Inoculation techniques</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-0.5">•</span>
+                      <span>Environmental control and monitoring</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-0.5">•</span>
+                      <span>Harvesting and post-harvest handling</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-0.5">•</span>
+                      <span>Business aspects and marketing</span>
+                    </li>
                   </ul>
                 </div>
 
                 <button
                   onClick={() => handleRegisterClick(program)}
-                  className="w-full bg-blue hover:bg-blue-dark text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 border-0"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 border-0 shadow-sm hover:shadow-md"
                 >
                   Register Now
                 </button>
@@ -209,41 +227,41 @@ const TrainingPrograms = () => {
       </div>
 
       {/* Features Section */}
-      <div className="bg-white py-16">
+      <div className="bg-white py-12 md:py-16">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-8 md:mb-12">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
               Why Choose Our Training Programs?
             </h2>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+            <div className="text-center p-6 rounded-lg hover:bg-gray-50 transition-colors duration-200">
               <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">👨‍🏫</span>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Expert Instructors</h3>
-              <p className="text-gray-600">
+              <h3 className="text-lg md:text-xl font-semibold mb-2">Expert Instructors</h3>
+              <p className="text-gray-600 text-sm md:text-base leading-relaxed">
                 Learn from experienced mushroom cultivation experts with years of practical knowledge.
               </p>
             </div>
             
-            <div className="text-center">
+            <div className="text-center p-6 rounded-lg hover:bg-gray-50 transition-colors duration-200">
               <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">🔬</span>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Hands-On Learning</h3>
-              <p className="text-gray-600">
+              <h3 className="text-lg md:text-xl font-semibold mb-2">Hands-On Learning</h3>
+              <p className="text-gray-600 text-sm md:text-base leading-relaxed">
                 Get practical experience with real mushroom cultivation setups and equipment.
               </p>
             </div>
             
-            <div className="text-center">
+            <div className="text-center p-6 rounded-lg hover:bg-gray-50 transition-colors duration-200">
               <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">📜</span>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Certification</h3>
-              <p className="text-gray-600">
+              <h3 className="text-lg md:text-xl font-semibold mb-2">Certification</h3>
+              <p className="text-gray-600 text-sm md:text-base leading-relaxed">
                 Receive official certification upon successful completion of the training program.
               </p>
             </div>
@@ -373,7 +391,7 @@ const RegistrationModal = ({
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -430,10 +448,10 @@ const RegistrationModal = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Address *
               </label>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <input
                   type="text"
                   placeholder="Street Address"
@@ -445,7 +463,7 @@ const RegistrationModal = ({
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-3">
                   <input
                     type="text"
                     placeholder="City"
@@ -484,7 +502,7 @@ const RegistrationModal = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Special Requirements or Questions
               </label>
               <textarea
@@ -496,18 +514,18 @@ const RegistrationModal = ({
               />
             </div>
 
-            <div className="flex justify-end space-x-3 pt-4">
+            <div className="flex flex-col sm:flex-row justify-end gap-3 pt-6">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-6 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+                className="px-6 py-3 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors duration-200 font-medium"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue hover:bg-blue-dark text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 border-0"
+                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors duration-200 border-0 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
               >
                 {loading ? "Registering..." : "Register"}
               </button>
