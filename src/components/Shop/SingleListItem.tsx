@@ -104,7 +104,7 @@ const SingleListItem = ({ item, priority = false, onNotifyMe }: Props) => {
                   <Image key={i} src="/images/icons/icon-star.svg" alt="star icon" width={15} height={15}/>
               ))}
           </div>
-          <p className="text-custom-sm">({item.reviews} Reviews)</p>
+          <p className="text-custom-sm">({item.reviewCount || 0} Reviews)</p>
         </div>
         
         <div className="flex items-center justify-between">
