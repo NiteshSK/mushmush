@@ -46,10 +46,9 @@ export async function sendRestockNotifications(productId: number) {
 
     // Send emails to all subscribers
     const emailPromises = notifications.map(async (notification) => {
-      const template = emailTemplates.restockNotification(
+      const template = emailTemplates.restockAlert(
         product.title,
-        productUrl,
-        productImage
+        productUrl
       );
 
       const result = await sendEmail({

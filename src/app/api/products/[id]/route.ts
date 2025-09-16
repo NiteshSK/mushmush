@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { triggerRestockNotifications } from '@/lib/notifications'
 
 // GET /api/products/[id] - Fetch single product by ID
 export async function GET(
@@ -100,6 +101,12 @@ export async function PUT(
       categories
     } = body
 
+    // Get current product state to check if stock status changed
+    const currentProduct = await prisma.product.findUnique({
+      where: { id: productId },
+      select: { inStock: true }
+    });
+
     // Update slug if title changed
     const slug = title ? title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : undefined
 
@@ -120,6 +127,18 @@ export async function PUT(
         ...(additionalInfo && { additionalInfo })
       }
     })
+
+    // Trigger restock notifications whenever product is in stock.
+    // Safe to call repeatedly; function only emails active subscribers and deactivates them after send.
+    if (product.inStock) {
+      console.log(`Product ${productId} is in stock, attempting to send restock notifications...`);
+      try {
+        await triggerRestockNotifications(productId);
+      } catch (error) {
+        console.error('Failed to send restock notifications:', error);
+        // Don't fail the update if notifications fail
+      }
+    }
 
     // Update categories if provided
     if (categories) {
