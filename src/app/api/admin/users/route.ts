@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { requireAdmin } from '@/lib/admin';
+import { validatePasswordPolicy } from '@/lib/validation';
 
 // GET - Fetch all users (admin only)
 export async function GET(request: NextRequest) {
@@ -62,12 +63,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate password strength
-    if (password.length < 6) {
-      return NextResponse.json(
-        { error: 'Password must be at least 6 characters long' },
-        { status: 400 }
-      );
+    // Validate password strength (policy)
+    const passwordCheck = validatePasswordPolicy(password);
+    if (!passwordCheck.valid) {
+      return NextResponse.json({ error: passwordCheck.error }, { status: 400 });
     }
 
     // Check if user already exists

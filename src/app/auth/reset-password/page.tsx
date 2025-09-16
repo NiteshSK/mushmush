@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { passwordRequirementsText } from "@/lib/validation";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -32,8 +33,9 @@ function ResetPasswordForm() {
       return;
     }
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters long!");
+    const policy = /^(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}$/;
+    if (!policy.test(password)) {
+      setError(passwordRequirementsText + "!");
       return;
     }
 
@@ -133,7 +135,7 @@ function ResetPasswordForm() {
                     onChange={(e) => setPassword(e.target.value)}
                     className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
                     placeholder="Enter new password"
-                    minLength={6}
+                    minLength={8}
                   />
                 </div>
               </div>
@@ -153,10 +155,11 @@ function ResetPasswordForm() {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
                     placeholder="Confirm new password"
-                    minLength={6}
+                    minLength={8}
                   />
                 </div>
               </div>
+              <p className="text-xs text-gray-500">{passwordRequirementsText}</p>
 
               <div>
                 <button

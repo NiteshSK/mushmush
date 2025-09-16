@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
+import { validatePasswordPolicy } from '@/lib/validation';
 
 // POST - Create first admin user (only if no admin exists)
 export async function POST(request: NextRequest) {
@@ -46,12 +47,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate password strength
-    if (password.length < 6) {
-      return NextResponse.json(
-        { error: 'Password must be at least 6 characters long' },
-        { status: 400 }
-      );
+    // Validate password strength (policy)
+    const passwordCheck = validatePasswordPolicy(password);
+    if (!passwordCheck.valid) {
+      return NextResponse.json({ error: passwordCheck.error }, { status: 400 });
     }
 
     // Check if user with email already exists
