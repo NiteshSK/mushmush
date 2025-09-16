@@ -83,12 +83,16 @@ async function main() {
           "/images/products/ganoderma_package.png",
           "/images/products/ganoderma_specs.png",
           "/images/products/ganoderma.png",
+          "/images/products/ganoderma_real_1.png",
+          "/images/products/ganoderma_real_2.png",
         ],
         previews: [
           "/images/products/ganoderma_sticker.png",
           "/images/products/ganoderma_package.png",
           "/images/products/ganoderma_specs.png",
           "/images/products/ganoderma.png",
+          "/images/products/ganoderma_real_1.png",
+          "/images/products/ganoderma_real_2.png",
         ]
       },
       specifications: [
@@ -347,7 +351,8 @@ async function main() {
     
     const product = await prisma.product.upsert({
       where: { slug: productInfo.slug },
-      update: {},
+      // Update existing products so new fields (like imgs) are applied
+      update: productInfo,
       create: productInfo
     })
 
