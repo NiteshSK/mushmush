@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { sendRestockNotifications } from '@/lib/notifications';
 
 // PUT /api/admin/products/[id] - Update product details (Admin only)
 export async function PUT(
@@ -33,6 +34,19 @@ export async function PUT(
       howToConsume,
       additionalInfo
     } = body;
+
+    // Check if product is currently out of stock and will be updated to in stock
+    let shouldSendRestockNotifications = false;
+    if (inStock !== undefined && inStock === true) {
+      const currentProduct = await prisma.product.findUnique({
+        where: { id: parseInt(id) },
+        select: { inStock: true }
+      });
+      
+      if (currentProduct && !currentProduct.inStock) {
+        shouldSendRestockNotifications = true;
+      }
+    }
 
     // Update the product
     const updatedProduct = await prisma.product.update({
@@ -66,6 +80,14 @@ export async function PUT(
       }
     });
 
+    // Send restock notifications if product came back in stock
+    if (shouldSendRestockNotifications) {
+      console.log(`Product ${id} came back in stock, sending notifications...`);
+      sendRestockNotifications(parseInt(id)).catch((error) => {
+        console.error('Failed to send restock notifications:', error);
+      });
+    }
+
     return NextResponse.json(updatedProduct);
   } catch (error) {
     console.error('Error updating product:', error);
@@ -94,6 +116,19 @@ export async function PATCH(
     const { id } = await context.params;
     const body = await request.json();
     const { field, value } = body;
+
+    // Check if product is coming back in stock via PATCH
+    let shouldSendRestockNotifications = false;
+    if (field === 'inStock' && value === true) {
+      const currentProduct = await prisma.product.findUnique({
+        where: { id: parseInt(id) },
+        select: { inStock: true }
+      });
+      
+      if (currentProduct && !currentProduct.inStock) {
+        shouldSendRestockNotifications = true;
+      }
+    }
 
     // Validate allowed fields
     const allowedFields = ['price', 'inStock', 'featured', 'title', 'description', 'measurementValue', 'measurementType'];
@@ -140,6 +175,14 @@ export async function PATCH(
         }
       }
     });
+
+    // Send restock notifications if product came back in stock
+    if (shouldSendRestockNotifications) {
+      console.log(`Product ${id} came back in stock via PATCH, sending notifications...`);
+      sendRestockNotifications(parseInt(id)).catch((error) => {
+        console.error('Failed to send restock notifications:', error);
+      });
+    }
 
     return NextResponse.json(updatedProduct);
   } catch (error) {

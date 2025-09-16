@@ -69,7 +69,7 @@ const SingleItem = ({ item }: { item: Product }) => {
     <div className="group flex flex-col h-full bg-white rounded-lg shadow-1 overflow-hidden transition-shadow duration-300 hover:shadow-2">
       {/* Product Image */}
       <div className="relative w-full aspect-square overflow-hidden bg-gray-1">
-        <Link href="/shop-details" onClick={handleNavigateToDetails} className="block w-full h-full">
+        <Link href={`/shop-details/${item.slug}`} onClick={handleNavigateToDetails} className="block w-full h-full">
           <Image
             src={item.imgs.previews[0]}
             alt={item.title}

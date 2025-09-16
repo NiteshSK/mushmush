@@ -8,7 +8,7 @@ import NotifyMeModal from "../NotifyMeModal";
 import { usePreviewSlider } from "@/app/context/PreviewSliderContext";
 import { useAppSelector } from "@/redux/store";
 import { useDispatch } from "react-redux";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams, useParams } from "next/navigation";
 import { addItemToCart } from "@/redux/features/cart-slice";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { useWishlist } from "@/app/context/WishlistContext";
@@ -60,6 +60,9 @@ const ShopDetails = () => {
 
   const dispatch = useDispatch();
   const router = useRouter();
+  const params = useParams();
+  const searchParams = useSearchParams();
+  const slug = params?.slug as string;
 
   const handlePurchaseNow = () => {
     if (!displayProduct || !displayProduct.id) return; // Safety check
@@ -133,22 +136,83 @@ const ShopDetails = () => {
 
   useEffect(() => {
     setIsClient(true);
-    const alreadyExist = localStorage.getItem("productDetails");
     
-    const resolvedProduct =
-      productFromStorage && productFromStorage.title
-        ? productFromStorage
-        : alreadyExist
-        ? JSON.parse(alreadyExist)
-        : {};
-    
-    setProduct(resolvedProduct);
-    
-    // Fetch fresh product data with discount information if we have a product ID
-    if (resolvedProduct.id) {
-      fetchProductWithDiscounts(resolvedProduct.id);
+    // Fetch product by slug from URL
+    if (slug) {
+      fetchProductBySlug(slug);
+    } else {
+      // Fallback to localStorage for backward compatibility
+      const alreadyExist = localStorage.getItem("productDetails");
+      const resolvedProduct =
+        productFromStorage && productFromStorage.title
+          ? productFromStorage
+          : alreadyExist
+          ? JSON.parse(alreadyExist)
+          : {};
+      
+      setProduct(resolvedProduct);
+      
+      if (resolvedProduct.id) {
+        fetchProductWithDiscounts(resolvedProduct.id);
+      }
     }
-  }, [productFromStorage]);
+  }, [slug, productFromStorage]);
+
+  const fetchProductBySlug = async (productSlug: string) => {
+    try {
+      setProductLoading(true);
+      const response = await fetch(`/api/products?slug=${productSlug}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch product by slug');
+      }
+      
+      const data = await response.json();
+      
+      // Find the specific product from the response
+      const productBySlug = data.products?.find((p: any) => p.slug === productSlug);
+      
+      if (productBySlug) {
+        // Set the product data
+        const updatedProduct = {
+          ...product,
+          ...productBySlug,
+          discountPercentage: productBySlug.discountPercentage,
+          hasDiscount: productBySlug.hasDiscount,
+          discountedPrice: productBySlug.discountedPrice,
+          // Preserve measurement structure
+          measurement: productBySlug.measurementValue && productBySlug.measurementType ? {
+            value: productBySlug.measurementValue,
+            type: productBySlug.measurementType
+          } : productBySlug.measurement
+        };
+        
+        setProduct(updatedProduct);
+        localStorage.setItem("productDetails", JSON.stringify(updatedProduct));
+        
+        // Also fetch fresh discount data
+        if (productBySlug.id) {
+          fetchProductWithDiscounts(productBySlug.id);
+        }
+      } else {
+        console.error('Product not found for slug:', productSlug);
+        // Fallback to localStorage
+        const alreadyExist = localStorage.getItem("productDetails");
+        if (alreadyExist) {
+          setProduct(JSON.parse(alreadyExist));
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching product by slug:', error);
+      // Fallback to localStorage
+      const alreadyExist = localStorage.getItem("productDetails");
+      if (alreadyExist) {
+        setProduct(JSON.parse(alreadyExist));
+      }
+    } finally {
+      setProductLoading(false);
+    }
+  };
 
   const fetchProductWithDiscounts = async (productId: number) => {
     try {
