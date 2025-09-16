@@ -110,13 +110,15 @@ const SingleItem = ({ item, onNotifyMe }: { item: Product; onNotifyMe?: (product
         </div>
 
         <div className="flex justify-center items-center">
-          <Image
-            src={item.imgs.previews[0]}
-            alt={item.title}
-            width={280}
-            height={280}
-            className={!item.inStock ? "grayscale" : ""}
-          />
+          {item.imgs?.previews?.[0] ? (
+            <Image
+              src={item.imgs.previews[0]}
+              alt={item.title}
+              width={280}
+              height={280}
+              className={!item.inStock ? "grayscale" : ""}
+            />
+          ) : null}
         </div>
 
         {/* --- UPDATED: Conditional Buttons --- */}

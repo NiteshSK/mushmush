@@ -61,6 +61,17 @@ async function main() {
         path: '/shop?category=powders',
         description: 'Dried mushroom powders and supplements'
       }
+    }),
+    prisma.category.upsert({
+      where: { slug: 'spat-spawn' },
+      update: {},
+      create: {
+        title: 'Spat/Spawn',
+        slug: 'spat-spawn',
+        img: '/images/categories/spat_spawn.png',
+        path: '/shop?category=spat-spawn',
+        description: 'Mushroom spawn and spore cultures for cultivation'
+      }
     })
   ])
 
