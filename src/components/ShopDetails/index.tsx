@@ -8,7 +8,7 @@ import NotifyMeModal from "../NotifyMeModal";
 import { usePreviewSlider } from "@/app/context/PreviewSliderContext";
 import { useAppSelector } from "@/redux/store";
 import { useDispatch } from "react-redux";
-import { useRouter, useSearchParams, useParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { addItemToCart } from "@/redux/features/cart-slice";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { useWishlist } from "@/app/context/WishlistContext";
@@ -61,7 +61,6 @@ const ShopDetails = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const params = useParams();
-  const searchParams = useSearchParams();
   const slug = params?.slug as string;
 
   const handlePurchaseNow = () => {
