@@ -59,7 +59,7 @@ const AboutUs = () => {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
                   <p className="text-white text-sm font-medium">The MushMush Team</p>
-                  <p className="text-white/80 text-xs">Vikrant, Pravesh, Bhartendu & Nitesh - Founders dedicated to natural mushroom cultivation</p>
+                  <p className="text-white/80 text-xs">Bhartendu, Pravesh, Nitesh & Vikrant - Founders dedicated to natural mushroom cultivation</p>
                 </div>
               </div>
             </div>
