@@ -47,36 +47,19 @@ const AboutUs = () => {
               </div>
             </div>
             <div className="order-1 lg:order-2">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="relative rounded-2xl overflow-hidden shadow-xl">
-                  <Image
-                    src="/images/aboutus/all_four.png"
-                    alt="Vikrant, Pravesh, Bhartendu and Nitesh - MushMush Founders"
-                    width={300}
-                    height={400}
-                    className="w-full h-64 sm:h-80 object-cover"
-                    priority
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
-                    <p className="text-white text-sm font-medium">The MushMush Team</p>
-                    <p className="text-white/80 text-xs">All four founders together</p>
-                  </div>
-                </div>
-                <div className="relative rounded-2xl overflow-hidden shadow-xl">
-                  <Image
-                    src="/images/aboutus/about_us_story.png"
-                    alt="MushMush Story - Our Journey in Mushroom Cultivation"
-                    width={300}
-                    height={400}
-                    className="w-full h-64 sm:h-80 object-cover"
-                    priority
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
-                    <p className="text-white text-sm font-medium">Our Journey</p>
-                    <p className="text-white/80 text-xs">The story behind MushMush</p>
-                  </div>
+              <div className="relative rounded-2xl overflow-hidden shadow-xl">
+                <Image
+                  src="/images/aboutus/all_four.png"
+                  alt="Vikrant, Pravesh, Bhartendu and Nitesh - MushMush Founders"
+                  width={600}
+                  height={400}
+                  className="w-full h-80 sm:h-96 object-cover"
+                  priority
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+                  <p className="text-white text-sm font-medium">The MushMush Team</p>
+                  <p className="text-white/80 text-xs">Vikrant, Pravesh, Bhartendu & Nitesh - Founders dedicated to natural mushroom cultivation</p>
                 </div>
               </div>
             </div>
