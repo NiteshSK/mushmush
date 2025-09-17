@@ -31,12 +31,12 @@ const AboutUs = () => {
               </h2>
               <div className="space-y-4 text-gray-700">
                 <p className="text-lg leading-relaxed">
-                  Welcome to <strong>MushMush</strong>, born from a passion for nature and a dedication to purity. 
+                  Welcome to <strong>MushMush by MushAgroProducts</strong>, born from a passion for nature and a dedication to purity. 
                   Nestled in the serene environment of <strong>Herbertpur, Dehradun</strong>, <strong>MushMush by MushAgroProducts </strong> 
                   is more than just a mushroom farm—it's a dream brought to life.
                 </p>
                 <p className="text-lg leading-relaxed">
-                  Our journey began when we, <strong>Bhartendu, Pravesh, Nitesh & Vikrant</strong>, decided to leave our conventional jobs behind. 
+                  Our journey began when we, <strong>Bhartendu, Pravesh, Nitesh & Vikrant</strong>, decided to leave their conventional jobs behind. 
                   We saw an opportunity to contribute something wholesome and natural to our community, and we 
                   committed ourselves full-time to the art and science of mushroom cultivation.
                 </p>
@@ -109,9 +109,9 @@ const AboutUs = () => {
               </h2>
               <div className="space-y-4 text-gray-700">
                 <p className="text-lg leading-relaxed">
-                  At the heart of MushMush is an unwavering commitment to organic principles. 
+                  At the heart of <strong>MushMush</strong> is an unwavering commitment to organic principles. 
                   We believe that the best food is grown the way nature intended. That's why we 
-                  use zero chemicals in our cultivation process. From the substrate to the harvest, 
+                  use <strong>zero chemicals</strong> in our cultivation process. From the substrate to the harvest, 
                   every mushroom is nurtured in a controlled, clean, and natural environment.
                 </p>
                 <p className="text-lg leading-relaxed">

@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "react-hot-toast";
-import PaymentModal from "./PaymentModal";
+import Breadcrumb from "@/components/Common/Breadcrumb";
+import AutomatedPaymentModal from "./AutomatedPaymentModal";
 
 interface TrainingProgram {
   id: number;
@@ -54,6 +55,54 @@ const TrainingPrograms = () => {
     window.location.href = `/training/${program.slug}/schedule`;
   };
 
+  const handleCheckScheduleClick = (program: TrainingProgram) => {
+    window.location.href = `/training/${program.slug}/schedule`;
+  };
+
+  const handleRegisterNowClick = async (program: TrainingProgram) => {
+    if (!session) {
+      // Redirect to login page if user is not authenticated
+      window.location.href = `/auth/signin?callbackUrl=${encodeURIComponent(window.location.pathname)}`;
+      return;
+    }
+
+    try {
+      // Check if user is already registered for this program
+      const checkResponse = await fetch(`/api/training-registrations/check?programId=${program.id}`);
+      
+      if (checkResponse.ok) {
+        const checkData = await checkResponse.json();
+        
+        if (checkData.isRegistered) {
+          // User is already registered, show existing registration details
+          const registration = checkData.registration;
+          toast.error(
+            `You are already registered for ${registration.programName}!\n\n` +
+            `Registration Number: ${registration.registrationNumber}\n` +
+            `Status: ${registration.status}\n` +
+            `Payment Status: ${registration.paymentStatus}`,
+            {
+              duration: 8000,
+              style: {
+                maxWidth: '500px',
+                whiteSpace: 'pre-line'
+              }
+            }
+          );
+          return;
+        }
+      }
+    } catch (error) {
+      console.error('Error checking registration status:', error);
+      // If check fails, continue with registration flow
+      toast.error('Could not verify registration status. Continuing with registration...');
+    }
+    
+    // User is not registered or check failed, proceed with registration
+    setSelectedProgram(program);
+    setShowRegistrationModal(true);
+  };
+
   const getTypeIcon = (type: string) => {
     switch (type) {
       case "OYSTER":
@@ -72,15 +121,30 @@ const TrainingPrograms = () => {
   const getTypeColor = (type: string) => {
     switch (type) {
       case "OYSTER":
-        return "bg-blue-100 text-blue-800";
+        return "bg-blue-50 text-blue-700 border-blue-200";
       case "BUTTON":
-        return "bg-green-100 text-green-800";
+        return "bg-green-50 text-green-700 border-green-200";
       case "SHIITAKE":
-        return "bg-purple-100 text-purple-800";
+        return "bg-purple-50 text-purple-700 border-purple-200";
       case "GANODERMA":
-        return "bg-orange-100 text-orange-800";
+        return "bg-orange-50 text-orange-700 border-orange-200";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-gray-50 text-gray-700 border-gray-200";
+    }
+  };
+
+  const getCardColor = (type: string) => {
+    switch (type) {
+      case "OYSTER":
+        return "bg-blue-25 border-blue-100";
+      case "BUTTON":
+        return "bg-green-25 border-green-100";
+      case "SHIITAKE":
+        return "bg-purple-25 border-purple-100";
+      case "GANODERMA":
+        return "bg-orange-25 border-orange-100";
+      default:
+        return "bg-gray-25 border-gray-100";
     }
   };
 
@@ -93,182 +157,113 @@ const TrainingPrograms = () => {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <>
+      <Breadcrumb title={"Training Programs"} pages={["training"]} />
+
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-green-600 to-blue-600 text-white py-12 md:py-16">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6">
-            Mushroom Cultivation Training Programs
-          </h1>
-          <p className="text-lg md:text-xl lg:text-2xl mb-6 md:mb-8 max-w-3xl mx-auto leading-relaxed">
-            Master the art of mushroom cultivation with our comprehensive, hands-on training programs. 
-            Learn from experts and start your journey in sustainable agriculture.
-          </p>
-          <div className="flex flex-wrap justify-center gap-6 md:gap-8 text-base md:text-lg">
-            <div className="flex items-center space-x-2">
-              <span className="text-green-300">✓</span>
-              <span>Theory & Practical Training</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-green-300">✓</span>
-              <span>Expert Instructors</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-green-300">✓</span>
-              <span>Certification Provided</span>
-            </div>
+      <section className="relative py-2 bg-gradient-to-br from-green-50 to-blue-50">
+        <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
+          <div className="text-center">
+            <h1 className="font-bold text-4xl sm:text-5xl xl:text-6xl text-dark mb-6">
+              Mushroom Cultivation Training Programs
+            </h1>
+            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
+              Master the art of mushroom cultivation with our comprehensive, hands-on training programs. 
+              Learn from experts and start your journey in sustainable agriculture.
+            </p>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Training Programs Grid */}
-      <div className="container mx-auto px-4 pt-0 pb-12 md:pb-16">
-        <div className="text-center mb-8 md:mb-12">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3 md:mb-4">
-            Choose Your Training Program
-          </h2>
-          <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            We offer specialized training programs for different types of mushroom cultivation. 
-            Each program includes both theoretical knowledge and hands-on practical experience.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 md:gap-8 max-w-6xl mx-auto">
-          {trainingPrograms.map((program) => (
-            <div
-              key={program.id}
-              className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
-            >
-              <div className="p-6 md:p-8">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-                  <div className="flex items-center">
-                    <span className="text-3xl md:text-4xl mr-3">{getTypeIcon(program.type)}</span>
-                    <div>
-                      <h3 className="text-xl md:text-2xl font-bold text-gray-900">{program.name}</h3>
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeColor(
-                          program.type
-                        )}`}
-                      >
-                        {program.type}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-left sm:text-right">
-                    <div className="text-2xl md:text-3xl font-bold text-green-600">
-                      ₹{program.price.toLocaleString()}
-                    </div>
-                    <div className="text-sm text-gray-500">per participant</div>
-                  </div>
-                </div>
-
-                <p className="text-gray-600 mb-6 leading-relaxed">
-                  {program.description}
-                </p>
-
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <div className="text-sm text-gray-500 mb-1">Duration</div>
-                    <div className="font-semibold text-gray-900">{program.duration} Days</div>
-                  </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <div className="text-sm text-gray-500 mb-1">Daily Hours</div>
-                    <div className="font-semibold text-gray-900">{program.dailyHours}</div>
-                  </div>
-                </div>
-
-                <div className="mb-6">
-                  <h4 className="font-semibold text-gray-900 mb-3">What You'll Learn:</h4>
-                  <ul className="text-sm text-gray-600 space-y-2">
-                    <li className="flex items-start">
-                      <span className="text-green-500 mr-2 mt-0.5">•</span>
-                      <span>Mushroom biology and lifecycle</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-green-500 mr-2 mt-0.5">•</span>
-                      <span>Substrate preparation and sterilization</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-green-500 mr-2 mt-0.5">•</span>
-                      <span>Inoculation techniques</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-green-500 mr-2 mt-0.5">•</span>
-                      <span>Environmental control and monitoring</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-green-500 mr-2 mt-0.5">•</span>
-                      <span>Harvesting and post-harvest handling</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-green-500 mr-2 mt-0.5">•</span>
-                      <span>Business aspects and marketing</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <button
-                  onClick={() => handleRegisterClick(program)}
-                  className="w-full bg-blue hover:bg-blue-dark text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 border-0"
-                >
-                  Register Now
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {trainingPrograms.length === 0 && !loading && (
-          <div className="text-center py-12">
-            <div className="text-gray-500 text-lg">No training programs available at the moment.</div>
-          </div>
-        )}
-      </div>
-
-      {/* Features Section */}
-      <div className="bg-white py-12 md:py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-8 md:mb-12">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-              Why Choose Our Training Programs?
+      {/* Training Programs Section */}
+      <section className="py-20 bg-[#f3f4f6]">
+        <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
+          <div className="text-center mb-12">
+            <h2 className="font-bold text-3xl sm:text-4xl text-dark mb-4">
+              Choose Your Training Program
             </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              We offer specialized training programs for different types of mushroom cultivation. 
+              Each program includes both theoretical knowledge and hands-on practical experience.
+            </p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-            <div className="text-center p-6 rounded-lg hover:bg-gray-50 transition-colors duration-200">
-              <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">👨‍🏫</span>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
+            {trainingPrograms.map((program) => (
+              <div
+                key={program.id}
+                className={`rounded-xl border-2 ${getCardColor(program.type)} overflow-hidden hover:shadow-lg transition-all duration-300`}
+              >
+                <div className="p-6 md:p-8">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                    <div className="flex items-center">
+                      <span className="text-3xl md:text-4xl mr-3">{getTypeIcon(program.type)}</span>
+                      <div>
+                        <h3 className="text-xl md:text-2xl font-bold text-gray-900">{program.name}</h3>
+                        <span
+                          className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getTypeColor(
+                            program.type
+                          )}`}
+                        >
+                          {program.type}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-left sm:text-right">
+                      <div className="text-2xl md:text-3xl font-bold text-green-600">
+                        ₹{program.price.toLocaleString()}
+                      </div>
+                      <div className="text-sm text-gray-500">per participant</div>
+                    </div>
+                  </div>
+
+                  <p className="text-gray-600 mb-6 leading-relaxed">
+                    {program.description}
+                  </p>
+
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className={`p-4 rounded-lg ${getCardColor(program.type)}`}>
+                      <div className="text-sm text-gray-500 mb-1">Duration</div>
+                      <div className="font-semibold text-gray-900">{program.duration} Days</div>
+                    </div>
+                    <div className={`p-4 rounded-lg ${getCardColor(program.type)}`}>
+                      <div className="text-sm text-gray-500 mb-1">Daily Hours</div>
+                      <div className="font-semibold text-gray-900">{program.dailyHours}</div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button
+                      onClick={() => handleCheckScheduleClick(program)}
+                      className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-colors duration-200 border-2 ${
+                        program.type === "OYSTER" ? "bg-white text-blue-600 border-blue-200 hover:bg-blue-50" :
+                        program.type === "BUTTON" ? "bg-white text-green-600 border-green-200 hover:bg-green-50" :
+                        program.type === "SHIITAKE" ? "bg-white text-purple-600 border-purple-200 hover:bg-purple-50" :
+                        program.type === "GANODERMA" ? "bg-white text-orange-600 border-orange-200 hover:bg-orange-50" :
+                        "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                      }`}
+                    >
+                      Check Schedule
+                    </button>
+                    <button
+                      onClick={() => handleRegisterNowClick(program)}
+                      className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-colors duration-200 border-2 ${
+                        program.type === "OYSTER" ? "bg-white text-blue-600 border-blue-200 hover:bg-blue-50" :
+                        program.type === "BUTTON" ? "bg-white text-green-600 border-green-200 hover:bg-green-50" :
+                        program.type === "SHIITAKE" ? "bg-white text-purple-600 border-purple-200 hover:bg-purple-50" :
+                        program.type === "GANODERMA" ? "bg-white text-orange-600 border-orange-200 hover:bg-orange-50" :
+                        "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                      }`}
+                    >
+                      Register Now
+                    </button>
+                  </div>
+                </div>
               </div>
-              <h3 className="text-lg md:text-xl font-semibold mb-2">Expert Instructors</h3>
-              <p className="text-gray-600 text-sm md:text-base leading-relaxed">
-                Learn from experienced mushroom cultivation experts with years of practical knowledge.
-              </p>
-            </div>
-            
-            <div className="text-center p-6 rounded-lg hover:bg-gray-50 transition-colors duration-200">
-              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">🔬</span>
-              </div>
-              <h3 className="text-lg md:text-xl font-semibold mb-2">Hands-On Learning</h3>
-              <p className="text-gray-600 text-sm md:text-base leading-relaxed">
-                Get practical experience with real mushroom cultivation setups and equipment.
-              </p>
-            </div>
-            
-            <div className="text-center p-6 rounded-lg hover:bg-gray-50 transition-colors duration-200">
-              <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">📜</span>
-              </div>
-              <h3 className="text-lg md:text-xl font-semibold mb-2">Certification</h3>
-              <p className="text-gray-600 text-sm md:text-base leading-relaxed">
-                Receive official certification upon successful completion of the training program.
-              </p>
-            </div>
+            ))}
           </div>
         </div>
-      </div>
-
-      {/* Registration Modal */}
+      </section>
       {showRegistrationModal && selectedProgram && (
         <RegistrationModal
           program={selectedProgram}
@@ -280,13 +275,14 @@ const TrainingPrograms = () => {
           onRegistrationComplete={(registration) => {
             setPendingRegistration(registration);
             setShowPaymentModal(true);
+            setShowRegistrationModal(false);
+            setSelectedProgram(null);
           }}
         />
       )}
 
-      {/* Payment Modal */}
       {showPaymentModal && pendingRegistration && (
-        <PaymentModal
+        <AutomatedPaymentModal
           registration={pendingRegistration}
           onClose={() => {
             setShowPaymentModal(false);
@@ -299,7 +295,7 @@ const TrainingPrograms = () => {
           }}
         />
       )}
-    </div>
+    </>
   );
 };
 
@@ -353,10 +349,24 @@ const RegistrationModal = ({
         
         // Show payment modal after successful registration
         onRegistrationComplete(registration);
-        onClose();
       } else {
         const error = await response.json();
-        toast.error(error.error || "Failed to register");
+        
+        // Handle duplicate registration error specifically
+        if (response.status === 409 && error.existingRegistration) {
+          const { existingRegistration } = error;
+          toast.error(
+            `You are already registered for this program! Registration: ${existingRegistration.registrationNumber} (Status: ${existingRegistration.status})`,
+            {
+              duration: 6000, // Show longer for important information
+              style: {
+                maxWidth: '500px',
+              }
+            }
+          );
+        } else {
+          toast.error(error.error || "Failed to register");
+        }
       }
     } catch (error) {
       toast.error("Error submitting registration");
@@ -524,9 +534,9 @@ const RegistrationModal = ({
               <button
                 type="submit"
                 disabled={loading}
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors duration-200 border-0 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                className="bg-blue hover:bg-blue-dark text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
               >
-                {loading ? "Registering..." : "Register"}
+                {loading ? "Registering..." : "Continue to Payment"}
               </button>
             </div>
           </form>

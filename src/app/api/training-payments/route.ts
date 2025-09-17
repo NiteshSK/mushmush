@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
+import { sendPaymentConfirmationEmail } from "@/lib/email";
+import { upiVerifier, generateTransactionNote } from "@/lib/upi-verification";
 
 export async function POST(request: NextRequest) {
   try {
@@ -80,16 +82,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Update registration with payment details
+    // Verify UPI transaction using automated verification system
+    const verificationResult = await upiVerifier.verifyTransaction(upiTransactionId, amount, upiId);
+    if (!verificationResult.isValid) {
+      return NextResponse.json(
+        { error: verificationResult.message || "UPI transaction verification failed" },
+        { status: 400 }
+      );
+    }
+
+    // Update registration with payment details - automatically confirm
     const updatedRegistration = await prisma.trainingRegistration.update({
       where: { id: registrationId },
       data: {
-        paymentStatus: 'PROCESSING',
+        paymentStatus: 'COMPLETED', // Mark as completed since we're doing automatic confirmation
         paymentMethod: paymentMethod,
         upiTransactionId: upiTransactionId,
         paymentReference: upiId || null,
         paymentDate: new Date(),
-        status: 'PENDING' // Keep registration status as pending until payment is verified
+        status: 'CONFIRMED' // Automatically confirm registration when payment is submitted
       },
       include: {
         trainingProgram: true,
@@ -97,21 +108,36 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    // TODO: Here you can add integration with payment verification services
-    // For now, we'll mark it as processing and require manual verification
-
-    // Send confirmation email (you can implement this)
-    // await sendPaymentConfirmationEmail(updatedRegistration);
+    // Send payment confirmation email with timetable information
+    await sendPaymentConfirmationEmail({
+      registrationNumber: updatedRegistration.registrationNumber,
+      programName: updatedRegistration.trainingProgram.name,
+      participantName: updatedRegistration.participantName,
+      totalAmount: updatedRegistration.totalAmount,
+      paymentStatus: updatedRegistration.paymentStatus,
+      paymentMethod: updatedRegistration.paymentMethod,
+      upiTransactionId: updatedRegistration.upiTransactionId,
+      paymentDate: updatedRegistration.paymentDate,
+      participantEmail: updatedRegistration.participantEmail,
+      programDuration: updatedRegistration.trainingProgram.duration.toString(),
+      programSchedule: updatedRegistration.trainingProgram.dailyHours,
+      programStartDate: updatedRegistration.preferredStartDate 
+        ? updatedRegistration.preferredStartDate.toLocaleDateString() 
+        : new Date().toLocaleDateString(),
+      programLocation: 'MushMush Training Center',
+      programInstructor: 'MushMush Expert Team',
+    });
 
     return NextResponse.json({
       success: true,
-      message: "Payment details submitted successfully. We will verify your payment and confirm your registration within 24 hours.",
+      message: "Payment confirmed successfully! Your registration has been confirmed.",
       registration: {
         id: updatedRegistration.id,
         registrationNumber: updatedRegistration.registrationNumber,
         paymentStatus: updatedRegistration.paymentStatus,
         paymentDate: updatedRegistration.paymentDate,
-        upiTransactionId: updatedRegistration.upiTransactionId
+        upiTransactionId: updatedRegistration.upiTransactionId,
+        status: updatedRegistration.status
       }
     });
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { toast } from 'react-hot-toast';
+import ReactQRCode from 'react-qr-code';
 
 interface PaymentModalProps {
   registration: {
@@ -29,9 +30,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
 
   // Company UPI details (you should replace with actual details)
   const companyUPI = {
-    id: 'mushmush@paytm', // Replace with your actual UPI ID
-    name: 'MushMush Training Center',
-    qrCode: '/images/upi-qr-code.png', // Add your QR code image
+    id: 'pravesh.rawat340-2@oksbi', // Replace with your actual UPI ID
+    name: 'Pravesh Rawat',
   };
 
   const handlePaymentSubmit = async (e: React.FormEvent) => {
@@ -63,7 +63,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
 
       if (response.ok) {
         const paymentData = await response.json();
-        toast.success('Payment submitted successfully! We will verify and confirm your registration.');
+        toast.success(paymentData.message || 'Payment submitted successfully! Your registration has been confirmed.');
         onPaymentComplete(paymentData);
         onClose();
       } else {
@@ -142,7 +142,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
               <div className="flex justify-end mt-6">
                 <button
                   onClick={() => setStep(2)}
-                  className="bg-blue hover:bg-blue-dark text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
+                  className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark"
                 >
                   Proceed to Payment
                 </button>
@@ -195,6 +195,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                       Amount: ₹{registration.totalAmount.toLocaleString()}<br/>
                       Note: Training Registration {registration.registrationNumber}
                     </div>
+                    <ReactQRCode value={generateUPILink()} size={200} />
                   </div>
                 </div>
               </div>

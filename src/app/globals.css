@@ -1,3 +1,235 @@
+/* Toast Notification Styles - Highest Priority */
+.Toastify__toast-container {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 9999999 !important;
+  width: auto !important;
+  max-width: 90vw !important;
+  pointer-events: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  padding: 20px !important;
+  box-sizing: border-box !important;
+}
+
+.Toastify__toast {
+  position: relative !important;
+  min-width: 320px !important;
+  max-width: 500px !important;
+  margin: 0 !important;
+  padding: 16px 20px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(10px) !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  line-height: 1.5 !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  text-align: center !important;
+  z-index: 9999999 !important;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 640px) {
+  .Toastify__toast {
+    min-width: 280px !important;
+    max-width: 90vw !important;
+    padding: 14px 16px !important;
+    font-size: 14px !important;
+  }
+  
+  .Toastify__toast-container {
+    padding: 15px !important;
+    gap: 10px !important;
+  }
+}
+
+/* Error Toast Styling */
+.Toastify__toast--error {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%) !important;
+  color: #991b1b !important;
+  border: 1px solid #fca5a5 !important;
+  z-index: 9999999 !important;
+}
+
+.Toastify__toast--error .Toastify__close-button {
+  color: #991b1b !important;
+  opacity: 0.7 !important;
+}
+
+.Toastify__toast--error .Toastify__close-button:hover {
+  opacity: 1 !important;
+}
+
+/* Success Toast Styling */
+.Toastify__toast--success {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%) !important;
+  color: #065f46 !important;
+  border: 1px solid #6ee7b7 !important;
+  z-index: 9999999 !important;
+}
+
+.Toastify__toast--success .Toastify__close-button {
+  color: #065f46 !important;
+  opacity: 0.7 !important;
+}
+
+.Toastify__toast--success .Toastify__close-button:hover {
+  opacity: 1 !important;
+}
+
+/* Loading Toast Styling */
+.Toastify__toast--info {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important;
+  color: #92400e !important;
+  border: 1px solid #fcd34d !important;
+  z-index: 9999999 !important;
+}
+
+.Toastify__toast--info .Toastify__close-button {
+  color: #92400e !important;
+  opacity: 0.7 !important;
+}
+
+.Toastify__toast--info .Toastify__close-button:hover {
+  opacity: 1 !important;
+}
+
+/* Close button styling */
+.Toastify__close-button {
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  width: 24px !important;
+  height: 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.3) !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  font-size: 16px !important;
+  line-height: 1 !important;
+  z-index: 9999999 !important;
+}
+
+.Toastify__close-button:hover {
+  background: rgba(255, 255, 255, 0.5) !important;
+  transform: scale(1.1) !important;
+}
+
+/* Progress bar styling */
+.Toastify__progress-bar {
+  height: 3px !important;
+  background: rgba(255, 255, 255, 0.5) !important;
+  border-radius: 2px !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  position: absolute !important;
+}
+
+.Toastify__toast--error .Toastify__progress-bar {
+  background: rgba(153, 27, 27, 0.3) !important;
+}
+
+.Toastify__toast--success .Toastify__progress-bar {
+  background: rgba(6, 95, 70, 0.3) !important;
+}
+
+.Toastify__toast--info .Toastify__progress-bar {
+  background: rgba(146, 64, 14, 0.3) !important;
+}
+
+/* Icon styling */
+.Toastify__toast-icon {
+  margin-right: 12px !important;
+  font-size: 20px !important;
+  flex-shrink: 0 !important;
+}
+
+/* Body styling */
+.Toastify__toast-body {
+  flex: 1 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font-weight: 500 !important;
+  font-size: 15px !important;
+  text-align: center !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+}
+
+/* Animation enhancements */
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes toastSlideOut {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+}
+
+.Toastify__toast-enter {
+  animation: toastSlideIn 0.3s ease-out !important;
+}
+
+.Toastify__toast-exit {
+  animation: toastSlideOut 0.3s ease-in !important;
+}
+
+/* Ensure toast appears above all modals and overlays */
+.Toastify__toast-container {
+  z-index: 9999999 !important;
+}
+
+/* Additional override for any potential conflicts */
+.Toastify__toast {
+  z-index: 9999999 !important;
+}
+
+/* Ultra-specific selectors to override any conflicts */
+html body div.Toastify__toast-container {
+  z-index: 9999999 !important;
+}
+
+html body div.Toastify__toast-container div.Toastify__toast {
+  z-index: 9999999 !important;
+}
+
+/* Force override with maximum specificity */
+html body div.Toastify__toast-container,
+html body div.Toastify__toast-container div.Toastify__toast,
+html body div.Toastify__toast-container div.Toastify__toast.Toastify__toast--error,
+html body div.Toastify__toast-container div.Toastify__toast.Toastify__toast--success,
+html body div.Toastify__toast-container div.Toastify__toast.Toastify__toast--info {
+  z-index: 9999999 !important;
+}
+
 /* Recently Viewed Swiper Styles */
 .recently-viewed-swiper {
   padding-bottom: 20px;
