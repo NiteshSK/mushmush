@@ -274,18 +274,36 @@ const AboutUs = () => {
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <div className="relative rounded-2xl overflow-hidden shadow-xl">
-                <Image
-                  src="/images/aboutus/vikrant_training.png"
-                  alt="Vikrant conducting mushroom training session"
-                  width={600}
-                  height={400}
-                  className="w-full h-80 sm:h-96 object-cover"
-                  priority
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
-                  <p className="text-white text-sm font-medium">Training Session in Progress</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="relative rounded-2xl overflow-hidden shadow-xl">
+                  <Image
+                    src="/images/aboutus/vikrant_training.png"
+                    alt="Vikrant conducting mushroom training session"
+                    width={300}
+                    height={400}
+                    className="w-full h-64 sm:h-80 object-cover"
+                    priority
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+                    <p className="text-white text-sm font-medium">Training Session</p>
+                    <p className="text-white/80 text-xs">Hands-on cultivation training</p>
+                  </div>
+                </div>
+                <div className="relative rounded-2xl overflow-hidden shadow-xl">
+                  <Image
+                    src="/images/aboutus/knowledge_about_us.png"
+                    alt="MushMush knowledge sharing and community education"
+                    width={300}
+                    height={400}
+                    className="w-full h-64 sm:h-80 object-cover"
+                    priority
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+                    <p className="text-white text-sm font-medium">Knowledge Sharing</p>
+                    <p className="text-white/80 text-xs">Empowering our community</p>
+                  </div>
                 </div>
               </div>
             </div>
