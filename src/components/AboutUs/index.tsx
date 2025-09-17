@@ -211,16 +211,15 @@ const AboutUs = () => {
             </div>
             <div>
               <div className="relative rounded-2xl overflow-hidden shadow-xl">
-                {/* Placeholder for Future Products Image */}
-                <div className="w-full h-80 sm:h-96 bg-gradient-to-br from-purple-200 to-pink-400 flex items-center justify-center">
-                  <div className="text-center text-white">
-                    <svg className="w-16 h-16 mx-auto mb-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/>
-                    </svg>
-                    <p className="text-lg font-medium">Coming Soon</p>
-                    <p className="text-sm opacity-80">Innovative mushroom products</p>
-                  </div>
-                </div>
+                <Image
+                  src="/images/aboutus/vikrant_working.png"
+                  alt="Vikrant working with mushrooms"
+                  width={600}
+                  height={400}
+                  className="w-full h-80 sm:h-96 object-cover"
+                  priority
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
               </div>
             </div>
           </div>
