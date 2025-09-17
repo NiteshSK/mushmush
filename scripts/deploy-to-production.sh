@@ -33,7 +33,7 @@ if [ -z "$DATABASE_URL" ]; then
 fi
 
 echo "🔍 Step 2: Verifying database connection..."
-npx prisma db execute --stdin --echo <<< "SELECT 1;"
+npx prisma db execute --stdin --schema=prisma/schema.prisma <<< "SELECT 1;"
 
 if [ $? -ne 0 ]; then
     echo "❌ Error: Cannot connect to production database"
