@@ -70,16 +70,15 @@ const AboutUs = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <div className="relative rounded-2xl overflow-hidden shadow-xl">
-                {/* Placeholder for Farm/Certification Image */}
-                <div className="w-full h-80 sm:h-96 bg-gradient-to-br from-amber-200 to-amber-400 flex items-center justify-center">
-                  <div className="text-center text-white">
-                    <svg className="w-16 h-16 mx-auto mb-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <p className="text-lg font-medium">Certified Organic Farm</p>
-                    <p className="text-sm opacity-80">Department of Mushroom, Uttarakhand</p>
-                  </div>
-                </div>
+                <Image
+                  src="/images/aboutus/vikrant_certificate.png"
+                  alt="Vikrant's Mushroom Cultivation Certificate"
+                  width={600}
+                  height={400}
+                  className="w-full h-80 sm:h-96 object-cover"
+                  priority
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
               </div>
             </div>
             <div>
