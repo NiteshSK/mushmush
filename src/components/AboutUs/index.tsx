@@ -156,18 +156,22 @@ const AboutUs = () => {
             <h3 className="font-bold text-2xl text-dark mb-6 text-center">Our Premium Varieties</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
               {[
-                { name: "Oyster Mushrooms", color: "from-pink-200 to-pink-400" },
-                { name: "Shiitake", color: "from-brown-200 to-brown-400" },
-                { name: "Ganoderma (Reishi)", color: "from-red-200 to-red-400" },
-                { name: "Button", color: "from-gray-200 to-gray-400" },
-                { name: "King Oyster", color: "from-yellow-200 to-yellow-400" }
+                { name: "Oyster Mushrooms", image: "/images/aboutus/oyster_about_us.png" },
+                { name: "Shiitake", image: "/images/aboutus/shitake_about_us.png" },
+                { name: "Ganoderma (Reishi)", image: "/images/aboutus/ganoderma_about_us.png" },
+                { name: "Button", image: "/images/aboutus/button_about_us.png" },
+                { name: "King Oyster", image: "/images/aboutus/king_oyster_about_us.png" }
               ].map((mushroom, index) => (
                 <div key={index} className="text-center">
-                  <div className={`w-full h-24 bg-gradient-to-br ${mushroom.color} rounded-lg mb-3 flex items-center justify-center`}>
-                    <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-                      <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd"/>
-                    </svg>
+                  <div className="relative w-full h-16 rounded-lg mb-3 overflow-hidden shadow-md flex items-center justify-center bg-white">
+                    <Image
+                      src={mushroom.image}
+                      alt={`${mushroom.name} mushroom`}
+                      width={80}
+                      height={60}
+                      className="max-w-full max-h-full object-contain"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent"></div>
                   </div>
                   <p className="text-sm font-medium text-gray-700">{mushroom.name}</p>
                 </div>
