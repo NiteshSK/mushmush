@@ -119,8 +119,8 @@ export async function POST(request: NextRequest) {
       upiTransactionId: updatedRegistration.upiTransactionId,
       paymentDate: updatedRegistration.paymentDate,
       participantEmail: updatedRegistration.participantEmail,
-      programDuration: updatedRegistration.trainingProgram.duration,
-      programSchedule: updatedRegistration.trainingProgram.schedule,
+      programDuration: updatedRegistration.trainingProgram.duration.toString(),
+      programSchedule: updatedRegistration.trainingProgram.schedule.toString(),
       programStartDate: updatedRegistration.preferredStartDate 
         ? updatedRegistration.preferredStartDate.toLocaleDateString() 
         : updatedRegistration.trainingProgram.startDate 
