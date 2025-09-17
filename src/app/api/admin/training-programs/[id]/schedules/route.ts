@@ -117,7 +117,7 @@ export async function POST(
         theoreticalSessions: theoreticalSessions || [],
         learningObjectives: learningObjectives || [],
         materials: materials || [],
-        instructor,
+        instructorId: instructor || null,
         startTime,
         endTime
       }

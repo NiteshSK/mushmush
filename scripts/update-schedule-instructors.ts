@@ -23,14 +23,14 @@ async function main() {
       continue;
     }
 
-    // Try to match by name (this is a simple heuristic)
-    const instructorName = schedule.instructor as string; // Cast to string for comparison
-    if (instructorName) {
-      if (instructorName.toLowerCase().includes('vikrant')) {
-        matchedInstructor = instructors.find(i => i.name === 'Vikrant Rai');
-      } else if (instructorName.toLowerCase().includes('pravesh')) {
-        matchedInstructor = instructors.find(i => i.name === 'Pravesh Rawat');
-      }
+    // Try to match by title or description (this is a simple heuristic)
+    const title = schedule.title.toLowerCase();
+    const description = schedule.description.toLowerCase();
+    
+    if (title.includes('oyster') || description.includes('oyster')) {
+      matchedInstructor = instructors.find(i => i.name === 'Vikrant Rai');
+    } else if (title.includes('button') || title.includes('shiitake') || description.includes('button') || description.includes('shiitake')) {
+      matchedInstructor = instructors.find(i => i.name === 'Pravesh Rawat');
     }
 
     if (matchedInstructor) {
