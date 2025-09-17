@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { sendEmail, emailTemplates } from '@/lib/email';
 import { z } from 'zod';
 
 const notificationSchema = z.object({
@@ -49,6 +50,17 @@ export async function POST(request: NextRequest) {
         isActive: true
       }
     });
+
+    // Try to send a subscription confirmation email (non-blocking for response)
+    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+    const productUrl = `${baseUrl}/shop-details/${product.slug}`;
+    const template = emailTemplates.subscriptionConfirm(product.title, productUrl);
+    sendEmail({
+      to: email,
+      subject: template.subject,
+      html: template.html,
+      text: template.text,
+    }).catch((err) => console.error('Subscription confirm email failed:', err));
 
     return NextResponse.json({
       message: 'Successfully subscribed to product notifications',

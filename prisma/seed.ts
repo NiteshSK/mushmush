@@ -8,19 +8,13 @@ async function main() {
   // Create categories
   const categories = await Promise.all([
     prisma.category.upsert({
-      where: { slug: 'all-mushrooms' },
-      update: {},
-      create: {
-        title: 'All Mushrooms',
-        slug: 'all-mushrooms',
-        img: '/images/categories/mushrooms.png',
-        path: '/shop',
-        description: 'Complete collection of all mushroom varieties'
-      }
-    }),
-    prisma.category.upsert({
       where: { slug: 'edible' },
-      update: {},
+      update: {
+        title: 'Edible',
+        img: '/images/categories/edible_mushrooms.png',
+        path: '/shop?category=edible',
+        description: 'Fresh edible mushrooms for culinary use'
+      },
       create: {
         title: 'Edible',
         slug: 'edible',
@@ -31,7 +25,12 @@ async function main() {
     }),
     prisma.category.upsert({
       where: { slug: 'medicinal' },
-      update: {},
+      update: {
+        title: 'Medicinal',
+        img: '/images/categories/medicinal_mushrooms.png',
+        path: '/shop?category=medicinal',
+        description: 'Medicinal mushrooms for health and wellness'
+      },
       create: {
         title: 'Medicinal',
         slug: 'medicinal',
@@ -42,7 +41,12 @@ async function main() {
     }),
     prisma.category.upsert({
       where: { slug: 'tinctures' },
-      update: {},
+      update: {
+        title: 'Tinctures',
+        img: '/images/categories/generic_tincture.png',
+        path: '/shop?category=tinctures',
+        description: 'Concentrated mushroom tinctures and extracts'
+      },
       create: {
         title: 'Tinctures',
         slug: 'tinctures',
@@ -53,13 +57,34 @@ async function main() {
     }),
     prisma.category.upsert({
       where: { slug: 'powders' },
-      update: {},
+      update: {
+        title: 'Dry Powder',
+        img: '/images/categories/powders.png',
+        path: '/shop?category=powders',
+        description: 'Dried mushroom powders and supplements'
+      },
       create: {
         title: 'Dry Powder',
         slug: 'powders',
         img: '/images/categories/powders.png',
         path: '/shop?category=powders',
         description: 'Dried mushroom powders and supplements'
+      }
+    }),
+    prisma.category.upsert({
+      where: { slug: 'spat-spawn' },
+      update: {
+        title: 'Spat/Spawn',
+        img: '/images/categories/spat_spawn.png',
+        path: '/shop?category=spat-spawn',
+        description: 'Mushroom spawn and spore cultures for cultivation'
+      },
+      create: {
+        title: 'Spat/Spawn',
+        slug: 'spat-spawn',
+        img: '/images/categories/spat_spawn.png',
+        path: '/shop?category=spat-spawn',
+        description: 'Mushroom spawn and spore cultures for cultivation'
       }
     })
   ])

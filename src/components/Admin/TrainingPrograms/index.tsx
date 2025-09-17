@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import TrainingScheduleManagement from "../TrainingSchedule";
 
 interface TrainingProgram {
   id: number;
@@ -29,6 +30,7 @@ const TrainingProgramsAdmin = () => {
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingProgram, setEditingProgram] = useState<TrainingProgram | null>(null);
+  const [selectedProgramForSchedule, setSelectedProgramForSchedule] = useState<TrainingProgram | null>(null);
 
   // Redirect if not admin
   useEffect(() => {
@@ -182,6 +184,12 @@ const TrainingProgramsAdmin = () => {
                       Edit
                     </button>
                     <button
+                      onClick={() => setSelectedProgramForSchedule(program)}
+                      className="text-purple-600 hover:text-purple-900"
+                    >
+                      Schedule
+                    </button>
+                    <button
                       onClick={() => toggleProgramStatus(program.id, program.isActive)}
                       className={`${
                         program.isActive
@@ -213,6 +221,29 @@ const TrainingProgramsAdmin = () => {
             fetchTrainingPrograms();
           }}
         />
+      )}
+
+      {/* Schedule Management Modal */}
+      {selectedProgramForSchedule && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-bold">
+                Manage Schedule: {selectedProgramForSchedule.name}
+              </h3>
+              <button
+                onClick={() => setSelectedProgramForSchedule(null)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+            <TrainingScheduleManagement
+              trainingProgramId={selectedProgramForSchedule.id}
+              trainingProgramName={selectedProgramForSchedule.name}
+            />
+          </div>
+        </div>
       )}
     </div>
   );
@@ -371,7 +402,7 @@ const ProgramModal = ({
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+              className="w-full bg-blue hover:bg-blue-dark text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 border-0"
             >
               {loading ? "Saving..." : program ? "Update" : "Create"}
             </button>

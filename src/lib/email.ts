@@ -96,6 +96,46 @@ export const emailTemplates = {
     `
   }),
 
+  subscriptionConfirm: (productTitle: string, productUrl: string) => ({
+    subject: `You're subscribed for ${productTitle} restock alerts`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="text-align: center; margin-bottom: 24px;">
+          <h2 style="color: #2d5016; margin: 0;">Subscription Confirmed</h2>
+          <p style="color: #555;">We'll email you when this product is back in stock.</p>
+        </div>
+        <div style="background:#f8f9fa; padding: 20px; border-radius: 8px;">
+          <p style="margin:0; color:#333;">Product: <strong>${productTitle}</strong></p>
+        </div>
+        <div style="text-align:center; margin: 24px 0;">
+          <a href="${productUrl}" style="background:#2d5016; color:#fff; padding:12px 24px; border-radius:6px; text-decoration:none;">View Product</a>
+        </div>
+        <p style="color:#666; font-size:12px; text-align:center;">You can unsubscribe by clicking "Notify Me" again on the product page.</p>
+      </div>
+    `,
+    text: `Subscription confirmed for ${productTitle}. We will notify you when it is back in stock. ${productUrl}`,
+  }),
+
+  restockAlert: (productTitle: string, productUrl: string) => ({
+    subject: `Good news! ${productTitle} is back in stock!`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="text-align: center; margin-bottom: 24px;">
+          <h2 style="color: #2d5016; margin: 0;">Back in Stock! 🍄</h2>
+          <p style="color: #555;">The product you've been waiting for is now available.</p>
+        </div>
+        <div style="background:#f8f9fa; padding: 20px; border-radius: 8px;">
+          <p style="margin:0; color:#333;">Product: <strong>${productTitle}</strong></p>
+        </div>
+        <div style="text-align:center; margin: 24px 0;">
+          <a href="${productUrl}" style="background:#2d5016; color:#fff; padding:12px 24px; border-radius:6px; text-decoration:none; font-weight:bold;">Shop Now</a>
+        </div>
+        <p style="color:#666; font-size:12px; text-align:center;">You received this email because you subscribed to restock alerts for this product.</p>
+      </div>
+    `,
+    text: `Good news! ${productTitle} is back in stock! Visit: ${productUrl}`,
+  }),
+
   resetPassword: (name: string, resetToken: string) => ({
     subject: 'Reset Your MushMush Password',
     html: `

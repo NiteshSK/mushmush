@@ -8,7 +8,7 @@ import NotifyMeModal from "../NotifyMeModal";
 import { usePreviewSlider } from "@/app/context/PreviewSliderContext";
 import { useAppSelector } from "@/redux/store";
 import { useDispatch } from "react-redux";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { addItemToCart } from "@/redux/features/cart-slice";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { useWishlist } from "@/app/context/WishlistContext";
@@ -60,6 +60,8 @@ const ShopDetails = () => {
 
   const dispatch = useDispatch();
   const router = useRouter();
+  const params = useParams();
+  const slug = params?.slug as string;
 
   const handlePurchaseNow = () => {
     if (!displayProduct || !displayProduct.id) return; // Safety check
@@ -133,22 +135,83 @@ const ShopDetails = () => {
 
   useEffect(() => {
     setIsClient(true);
-    const alreadyExist = localStorage.getItem("productDetails");
     
-    const resolvedProduct =
-      productFromStorage && productFromStorage.title
-        ? productFromStorage
-        : alreadyExist
-        ? JSON.parse(alreadyExist)
-        : {};
-    
-    setProduct(resolvedProduct);
-    
-    // Fetch fresh product data with discount information if we have a product ID
-    if (resolvedProduct.id) {
-      fetchProductWithDiscounts(resolvedProduct.id);
+    // Fetch product by slug from URL
+    if (slug) {
+      fetchProductBySlug(slug);
+    } else {
+      // Fallback to localStorage for backward compatibility
+      const alreadyExist = localStorage.getItem("productDetails");
+      const resolvedProduct =
+        productFromStorage && productFromStorage.title
+          ? productFromStorage
+          : alreadyExist
+          ? JSON.parse(alreadyExist)
+          : {};
+      
+      setProduct(resolvedProduct);
+      
+      if (resolvedProduct.id) {
+        fetchProductWithDiscounts(resolvedProduct.id);
+      }
     }
-  }, [productFromStorage]);
+  }, [slug, productFromStorage]);
+
+  const fetchProductBySlug = async (productSlug: string) => {
+    try {
+      setProductLoading(true);
+      const response = await fetch(`/api/products?slug=${productSlug}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch product by slug');
+      }
+      
+      const data = await response.json();
+      
+      // Find the specific product from the response
+      const productBySlug = data.products?.find((p: any) => p.slug === productSlug);
+      
+      if (productBySlug) {
+        // Set the product data
+        const updatedProduct = {
+          ...product,
+          ...productBySlug,
+          discountPercentage: productBySlug.discountPercentage,
+          hasDiscount: productBySlug.hasDiscount,
+          discountedPrice: productBySlug.discountedPrice,
+          // Preserve measurement structure
+          measurement: productBySlug.measurementValue && productBySlug.measurementType ? {
+            value: productBySlug.measurementValue,
+            type: productBySlug.measurementType
+          } : productBySlug.measurement
+        };
+        
+        setProduct(updatedProduct);
+        localStorage.setItem("productDetails", JSON.stringify(updatedProduct));
+        
+        // Also fetch fresh discount data
+        if (productBySlug.id) {
+          fetchProductWithDiscounts(productBySlug.id);
+        }
+      } else {
+        console.error('Product not found for slug:', productSlug);
+        // Fallback to localStorage
+        const alreadyExist = localStorage.getItem("productDetails");
+        if (alreadyExist) {
+          setProduct(JSON.parse(alreadyExist));
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching product by slug:', error);
+      // Fallback to localStorage
+      const alreadyExist = localStorage.getItem("productDetails");
+      if (alreadyExist) {
+        setProduct(JSON.parse(alreadyExist));
+      }
+    } finally {
+      setProductLoading(false);
+    }
+  };
 
   const fetchProductWithDiscounts = async (productId: number) => {
     try {
@@ -376,12 +439,20 @@ const ShopDetails = () => {
                     <div className="flex items-center gap-2.5">
                       <div className="flex items-center gap-1">
                         {[...Array(5)].map((_, i) => (
-                          <svg key={i} className="fill-[#FFA645]" width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <svg 
+                            key={i} 
+                            className={`fill-current ${i < Math.round(reviewStats.averageRating || 0) ? "fill-[#FFA645]" : "fill-gray-3"}`} 
+                            width="18" 
+                            height="18" 
+                            viewBox="0 0 18 18" 
+                            fill="none" 
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
                             <path d="M16.7906 6.72187L11.7 5.93438L9.39377 1.09688C9.22502 0.759375 8.77502 0.759375 8.60627 1.09688L6.30002 5.9625L1.23752 6.72187C0.871891 6.77812 0.731266 7.25625 1.01252 7.50938L4.69689 11.3063L3.82502 16.6219C3.76877 16.9875 4.13439 17.2969 4.47189 17.0719L9.05627 14.5687L13.6125 17.0719C13.9219 17.2406 14.3156 16.9594 14.2313 16.6219L13.3594 11.3063L17.0438 7.50938C17.2688 7.25625 17.1563 6.77812 16.7906 6.72187Z" />
                           </svg>
                         ))}
                       </div>
-                      <span> (5 customer reviews) </span>
+                      <span> ({reviewStats.totalReviews} customer review{reviewStats.totalReviews !== 1 ? 's' : ''}) </span>
                     </div>
                     {displayProduct.inStock ? (
                       <div className="flex items-center gap-1.5">

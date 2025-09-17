@@ -112,3 +112,68 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+// PATCH - Update a user (admin only)
+export async function PATCH(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    await requireAdmin();
+
+    const body = await request.json();
+    const { id, name, role, password } = body as {
+      id?: string;
+      name?: string;
+      role?: 'ADMIN' | 'CUSTOMER';
+      password?: string;
+    };
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'User id is required' },
+        { status: 400 }
+      );
+    }
+
+    // Validate role if provided
+    if (role && role !== 'ADMIN' && role !== 'CUSTOMER') {
+      return NextResponse.json(
+        { error: 'Invalid role' },
+        { status: 400 }
+      );
+    }
+
+    let data: any = {};
+    if (typeof name === 'string') data.name = name;
+    if (role) data.role = role;
+
+    if (typeof password === 'string' && password.trim().length > 0) {
+      const passwordCheck = validatePasswordPolicy(password);
+      if (!passwordCheck.valid) {
+        return NextResponse.json({ error: passwordCheck.error }, { status: 400 });
+      }
+      data.password = await bcrypt.hash(password, 12);
+    }
+
+    const updated = await prisma.user.update({
+      where: { id },
+      data,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        emailVerified: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    return NextResponse.json(updated, { status: 200 });
+  } catch (error) {
+    console.error('Error updating user:', error);
+    return NextResponse.json(
+      { error: 'Failed to update user' },
+      { status: 500 }
+    );
+  }
+}

@@ -51,8 +51,7 @@ const TrainingPrograms = () => {
   }, []);
 
   const handleRegisterClick = (program: TrainingProgram) => {
-    setSelectedProgram(program);
-    setShowRegistrationModal(true);
+    window.location.href = `/training/${program.slug}/schedule`;
   };
 
   const getTypeIcon = (type: string) => {
@@ -96,7 +95,7 @@ const TrainingPrograms = () => {
   return (
     <div className="bg-gray-50 min-h-screen">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-green-600 to-blue-600 text-white py-16 md:py-20">
+      <div className="bg-gradient-to-r from-green-600 to-blue-600 text-white py-12 md:py-16">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6">
             Mushroom Cultivation Training Programs
@@ -123,7 +122,7 @@ const TrainingPrograms = () => {
       </div>
 
       {/* Training Programs Grid */}
-      <div className="container mx-auto px-4 py-12 md:py-16">
+      <div className="container mx-auto px-4 pt-0 pb-12 md:pb-16">
         <div className="text-center mb-8 md:mb-12">
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3 md:mb-4">
             Choose Your Training Program
@@ -210,7 +209,7 @@ const TrainingPrograms = () => {
 
                 <button
                   onClick={() => handleRegisterClick(program)}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 border-0 shadow-sm hover:shadow-md"
+                  className="w-full bg-blue hover:bg-blue-dark text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 border-0"
                 >
                   Register Now
                 </button>

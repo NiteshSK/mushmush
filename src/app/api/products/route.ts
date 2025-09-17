@@ -6,6 +6,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
+    const slug = searchParams.get('slug')
     const category = searchParams.get('category')
     const featured = searchParams.get('featured')
     const inStock = searchParams.get('inStock')
@@ -18,6 +19,11 @@ export async function GET(request: NextRequest) {
     // If ID is provided, fetch single product
     if (id) {
       where.id = parseInt(id)
+    }
+    
+    // If slug is provided, fetch single product
+    if (slug) {
+      where.slug = slug
     }
     
     if (category) {

@@ -57,6 +57,13 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
       const response = await fetch('/api/wishlist', {
         cache: 'no-store'
       });
+      
+      // Handle unauthorized response gracefully
+      if (response.status === 401) {
+        setItems([]);
+        return;
+      }
+      
       if (!response.ok) {
         throw new Error('Failed to fetch wishlist');
       }
@@ -87,6 +94,12 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
         cache: 'no-store'
       });
 
+      // Handle unauthorized response gracefully
+      if (response.status === 401) {
+        setItems([]);
+        return false;
+      }
+
       if (!response.ok) {
         throw new Error('Failed to add to wishlist');
       }
@@ -113,6 +126,12 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
         method: 'DELETE',
         cache: 'no-store'
       });
+
+      // Handle unauthorized response gracefully
+      if (response.status === 401) {
+        setItems([]);
+        return false;
+      }
 
       if (response.status === 404) {
         await fetchWishlist(true);

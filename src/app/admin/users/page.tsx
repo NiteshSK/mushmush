@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminAuthWrapper from '@/components/Admin/AdminAuthWrapper';
 import CreateUserModal from '@/components/Admin/CreateUserModal';
+import EditUserModal from '@/components/Admin/EditUserModal';
 import toast from 'react-hot-toast';
 
 interface User {
@@ -18,6 +19,7 @@ const UsersPageContent: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
 
   useEffect(() => {
     fetchUsers();
@@ -154,7 +156,7 @@ const UsersPageContent: React.FC = () => {
                     {formatDate(user.createdAt)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button className="text-blue hover:text-blue-dark mr-3">
+                    <button className="text-blue hover:text-blue-dark mr-3" onClick={() => setEditingUser(user)}>
                       Edit
                     </button>
                     <button className="text-red hover:text-red-dark">
@@ -181,6 +183,14 @@ const UsersPageContent: React.FC = () => {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onUserCreated={handleUserCreated}
+      />
+
+      {/* Edit User Modal */}
+      <EditUserModal
+        isOpen={!!editingUser}
+        onClose={() => setEditingUser(null)}
+        user={editingUser}
+        onUpdated={fetchUsers}
       />
     </div>
   );

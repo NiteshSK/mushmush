@@ -41,15 +41,14 @@ export async function sendRestockNotifications(productId: number) {
     }
 
     const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
-    const productUrl = `${baseUrl}/shop-details?id=${product.id}`;
+    const productUrl = `${baseUrl}/shop-details/${product.slug}`;
     const productImage = (product.imgs as Product['imgs'])?.previews?.[0] || `${baseUrl}/images/placeholder.jpg`;
 
     // Send emails to all subscribers
     const emailPromises = notifications.map(async (notification) => {
-      const template = emailTemplates.restockNotification(
+      const template = emailTemplates.restockAlert(
         product.title,
-        productUrl,
-        productImage
+        productUrl
       );
 
       const result = await sendEmail({

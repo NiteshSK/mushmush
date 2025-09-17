@@ -290,8 +290,49 @@ model TrainingProgram {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   registrations TrainingRegistration[]
+  schedules    TrainingSchedule[]
 
   @@map("training_programs")
+}
+
+model Instructor {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  email       String?  @unique
+  phone       String?
+  bio         String?
+  expertise   String?  // Areas of expertise
+  experience  Int?     // Years of experience
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  schedules   TrainingSchedule[]
+
+  @@map("instructors")
+}
+
+model TrainingSchedule {
+  id                Int      @id @default(autoincrement())
+  trainingProgramId Int
+  dayNumber         Int     // Day 1, 2, 3, etc.
+  date              DateTime // Specific date for this day
+  title             String   // Title for the day's content
+  description       String   // Detailed description of what will be covered
+  topics            Json     // Array of topics to be covered
+  practicalSessions Json     // Array of practical sessions with details
+  theoreticalSessions Json   // Array of theoretical sessions with details
+  learningObjectives Json   // What participants will learn
+  materials         Json     // Materials needed for the day
+  instructorId      Int?    // Foreign key to Instructor
+  startTime         String   // Start time (e.g., "09:00")
+  endTime           String   // End time (e.g., "17:00")
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  trainingProgram   TrainingProgram @relation(fields: [trainingProgramId], references: [id], onDelete: Cascade)
+  instructor        Instructor?      @relation(fields: [instructorId], references: [id], onDelete: SetNull)
+
+  @@map("training_schedules")
 }
 
 model TrainingRegistration {

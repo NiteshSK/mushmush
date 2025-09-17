@@ -93,7 +93,7 @@ const SingleListItem = ({ item, priority = false, onNotifyMe }: Props) => {
       <div className="w-3/4">
         <h3 className="font-medium text-dark ease-out duration-200 hover:text-blue mb-2 text-xl">
           {/* --- UPDATED: Link is now always active --- */}
-          <Link href="/shop-details" onClick={handleNavigateToDetails}>
+          <Link href={`/shop-details/${item.slug}`} onClick={handleNavigateToDetails}>
             {item.title}
           </Link>
         </h3>
