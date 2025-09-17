@@ -64,7 +64,7 @@ export async function POST(
       theoreticalSessions,
       learningObjectives,
       materials,
-      instructor,
+      instructorId,
       startTime,
       endTime
     } = body;
@@ -117,7 +117,7 @@ export async function POST(
         theoreticalSessions: theoreticalSessions || [],
         learningObjectives: learningObjectives || [],
         materials: materials || [],
-        instructorId: instructor || null,
+        instructorId: instructorId || null,
         startTime,
         endTime
       }

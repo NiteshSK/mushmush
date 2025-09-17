@@ -58,7 +58,7 @@ const TrainingScheduleManagement: React.FC<TrainingScheduleManagementProps> = ({
     theoreticalSessions: "",
     learningObjectives: "",
     materials: "",
-    instructorId: 0,
+    instructorId: null as number | null,
     startTime: "09:00",
     endTime: "17:00",
   });
@@ -163,7 +163,7 @@ const TrainingScheduleManagement: React.FC<TrainingScheduleManagementProps> = ({
       ).join("; "),
       learningObjectives: schedule.learningObjectives.join(", "),
       materials: schedule.materials.join(", "),
-      instructorId: schedule.instructorId || 0,
+      instructorId: schedule.instructorId || null,
       startTime: schedule.startTime,
       endTime: schedule.endTime,
     });
@@ -203,7 +203,7 @@ const TrainingScheduleManagement: React.FC<TrainingScheduleManagementProps> = ({
       theoreticalSessions: "",
       learningObjectives: "",
       materials: "",
-      instructorId: 0,
+      instructorId: null,
       startTime: "09:00",
       endTime: "17:00",
     });
@@ -409,10 +409,10 @@ const TrainingScheduleManagement: React.FC<TrainingScheduleManagementProps> = ({
                 </label>
                 <select
                   value={formData.instructorId}
-                  onChange={(e) => setFormData({ ...formData, instructorId: parseInt(e.target.value) || 0 })}
+                  onChange={(e) => setFormData({ ...formData, instructorId: parseInt(e.target.value) || null })}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="0">Select Instructor</option>
+                  <option value="">Select Instructor</option>
                   <option value="1">Vikrant Rai</option>
                   <option value="2">Pravesh Rawat</option>
                 </select>
