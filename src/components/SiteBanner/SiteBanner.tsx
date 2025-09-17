@@ -10,7 +10,7 @@ const SiteBanner = () => {
         <span className="font-bold mr-2">Online Orders Paused:</span>
         We are not currently accepting orders from the website. To order, please 
         <Link 
-          href="https://wa.me/917417165960" 
+          href="https://wa.me/917618362662" 
           target="_blank" 
           rel="noopener noreferrer"
           className="font-bold underline mx-1 hover:text-red-200"
@@ -19,10 +19,10 @@ const SiteBanner = () => {
         </Link>
         or call us directly at 
         <a 
-          href="tel:+917417165960"
+          href="tel:+917618362662"
           className="font-bold underline ml-1 hover:text-red-200"
         >
-          (+91) 7417165960
+          (+91) 7618362662
         </a>.
       </p>
     </div>

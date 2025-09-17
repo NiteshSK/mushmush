@@ -405,7 +405,7 @@ const MyAccount = () => {
                           fill=""
                         />
                       </svg>
-                      Phone: +91-7417165960
+                      Phone: +91-7618362662
                     </p>
 
                     <p className="flex gap-2.5 text-custom-sm">
@@ -537,7 +537,7 @@ const MyAccount = () => {
                           fill=""
                         />
                       </svg>
-                      Phone: +91-7417165960
+                      Phone: +91-7618362662
                     </p>
 
                     <p className="flex gap-2.5 text-custom-sm">

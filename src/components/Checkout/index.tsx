@@ -58,12 +58,12 @@ const Checkout = () => {
   <p>
     We are not currently accepting orders from the website. To place an order, please reach out to us on WhatsApp or call us directly at: 
     <a 
-      href="https://wa.me/917417165960" 
+      href="https://wa.me/917618362662" 
       target="_blank" 
       rel="noopener noreferrer"
       className="font-bold underline ml-1 hover:text-red-800"
     >
-      (+91) 7417165960
+      (+91) 7618362662
     </a>
   </p>
 </div>
