@@ -35,7 +35,33 @@ export default function SiteLayout({
             <CartModalProvider>
               <PreviewSliderProvider>
                 <LoadingProvider>
-                  <Toaster />
+                  <Toaster 
+                    position="top-center"
+                    reverseOrder={false}
+                    gutter={8}
+                    containerClassName=""
+                    containerStyle={{
+                      zIndex: 9999999,
+                      position: 'fixed',
+                      top: '50%',
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                    }}
+                    toastOptions={{
+                      duration: 4000,
+                      style: {
+                        background: '#363636',
+                        color: '#fff',
+                        zIndex: 9999999,
+                      },
+                      success: {
+                        duration: 3000,
+                      },
+                      error: {
+                        duration: 8000,
+                      },
+                    }}
+                  />
                   {loading && <PreLoader />}
                   <Header />
                   {children}
