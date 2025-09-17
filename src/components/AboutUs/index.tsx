@@ -36,7 +36,7 @@ const AboutUs = () => {
                   is more than just a mushroom farm—it's a dream brought to life.
                 </p>
                 <p className="text-lg leading-relaxed">
-                  Our journey began when we, <strong>Vikrant, Pravesh, Bhartendu and Nitesh</strong>, decided to leave our conventional jobs behind. 
+                  Our journey began when we, <strong>Bhartendu, Pravesh, Nitesh & Vikrant</strong>, decided to leave our conventional jobs behind. 
                   We saw an opportunity to contribute something wholesome and natural to our community, and we 
                   committed ourselves full-time to the art and science of mushroom cultivation.
                 </p>
