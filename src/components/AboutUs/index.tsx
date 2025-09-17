@@ -50,7 +50,7 @@ const AboutUs = () => {
               <div className="relative rounded-2xl overflow-hidden shadow-xl">
                 <Image
                   src="/images/aboutus/all_four.png"
-                  alt="Vikrant, Pravesh, Bhartendu and Nitesh - MushMush Founders"
+                  alt="Bhartendu, Pravesh, Nitesh and Vikrant - MushMush Founders"
                   width={600}
                   height={400}
                   className="w-full h-80 sm:h-96 object-cover"
