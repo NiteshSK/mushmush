@@ -120,7 +120,7 @@ export async function verifyAndProcessPayment(
         'UPI',
         transactionId,
         {
-          programDuration: updatedRegistration.trainingProgram.duration,
+          programDuration: updatedRegistration.trainingProgram.duration.toString(),
           schedule: updatedRegistration.trainingProgram.dailyHours,
           startDate: new Date().toLocaleDateString('en-IN', { 
             weekday: 'long', 
