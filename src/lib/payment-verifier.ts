@@ -8,7 +8,6 @@ export interface PaymentVerificationRequest {
   registrationId: string;
   transactionId: string;
   amount: number;
-  upiId?: string;
 }
 
 export interface PaymentVerificationResult {
@@ -22,7 +21,7 @@ export async function verifyAndProcessPayment(
   request: PaymentVerificationRequest
 ): Promise<PaymentVerificationResult> {
   try {
-    const { registrationId, transactionId, amount, upiId } = request;
+    const { registrationId, transactionId, amount } = request;
 
     // Validate required fields
     if (!registrationId || !transactionId || !amount) {
@@ -99,7 +98,6 @@ export async function verifyAndProcessPayment(
         paymentStatus: 'COMPLETED',
         paymentMethod: 'UPI',
         upiTransactionId: transactionId,
-        upiId: upiId || null,
         paymentDate: new Date(),
         status: 'CONFIRMED'
       },
@@ -111,27 +109,27 @@ export async function verifyAndProcessPayment(
 
     // Send payment confirmation email
     try {
-      await sendPaymentConfirmationEmail(
-        updatedRegistration.user.email,
-        updatedRegistration.user.name || 'Valued Customer',
-        updatedRegistration.registrationNumber,
-        updatedRegistration.trainingProgram.name,
-        updatedRegistration.totalAmount,
-        'UPI',
-        transactionId,
-        {
-          programDuration: updatedRegistration.trainingProgram.duration.toString(),
-          schedule: updatedRegistration.trainingProgram.dailyHours,
-          startDate: new Date().toLocaleDateString('en-IN', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-          }),
-          location: 'MushMush Training Center',
-          instructor: 'Expert Trainer'
-        }
-      );
+      await sendPaymentConfirmationEmail({
+        registrationNumber: updatedRegistration.registrationNumber,
+        programName: updatedRegistration.trainingProgram.name,
+        participantName: updatedRegistration.user.name || 'Valued Customer',
+        totalAmount: updatedRegistration.totalAmount,
+        paymentStatus: 'COMPLETED',
+        paymentMethod: 'UPI',
+        upiTransactionId: transactionId,
+        paymentDate: updatedRegistration.paymentDate,
+        participantEmail: updatedRegistration.user.email,
+        programDuration: updatedRegistration.trainingProgram.duration.toString(),
+        programSchedule: updatedRegistration.trainingProgram.dailyHours,
+        programStartDate: new Date().toLocaleDateString('en-IN', { 
+          weekday: 'long', 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        }),
+        programLocation: 'MushMush Training Center',
+        programInstructor: 'Expert Trainer'
+      });
     } catch (emailError) {
       console.error('Failed to send payment confirmation email:', emailError);
       // Don't fail the payment process if email fails
@@ -205,8 +203,7 @@ export async function quickVerifyPayment(
     return await verifyAndProcessPayment({
       registrationId: registration.id,
       transactionId,
-      amount,
-      upiId: registration.upiId
+      amount
     });
 
   } catch (error) {

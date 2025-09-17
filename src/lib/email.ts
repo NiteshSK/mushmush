@@ -311,58 +311,24 @@ export function generateRegistrationConfirmationEmail(data: RegistrationEmailDat
         </p>
         
         <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #e0e0e0;">
-          <h3 style="color: #2d5016; margin-top: 0; border-bottom: 2px solid #2d5016; padding-bottom: 10px;">Registration Details</h3>
+          <h3 style="color: #2d5016; margin-top: 0; border-bottom: 2px solid #2d5016; padding-bottom: 10px;">📋 Registration Details</h3>
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
               <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Registration Number:</td>
-              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; color: #2d5016; font-weight: bold;">${data.registrationNumber}</td>
+              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">${data.registrationNumber}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Training Program:</td>
+              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Program Name:</td>
               <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">${data.programName}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Registration Fee:</td>
+              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Registration Status:</td>
+              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">${data.status}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Total Amount:</td>
               <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">₹${data.totalAmount.toLocaleString()}</td>
             </tr>
-            <tr>
-              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Status:</td>
-              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">
-                <span style="background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${data.status}</span>
-              </td>
-            </tr>
-          </table>
-        </div>
-        
-        <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #e0e0e0;">
-          <h3 style="color: #2d5016; margin-top: 0; border-bottom: 2px solid #2d5016; padding-bottom: 10px;">📅 Training Timetable</h3>
-          <table style="width: 100%; border-collapse: collapse;">
-            <tr>
-              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Program Duration:</td>
-              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">${data.programDuration}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Training Schedule:</td>
-              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">${data.programSchedule}</td>
-            </tr>
-            ${data.programStartDate ? `
-            <tr>
-              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Start Date:</td>
-              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">${data.programStartDate}</td>
-            </tr>
-            ` : ''}
-            ${data.programLocation ? `
-            <tr>
-              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Training Location:</td>
-              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">${data.programLocation}</td>
-            </tr>
-            ` : ''}
-            ${data.programInstructor ? `
-            <tr>
-              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Lead Instructor:</td>
-              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">${data.programInstructor}</td>
-            </tr>
-            ` : ''}
           </table>
         </div>
         

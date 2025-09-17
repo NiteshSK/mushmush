@@ -36,6 +36,9 @@ export async function POST(request: NextRequest) {
         status: {
           in: ['PENDING', 'CONFIRMED', 'IN_PROGRESS']
         }
+      },
+      include: {
+        trainingProgram: true
       }
     });
 
@@ -94,16 +97,7 @@ export async function POST(request: NextRequest) {
       participantName: registration.participantName,
       totalAmount: registration.totalAmount,
       status: registration.status,
-      participantEmail: registration.participantEmail,
-      programDuration: registration.trainingProgram.duration,
-      programSchedule: registration.trainingProgram.schedule,
-      programStartDate: registration.preferredStartDate 
-        ? registration.preferredStartDate.toLocaleDateString() 
-        : registration.trainingProgram.startDate 
-          ? new Date(registration.trainingProgram.startDate).toLocaleDateString()
-          : undefined,
-      programLocation: registration.trainingProgram.location,
-      programInstructor: registration.trainingProgram.instructor
+      participantEmail: registration.participantEmail
     });
 
     return NextResponse.json(registration, { status: 201 });

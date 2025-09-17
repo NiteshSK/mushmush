@@ -299,7 +299,7 @@ class UPIPaymentVerifier {
     
     const poll = async () => {
       if (attempts >= maxAttempts) {
-        callback({ status: 'TIMEOUT', message: 'Payment verification timeout' });
+        callback({ status: 'TIMEOUT', errorMessage: 'Payment verification timeout' });
         return;
       }
 

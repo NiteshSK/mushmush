@@ -120,14 +120,12 @@ export async function POST(request: NextRequest) {
       paymentDate: updatedRegistration.paymentDate,
       participantEmail: updatedRegistration.participantEmail,
       programDuration: updatedRegistration.trainingProgram.duration.toString(),
-      programSchedule: updatedRegistration.trainingProgram.schedule.toString(),
+      programSchedule: updatedRegistration.trainingProgram.dailyHours,
       programStartDate: updatedRegistration.preferredStartDate 
         ? updatedRegistration.preferredStartDate.toLocaleDateString() 
-        : updatedRegistration.trainingProgram.startDate 
-          ? new Date(updatedRegistration.trainingProgram.startDate).toLocaleDateString()
-          : undefined,
-      programLocation: updatedRegistration.trainingProgram.location,
-      programInstructor: updatedRegistration.trainingProgram.instructor
+        : new Date().toLocaleDateString(),
+      programLocation: 'MushMush Training Center',
+      programInstructor: 'MushMush Expert Team',
     });
 
     return NextResponse.json({

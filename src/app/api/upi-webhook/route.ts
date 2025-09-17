@@ -58,7 +58,6 @@ export async function POST(request: NextRequest) {
           paymentStatus: 'COMPLETED',
           paymentMethod: 'UPI',
           upiTransactionId: transactionId,
-          upiId: upiId,
           paymentDate: new Date(timestamp || Date.now()),
           status: 'CONFIRMED'
         },
@@ -70,27 +69,27 @@ export async function POST(request: NextRequest) {
 
       // Send payment confirmation email
       try {
-        await sendPaymentConfirmationEmail(
-          updatedRegistration.user.email,
-          updatedRegistration.user.name || 'Valued Customer',
-          updatedRegistration.registrationNumber,
-          updatedRegistration.trainingProgram.name,
-          updatedRegistration.totalAmount,
-          'UPI',
-          transactionId,
-          {
-            programDuration: updatedRegistration.trainingProgram.duration.toString(),
-            schedule: updatedRegistration.trainingProgram.dailyHours,
-            startDate: new Date().toLocaleDateString('en-IN', { 
-              weekday: 'long', 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            }),
-            location: 'MushMush Training Center',
-            instructor: 'Expert Trainer'
-          }
-        );
+        await sendPaymentConfirmationEmail({
+          registrationNumber: updatedRegistration.registrationNumber,
+          programName: updatedRegistration.trainingProgram.name,
+          participantName: updatedRegistration.user.name || 'Valued Customer',
+          totalAmount: updatedRegistration.totalAmount,
+          paymentStatus: 'COMPLETED',
+          paymentMethod: 'UPI',
+          upiTransactionId: transactionId,
+          paymentDate: updatedRegistration.paymentDate,
+          participantEmail: updatedRegistration.user.email,
+          programDuration: updatedRegistration.trainingProgram.duration.toString(),
+          programSchedule: updatedRegistration.trainingProgram.dailyHours,
+          programStartDate: new Date().toLocaleDateString('en-IN', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          }),
+          programLocation: 'MushMush Training Center',
+          programInstructor: 'Expert Trainer'
+        });
       } catch (emailError) {
         console.error('Failed to send payment confirmation email:', emailError);
         // Don't fail the webhook if email fails

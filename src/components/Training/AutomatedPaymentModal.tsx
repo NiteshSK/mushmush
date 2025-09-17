@@ -40,12 +40,7 @@ const AutomatedPaymentModal: React.FC<AutomatedPaymentModalProps> = ({
   };
 
   // Generate UPI link
-  const upiLink = upiGateway.generateUPILink({
-    upiId: companyUPI.id,
-    amount: registration.totalAmount,
-    transactionNote: generateTransactionNote(registration.registrationNumber),
-    merchantCode: 'MUSHMUSH',
-  });
+  const upiLink = `upi://pay?pa=${companyUPI.id}&pn=${encodeURIComponent(companyUPI.name)}&am=${registration.totalAmount}&cu=INR&tn=${generateTransactionNote(registration.registrationNumber)}`;
 
   // Handle payment timeout
   useEffect(() => {
