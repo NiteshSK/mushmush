@@ -8,21 +8,36 @@ export async function GET(
 ) {
   try {
     const params = await context.params;
-    const id = parseInt(params.id);
+    const identifier = params.id;
     
-    if (isNaN(id)) {
+    if (!identifier) {
       return NextResponse.json(
-        { error: "Invalid training program ID" },
+        { error: "Identifier is required" },
         { status: 400 }
       );
     }
 
-    const trainingProgram = await prisma.trainingProgram.findUnique({
-      where: {
-        id: id,
-        isActive: true,
-      },
-    });
+    // Try to parse as number first, if fails treat as slug
+    const numericId = parseInt(identifier);
+    let trainingProgram;
+
+    if (!isNaN(numericId)) {
+      // Search by ID
+      trainingProgram = await prisma.trainingProgram.findUnique({
+        where: {
+          id: numericId,
+          isActive: true,
+        },
+      });
+    } else {
+      // Search by slug
+      trainingProgram = await prisma.trainingProgram.findFirst({
+        where: {
+          slug: identifier,
+          isActive: true,
+        },
+      });
+    }
 
     if (!trainingProgram) {
       return NextResponse.json(
