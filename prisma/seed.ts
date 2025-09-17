@@ -75,14 +75,14 @@ async function main() {
       where: { slug: 'spat-spawn' },
       update: {
         title: 'Spat/Spawn',
-        img: '/images/categories/spat_spawn.png',
+        img: '/images/categories/seed_spawn.png',
         path: '/shop?category=spat-spawn',
         description: 'Mushroom spawn and spore cultures for cultivation'
       },
       create: {
         title: 'Spat/Spawn',
         slug: 'spat-spawn',
-        img: '/images/categories/spat_spawn.png',
+        img: '/images/categories/seed_spawn.png',
         path: '/shop?category=spat-spawn',
         description: 'Mushroom spawn and spore cultures for cultivation'
       }
