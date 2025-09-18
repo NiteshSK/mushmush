@@ -47,9 +47,9 @@ async function verifyProducts() {
       const thumbnails = imgs?.thumbnails as string[] || [];
       console.log(`   Images: ${previews.length} previews, ${thumbnails.length} thumbnails`);
       
-      console.log(`   Specifications: ${product.specifications?.length || 0} items`);
-      console.log(`   How to Consume: ${product.howToConsume?.length || 0} items`);
-      console.log(`   Additional Info: ${product.additionalInfo?.length || 0} items`);
+      console.log(`   Specifications: ${Array.isArray(product.specifications) ? product.specifications.length : 0} items`);
+      console.log(`   How to Consume: ${Array.isArray(product.howToConsume) ? product.howToConsume.length : 0} items`);
+      console.log(`   Additional Info: ${Array.isArray(product.additionalInfo) ? product.additionalInfo.length : 0} items`);
       console.log(`   Created: ${product.createdAt}`);
       console.log(`   Updated: ${product.updatedAt}`);
     });
