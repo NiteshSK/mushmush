@@ -39,7 +39,7 @@ async function verifyProducts() {
       console.log(`   Measurement: ${product.measurementValue} ${product.measurementType}`);
       console.log(`   In Stock: ${product.inStock ? 'Yes' : 'No'}`);
       console.log(`   Featured: ${product.featured ? 'Yes' : 'No'}`);
-      console.log(`   Categories: ${product.categories.map(pc => pc.category.name).join(', ') || 'None'}`);
+      console.log(`   Categories: ${product.categories.map(pc => pc.category.title).join(', ') || 'None'}`);
       console.log(`   Images: ${product.imgs?.previews?.length || 0} previews, ${product.imgs?.thumbnails?.length || 0} thumbnails`);
       console.log(`   Specifications: ${product.specifications?.length || 0} items`);
       console.log(`   How to Consume: ${product.howToConsume?.length || 0} items`);
