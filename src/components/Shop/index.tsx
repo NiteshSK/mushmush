@@ -182,7 +182,7 @@ const Shop: React.FC<ShopProps> = ({ showFilters = true }) => {
                 
                 <div className="space-y-6">
                   {/* Filters header card inside sidebar */}
-                  <div className="bg-white shadow-1 rounded-lg py-4 px-5">
+                  <div className="bg-gray shadow-1 rounded-lg py-4 px-5">
                     <div className="flex items-center justify-between">
                       <p>Filters:</p>
                       <button
@@ -202,7 +202,7 @@ const Shop: React.FC<ShopProps> = ({ showFilters = true }) => {
                   </div>
 
                   {/* Category Filter */}
-                  <div className="bg-white shadow-1 rounded-lg p-5">
+                  <div className="bg-gray shadow-1 rounded-lg p-5">
                     <h4 className="font-semibold text-lg text-dark mb-5">Category</h4>
                     <div className="flex flex-col gap-4">
                       {categoriesWithCounts.map((category) => (
@@ -228,7 +228,7 @@ const Shop: React.FC<ShopProps> = ({ showFilters = true }) => {
                   </div>
 
                   {/* Price Filter */}
-                  <div className="bg-white shadow-1 rounded-lg p-5">
+                  <div className="bg-gray shadow-1 rounded-lg p-5">
                     <h4 className="font-semibold text-lg text-dark mb-4">Price</h4>
                     <input
                       type="range"

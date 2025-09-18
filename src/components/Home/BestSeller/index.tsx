@@ -12,7 +12,7 @@ const BestSeller = () => {
   const { products, loading, error } = useProducts();
   const { hasBanners } = usePromotionalBanners();
   const bestSellers = products
-    .sort((a: Product, b: Product) => (b.reviews ?? 0) - (a.reviews ?? 0))
+    .sort((a: Product, b: Product) => (b.reviewCount ?? 0) - (a.reviewCount ?? 0))
     .slice(0, 3);
 
   // NotifyMe modal state
