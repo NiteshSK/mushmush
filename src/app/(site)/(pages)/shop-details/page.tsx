@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 const ShopDetailsPage = () => {
   return (
     <main>
-      <ShopDetails />
+      <ShopDetails key="shop-details" />
     </main>
   );
 };

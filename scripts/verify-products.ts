@@ -91,7 +91,8 @@ async function verifyProducts() {
       }
 
       // Check images
-      if (!product.imgs || !product.imgs.previews || !product.imgs.thumbnails) {
+      const imgs = product.imgs as any;
+      if (!imgs || !imgs.previews || !imgs.thumbnails) {
         console.log(`   ⚠️  Product ${product.id} (${product.title}) has missing image data`);
         integrityIssues++;
       }

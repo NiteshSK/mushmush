@@ -61,7 +61,22 @@ const SingleItem = ({ item }: { item: Product }) => {
   };
 
   const handleNavigateToDetails = () => {
+    // Debug: Log what product data is being stored
+    console.log('SingleItem: Navigating to product details:', {
+      id: item.id,
+      title: item.title,
+      slug: item.slug,
+      price: item.price
+    });
+    
+    // Clear any existing product details from localStorage to prevent stale data
+    localStorage.removeItem("productDetails");
+    // Set the new product details
     localStorage.setItem("productDetails", JSON.stringify(item));
+    
+    // Debug: Verify localStorage was set correctly
+    const storedItem = localStorage.getItem("productDetails");
+    console.log('SingleItem: Product data stored in localStorage:', storedItem ? JSON.parse(storedItem).title : 'None');
   };
 
   return (

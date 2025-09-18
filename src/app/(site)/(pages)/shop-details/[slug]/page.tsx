@@ -18,10 +18,12 @@ export async function generateMetadata({ params }: ShopDetailsPageProps): Promis
   };
 }
 
-const ShopDetailsPage = ({ params }: ShopDetailsPageProps) => {
+const ShopDetailsPage = async ({ params }: ShopDetailsPageProps) => {
+  const { slug } = await params;
+  
   return (
     <main>
-      <ShopDetails />
+      <ShopDetails key={`shop-details-${slug}`} />
     </main>
   );
 };
