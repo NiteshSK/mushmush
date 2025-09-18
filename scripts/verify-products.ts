@@ -40,7 +40,13 @@ async function verifyProducts() {
       console.log(`   In Stock: ${product.inStock ? 'Yes' : 'No'}`);
       console.log(`   Featured: ${product.featured ? 'Yes' : 'No'}`);
       console.log(`   Categories: ${product.categories.map(pc => pc.category.title).join(', ') || 'None'}`);
-      console.log(`   Images: ${product.imgs?.previews?.length || 0} previews, ${product.imgs?.thumbnails?.length || 0} thumbnails`);
+      
+      // Safely access imgs property with type checking
+      const imgs = product.imgs as any;
+      const previews = imgs?.previews as string[] || [];
+      const thumbnails = imgs?.thumbnails as string[] || [];
+      console.log(`   Images: ${previews.length} previews, ${thumbnails.length} thumbnails`);
+      
       console.log(`   Specifications: ${product.specifications?.length || 0} items`);
       console.log(`   How to Consume: ${product.howToConsume?.length || 0} items`);
       console.log(`   Additional Info: ${product.additionalInfo?.length || 0} items`);
