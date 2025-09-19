@@ -51,23 +51,36 @@ const hasBenefits = product.benefits &&
 
   return (
     <>
-      {/* Mushroom Icon */}
+      {/* Royal Mushroom Icon Button */}
       <button
         onClick={handleIconClick}
-        className={`absolute top-3 left-10 w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 bg-orange-500 text-red-500 hover:bg-orange-600 z-10 animate-pulse ${className}`}
+        className={`absolute bottom-6 left-7 w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 z-20 ${className}
+          bg-gradient-to-br from-purple-800 via-purple-600 to-indigo-800
+          hover:from-purple-700 hover:via-purple-500 hover:to-indigo-700
+          shadow-lg hover:shadow-xl
+          border-2 border-yellow-400 hover:border-yellow-300
+          transform hover:scale-105
+          animate-pulse`}
         aria-label="View mushroom benefits"
         title="Click me"
       >
-        <Image
-          src="/images/icons/mushroom.png"
-          alt="Mushroom Icon"
-          width={37}
-          height={37}
-        />
-        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
-        </span>
-        <span className="text-xs text-blue font-medium mt-1 block">
-        Benefits
+        <div className="relative">
+          <Image
+            src="/images/icons/mushroom.png"
+            alt="Mushroom Icon"
+            width={32}
+            height={32}
+            className="drop-shadow-lg"
+          />
+          {/* Royal crown decoration */}
+          <div className="absolute -top-2 -right-2">
+            <div className="w-5 h-5 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center shadow-md">
+              <div className="w-3 h-3 bg-yellow-200 rounded-full"></div>
+            </div>
+          </div>
+        </div>
+        <span className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-xs font-bold text-purple-800 whitespace-nowrap drop-shadow-sm">
+          Benefits
         </span>
       </button>
 

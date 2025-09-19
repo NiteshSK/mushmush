@@ -296,7 +296,7 @@ const ShopDetails = () => {
   }, [product?.id]);
 
   const fetchReviews = async () => {
-    if (!product.id) return;
+    if (!product || !product.id) return;
     
     try {
       setReviewsLoading(true);
@@ -438,7 +438,9 @@ const ShopDetails = () => {
                         width={400}
                         height={400}
                       />
-                      <MushroomBenefitsIcon product={displayProduct} />
+                      <div className="absolute bottom-4 left-4 z-10">
+  <MushroomBenefitsIcon product={displayProduct} />
+</div>
                     </div>
                   </div>
                   <div className="flex flex-wrap sm:flex-nowrap gap-4.5 mt-6">
