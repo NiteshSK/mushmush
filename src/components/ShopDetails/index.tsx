@@ -16,35 +16,43 @@ import toast from "react-hot-toast";
 import MushroomBenefitsIcon from "../Shop/MushroomBenefitsIcon";
 
 interface ProductDetails {
-  id?: number;
-  title?: string;
-  price?: number;
+  id: number;
+  title: string;
+  slug: string;
+  description: string;
+  price: number;
   discountedPrice?: number;
-  inStock?: boolean;
-  discountPercentage?: number;
+  measurementValue: number;
+  measurementType: string;
+  quantity?: number;
+  inStock: boolean;
+  featured: boolean;
+  isOutOfStock?: boolean;
   hasDiscount?: boolean;
-  imgs?: {
-    previews: string[];
+  discountPercentage?: number;
+  imgs: {
     thumbnails: string[];
+    previews: string[];
   };
-  measurement?: {
-    value: number;
-    type: string;
-  };
-  description?: string;
-  specifications?: string[];
-  howToConsume?: string[];
-  additionalInfo?: Array<{
-    label: string;
-    value: string;
-  }>;
-  reviewsList?: Array<{
+  specifications: string[];
+  howToConsume: string[];
+  additionalInfo: { label: string; value: string }[];
+  categories: { category: { id: number; title: string; slug: string } }[];
+  averageRating?: number;
+  reviewCount?: number;
+  reviews?: number;
+  category?: string[];
+  reviewsList?: {
     name: string;
     avatar?: string;
     role?: string;
     rating: number;
     comment: string;
-  }>;
+  }[];
+  measurement?: {
+    value: number;
+    type: string;
+  };
   benefits?: any;
 }
 
@@ -121,7 +129,7 @@ const ShopDetails = () => {
     { id: "tabThree", title: "Reviews" },
   ];
 
-  const [product, setProduct] = useState<ProductDetails>({});
+  const [product, setProduct] = useState<ProductDetails | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [reviews, setReviews] = useState<any[]>([]);
   const [reviewStats, setReviewStats] = useState({ totalReviews: 0, averageRating: 0 });
@@ -282,10 +290,10 @@ const ShopDetails = () => {
 
   // Fetch reviews when product changes
   useEffect(() => {
-    if (product.id) {
+    if (product && product.id) {
       fetchReviews();
     }
-  }, [product.id]);
+  }, [product?.id]);
 
   const fetchReviews = async () => {
     if (!product.id) return;
@@ -378,7 +386,7 @@ const ShopDetails = () => {
   const displayProduct = product;
 
   useEffect(() => {
-    if (product.title) {
+    if (product && product.title) {
         localStorage.setItem("productDetails", JSON.stringify(product));
         // Track product view in recently viewed with debounce
         if (product.id) {
@@ -388,7 +396,7 @@ const ShopDetails = () => {
           return () => clearTimeout(timeoutId);
         }
     }
-  }, [product.id, addToRecentlyViewed]);
+  }, [product?.id, product?.title, addToRecentlyViewed]);
 
   const handlePreviewSlider = () => {
     openPreviewModal();
@@ -398,7 +406,7 @@ const ShopDetails = () => {
     <>
       <Breadcrumb title={"Shop Details"} pages={["shop details"]} />
 
-      {!displayProduct.title ? (
+      {!displayProduct || !displayProduct.title ? (
         <div className="flex items-center justify-center py-20">
             <p className="text-lg text-dark">Please select a product to view details.</p>
         </div>
