@@ -73,16 +73,18 @@ const SingleGridItem = ({ item, priority = false, onNotifyMe }: Props) => {
   return (
     <div className="group">
       <div className="relative overflow-hidden flex items-center justify-center rounded-lg bg-white shadow-1 min-h-[270px] mb-4">
-        <Image
-          src={item.imgs.thumbnails[0]}
-          alt={item.title}
-          width={250}
-          height={250}
-          priority={priority}
-          className={`w-full transition-transform duration-300 group-hover:scale-110 ${
-            !item.inStock ? "grayscale" : ""
-          }`}
-        />
+        <Link href={`/shop-details/${item.slug}`} onClick={handleNavigateToDetails}>
+          <Image
+            src={item.imgs.thumbnails[0]}
+            alt={item.title}
+            width={250}
+            height={250}
+            priority={priority}
+            className={`w-full transition-transform duration-300 group-hover:scale-110 ${
+              !item.inStock ? "grayscale" : ""
+            }`}
+          />
+        </Link>
         
         {!item.inStock ? (
           <div className="absolute top-3 right-3 bg-dark text-white text-xs font-semibold px-3 py-1 rounded-full z-10">

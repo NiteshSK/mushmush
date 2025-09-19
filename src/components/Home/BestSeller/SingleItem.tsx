@@ -10,6 +10,7 @@ import { useWishlist } from "@/app/context/WishlistContext";
 import Image from "next/image";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import MushroomBenefitsIcon from "@/components/Shop/MushroomBenefitsIcon";
 
 const SingleItem = ({ item, onNotifyMe }: { item: Product; onNotifyMe?: (product: Product) => void }) => {
   const { openModal } = useModalContext();
@@ -75,6 +76,9 @@ const SingleItem = ({ item, onNotifyMe }: { item: Product; onNotifyMe?: (product
           </div>
         ) : null}
 
+        {/* Mushroom Benefits Icon */}
+        <MushroomBenefitsIcon product={item} />
+
         <div className="text-center px-4 py-7.5">
           <div className="flex items-center justify-center gap-2.5 mb-2">
             <div className="flex items-center gap-1">
@@ -111,13 +115,15 @@ const SingleItem = ({ item, onNotifyMe }: { item: Product; onNotifyMe?: (product
 
         <div className="flex justify-center items-center">
           {item.imgs?.previews?.[0] ? (
-            <Image
-              src={item.imgs.previews[0]}
-              alt={item.title}
-              width={280}
-              height={280}
-              className={!item.inStock ? "grayscale" : ""}
-            />
+            <Link href={`/shop-details/${item.slug}`} onClick={handleNavigateToDetails}>
+              <Image
+                src={item.imgs.previews[0]}
+                alt={item.title}
+                width={280}
+                height={280}
+                className={!item.inStock ? "grayscale" : ""}
+              />
+            </Link>
           ) : null}
         </div>
 
@@ -140,6 +146,8 @@ const SingleItem = ({ item, onNotifyMe }: { item: Product; onNotifyMe?: (product
                 <svg className="fill-current" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path fillRule="evenodd" clipRule="evenodd" d="M7.99992 5.49996C6.61921 5.49996 5.49992 6.61925 5.49992 7.99996C5.49992 9.38067 6.61921 10.5 7.99992 10.5C9.38063 10.5 10.4999 9.38067 10.4999 7.99996C10.4999 6.61925 9.38063 5.49996 7.99992 5.49996ZM6.49992 7.99996C6.49992 7.17153 7.17149 6.49996 7.99992 6.49996C8.82835 6.49996 9.49992 7.17153 9.49992 7.99996C9.49992 8.82839 8.82835 9.49996 7.99992 9.49996C7.17149 9.49996 6.49992 8.82839 6.49992 7.99996Z" />
                   <path fillRule="evenodd" clipRule="evenodd" d="M7.99992 2.16663C4.9905 2.16663 2.96345 3.96942 1.78696 5.49787L1.76575 5.52543C1.49968 5.87098 1.25463 6.18924 1.08838 6.56556C0.910348 6.96854 0.833252 7.40775 0.833252 7.99996C0.833252 8.59217 0.910348 9.03138 1.08838 9.43436C1.25463 9.81068 1.49968 10.1289 1.76575 10.4745L1.78696 10.5021C2.96345 12.0305 4.9905 13.8333 7.99992 13.8333C11.0093 13.8333 13.0364 12.0305 14.2129 10.5021L14.2341 10.4745C14.5002 10.1289 14.7452 9.81069 14.9115 9.43436C15.0895 9.03138 15.1666 8.59217 15.1666 7.99996C15.1666 7.40775 15.0895 6.96854 14.9115 6.56556C14.7452 6.18923 14.5002 5.87097 14.2341 5.52541L14.2129 5.49787C13.0364 3.96942 11.0093 2.16663 7.99992 2.16663ZM2.5794 6.10783C3.66568 4.69657 5.43349 3.16663 7.99992 3.16663C10.5663 3.16663 12.3342 4.69657 13.4204 6.10783C13.7128 6.48769 13.8841 6.71466 13.9967 6.96966C14.102 7.20797 14.1666 7.49925 14.1666 7.99996C14.1666 8.50067 14.102 8.79195 13.9967 9.03026C13.8841 9.28526 13.7128 9.51223 13.4204 9.89209C12.3342 11.3033 10.5663 12.8333 7.99992 12.8333C5.43349 12.8333 3.66568 11.3033 2.5794 9.89209C2.28701 9.51223 2.11574 9.28525 2.00309 9.03026C1.89781 8.79195 1.83325 8.50067 1.83325 7.99996C1.83325 7.49925 1.89781 7.20797 2.00309 6.96966C2.11574 6.71466 2.28701 6.48769 2.5794 6.10783Z" />
+                  <path fillRule="evenodd" clipRule="evenodd" d="M3.50005 13C3.50005 13.8284 4.17163 14.5 5.00005 14.5C5.82848 14.5 6.50005 13.8284 6.50005 13C6.50005 12.1716 5.82848 11.5 5.00005 11.5C4.17163 11.5 3.50005 12.1716 3.50005 13ZM5.00005 13.5C4.72391 13.5 4.50005 13.2762 4.50005 13C4.50005 12.7239 4.72391 12.5 5.00005 12.5C5.2762 12.5 5.50005 12.7239 5.50005 13C5.50005 13.2762 5.2762 13.5 5.00005 13.5Z" />
+                  <path fillRule="evenodd" clipRule="evenodd" d="M11.0001 14.5001C10.1716 14.5001 9.50005 13.8285 9.50005 13.0001C9.50005 12.1716 10.1716 11.5001 11.0001 11.5001C11.8285 11.5001 12.5001 12.1716 12.5001 13.0001C12.5001 13.8285 11.8285 14.5001 11.0001 14.5001ZM10.5001 13.0001C10.5001 13.2762 10.7239 13.5001 11.0001 13.5001C11.2762 13.5001 11.5001 13.2762 11.5001 13.0001C11.5001 12.7239 11.2762 12.5001 11.0001 12.5001C10.7239 12.5001 10.5001 12.7239 10.5001 13.0001Z" />
                 </svg>
               </button>
               <button onClick={handleAddToCart} aria-label="button for add to cart" className="flex items-center justify-center w-9 h-9 rounded-[5px] shadow-1 ease-out duration-200 text-dark bg-white hover:text-white hover:bg-blue">

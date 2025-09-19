@@ -149,16 +149,13 @@ export async function PUT(
 
       // Add new categories
       if (categories.length > 0) {
-        await Promise.all(
-          categories.map((categoryId: number) =>
-            prisma.productCategory.create({
-              data: {
-                productId,
-                categoryId
-              }
-            })
-          )
-        )
+        await prisma.productCategory.createMany({
+          data: categories.map((categoryId: number) => ({
+            productId,
+            categoryId
+          })),
+          skipDuplicates: true
+        })
       }
     }
 
