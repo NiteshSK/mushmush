@@ -36,4 +36,5 @@ export type Product = {
     value: number;
     type: string;
   };
+  benefits?: any;
 };
