@@ -18,6 +18,7 @@ export interface Product {
   specifications: string[];
   howToConsume: string[];
   additionalInfo: { label: string; value: string }[];
+  benefits?: string;
   categories: { category: { id: number; title: string; slug: string } }[];
   averageRating?: number;
   reviewCount?: number;

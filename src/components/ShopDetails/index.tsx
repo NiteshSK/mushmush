@@ -13,6 +13,7 @@ import { addItemToCart } from "@/redux/features/cart-slice";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { useWishlist } from "@/app/context/WishlistContext";
 import toast from "react-hot-toast";
+import MushroomBenefitsIcon from "../Shop/MushroomBenefitsIcon";
 
 interface ProductDetails {
   id?: number;
@@ -44,6 +45,7 @@ interface ProductDetails {
     rating: number;
     comment: string;
   }>;
+  benefits?: any;
 }
 
 const ShopDetails = () => {
@@ -406,8 +408,8 @@ const ShopDetails = () => {
             <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
               <div className="flex flex-col lg:flex-row gap-7.5 xl:gap-17.5">
                 <div className="lg:max-w-[570px] w-full">
-                  <div className="lg:min-h-[512px] rounded-lg shadow-1 bg-gray-2 p-4 sm:p-7.5 relative flex items-center justify-center">
-                    <div>
+                  <div className="lg:min-h-[512px] rounded-lg shadow-1 bg-blue-2 p-4 sm:p-7.5 relative flex items-center justify-center">
+                    <div className="relative">
                       <button
                         onClick={handlePreviewSlider}
                         aria-label="button for zoom"
@@ -428,6 +430,7 @@ const ShopDetails = () => {
                         width={400}
                         height={400}
                       />
+                      <MushroomBenefitsIcon product={displayProduct} />
                     </div>
                   </div>
                   <div className="flex flex-wrap sm:flex-nowrap gap-4.5 mt-6">

@@ -28,6 +28,7 @@ const EditProductPage: React.FC = () => {
   const [additionalInfo, setAdditionalInfo] = useState<{ label: string; value: string }[]>([
     { label: "", value: "" },
   ]);
+  const [benefits, setBenefits] = useState<string>("");
 
   useEffect(() => {
     fetch("/api/categories")
@@ -53,6 +54,7 @@ const EditProductPage: React.FC = () => {
         setSpecifications(p.specifications || [""]);
         setHowToConsume(p.howToConsume || [""]);
         setAdditionalInfo(p.additionalInfo || [{ label: "", value: "" }]);
+        setBenefits(p.benefits || "");
         setSelectedCategoryIds((p.categories || []).map((pc: any) => pc.categoryId || pc.category?.id));
       })
       .finally(() => setLoading(false));
@@ -91,6 +93,7 @@ const EditProductPage: React.FC = () => {
           specifications: specifications.filter((s) => s.trim().length > 0),
           howToConsume: howToConsume.filter((s) => s.trim().length > 0),
           additionalInfo: additionalInfo.filter((a) => a.label.trim() && a.value.trim()),
+          benefits,
           categories: selectedCategoryIds,
         }),
       });
@@ -234,6 +237,11 @@ const EditProductPage: React.FC = () => {
           </div>
         </div>
 
+        <div>
+          <label className="block text-sm text-dark mb-2">Benefits (JSON)</label>
+          <textarea value={benefits} onChange={(e) => setBenefits(e.target.value)} className="w-full border rounded-md px-3 py-2" rows={6} />
+        </div>
+
         <div className="flex items-center gap-3">
           <button type="submit" disabled={!canSave || saving} className="px-5 py-2 rounded-md text-white bg-blue disabled:opacity-60">
             {saving ? "Saving..." : "Update Product"}
@@ -246,5 +254,3 @@ const EditProductPage: React.FC = () => {
 };
 
 export default EditProductPage;
-
-

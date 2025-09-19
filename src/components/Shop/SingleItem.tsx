@@ -11,6 +11,7 @@ import Link from "next/link";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import NotifyMeModal from "@/components/NotifyMeModal";
+import MushroomBenefitsIcon from "./MushroomBenefitsIcon";
 
 const SingleItem = ({ item }: { item: Product }) => {
   const { openModal } = useModalContext();
@@ -120,6 +121,9 @@ const SingleItem = ({ item }: { item: Product }) => {
             />
           </svg>
         </button>
+        
+        {/* Mushroom Benefits Icon */}
+        <MushroomBenefitsIcon product={item} />
         
         {!item.inStock ? (
           <div className="absolute top-3 left-3 bg-dark text-white text-xs font-semibold px-3 py-1.5 rounded-full z-10">
