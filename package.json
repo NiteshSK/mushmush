@@ -24,7 +24,9 @@
     "migrate:status": "tsx scripts/safe-migrate.ts status",
     "fix:production-migration": "node scripts/resolve-production-migration.js",
     "fix:p3009": "node scripts/fix-p3009-production.js",
-    "migrate:production": "tsx scripts/safe-production-migration.ts"
+    "migrate:production": "tsx scripts/safe-production-migration.ts",
+    "db:resolve-benefits": "tsx scripts/resolve-benefits-migration.ts",
+    "db:force-resolve": "tsx scripts/force-resolve-migration.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",
@@ -34,6 +36,7 @@
     "@types/nodemailer": "^7.0.1",
     "autoprefixer": "10.4.15",
     "bcryptjs": "^3.0.2",
+    "dotenv": "^16.3.1",
     "lucide-react": "^0.542.0",
     "next": "15.2.3",
     "next-auth": "^4.24.11",
