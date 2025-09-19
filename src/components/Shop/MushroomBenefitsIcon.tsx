@@ -54,7 +54,7 @@ const hasBenefits = product.benefits &&
       {/* Mushroom Icon */}
       <button
         onClick={handleIconClick}
-        className={`absolute top-3 left-10 w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 bg-orange-500 text-red-500 hover:bg-orange-600 z-10 ${className}`}
+        className={`absolute top-3 left-10 w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 bg-orange-500 text-red-500 hover:bg-orange-600 z-10 animate-pulse ${className}`}
         aria-label="View mushroom benefits"
         title="Click me"
       >
