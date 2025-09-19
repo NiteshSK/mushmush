@@ -69,16 +69,18 @@ const SingleListItem = ({ item, priority = false, onNotifyMe }: Props) => {
   return (
     <div className="group flex items-center gap-6 rounded-lg bg-white p-4 shadow-1">
       <div className="relative overflow-hidden w-1/4">
-        <Image
-          src={item.imgs.thumbnails[0]}
-          alt={item.title}
-          width={200}
-          height={200}
-          priority={priority}
-          className={`rounded-lg transition-all duration-300 ${
-            !item.inStock ? "grayscale" : ""
-          }`}
-        />
+        <Link href={`/shop-details/${item.slug}`} onClick={handleNavigateToDetails}>
+          <Image
+            src={item.imgs.thumbnails[0]}
+            alt={item.title}
+            width={200}
+            height={200}
+            priority={priority}
+            className={`rounded-lg transition-all duration-300 ${
+              !item.inStock ? "grayscale" : ""
+            }`}
+          />
+        </Link>
         {!item.inStock ? (
             <div className="absolute top-2 right-2 bg-dark text-white text-xs font-semibold px-3 py-1 rounded-full z-10">
                 Out of Stock

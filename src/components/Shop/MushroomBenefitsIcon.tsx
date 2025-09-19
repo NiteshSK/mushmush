@@ -55,12 +55,11 @@ const hasBenefits = product.benefits &&
       <button
         onClick={handleIconClick}
         className={`absolute bottom-6 left-7 w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 z-20 ${className}
-          bg-gradient-to-br from-purple-800 via-purple-600 to-indigo-800
-          hover:from-purple-700 hover:via-purple-500 hover:to-indigo-700
+          bg-white
+          hover:bg-gray-100
           shadow-lg hover:shadow-xl
-          border-2 border-yellow-400 hover:border-yellow-300
-          transform hover:scale-105
-          animate-pulse`}
+          border-2 border-gray-300 hover:border-gray-400
+          transform hover:scale-105`}
         aria-label="View mushroom benefits"
         title="Click me"
       >
@@ -79,7 +78,7 @@ const hasBenefits = product.benefits &&
             </div>
           </div>
         </div>
-        <span className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-xs font-bold text-purple-800 whitespace-nowrap drop-shadow-sm">
+        <span className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-xs font-bold text-gray-700 whitespace-nowrap drop-shadow-sm">
           Benefits
         </span>
       </button>

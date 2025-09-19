@@ -115,13 +115,15 @@ const SingleItem = ({ item, onNotifyMe }: { item: Product; onNotifyMe?: (product
 
         <div className="flex justify-center items-center">
           {item.imgs?.previews?.[0] ? (
-            <Image
-              src={item.imgs.previews[0]}
-              alt={item.title}
-              width={280}
-              height={280}
-              className={!item.inStock ? "grayscale" : ""}
-            />
+            <Link href={`/shop-details/${item.slug}`} onClick={handleNavigateToDetails}>
+              <Image
+                src={item.imgs.previews[0]}
+                alt={item.title}
+                width={280}
+                height={280}
+                className={!item.inStock ? "grayscale" : ""}
+              />
+            </Link>
           ) : null}
         </div>
 
