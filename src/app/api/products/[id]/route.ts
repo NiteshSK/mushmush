@@ -98,6 +98,7 @@ export async function PUT(
       specifications,
       howToConsume,
       additionalInfo,
+      benefits,
       categories
     } = body
 
@@ -124,7 +125,8 @@ export async function PUT(
         ...(imgs && { imgs }),
         ...(specifications && { specifications }),
         ...(howToConsume && { howToConsume }),
-        ...(additionalInfo && { additionalInfo })
+        ...(additionalInfo && { additionalInfo }),
+        ...(benefits && { benefits })
       }
     })
 

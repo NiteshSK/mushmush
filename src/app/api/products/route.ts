@@ -183,6 +183,7 @@ export async function POST(request: NextRequest) {
       specifications,
       howToConsume,
       additionalInfo,
+      benefits,
       categories
     } = body
 
@@ -202,7 +203,8 @@ export async function POST(request: NextRequest) {
         imgs,
         specifications,
         howToConsume,
-        additionalInfo
+        additionalInfo,
+        benefits
       }
     })
 
