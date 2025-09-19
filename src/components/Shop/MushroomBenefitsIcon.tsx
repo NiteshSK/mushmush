@@ -45,9 +45,9 @@ const hasBenefits = product.benefits &&
   ((typeof product.benefits === 'string' && product.benefits.trim() !== '') ||
    (typeof product.benefits === 'object' && Object.keys(product.benefits).length > 0));
 
-// if (!hasBenefits) {
-//   return null;
-// }
+if (!hasBenefits) {
+  return null;
+}
 
   return (
     <>
