@@ -12,6 +12,9 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
+    "db:seed:blog": "tsx scripts/seed-blog-post.ts",
+    "db:check:blog": "tsx scripts/check-blog-post.ts",
+    "db:test:blog-api": "tsx scripts/test-blog-api.ts",
     "db:studio": "prisma studio",
     "db:backup": "tsx scripts/backup-database.ts backup",
     "db:restore": "tsx scripts/backup-database.ts restore",
@@ -28,7 +31,8 @@
     "db:resolve-benefits": "tsx scripts/resolve-benefits-migration.ts",
     "db:force-resolve": "tsx scripts/force-resolve-migration.ts",
     "test:production-auth": "node test-production-auth.js",
-    "deploy:clean": "./scripts/clean-deploy.sh"
+    "deploy:clean": "./scripts/clean-deploy.sh",
+    "run-blog-post-seed": "tsx scripts/seed-blog-post.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",
@@ -54,7 +58,8 @@
     "swiper": "^10.2.0",
     "tailwindcss": "3.3.3",
     "tsx": "^4.20.5",
-    "zod": "^4.1.5"
+    "zod": "^4.1.5",
+    "@tailwindcss/typography": "^0.5.15"
   },
   "devDependencies": {
     "@types/node": "20.6.2",
