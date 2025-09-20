@@ -414,7 +414,7 @@ async function main() {
       content: 'Complete guide content here...',
       excerpt: 'Learn how to grow delicious oyster mushrooms at home with this comprehensive guide.',
       img: '/images/blog/oyster-blog-01.png',
-      views: 100000,
+      views: 0,
       published: true,
       metaTitle: 'How to Grow Oyster Mushrooms at Home - Complete Guide',
       metaDescription: 'Step-by-step guide to growing oyster mushrooms at home. Learn about spawn, growing conditions, and harvesting techniques.'

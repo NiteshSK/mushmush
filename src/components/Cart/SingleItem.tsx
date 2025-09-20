@@ -8,7 +8,21 @@ import {
 
 import Image from "next/image";
 
-const SingleItem = ({ item }) => {
+interface SingleItemProps {
+  item: {
+    id: number;
+    title: string;
+    price: number;
+    discountedPrice?: number;
+    quantity: number;
+    imgs?: {
+      thumbnails: string[];
+      previews: string[];
+    };
+  };
+}
+
+const SingleItem = ({ item }: SingleItemProps) => {
   const [quantity, setQuantity] = useState(item.quantity);
 
   const dispatch = useDispatch<AppDispatch>();

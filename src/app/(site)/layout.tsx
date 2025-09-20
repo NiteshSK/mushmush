@@ -9,7 +9,6 @@ import { LoadingProvider } from "../context/LoadingContext";
 import { Toaster } from "react-hot-toast";
 import { CartModalProvider } from "../context/CartSidebarModalContext";
 import { PreviewSliderProvider } from "../context/PreviewSliderContext";
-import { WishlistProvider } from "../context/WishlistContext";
 import PreviewSliderModal from "@/components/Common/PreviewSlider";
 import QuickViewModal from "@/components/Common/QuickViewModal";
 import CartSidebarModal from "@/components/Common/CartSidebarModal";
@@ -29,53 +28,51 @@ export default function SiteLayout({
 
   return (
     <ReduxProvider>
-      <WishlistProvider>
-        <ModalProvider>
-          <QuickViewModalProvider>
-            <CartModalProvider>
-              <PreviewSliderProvider>
-                <LoadingProvider>
-                  <Toaster 
-                    position="top-center"
-                    reverseOrder={false}
-                    gutter={8}
-                    containerClassName=""
-                    containerStyle={{
+      <ModalProvider>
+        <QuickViewModalProvider>
+          <CartModalProvider>
+            <PreviewSliderProvider>
+              <LoadingProvider>
+                <Toaster 
+                  position="top-center"
+                  reverseOrder={false}
+                  gutter={8}
+                  containerClassName=""
+                  containerStyle={{
+                    zIndex: 9999999,
+                    position: 'fixed',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                  }}
+                  toastOptions={{
+                    duration: 4000,
+                    style: {
+                      background: '#363636',
+                      color: '#fff',
                       zIndex: 9999999,
-                      position: 'fixed',
-                      top: '50%',
-                      left: '50%',
-                      transform: 'translate(-50%, -50%)',
-                    }}
-                    toastOptions={{
-                      duration: 4000,
-                      style: {
-                        background: '#363636',
-                        color: '#fff',
-                        zIndex: 9999999,
-                      },
-                      success: {
-                        duration: 3000,
-                      },
-                      error: {
-                        duration: 8000,
-                      },
-                    }}
-                  />
-                  {loading && <PreLoader />}
-                  <Header />
-                  {children}
-                  <Footer />
-                  <ScrollToTop />
-                  <PreviewSliderModal />
-                  <QuickViewModal />
-                  <CartSidebarModal />
-                </LoadingProvider>
-              </PreviewSliderProvider>
-            </CartModalProvider>
-          </QuickViewModalProvider>
-        </ModalProvider>
-      </WishlistProvider>
+                    },
+                    success: {
+                      duration: 3000,
+                    },
+                    error: {
+                      duration: 8000,
+                    },
+                  }}
+                />
+                {loading && <PreLoader />}
+                <Header />
+                {children}
+                <Footer />
+                <ScrollToTop />
+                <PreviewSliderModal />
+                <QuickViewModal />
+                <CartSidebarModal />
+              </LoadingProvider>
+            </PreviewSliderProvider>
+          </CartModalProvider>
+        </QuickViewModalProvider>
+      </ModalProvider>
     </ReduxProvider>
   );
 }

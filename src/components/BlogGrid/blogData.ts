@@ -3,7 +3,7 @@ import { BlogItem } from "@/types/blogItem";
 const blogData: BlogItem[] = [
   {
     date: "Aug 21, 2025",
-    views: 100000,
+    views: 0,
     title: "From Spore to Plate: The Ultimate Guide to Growing Oyster Mushrooms at Home",
     img: "/images/blog/oyster-blog-01.png",
   },

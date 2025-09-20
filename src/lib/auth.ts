@@ -4,6 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { compare } from "bcryptjs"
 import { prisma } from "./prisma"
+import { UserRole } from "@prisma/client"
 
 // Build providers array conditionally to avoid runtime errors when env vars are missing
 const providers = [
@@ -41,7 +42,7 @@ const providers = [
         }
 
         return {
-          id: user.id,
+          id: user.id.toString(),
           email: user.email,
           name: user.name,
           role: user.role,
@@ -53,7 +54,7 @@ const providers = [
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as any,
   providers,
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET || "fallback-secret-for-development",
   debug: process.env.NODE_ENV !== "production",
   callbacks: {
     async signIn({ user, account, profile, email, credentials }) {
@@ -82,21 +83,21 @@ export const authOptions: NextAuthOptions = {
     },
     session: async ({ session, token }) => {
       if (session?.user && token?.sub) {
-        (session.user as any).id = token.sub;
-        (session.user as any).role = token.role;
+        session.user.id = token.sub;
+        session.user.role = token.role as UserRole;
       }
       return session;
     },
     jwt: async ({ user, token }) => {
       if (user) {
-        token.uid = user.id;
+        token.sub = user.id;
         token.role = (user as any).role;
       }
       return token
     },
   },
   session: {
-    strategy: "jwt",
+    strategy: "jwt" as const,
     maxAge: 15 * 60, // 15 minutes (900 seconds)
     updateAge: 0, // Update session on every request to trigger validation
   },
