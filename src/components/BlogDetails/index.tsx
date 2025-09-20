@@ -57,8 +57,8 @@ const BlogDetails = ({ slug }: BlogDetailsProps) => {
                     className="rounded-[10px] w-full h-auto"
                     src={blogPost.img || "/images/blog/oyster-blog-01.png"}
                     alt={blogPost.title}
-                    width={800}
-                    height={300}
+                    width={600}
+                    height={250}
                   />
                 </div>
                 <div>
