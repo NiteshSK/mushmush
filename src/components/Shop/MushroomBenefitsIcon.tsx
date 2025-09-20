@@ -126,7 +126,7 @@ const MushroomBenefitsIcon: React.FC<MushroomBenefitsIconProps> = ({
       {/* Eye-catching Mushroom Icon Button */}
       <button
         onClick={handleIconClick}
-        className={`absolute ${position.bottom ? `bottom-${position.bottom}` : ''} ${position.left ? `left-${position.left}` : ''} ${position.right ? `right-${position.right}` : ''} w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 z-30 ${className}
+        className={`absolute ${position.bottom ? `bottom-${position.bottom} !important` : 'bottom-4 !important'} ${position.left ? `left-${position.left} !important` : ''} ${position.right ? `right-${position.right} !important` : ''} w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 z-30 ${className}
           bg-gradient-to-br from-amber-200 via-orange-200 to-amber-200
           hover:from-amber-300 hover:via-orange-300 hover:to-amber-300
           shadow-lg hover:shadow-2xl
