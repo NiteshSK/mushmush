@@ -34,6 +34,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
+  const [imageSourceType, setImageSourceType] = useState<'upload' | 'url'>('upload');
 
   useEffect(() => {
     if (initialData) {
@@ -45,6 +46,15 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
         published: initialData.published || false,
         img: initialData.img || '',
       });
+      
+      // Determine the initial image source type based on the existing image
+      if (initialData.img) {
+        if (initialData.img.startsWith('http://') || initialData.img.startsWith('https://')) {
+          setImageSourceType('url');
+        } else {
+          setImageSourceType('upload');
+        }
+      }
     }
   }, [initialData]);
 
@@ -85,6 +95,15 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
 
     if (!formData.content.trim()) {
       newErrors.content = 'Content is required';
+    }
+
+    // Validate image URL if URL source is selected
+    if (imageSourceType === 'url' && formData.img.trim()) {
+      try {
+        new URL(formData.img);
+      } catch {
+        newErrors.img = 'Please enter a valid URL';
+      }
     }
 
     setErrors(newErrors);
@@ -142,6 +161,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
           ...prev,
           img: data.url,
         }));
+        setImageSourceType('upload');
       } else {
         const error = await response.json();
         setUploadError(error.error || 'Failed to upload image');
@@ -152,6 +172,33 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
     } finally {
       setUploading(false);
     }
+  };
+
+  const handleImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const url = e.target.value;
+    setFormData(prev => ({
+      ...prev,
+      img: url,
+    }));
+  };
+
+  const getImageDisplayUrl = (imgPath: string) => {
+    if (!imgPath) return null;
+    
+    // If it's already a full URL, return as is
+    if (imgPath.startsWith('http://') || imgPath.startsWith('https://')) {
+      return imgPath;
+    }
+    
+    // If it's a local path, ensure it starts with /
+    return imgPath.startsWith('/') ? imgPath : `/${imgPath}`;
+  };
+
+  const removeImage = () => {
+    setFormData(prev => ({
+      ...prev,
+      img: '',
+    }));
   };
 
   return (
@@ -220,62 +267,132 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
           </div>
 
           <div className="mt-6">
-            <label htmlFor="img" className="block text-sm font-medium text-gray-7 mb-2">
+            <label className="block text-sm font-medium text-gray-7 mb-2">
               Featured Image
             </label>
             
-            {/* Image Upload */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <input
-                  type="file"
-                  id="image-upload"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                  disabled={uploading}
-                />
-                <label
-                  htmlFor="image-upload"
-                  className={`px-4 py-2 rounded-md cursor-pointer ${
-                    uploading
-                      ? 'bg-gray-3 text-gray-6 cursor-not-allowed'
-                      : 'bg-blue text-white hover:bg-blue/90'
-                  }`}
-                >
-                  {uploading ? 'Uploading...' : 'Upload Image'}
-                </label>
-                <span className="text-sm text-gray-6">
-                  or enter URL below
-                </span>
-              </div>
-
-              {uploadError && (
-                <p className="text-sm text-red">{uploadError}</p>
-              )}
-
-              {formData.img && (
-                <div className="mt-3">
-                  <img
-                    src={formData.img}
-                    alt="Featured image preview"
-                    className="w-32 h-32 object-cover rounded-md border border-gray-3"
+            {/* Image Source Selection */}
+            <div className="mb-4">
+              <div className="flex gap-4">
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="imageSource"
+                    value="upload"
+                    checked={imageSourceType === 'upload'}
+                    onChange={() => setImageSourceType('upload')}
+                    className="mr-2"
                   />
-                  <p className="mt-1 text-sm text-gray-6">
-                    Current image: {formData.img}
-                  </p>
-                </div>
-              )}
-
-              <input
-                type="url"
-                id="img"
-                value={formData.img}
-                onChange={(e) => setFormData(prev => ({ ...prev, img: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue"
-                placeholder="https://example.com/image.jpg"
-              />
+                  <span className="text-sm">Upload Image</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="imageSource"
+                    value="url"
+                    checked={imageSourceType === 'url'}
+                    onChange={() => setImageSourceType('url')}
+                    className="mr-2"
+                  />
+                  <span className="text-sm">External URL</span>
+                </label>
+              </div>
             </div>
+
+            {/* Image Upload Section */}
+            {imageSourceType === 'upload' && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <input
+                    type="file"
+                    id="image-upload"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    disabled={uploading}
+                  />
+                  <label
+                    htmlFor="image-upload"
+                    className={`px-4 py-2 rounded-md cursor-pointer ${
+                      uploading
+                        ? 'bg-gray-3 text-gray-6 cursor-not-allowed'
+                        : 'bg-blue text-white hover:bg-blue/90'
+                    }`}
+                  >
+                    {uploading ? 'Uploading...' : 'Choose Image'}
+                  </label>
+                  <span className="text-sm text-gray-6">
+                    Supported formats: JPEG, PNG, WebP, GIF (max 5MB)
+                  </span>
+                </div>
+
+                {uploadError && (
+                  <p className="text-sm text-red">{uploadError}</p>
+                )}
+
+                {/* Local path display for uploaded images */}
+                {formData.img && imageSourceType === 'upload' && (
+                  <div className="mt-3 p-3 bg-gray-1 rounded-md">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-7">Uploaded Image Path:</p>
+                        <code className="text-xs bg-gray-2 px-2 py-1 rounded">{formData.img}</code>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={removeImage}
+                        className="text-red hover:text-red/80 text-sm"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* URL Input Section */}
+            {imageSourceType === 'url' && (
+              <div className="space-y-3">
+                <input
+                  type="url"
+                  id="img-url"
+                  value={formData.img}
+                  onChange={handleImageUrlChange}
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue ${
+                    errors.img ? 'border-red' : 'border-gray-3'
+                  }`}
+                  placeholder="https://example.com/image.jpg"
+                />
+                {errors.img && (
+                  <p className="text-sm text-red">{errors.img}</p>
+                )}
+                <p className="text-xs text-gray-6">
+                  Enter a full URL including http:// or https://
+                </p>
+              </div>
+            )}
+
+            {/* Image Preview */}
+            {formData.img && (
+              <div className="mt-4">
+                <p className="text-sm font-medium text-gray-7 mb-2">Preview:</p>
+                <div className="border border-gray-3 rounded-md p-3 inline-block">
+                  <img
+                    src={getImageDisplayUrl(formData.img)}
+                    alt="Featured image preview"
+                    className="max-w-xs max-h-48 object-contain rounded"
+                    onError={(e) => {
+                      e.currentTarget.src = '/images/placeholder.jpg';
+                      e.currentTarget.alt = 'Image failed to load';
+                    }}
+                  />
+                </div>
+                <div className="mt-2 text-xs text-gray-6">
+                  Source: {imageSourceType === 'upload' ? 'Local upload' : 'External URL'}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
