@@ -158,7 +158,7 @@ const Header = () => {
                 />
               </svg>
               <div>
-                <span className="block text-2xs text-dark-4 uppercase">24/7 SUPPORT</span>
+                <span className="block text-2xs text-dark-4 uppercase">Mon-Sat: 09:00 AM-6:00 PM</span>
                 <p className="font-medium text-custom-sm text-dark">(+91) 7618362662</p>
               </div>
             </div>
