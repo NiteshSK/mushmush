@@ -35,6 +35,9 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const [imageSourceType, setImageSourceType] = useState<'upload' | 'url'>('upload');
+  const [imageLoading, setImageLoading] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   useEffect(() => {
     if (initialData) {
@@ -76,6 +79,34 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
     }));
   };
 
+  const validateImageUrl = (url: string): { isValid: boolean; error: string } => {
+    if (!url.trim()) {
+      return { isValid: true, error: '' }; // Empty URLs are valid (optional field)
+    }
+    
+    try {
+      const urlObj = new URL(url);
+      // Check if it's a valid HTTP/HTTPS URL
+      if (!['http:', 'https:'].includes(urlObj.protocol)) {
+        return { isValid: false, error: 'URL must use HTTP or HTTPS protocol' };
+      }
+      
+      // Check if it's an image URL by extension
+      const imageExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.svg'];
+      const hasImageExtension = imageExtensions.some(ext => 
+        url.toLowerCase().includes(ext)
+      );
+      
+      if (!hasImageExtension) {
+        return { isValid: false, error: 'URL must point to an image file (jpg, png, webp, gif, or svg)' };
+      }
+      
+      return { isValid: true, error: '' };
+    } catch {
+      return { isValid: false, error: 'Please enter a valid URL' };
+    }
+  };
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
@@ -97,13 +128,17 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
       newErrors.content = 'Content is required';
     }
 
-    // Validate image URL if URL source is selected
+    // Enhanced image validation
     if (imageSourceType === 'url' && formData.img.trim()) {
-      try {
-        new URL(formData.img);
-      } catch {
-        newErrors.img = 'Please enter a valid URL';
+      const { isValid, error } = validateImageUrl(formData.img);
+      if (!isValid) {
+        newErrors.img = error;
       }
+    }
+
+    // Clear previous image error when switching to upload or removing image
+    if (imageSourceType === 'upload' || !formData.img.trim()) {
+      delete newErrors.img;
     }
 
     setErrors(newErrors);
@@ -143,10 +178,28 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
     const file = e.target.files?.[0];
     if (!file) return;
 
+    await processImageUpload(file);
+  };
+
+  const processImageUpload = async (file: File) => {
     setUploading(true);
     setUploadError('');
+    setImageError(false);
 
     try {
+      // Client-side validation
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+      if (!allowedTypes.includes(file.type)) {
+        setUploadError('Invalid file type. Only JPEG, PNG, WebP, and GIF images are allowed.');
+        return;
+      }
+
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        setUploadError('File too large. Maximum size is 5MB.');
+        return;
+      }
+
       const formData = new FormData();
       formData.append('image', file);
 
@@ -162,15 +215,45 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
           img: data.url,
         }));
         setImageSourceType('upload');
+        setImageLoading(true);
       } else {
         const error = await response.json();
         setUploadError(error.error || 'Failed to upload image');
       }
     } catch (error) {
       console.error('Error uploading image:', error);
-      setUploadError('Failed to upload image');
+      setUploadError('Failed to upload image. Please try again.');
     } finally {
       setUploading(false);
+    }
+  };
+
+  // Drag and drop handlers
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      if (file.type.startsWith('image/')) {
+        processImageUpload(file);
+      } else {
+        setUploadError('Please drop an image file');
+      }
     }
   };
 
@@ -302,7 +385,12 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
             {/* Image Upload Section */}
             {imageSourceType === 'upload' && (
               <div className="space-y-3">
-                <div className="flex items-center gap-3">
+                <div
+                  className={`flex items-center gap-3 border-2 border-dashed rounded-md p-4 ${isDragOver ? 'border-blue' : 'border-gray-3'}`}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                >
                   <input
                     type="file"
                     id="image-upload"
@@ -324,6 +412,9 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
                   <span className="text-sm text-gray-6">
                     Supported formats: JPEG, PNG, WebP, GIF (max 5MB)
                   </span>
+                  {isDragOver && (
+                    <p className="text-sm text-blue">Drop the image here</p>
+                  )}
                 </div>
 
                 {uploadError && (
@@ -378,18 +469,51 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
               <div className="mt-4">
                 <p className="text-sm font-medium text-gray-7 mb-2">Preview:</p>
                 <div className="border border-gray-3 rounded-md p-3 inline-block">
-                  <img
-                    src={getImageDisplayUrl(formData.img)}
-                    alt="Featured image preview"
-                    className="max-w-xs max-h-48 object-contain rounded"
-                    onError={(e) => {
-                      e.currentTarget.src = '/images/placeholder.jpg';
-                      e.currentTarget.alt = 'Image failed to load';
-                    }}
-                  />
+                  {imageLoading ? (
+                    <div className="flex flex-col items-center justify-center h-48 w-48 bg-gray-1 rounded">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue mb-2"></div>
+                      <p className="text-sm text-gray-6">Loading image...</p>
+                    </div>
+                  ) : (
+                    <div className="relative group">
+                      <img
+                        src={getImageDisplayUrl(formData.img)}
+                        alt="Featured image preview"
+                        className="max-w-xs max-h-48 object-contain rounded transition-opacity duration-300"
+                        onError={(e) => {
+                          e.currentTarget.src = '/images/blog/blog-small-01.jpg';
+                          e.currentTarget.alt = 'Image failed to load';
+                          setImageError(true);
+                          setImageLoading(false);
+                        }}
+                        onLoad={() => {
+                          setImageLoading(false);
+                          setImageError(false);
+                        }}
+                        loading="lazy"
+                      />
+                      {imageError && (
+                        <div className="absolute inset-0 bg-red/10 rounded flex items-center justify-center">
+                          <div className="text-center">
+                            <p className="text-red text-sm font-medium">Image failed to load</p>
+                            <p className="text-red/70 text-xs">Using placeholder</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <div className="mt-2 text-xs text-gray-6">
-                  Source: {imageSourceType === 'upload' ? 'Local upload' : 'External URL'}
+                <div className="mt-2 flex items-center justify-between">
+                  <div className="text-xs text-gray-6">
+                    <span className="font-medium">Source:</span> {imageSourceType === 'upload' ? 'Local upload' : 'External URL'}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={removeImage}
+                    className="text-xs text-red hover:text-red/80 transition-colors"
+                  >
+                    Remove Image
+                  </button>
                 </div>
               </div>
             )}
@@ -487,7 +611,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
           </div>
 
           <div className="mt-4 text-sm text-gray-6">
-            <p>💡 Tip: Use the buttons above to insert HTML elements, or write your own HTML. The content will be rendered with proper styling.</p>
+            <p> Tip: Use the buttons above to insert HTML elements, or write your own HTML. The content will be rendered with proper styling.</p>
           </div>
         </div>
 
