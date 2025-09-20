@@ -10,13 +10,13 @@ async function isAdmin() {
 }
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 // GET /api/admin/blogs/[id] - Get single blog post for editing
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, context: RouteParams) {
   try {
     // Check if user is admin
     if (!(await isAdmin())) {
@@ -26,6 +26,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       )
     }
 
+    const params = await context.params
     const id = parseInt(params.id)
 
     if (isNaN(id)) {
@@ -71,7 +72,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 }
 
 // PUT /api/admin/blogs/[id] - Update blog post (full update)
-export async function PUT(request: NextRequest, { params }: RouteParams) {
+export async function PUT(request: NextRequest, context: RouteParams) {
   try {
     // Check if user is admin
     if (!(await isAdmin())) {
@@ -81,6 +82,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       )
     }
 
+    const params = await context.params
     const id = parseInt(params.id)
 
     if (isNaN(id)) {
@@ -154,7 +156,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 }
 
 // PATCH /api/admin/blogs/[id] - Partial update (e.g., toggle publish status)
-export async function PATCH(request: NextRequest, { params }: RouteParams) {
+export async function PATCH(request: NextRequest, context: RouteParams) {
   try {
     // Check if user is admin
     if (!(await isAdmin())) {
@@ -164,6 +166,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       )
     }
 
+    const params = await context.params
     const id = parseInt(params.id)
 
     if (isNaN(id)) {
@@ -207,7 +210,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 }
 
 // DELETE /api/admin/blogs/[id] - Delete blog post
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(request: NextRequest, context: RouteParams) {
   try {
     // Check if user is admin
     if (!(await isAdmin())) {
@@ -217,6 +220,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       )
     }
 
+    const params = await context.params
     const id = parseInt(params.id)
 
     if (isNaN(id)) {

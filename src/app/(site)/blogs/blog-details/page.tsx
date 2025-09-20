@@ -1,19 +1,13 @@
-import BlogDetails from "@/components/BlogDetails";
-import React from "react";
+import { redirect } from 'next/navigation'
+import { Metadata } from 'next'
 
-import { Metadata } from "next";
 export const metadata: Metadata = {
-  title: "Blog Details Page | MushMush",
-  description: "This is Blog Details Page for MushMush",
-  // other metadata
-};
+  title: 'Blogs | MushMush',
+  description: 'Read our latest blog posts on MushMush',
+}
 
-const BlogDetailsPage = () => {
-  return (
-    <main>
-      <BlogDetails />
-    </main>
-  );
-};
-
-export default BlogDetailsPage;
+export default function BlogDetailsRedirectPage() {
+  // Redirect to the main blogs page since individual blog posts
+  // are now handled by the dynamic route: /blogs/[slug]
+  redirect('/blogs')
+}

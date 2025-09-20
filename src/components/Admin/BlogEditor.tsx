@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
+import { generateSlug } from "@/lib/utils";
 
 type BlogEditorProps = {
   initialData?: {
@@ -60,15 +61,6 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
       }
     }
   }, [initialData]);
-
-  const generateSlug = (title: string) => {
-    return title
-      .toLowerCase()
-      .replace(/[^\w\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim();
-  };
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const title = e.target.value;

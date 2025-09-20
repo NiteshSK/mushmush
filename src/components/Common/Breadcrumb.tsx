@@ -1,7 +1,12 @@
 import Link from "next/link";
 import React from "react";
 
-const Breadcrumb = ({ title, pages }) => {
+interface BreadcrumbProps {
+  title: string;
+  pages: string[];
+}
+
+const Breadcrumb = ({ title, pages }: BreadcrumbProps) => {
   return (
     <div className="overflow-hidden shadow-breadcrumb pt-[209px] sm:pt-[155px] lg:pt-[95px] xl:pt-[165px]">
       <div className="border-t border-gray-3">
