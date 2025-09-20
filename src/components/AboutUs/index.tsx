@@ -156,7 +156,7 @@ const AboutUs = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
             {/* Daily Production */}
             <div className="bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-2xl text-center">
-              <div className="text-4xl font-bold text-green-600 mb-2">250+ kg</div>
+              <div className="text-4xl font-bold text-green-600 mb-2">100+ kg</div>
               <p className="text-lg text-gray-700">Daily Fresh Mushroom Production</p>
             </div>
 
@@ -168,7 +168,7 @@ const AboutUs = () => {
 
             {/* Spawn Distribution */}
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-2xl text-center">
-              <div className="text-4xl font-bold text-blue-600 mb-2">100+ kg</div>
+              <div className="text-4xl font-bold text-blue-600 mb-2">5+ kg</div>
               <p className="text-lg text-gray-700">Daily Spawn Distribution</p>
             </div>
           </div>
