@@ -7,11 +7,17 @@ import { createPortal } from 'react-dom';
 interface MushroomBenefitsIconProps {
   product: Product;
   className?: string;
+  position?: {
+    bottom?: string;
+    left?: string;
+    right?: string;
+  };
 }
 
 const MushroomBenefitsIcon: React.FC<MushroomBenefitsIconProps> = ({ 
   product, 
-  className = "" 
+  className = "",
+  position = { bottom: "4", left: "7" }
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [benefits, setBenefits] = useState<any>(null);
@@ -117,54 +123,112 @@ const MushroomBenefitsIcon: React.FC<MushroomBenefitsIconProps> = ({
 
   return (
     <>
-      {/* Enhanced Royal Mushroom Icon Button */}
+      {/* Eye-catching Mushroom Icon Button */}
       <button
         onClick={handleIconClick}
-        className={`absolute bottom-6 left-7 w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 z-30 ${className}
-          bg-gradient-to-br from-amber-50 to-orange-50
-          hover:from-amber-100 hover:to-orange-100
-          shadow-xl hover:shadow-2xl
-          border-2 border-amber-200 hover:border-amber-300
+        className={`absolute ${position.bottom ? `bottom-${position.bottom}` : ''} ${position.left ? `left-${position.left}` : ''} ${position.right ? `right-${position.right}` : ''} w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 z-30 ${className}
+          bg-gradient-to-br from-amber-200 via-orange-200 to-amber-200
+          hover:from-amber-300 hover:via-orange-300 hover:to-amber-300
+          shadow-lg hover:shadow-2xl
+          border-2 border-amber-300 hover:border-amber-400
           transform hover:scale-110
           group
-          backdrop-blur-sm`}
+          backdrop-blur-sm
+          animate-float`}
         aria-label="View mushroom benefits"
         title="Discover the amazing benefits of this mushroom"
+        style={{
+          animation: 'float 3s ease-in-out infinite',
+          boxShadow: '0 4px 15px rgba(251, 191, 36, 0.4), 0 0 20px rgba(251, 191, 36, 0.2)'
+        }}
       >
         <div className="relative">
-          {/* Animated glow effect */}
-          <div className="absolute inset-0 bg-gradient-to-r from-amber-400 to-orange-400 rounded-full opacity-0 group-hover:opacity-20 blur-md transition-opacity duration-300"></div>
+          {/* Pulsing glow effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-amber-400 to-orange-400 rounded-full opacity-60 group-hover:opacity-80 blur-md transition-opacity duration-300 animate-pulse"></div>
           
-          <Image
-            src="/images/icons/mushroom.png"
-            alt="Mushroom Icon"
-            width={36}
-            height={36}
-            className="drop-shadow-lg filter group-hover:brightness-110 transition-all duration-300"
-          />
-          
-          {/* Enhanced royal crown decoration with animation */}
-          <div className="absolute -top-3 -right-3 group-hover:scale-110 transition-transform duration-300">
-            <div className="w-6 h-6 bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 rounded-full flex items-center justify-center shadow-lg border border-yellow-300">
-              <div className="w-4 h-4 bg-gradient-to-br from-yellow-200 to-yellow-300 rounded-full shadow-inner"></div>
-              {/* Crown sparkles */}
-              <div className="absolute -top-1 -left-1 w-2 h-2 bg-yellow-300 rounded-full opacity-60"></div>
-              <div className="absolute -top-1 -right-1 w-1.5 h-1.5 bg-yellow-200 rounded-full opacity-40"></div>
-            </div>
+          {/* Enhanced mushroom icon with rotation */}
+          <div className="relative animate-pulse-slow">
+            <Image
+              src="/images/icons/mushroom.png"
+              alt="Mushroom Icon"
+              width={28}
+              height={28}
+              className="drop-shadow-lg filter group-hover:brightness-110 transition-all duration-300 group-hover:rotate-12"
+            />
           </div>
+          
+          {/* Sparkle effects */}
+          <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-300 rounded-full animate-sparkle opacity-80"></div>
+          <div className="absolute -bottom-1 -left-1 w-1.5 h-1.5 bg-amber-300 rounded-full animate-sparkle-delayed opacity-60"></div>
         </div>
         
-        {/* Enhanced label with better typography */}
-        <span className="absolute -bottom-5 left-1/2 transform -translate-x-1/2 text-xs font-bold text-amber-800 whitespace-nowrap drop-shadow-sm bg-amber-50/80 px-2 py-1 rounded-full border border-amber-200">
+        {/* Enhanced benefits label with animation */}
+        <span className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-amber-900 whitespace-nowrap bg-white/95 px-2 py-1 rounded-md shadow-md border-2 border-amber-300 animate-bounce-slow">
           Benefits
         </span>
         
-        {/* Tooltip on hover */}
-        {/* <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-40">
-          Discover Benefits
-          <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
-        </div> */}
+        {/* Attention-grabbing ring animation */}
+        <div className="absolute inset-0 rounded-full border-2 border-amber-400 opacity-0 group-hover:opacity-100 animate-ping-slow"></div>
       </button>
+
+      {/* Add custom animations to head */}
+      {isClient && (
+        <style jsx global>{`
+          @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+          }
+          
+          @keyframes pulse-slow {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+          }
+          
+          @keyframes bounce-slow {
+            0%, 100% { transform: translateX(-50%) translateY(0px); }
+            50% { transform: translateX(-50%) translateY(-2px); }
+          }
+          
+          @keyframes sparkle {
+            0%, 100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+          }
+          
+          @keyframes sparkle-delayed {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 0.9; transform: scale(1.1); }
+          }
+          
+          @keyframes ping-slow {
+            0% { transform: scale(0.8); opacity: 1; }
+            70%, 100% { transform: scale(1.3); opacity: 0; }
+          }
+          
+          .animate-float {
+            animation: float 3s ease-in-out infinite;
+          }
+          
+          .animate-pulse-slow {
+            animation: pulse-slow 2s ease-in-out infinite;
+          }
+          
+          .animate-bounce-slow {
+            animation: bounce-slow 2s ease-in-out infinite;
+          }
+          
+          .animate-sparkle {
+            animation: sparkle 1.5s ease-in-out infinite;
+          }
+          
+          .animate-sparkle-delayed {
+            animation: sparkle-delayed 1.5s ease-in-out infinite 0.5s;
+          }
+          
+          .animate-ping-slow {
+            animation: ping-slow 2s ease-in-out infinite;
+          }
+        `}</style>
+      )}
 
       {/* Enhanced Benefits Modal */}
       {isModalOpen && isClient && createPortal(

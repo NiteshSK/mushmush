@@ -123,7 +123,7 @@ const SingleItem = ({ item }: { item: Product }) => {
         </button>
         
         {/* Mushroom Benefits Icon */}
-        <MushroomBenefitsIcon product={item} />
+        <MushroomBenefitsIcon product={item} position={{ bottom: "4", right: "4" }} />
         
         {!item.inStock ? (
           <div className="absolute top-3 left-3 bg-dark text-white text-xs font-semibold px-3 py-1.5 rounded-full z-10">
