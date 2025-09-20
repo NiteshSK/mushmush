@@ -19,7 +19,7 @@ const Shop: React.FC<ShopProps> = ({ showFilters = true }) => {
   const [productStyle, setProductStyle] = useState("grid");
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 8;
-  const [filtersVisible, setFiltersVisible] = useState(showFilters);
+  const [filtersVisible, setFiltersVisible] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   
   // NotifyMe modal state
