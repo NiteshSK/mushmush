@@ -11,6 +11,8 @@ type BlogEditorProps = {
     content: string;
     published: boolean;
     img?: string;
+    metaTitle?: string;
+    metaDescription?: string;
   };
   onSubmit: (data: any) => void;
   isSubmitting: boolean;
@@ -30,6 +32,8 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
     content: '',
     published: false,
     img: '',
+    metaTitle: '',
+    metaDescription: '',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -49,6 +53,8 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
         content: initialData.content || '',
         published: initialData.published || false,
         img: initialData.img || '',
+        metaTitle: initialData.metaTitle || '',
+        metaDescription: initialData.metaDescription || '',
       });
       
       // Determine the initial image source type based on the existing image
@@ -118,6 +124,16 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
 
     if (!formData.content.trim()) {
       newErrors.content = 'Content is required';
+    }
+
+    // Meta title validation (optional but with length limit)
+    if (formData.metaTitle.trim() && formData.metaTitle.length > 60) {
+      newErrors.metaTitle = 'Meta title should be 60 characters or less for optimal SEO';
+    }
+
+    // Meta description validation (optional but with length limit)
+    if (formData.metaDescription.trim() && formData.metaDescription.length > 160) {
+      newErrors.metaDescription = 'Meta description should be 160 characters or less for optimal SEO';
     }
 
     // Enhanced image validation
@@ -621,6 +637,42 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
             <label htmlFor="published" className="ml-2 block text-sm text-gray-7">
               Publish this blog post
             </label>
+          </div>
+          <div className="mt-4">
+            <label htmlFor="metaTitle" className="block text-sm font-medium text-gray-7 mb-2">
+              Meta Title
+            </label>
+            <input
+              type="text"
+              id="metaTitle"
+              value={formData.metaTitle}
+              onChange={(e) => setFormData(prev => ({ ...prev, metaTitle: e.target.value }))}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue border-gray-3 ${
+                errors.metaTitle ? 'border-red' : ''
+              }`}
+              placeholder="Meta title for search engines"
+            />
+            {errors.metaTitle && (
+              <p className="mt-1 text-sm text-red">{errors.metaTitle}</p>
+            )}
+          </div>
+          <div className="mt-4">
+            <label htmlFor="metaDescription" className="block text-sm font-medium text-gray-7 mb-2">
+              Meta Description
+            </label>
+            <textarea
+              id="metaDescription"
+              value={formData.metaDescription}
+              onChange={(e) => setFormData(prev => ({ ...prev, metaDescription: e.target.value }))}
+              rows={3}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue border-gray-3 ${
+                errors.metaDescription ? 'border-red' : ''
+              }`}
+              placeholder="Meta description for search engines"
+            />
+            {errors.metaDescription && (
+              <p className="mt-1 text-sm text-red">{errors.metaDescription}</p>
+            )}
           </div>
         </div>
 
