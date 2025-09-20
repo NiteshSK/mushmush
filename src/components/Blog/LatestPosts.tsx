@@ -2,7 +2,20 @@ import Link from "next/link";
 import React from "react";
 import Image from "next/image";
 
-const LatestPosts = ({ blogs }) => {
+interface BlogPost {
+  id?: number;
+  title: string;
+  img: string;
+  date: string;
+  views: number;
+  slug?: string;
+}
+
+interface LatestPostsProps {
+  blogs: BlogPost[];
+}
+
+const LatestPosts = ({ blogs }: LatestPostsProps) => {
   return (
     <div className="shadow-1 bg-white rounded-xl mt-7.5">
       <div className="px-4 sm:px-6 py-4.5 border-b border-gray-3">
@@ -16,7 +29,7 @@ const LatestPosts = ({ blogs }) => {
           {blogs.slice(0, 3).map((blog, key) => (
             <div className="flex items-center gap-4" key={key}>
               <Link
-                href="/blogs/blog-details-with-sidebar"
+                href={`/blogs/${blog.slug || blog.id || key}`}
                 className="max-w-[110px] w-full rounded-[10px] overflow-hidden"
               >
                 <Image
@@ -30,7 +43,7 @@ const LatestPosts = ({ blogs }) => {
 
               <div>
                 <h3 className="text-dark leading-[22px] ease-out duration-200 mb-1.5 hover:text-blue">
-                  <Link href="/blogs/blog-details-with-sidebar">{blog.title}</Link>
+                  <Link href={`/blogs/${blog.slug || blog.id || key}`}>{blog.title}</Link>
                 </h3>
 
                 <span className="flex items-center gap-3">
