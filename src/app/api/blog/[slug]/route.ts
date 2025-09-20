@@ -45,39 +45,3 @@ export async function GET(
     )
   }
 }
-
-// POST /api/blog/[slug] - Update blog post (Admin only)
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
-) {
-  try {
-    const { slug } = await params
-    const body = await request.json()
-
-    console.log('API: Updating blog post for slug:', slug)
-
-    if (!slug) {
-      return NextResponse.json(
-        { error: 'Blog slug is required' },
-        { status: 400 }
-      )
-    }
-
-    const updatedBlog = await prisma.blogPost.update({
-      where: { slug },
-      data: body
-    })
-
-    return NextResponse.json({
-      success: true,
-      blogPost: updatedBlog
-    })
-  } catch (error) {
-    console.error('API: Error updating blog post:', error)
-    return NextResponse.json(
-      { error: 'Failed to update blog post' },
-      { status: 500 }
-    )
-  }
-}
