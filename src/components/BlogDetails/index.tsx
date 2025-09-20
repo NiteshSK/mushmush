@@ -50,7 +50,7 @@ const BlogDetails = ({ slug }: BlogDetailsProps) => {
       <section className="overflow-hidden relative pb-20 pt-5 lg:pt-20 xl:pt-5">
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
           <div className="flex flex-col lg:flex-row gap-7.5 xl:gap-17.5">
-            <div className="w-full lg:w-2/3">
+            <div className="w-full lg:w-full">
               <div className="blog-details-content">
                 <div className="rounded-[10px] overflow-hidden mb-7.5">
                   <Image
@@ -81,7 +81,7 @@ const BlogDetails = ({ slug }: BlogDetailsProps) => {
                     {blogPost.content ? (
                       <div 
                         dangerouslySetInnerHTML={{ __html: blogPost.content }}
-                        className="prose prose-lg max-w-none text-gray-6
+                        className="prose prose-lg prose-xl:max-w-none max-w-full text-gray-6
                                   prose-headings:text-dark
                                   prose-h1:text-2xl prose-h1:font-bold prose-h1:mb-4
                                   prose-h2:text-xl prose-h2:font-semibold prose-h2:mb-3
@@ -91,7 +91,9 @@ const BlogDetails = ({ slug }: BlogDetailsProps) => {
                                   prose-ol:mb-4 prose-ol:pl-6
                                   prose-li:mb-2
                                   prose-strong:text-dark prose-strong:font-semibold
-                                  prose-a:text-blue prose-a:underline hover:prose-a:text-blue/80"
+                                  prose-a:text-blue prose-a:underline hover:prose-a:text-blue/80
+                                  prose-img:max-w-full prose-img:h-auto
+                                  prose-pre:max-w-full prose-pre:overflow-x-auto"
                       />
                     ) : (
                       <div className="text-gray-5 italic">Content not available</div>
