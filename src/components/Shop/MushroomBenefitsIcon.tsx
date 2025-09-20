@@ -126,7 +126,7 @@ const MushroomBenefitsIcon: React.FC<MushroomBenefitsIconProps> = ({
       {/* Eye-catching Mushroom Icon Button */}
       <button
         onClick={handleIconClick}
-        className={`absolute ${position.bottom ? `bottom-${position.bottom} !important` : 'bottom-4 !important'} ${position.left ? `left-${position.left} !important` : ''} ${position.right ? `right-${position.right} !important` : ''} w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 z-30 ${className}
+        className={`absolute ${position.bottom ? `bottom-${position.bottom} !important` : 'bottom-3 !important'} ${position.left ? `left-${position.left} !important` : ''} ${position.right ? `right-${position.right} !important` : ''} w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 z-20 ${className}
           bg-gradient-to-br from-amber-200 via-orange-200 to-amber-200
           hover:from-amber-300 hover:via-orange-300 hover:to-amber-300
           shadow-lg hover:shadow-2xl
@@ -151,19 +151,19 @@ const MushroomBenefitsIcon: React.FC<MushroomBenefitsIconProps> = ({
             <Image
               src="/images/icons/mushroom.png"
               alt="Mushroom Icon"
-              width={28}
-              height={28}
+              width={25}
+              height={25}
               className="drop-shadow-lg filter group-hover:brightness-110 transition-all duration-300 group-hover:rotate-12"
             />
           </div>
           
           {/* Sparkle effects */}
           <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-300 rounded-full animate-sparkle opacity-80"></div>
-          <div className="absolute -bottom-1 -left-1 w-1.5 h-1.5 bg-amber-300 rounded-full animate-sparkle-delayed opacity-60"></div>
+          <div className="absolute -bottom-2 -left-1 w-1.5 h-1.5 bg-amber-300 rounded-full animate-sparkle-delayed opacity-60"></div>
         </div>
         
         {/* Enhanced benefits label with animation */}
-        <span className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-amber-900 whitespace-nowrap bg-white/95 px-2 py-1 rounded-md shadow-md border-2 border-amber-300 animate-bounce-slow">
+        <span className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-xs font-bold text-amber-900 whitespace-nowrap bg-white/95 px-2 py-1 rounded-md shadow-md border-2 border-amber-300 animate-bounce-slow">
           Benefits
         </span>
         

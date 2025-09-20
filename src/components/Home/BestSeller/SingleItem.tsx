@@ -77,7 +77,7 @@ const SingleItem = ({ item, onNotifyMe }: { item: Product; onNotifyMe?: (product
         ) : null}
 
         {/* Mushroom Benefits Icon */}
-        <MushroomBenefitsIcon product={item} position={{ bottom: "6", left: "7" }} />
+        <MushroomBenefitsIcon product={item} position={{ bottom: "4", left: "4" }} />
 
         <div className="text-center px-4 py-7.5">
           <div className="flex items-center justify-center gap-2.5 mb-2">

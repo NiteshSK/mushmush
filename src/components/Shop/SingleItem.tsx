@@ -82,7 +82,7 @@ const SingleItem = ({ item }: { item: Product }) => {
 
   return (
     <>
-    <div className="group flex flex-col h-full bg-white rounded-lg shadow-1 overflow-hidden transition-shadow duration-300 hover:shadow-2">
+    <div className="group flex flex-col h-full bg-white rounded-lg shadow-1 overflow-hidden transition-shadow duration-300 hover:shadow-2 relative">
       {/* Product Image */}
       <div className="relative w-full aspect-square overflow-hidden bg-gray-1">
         <Link href={`/shop-details/${item.slug}`} onClick={handleNavigateToDetails} className="block w-full h-full">
@@ -123,7 +123,7 @@ const SingleItem = ({ item }: { item: Product }) => {
         </button>
         
         {/* Mushroom Benefits Icon */}
-        <MushroomBenefitsIcon product={item} position={{ bottom: "4", right: "4" }} />
+        <MushroomBenefitsIcon product={item} position={{ bottom: "4", left: "4" }} className="absolute" />
         
         {!item.inStock ? (
           <div className="absolute top-3 left-3 bg-dark text-white text-xs font-semibold px-3 py-1.5 rounded-full z-10">
