@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { writeFile } from 'fs/promises'
-import { join } from 'path'
-import { mkdir } from 'fs/promises'
+import { put } from '@vercel/blob'
 
 // Helper function to check if user is admin
 async function isAdmin() {
@@ -49,30 +47,21 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-
     // Generate unique filename
     const timestamp = Date.now()
     const randomString = Math.random().toString(36).substring(2, 8)
     const fileExtension = file.name.split('.').pop()?.toLowerCase() || 'jpg'
     const filename = `blog-${timestamp}-${randomString}.${fileExtension}`
 
-    // Ensure the upload directory exists
-    const uploadDir = join(process.cwd(), 'public', 'images', 'blog')
-    try {
-      await mkdir(uploadDir, { recursive: true })
-    } catch (error) {
-      // Directory already exists or other error
-      console.log('Upload directory check:', error)
-    }
-
-    // Save the file
-    const filePath = join(uploadDir, filename)
-    await writeFile(filePath, buffer)
+    // Upload to Vercel Blob Storage
+    const blob = await put(filename, file, {
+      access: 'public',
+      addRandomSuffix: false,
+      token: process.env.BLOB_READ_WRITE_TOKEN
+    })
 
     // Return the public URL
-    const publicUrl = `/images/blog/${filename}`
+    const publicUrl = blob.url
 
     return NextResponse.json({
       message: 'Image uploaded successfully',

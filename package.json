@@ -43,6 +43,7 @@
     "@reduxjs/toolkit": "^2.6.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/nodemailer": "^7.0.1",
+    "@vercel/blob": "^1.0.0",
     "autoprefixer": "10.4.15",
     "bcryptjs": "^3.0.2",
     "dotenv": "^16.3.1",
