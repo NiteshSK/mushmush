@@ -107,7 +107,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-lg mb-1">Address</h3>
-                    <p className="text-gray-600">Mush Agro Products<br/>India</p>
+                    <p className="text-gray-600">Mush Agro Products<br/>Herbetpur, Dehradun <br/>Uttarakhand, India</p>
                   </div>
                 </div>
               </div>
