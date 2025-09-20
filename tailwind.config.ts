@@ -248,5 +248,30 @@ const config: Config = {
   plugins: [
     require('@tailwindcss/typography'),
   ],
+  typography: (theme) => ({
+    DEFAULT: {
+      css: {
+        fontFamily: theme('fontFamily.euclid-circular-a'),
+        color: theme('colors.gray.6'),
+        maxWidth: 'none',
+        '--tw-prose-body': theme('colors.gray.6'),
+        '--tw-prose-headings': theme('colors.dark.DEFAULT'),
+        '--tw-prose-lead': theme('colors.gray.5'),
+        '--tw-prose-links': theme('colors.blue.DEFAULT'),
+        '--tw-prose-bold': theme('colors.dark.DEFAULT'),
+        '--tw-prose-counters': theme('colors.gray.5'),
+        '--tw-prose-bullets': theme('colors.gray.5'),
+        '--tw-prose-hr': theme('colors.gray.3'),
+        '--tw-prose-quotes': theme('colors.gray.5'),
+        '--tw-prose-quote-borders': theme('colors.gray.3'),
+        '--tw-prose-captions': theme('colors.gray.5'),
+        '--tw-prose-code': theme('colors.gray.5'),
+        '--tw-prose-pre-code': theme('colors.gray.5'),
+        '--tw-prose-pre-bg': theme('colors.gray.1'),
+        '--tw-prose-th-borders': theme('colors.gray.3'),
+        '--tw-prose-td-borders': theme('colors.gray.3'),
+      },
+    },
+  }),
 };
 export default config;
