@@ -50,7 +50,7 @@ const Hero = () => {
               </span>
             </h1>
             <p className="text-lg text-gray-600 leading-relaxed mb-8">
-              At MushMush, we're obsessed with the incredible world of fungi. We specialize in cultivating premium edible and medicinal mushrooms, all grown to the highest organic standards. Our passion is to provide you with the purest, most potent mushrooms on the market, whether you're looking to create a culinary masterpiece or enhance your daily wellness routine. Explore our collection and discover the MushMush difference.
+              At <strong>MushMush</strong>, we're obsessed with the incredible world of fungi. We specialize in cultivating premium edible and medicinal mushrooms, all grown to the highest organic standards. Our passion is to provide you with the purest, most potent mushrooms on the market, whether you're looking to create a culinary masterpiece or enhance your daily wellness routine. Explore our collection and discover the MushMush difference.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
