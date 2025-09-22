@@ -27,10 +27,6 @@ const FAQ = () => {
       answer: "To maintain optimal freshness, store our mushrooms in the paper bag they arrive in and place them in the main compartment of your refrigerator (not the vegetable drawer, as it can be too humid). This allows them to breathe and prevents them from becoming slimy. They are best consumed within 5-7 days."
     },
     {
-      question: "Who is behind MushMush?",
-      answer: "MushMush was founded by four friends—Bhartendu, Pravesh, Nitesh & Vikrant—who left their conventional jobs to pursue a shared passion for sustainable agriculture. We are the hands-on growers, personally overseeing every step from spawn to harvest."
-    },
-    {
       question: "Where is your farm located?",
       answer: "Our farm is nestled in the clean, serene environment of Herbertpur, Dehradun, Uttarakhand."
     },
