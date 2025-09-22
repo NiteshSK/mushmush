@@ -8,6 +8,7 @@ import CounDown from "./Countdown";
 import Newsletter from "../Common/Newsletter";
 import RecentlyViewed from "./RecentlyViewed";
 import WishlistSection from "./WishlistSection";
+import FAQ from "./FAQ";
 
 const Home = () => {
   return (
@@ -20,6 +21,7 @@ const Home = () => {
       <RecentlyViewed />
       <WishlistSection />
       {/* <NewArrival /> */}
+      <FAQ />
       <Newsletter />
     </main>
   );
