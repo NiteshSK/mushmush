@@ -320,7 +320,6 @@ const MushroomBenefitsIcon: React.FC<MushroomBenefitsIconProps> = ({
                   <span className={`font-mono px-2 py-1 rounded text-xs ${timeLeft <= 3 ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600'}`}>
                     {timeLeft}s
                   </span>
-                  <span>• Press <kbd className="px-2 py-1 bg-gray-100 rounded text-xs">ESC</kbd> to close</span>
                 </div>
                 <button
                   onClick={closeModal}
