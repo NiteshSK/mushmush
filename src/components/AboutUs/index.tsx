@@ -236,16 +236,37 @@ const AboutUs = () => {
               </div>
             </div>
             <div>
-              <div className="relative rounded-2xl overflow-hidden shadow-xl">
-                <Image
-                  src="/images/aboutus/vikrant_working.png"
-                  alt="Vikrant working with mushrooms"
-                  width={600}
-                  height={400}
-                  className="w-full h-80 sm:h-96 object-cover"
-                  priority
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="relative rounded-2xl overflow-hidden shadow-xl">
+                  <Image
+                    src="/images/aboutus/vikrant_working.png"
+                    alt="Vikrant working with mushrooms"
+                    width={600}
+                    height={400}
+                    className="w-full h-64 sm:h-80 object-cover"
+                    priority
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+                    <p className="text-white text-sm font-medium">Vikrant at Work</p>
+                    <p className="text-white/80 text-xs">Developing new mushroom products</p>
+                  </div>
+                </div>
+                <div className="relative rounded-2xl overflow-hidden shadow-xl">
+                  <Image
+                    src="/images/aboutus/vikrant_pravesh_working.png"
+                    alt="Vikrant and Pravesh working together"
+                    width={600}
+                    height={400}
+                    className="w-full h-64 sm:h-80 object-cover"
+                    priority
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+                    <p className="text-white text-sm font-medium">Team Collaboration</p>
+                    <p className="text-white/80 text-xs">Working on future mushroom innovations</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -330,32 +351,6 @@ const AboutUs = () => {
         </div>
       </section>
 
-      {/* Partners Section (For Future Use) */}
-      {/* <section className="py-20 bg-gray-50">
-        <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
-          <div className="text-center mb-12">
-            <h2 className="font-bold text-3xl sm:text-4xl text-dark mb-4">
-              Our Partners
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Collaborating with like-minded organizations to promote sustainable agriculture
-            </p>
-          </div>
-
-          <div className="bg-white rounded-2xl p-12 shadow-sm border-2 border-dashed border-gray-300">
-            <div className="text-center">
-              <svg className="w-16 h-16 mx-auto mb-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd"/>
-              </svg>
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">Partner Section Coming Soon</h3>
-              <p className="text-gray-500 max-w-md mx-auto">
-                This section will showcase our valued partners and collaborators who share our vision for sustainable mushroom cultivation.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section> */}
-
       {/* Call to Action Section */}
       <section className="py-20 bg-gradient-to-r from-green-600 to-green-700">
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0 text-center">
@@ -366,22 +361,22 @@ const AboutUs = () => {
             Experience the purity of naturally grown mushrooms, cultivated with care and dedication.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-    <a 
-        href="/shop" 
-        className="flex items-center justify-center font-semibold text-green-700 bg-white py-4 px-5 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 ease-out duration-300 transition-all hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-white/50 text-center w-full sm:w-auto"
-    >
-        <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
-        </svg>
-        Shop Our Products
-    </a>
-    <a 
-        href="/contact" 
-        className="flex items-center justify-center font-semibold text-green-700 bg-white py-4 px-5 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 ease-out duration-300 transition-all hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-white/50 text-center w-full sm:w-auto"
-    >
-        Contact Us
-    </a>
-</div>
+            <a 
+                href="/shop" 
+                className="flex items-center justify-center font-semibold text-green-700 bg-white py-4 px-5 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 ease-out duration-300 transition-all hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-white/50 text-center w-full sm:w-auto"
+            >
+                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
+                </svg>
+                Shop Our Products
+            </a>
+            <a 
+                href="/contact" 
+                className="flex items-center justify-center font-semibold text-green-700 bg-white py-4 px-5 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 ease-out duration-300 transition-all hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-white/50 text-center w-full sm:w-auto"
+            >
+                Contact Us
+            </a>
+          </div>
         </div>
       </section>
     </>
