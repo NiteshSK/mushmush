@@ -36,7 +36,7 @@ const AboutUs = () => {
                   is more than just a mushroom farm—it's a dream brought to life.
                 </p>
                 <p className="text-lg leading-relaxed">
-                  Our journey began when we, <strong>Bhartendu, Pravesh, Nitesh & Vikrant</strong>, decided to leave their conventional jobs behind. 
+                  Our journey began when we, <strong>Bhartendu, Pravesh & Vikrant</strong>, decided to leave their conventional jobs behind. 
                   We saw an opportunity to contribute something wholesome and natural to our community, and we 
                   committed ourselves full-time to the art and science of mushroom cultivation.
                 </p>
@@ -49,7 +49,7 @@ const AboutUs = () => {
             <div className="order-1 lg:order-2">
               <div className="relative rounded-2xl overflow-hidden shadow-xl">
                 <Image
-                  src="/images/aboutus/all_four.png"
+                  src="/images/aboutus/story.png"
                   alt="Bhartendu, Pravesh, Nitesh and Vikrant - MushMush Founders"
                   width={600}
                   height={400}
@@ -59,7 +59,7 @@ const AboutUs = () => {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
                   <p className="text-white text-sm font-medium">The MushMush Team</p>
-                  <p className="text-white/80 text-xs">Bhartendu, Pravesh, Nitesh & Vikrant - Founders dedicated to natural mushroom cultivation</p>
+                  <p className="text-white/80 text-xs">Bhartendu, Pravesh & Vikrant - Founders dedicated to natural mushroom cultivation</p>
                 </div>
               </div>
             </div>
