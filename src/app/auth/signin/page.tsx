@@ -88,6 +88,7 @@ export default function SignIn() {
         <div className="bg-white p-8 shadow rounded-lg">
           
           {/* Google Button */}
+          {/* 
           <button
             onClick={handleGoogleSignIn}
             disabled={isLoading}
@@ -101,6 +102,7 @@ export default function SignIn() {
             </svg>
             Continue with Google
           </button>
+          */}
 
           {/* Divider */}
           <div className="relative mb-6">
@@ -108,7 +110,7 @@ export default function SignIn() {
               <div className="w-full border-t border-gray-300" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Or</span>
+              <span className="px-2 bg-white text-gray-500">Login</span>
             </div>
           </div>
 
