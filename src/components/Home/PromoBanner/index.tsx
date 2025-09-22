@@ -13,7 +13,7 @@ const PromoBanner = () => {
       return banner.buttonLink;
     }
     if (banner.product) {
-      return `/shop-details?id=${banner.product.id}`;
+      return `/shop-details/${banner.product.slug}`;
     }
     if (banner.category) {
       return `/shop?category=${banner.category.slug}`;

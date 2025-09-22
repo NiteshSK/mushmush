@@ -149,7 +149,7 @@ const SingleItem = ({ item }: { item: Product }) => {
         </div>
 
         <h3 className="font-medium text-dark ease-out duration-200 hover:text-blue mb-2 text-lg flex-grow">
-          <Link href="/shop-details" onClick={handleNavigateToDetails}>
+          <Link href={`/shop-details/${item.slug}`} onClick={handleNavigateToDetails}>
             {item.title}
           </Link>
         </h3>
@@ -181,7 +181,7 @@ const SingleItem = ({ item }: { item: Product }) => {
               </button>
             ) : (
               <Link
-                href="/shop-details"
+                href={`/shop-details/${item.slug}`}
                 onClick={handleNavigateToDetails}
                 className="inline-flex font-medium text-sm text-white bg-blue py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue-dark"
               >

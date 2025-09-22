@@ -49,7 +49,7 @@ const ShopWithSidebar = () => {
 
   const handleProductClick = (product: Product) => {
     dispatch(updateproductDetails(product));
-    router.push("/shop-details");
+    router.push(`/shop-details/${product.slug}`);
   };
 
   // Handle opening notify me modal

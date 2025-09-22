@@ -53,7 +53,7 @@ const Shop: React.FC<ShopProps> = ({ showFilters = true }) => {
     // Only navigate to details if product is in stock
     if (product.inStock) {
       dispatch(updateproductDetails(product));
-      router.push("/shop-details");
+      router.push(`/shop-details/${product.slug}`);
     }
   };
 

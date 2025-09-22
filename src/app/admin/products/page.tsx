@@ -9,6 +9,7 @@ type Product = {
   inStock: boolean;
   featured: boolean;
   createdAt: string;
+  slug: string;
 };
 
 const ProductsPage: React.FC = () => {
@@ -71,7 +72,7 @@ const ProductsPage: React.FC = () => {
                     <td className="p-3">{new Date(p.createdAt).toLocaleDateString()}</td>
                     <td className="p-3 text-right">
                       <Link href={`/admin/products/${p.id}/edit`} className="text-blue mr-4">Edit</Link>
-                      <Link href={`/shop-details`} className="text-gray-600">View</Link>
+                      <Link href={`/shop-details/${p.slug}`} className="text-gray-600">View</Link>
                     </td>
                   </tr>
                 ))}

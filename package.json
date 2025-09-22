@@ -35,7 +35,8 @@
     "db:force-resolve": "tsx scripts/force-resolve-migration.ts",
     "test:production-auth": "node test-production-auth.js",
     "deploy:clean": "./scripts/clean-deploy.sh",
-    "run-blog-post-seed": "tsx scripts/seed-blog-post.ts"
+    "run-blog-post-seed": "tsx scripts/seed-blog-post.ts",
+    "fix:product-slugs": "tsx scripts/fix-product-slugs.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",
