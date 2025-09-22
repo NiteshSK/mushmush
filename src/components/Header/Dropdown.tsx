@@ -2,7 +2,11 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 
-const Dropdown = ({ menuItem, stickyMenu, setNavigationOpen }) => {
+const Dropdown = ({ menuItem, stickyMenu, setNavigationOpen }: { 
+  menuItem: any; 
+  stickyMenu: any; 
+  setNavigationOpen: (value: boolean) => void;
+}) => {
   const [dropdownToggler, setDropdownToggler] = useState(false);
   const pathUrl = usePathname();
 
