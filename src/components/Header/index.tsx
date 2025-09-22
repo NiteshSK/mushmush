@@ -375,6 +375,7 @@ const Header = () => {
                         key={i}
                         menuItem={menuItem}
                         stickyMenu={stickyMenu}
+                        setNavigationOpen={setNavigationOpen}
                       />
                     ) : (
                       <li
