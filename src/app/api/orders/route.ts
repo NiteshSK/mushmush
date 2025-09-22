@@ -87,38 +87,87 @@ export async function POST(request: NextRequest) {
       shipping
     } = body
 
+    // Validate order items and check inventory
+    for (const item of orderItems) {
+      const product = await prisma.product.findUnique({
+        where: { id: item.productId }
+      })
+
+      if (!product) {
+        return NextResponse.json(
+          { error: `Product with ID ${item.productId} not found` },
+          { status: 404 }
+        )
+      }
+
+      if (product.quantity < item.quantity) {
+        return NextResponse.json(
+          { error: `Insufficient stock for product "${product.title}". Available: ${product.quantity}, Requested: ${item.quantity}` },
+          { status: 400 }
+        )
+      }
+    }
+
     // Generate order number
     const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
     
     const total = subtotal + tax + shipping
 
-    const order = await prisma.order.create({
-      data: {
-        orderNumber,
-        userId,
-        customerName,
-        customerEmail,
-        customerPhone,
-        shippingAddress,
-        subtotal,
-        tax,
-        shipping,
-        total,
-        orderItems: {
-          create: orderItems.map((item: any) => ({
-            productId: item.productId,
-            quantity: item.quantity,
-            price: item.price
-          }))
-        }
-      },
-      include: {
-        orderItems: {
-          include: {
-            product: true
+    // Create order and update inventory in a transaction
+    const order = await prisma.$transaction(async (tx) => {
+      // Create the order
+      const newOrder = await tx.order.create({
+        data: {
+          orderNumber,
+          userId,
+          customerName,
+          customerEmail,
+          customerPhone,
+          shippingAddress,
+          subtotal,
+          tax,
+          shipping,
+          total,
+          orderItems: {
+            create: orderItems.map((item: any) => ({
+              productId: item.productId,
+              quantity: item.quantity,
+              price: item.price
+            }))
+          }
+        },
+        include: {
+          orderItems: {
+            include: {
+              product: true
+            }
           }
         }
+      })
+
+      // Update product quantities
+      for (const item of orderItems) {
+        const currentProduct = await tx.product.findUnique({
+          where: { id: item.productId },
+          select: { quantity: true }
+        })
+
+        if (!currentProduct) {
+          throw new Error(`Product with ID ${item.productId} not found`)
+        }
+
+        const newQuantity = currentProduct.quantity - item.quantity
+        
+        await tx.product.update({
+          where: { id: item.productId },
+          data: {
+            quantity: newQuantity,
+            inStock: newQuantity > 0
+          }
+        })
       }
+
+      return newOrder
     })
 
     return NextResponse.json(order, { status: 201 })

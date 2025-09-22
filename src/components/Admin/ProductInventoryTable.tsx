@@ -7,6 +7,7 @@ interface Product {
   id: number;
   title: string;
   price: number;
+  quantity: number;
   inStock: boolean;
   imgs: {
     thumbnails: string[];
@@ -24,6 +25,8 @@ const ProductInventoryTable: React.FC = () => {
   const [updating, setUpdating] = useState<number | null>(null);
   const [editingPrice, setEditingPrice] = useState<number | null>(null);
   const [newPrice, setNewPrice] = useState<string>('');
+  const [editingQuantity, setEditingQuantity] = useState<number | null>(null);
+  const [newQuantity, setNewQuantity] = useState<string>('');
 
   useEffect(() => {
     fetchProducts();
@@ -118,6 +121,51 @@ const ProductInventoryTable: React.FC = () => {
     }
   };
 
+  const updateQuantity = async (productId: number, quantity: string) => {
+    if (!quantity || isNaN(parseInt(quantity)) || parseInt(quantity) < 0) {
+      toast.error('Please enter a valid quantity (0 or greater)');
+      return;
+    }
+
+    setUpdating(productId);
+    try {
+      const response = await fetch(`/api/admin/products/${productId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          field: 'quantity',
+          value: parseInt(quantity),
+        }),
+      });
+
+      if (response.ok) {
+        const newQuantityValue = parseInt(quantity);
+        setProducts(prev =>
+          prev.map(product =>
+            product.id === productId
+              ? { 
+                  ...product, 
+                  quantity: newQuantityValue,
+                  inStock: newQuantityValue > 0 // Auto-update inStock status based on quantity
+                }
+              : product
+          )
+        );
+        toast.success('Product quantity updated successfully');
+        setEditingQuantity(null);
+        setNewQuantity('');
+      } else {
+        toast.error('Failed to update product quantity');
+      }
+    } catch (error) {
+      toast.error('Error updating product quantity');
+    } finally {
+      setUpdating(null);
+    }
+  };
+
   const startEditingPrice = (productId: number, currentPrice: number) => {
     setEditingPrice(productId);
     setNewPrice(currentPrice.toString());
@@ -126,6 +174,16 @@ const ProductInventoryTable: React.FC = () => {
   const cancelEditingPrice = () => {
     setEditingPrice(null);
     setNewPrice('');
+  };
+
+  const startEditingQuantity = (productId: number, currentQuantity: number) => {
+    setEditingQuantity(productId);
+    setNewQuantity(currentQuantity.toString());
+  };
+
+  const cancelEditingQuantity = () => {
+    setEditingQuantity(null);
+    setNewQuantity('');
   };
 
   if (loading) {
@@ -160,6 +218,9 @@ const ProductInventoryTable: React.FC = () => {
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-6 uppercase tracking-wider">
                 Price
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-6 uppercase tracking-wider">
+                Quantity
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-6 uppercase tracking-wider">
                 Reviews
@@ -238,6 +299,45 @@ const ProductInventoryTable: React.FC = () => {
                         onClick={() => startEditingPrice(product.id, product.price)}
                         className="text-xs text-blue hover:text-blue-dark"
                         title="Edit price"
+                      >
+                        ✏️
+                      </button>
+                    </div>
+                  )}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {editingQuantity === product.id ? (
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="number"
+                        value={newQuantity}
+                        onChange={(e) => setNewQuantity(e.target.value)}
+                        className="w-20 px-2 py-1 text-sm border border-gray-3 rounded focus:outline-none focus:ring-2 focus:ring-blue"
+                        min="0"
+                      />
+                      <button
+                        onClick={() => updateQuantity(product.id, newQuantity)}
+                        disabled={updating === product.id}
+                        className="px-2 py-1 text-xs bg-green text-white rounded hover:bg-green-dark disabled:opacity-50"
+                      >
+                        ✓
+                      </button>
+                      <button
+                        onClick={cancelEditingQuantity}
+                        className="px-2 py-1 text-xs bg-gray-5 text-white rounded hover:bg-gray-6"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                      <div className="text-sm font-medium text-dark">
+                        {product.quantity}
+                      </div>
+                      <button
+                        onClick={() => startEditingQuantity(product.id, product.quantity)}
+                        className="text-xs text-blue hover:text-blue-dark"
+                        title="Edit quantity"
                       >
                         ✏️
                       </button>

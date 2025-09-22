@@ -493,24 +493,26 @@ const ShopDetails = () => {
                       </div>
                       <span> ({reviewStats.totalReviews} customer review{reviewStats.totalReviews !== 1 ? 's' : ''}) </span>
                     </div>
-                    {displayProduct.inStock ? (
-                      <div className="flex items-center gap-1.5">
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M10 0.5625C4.78125 0.5625 0.5625 4.78125 0.5625 10C0.5625 15.2188 4.78125 19.4688 10 19.4688C15.2188 19.4688 19.4688 15.2188 19.4688 10C19.4688 4.78125 15.2188 0.5625 10 0.5625ZM10 18.0625C5.5625 18.0625 1.96875 14.4375 1.96875 10C1.96875 5.5625 5.5625 1.96875 10 1.96875C14.4375 1.96875 18.0625 5.59375 18.0625 10.0312C18.0625 14.4375 14.4375 18.0625 10 18.0625Z" fill="#22AD5C" />
-                          <path d="M12.6875 7.09374L8.9688 10.7187L7.5256 9.97474C7.28152 9.73067 6.8858 9.73067 6.64172 9.97474C6.39764 10.2188 6.39764 10.6146 6.64172 10.8586L8.30838 12.5253C8.55246 12.7694 8.94819 12.7694 9.19227 12.5253L13.3589 8.35863Z" fill="#22AD5C" />
-                        </svg>
-                        <span className="text-green"> In Stock </span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-1.5">
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M10 18C14.4183 18 18 14.4183 18 10C18 5.58172 14.4183 2 10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18Z" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                          <path d="M12.5 7.5L7.5 12.5" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                          <path d="M7.5 7.5L12.5 12.5" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                        <span className="font-medium text-red-500"> Out of Stock </span>
-                      </div>
-                    )}
+                    <div className="mb-4.5">
+  {displayProduct.inStock ? (
+    <div className="flex items-center gap-1.5">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 18C14.4183 18 18 14.4183 18 10C18 5.58172 14.4183 2 10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18Z" stroke="#22AD5C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M12.6875 7.09374L8.9688 10.7187L7.5256 9.97474C7.28152 9.73067 6.8858 9.73067 6.64172 9.97474C6.39764 10.2188 6.39764 10.6146 6.64172 10.8586L8.30838 12.5253C8.55246 12.7694 8.94819 12.7694 9.19227 12.5253L13.3589 8.35863Z" fill="#22AD5C" />
+      </svg>
+      <span className="text-green"> In Stock ({displayProduct.quantity} available) </span>
+    </div>
+  ) : (
+    <div className="flex items-center gap-1.5">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 18C14.4183 18 18 14.4183 18 10C18 5.58172 14.4183 2 10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18Z" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M12.5 7.5L7.5 12.5" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M7.5 7.5L12.5 12.5" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      <span className="font-medium text-red-500"> Out of Stock </span>
+    </div>
+  )}
+</div>
                   </div>
                   <div className="mb-4.5">
                     <div className="flex items-center gap-3">

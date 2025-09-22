@@ -92,6 +92,7 @@ model Product {
   slug             String                @unique
   description      String
   price            Float
+  quantity         Int                   @default(0)
   measurementValue Int
   measurementType  String
   inStock          Boolean               @default(true)

@@ -131,7 +131,7 @@ export async function PATCH(
     }
 
     // Validate allowed fields
-    const allowedFields = ['price', 'inStock', 'featured', 'title', 'description', 'measurementValue', 'measurementType'];
+    const allowedFields = ['price', 'quantity', 'inStock', 'featured', 'title', 'description', 'measurementValue', 'measurementType'];
     if (!allowedFields.includes(field)) {
       return NextResponse.json(
         { error: `Field '${field}' is not allowed for updates` },
@@ -145,6 +145,11 @@ export async function PATCH(
     switch (field) {
       case 'price':
         updateData.price = parseFloat(value);
+        break;
+      case 'quantity':
+        updateData.quantity = parseInt(value);
+        // Auto-update inStock status based on quantity
+        updateData.inStock = parseInt(value) > 0;
         break;
       case 'inStock':
       case 'featured':
