@@ -386,6 +386,7 @@ const Header = () => {
                           className={`hover:text-blue text-custom-sm font-medium text-dark flex ${
                             stickyMenu ? "xl:py-4" : "xl:py-6"
                           }`}
+                          onClick={() => setNavigationOpen(false)}
                         >
                           {menuItem.title}
                         </Link>
