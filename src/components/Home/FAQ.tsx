@@ -28,7 +28,7 @@ const FAQ = () => {
     },
     {
       question: "Where is your farm located?",
-      answer: "Our farm is nestled in the clean, serene environment of Herbertpur, Dehradun, Uttarakhand."
+      answer: "Our farm is nestled in Herbertpur, Dehradun, Uttarakhand."
     },
     {
       question: "Who should join your mushroom cultivation training program?",
