@@ -8,6 +8,12 @@ import { usePromotionalBanners } from "@/hooks/usePromotionalBanners";
 const PromoBanner = () => {
   const { banners, loading, currentBannerIndex, setCurrentBannerIndex } = usePromotionalBanners();
 
+  console.log('🎯 PromoBanner Component State:');
+  console.log('- Loading:', loading);
+  console.log('- Banners length:', banners.length);
+  console.log('- Current banner index:', currentBannerIndex);
+  console.log('- Banners data:', banners);
+
   const generateBannerLink = (banner: PromotionalBanner): string => {
     if (banner.buttonLink) {
       return banner.buttonLink;

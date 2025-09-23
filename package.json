@@ -40,6 +40,9 @@
     "add:early-bird-pricing": "tsx scripts/add-early-bird-pricing.ts",
     "check:early-bird-banners": "tsx scripts/check-early-bird-banners.ts",
     "seed:early-bird-banners": "tsx scripts/seed-early-bird-banners.ts",
+    "seed:production-banners": "tsx scripts/seed-production-promotional-banners.ts",
+    "test:promotional-banners-api": "tsx scripts/test-promotional-banners-api.ts",
+    "test:api-direct": "tsx test-api-direct.ts",
     "verify:early-bird-pricing": "tsx scripts/verify-early-bird-pricing.ts",
     "test:admin-early-bird": "tsx scripts/test-admin-early-bird.ts",
     "resolve:instructorid-migration": "psql \"$DATABASE_URL\" -f scripts/resolve-instructorid-migration.sql"
