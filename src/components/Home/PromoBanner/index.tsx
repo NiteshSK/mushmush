@@ -69,74 +69,62 @@ const PromoBanner = () => {
         </div>
 
         {/* UPDATED & CATCHY: Promotional Banner */}
-        <div className="relative overflow-hidden rounded-2xl shadow-2xl transform transition-all duration-500 hover:scale-[1.03] hover:shadow-3xl mb-8 bg-gradient-to-br from-white to-gray-50 border-2 border-transparent hover:border-yellow-400">
-          {/* Dynamic Rainbow Background */}
-          <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 via-yellow-500/10 via-green-500/10 via-blue-500/10 via-purple-500/10 to-pink-500/10 animate-rainbow-flow"></div>
+        <div className="relative overflow-hidden rounded-2xl shadow-2xl transform transition-all duration-500 hover:scale-[1.03] hover:shadow-3xl mb-8 bg-gradient-to-br from-yellow-100 via-pink-100 to-purple-100 border-4 border-yellow-400">
+          {/* Bright Animated Background */}
+          <div className="absolute inset-0 bg-gradient-to-r from-red-400/20 via-yellow-400/20 via-green-400/20 via-blue-400/20 via-purple-400/20 to-pink-400/20 animate-rainbow-flow"></div>
           
-          {/* Animated Particle Background */}
+          {/* Large Floating Particles */}
           <div className="absolute inset-0">
-            {[...Array(20)].map((_, i) => (
+            {[...Array(15)].map((_, i) => (
               <div
                 key={i}
-                className="absolute w-1 h-1 bg-yellow-400 rounded-full animate-particle-float"
+                className="absolute w-3 h-3 bg-yellow-400 rounded-full animate-particle-float shadow-lg"
                 style={{
                   left: `${Math.random() * 100}%`,
                   top: `${Math.random() * 100}%`,
-                  animationDelay: `${Math.random() * 3}s`,
-                  animationDuration: `${3 + Math.random() * 4}s`,
+                  animationDelay: `${Math.random() * 2}s`,
+                  animationDuration: `${4 + Math.random() * 3}s`,
+                  boxShadow: '0 0 10px rgba(255, 255, 0, 0.8)',
                 }}
               />
             ))}
           </div>
           
-          {/* Geometric Pattern Overlay */}
-          <div className="absolute inset-0 opacity-20">
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBzdHJva2U9IiNmZmQ3MDAiIHN0cm9rZS13aWR0aD0iMSI+PHBhdGggZD0iTTAgMEw0MCA0ME00MCAwTDAgNDAiLz48L2c+PC9zdmc+')]"></div>
-          </div>
+          {/* Giant Corner Celebrations */}
+          <div className="absolute top-2 left-2 text-6xl animate-bounce-super text-yellow-500 drop-shadow-lg">🎉</div>
+          <div className="absolute top-2 right-2 text-6xl animate-bounce-super text-pink-500 drop-shadow-lg" style={{animationDelay: '0.3s'}}>🎊</div>
+          <div className="absolute bottom-2 left-2 text-5xl animate-pulse-super text-purple-500 drop-shadow-lg">✨</div>
+          <div className="absolute bottom-2 right-2 text-5xl animate-pulse-super text-blue-500 drop-shadow-lg" style={{animationDelay: '0.5s'}}>🌟</div>
           
-          {/* Glowing Corner Accents */}
-          <div className="absolute top-0 left-0 w-20 h-20 bg-gradient-to-br from-yellow-400 to-transparent rounded-tl-2xl animate-pulse-slow"></div>
-          <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-pink-400 to-transparent rounded-tr-2xl animate-pulse-slow" style={{animationDelay: '0.5s'}}></div>
-          <div className="absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-tr from-purple-400 to-transparent rounded-bl-2xl animate-pulse-slow" style={{animationDelay: '1s'}}></div>
-          <div className="absolute bottom-0 right-0 w-20 h-20 bg-gradient-to-tl from-blue-400 to-transparent rounded-br-2xl animate-pulse-slow" style={{animationDelay: '1.5s'}}></div>
+          {/* Large Side Elements */}
+          <div className="absolute top-1/4 left-8 text-4xl animate-float-3d text-orange-500 drop-shadow-lg">�</div>
+          <div className="absolute top-1/4 right-8 text-4xl animate-float-3d text-red-500 drop-shadow-lg" style={{animationDelay: '0.7s'}}>�</div>
+          <div className="absolute bottom-1/4 left-8 text-3xl animate-float-3d text-green-500 drop-shadow-lg" style={{animationDelay: '0.9s'}}>🪔</div>
+          <div className="absolute bottom-1/4 right-8 text-3xl animate-float-3d text-indigo-500 drop-shadow-lg" style={{animationDelay: '1.1s'}}>🕉️</div>
           
-          {/* Animated Border Lights */}
-          <div className="absolute inset-0 rounded-2xl border-4 border-transparent animate-border-rainbow pointer-events-none"></div>
+          {/* Giant Sparkles */}
+          <div className="absolute top-1/2 left-1/4 text-3xl animate-sparkle-explosive text-yellow-400 drop-shadow-lg">💫</div>
+          <div className="absolute top-1/2 right-1/4 text-3xl animate-sparkle-explosive text-pink-400 drop-shadow-lg" style={{animationDelay: '0.4s'}}>⭐</div>
+          <div className="absolute top-1/3 left-1/2 text-2xl animate-sparkle-explosive text-purple-400 drop-shadow-lg" style={{animationDelay: '0.8s'}}>✦</div>
+          <div className="absolute bottom-1/3 left-1/2 text-2xl animate-sparkle-explosive text-blue-400 drop-shadow-lg" style={{animationDelay: '1.2s'}}>✧</div>
           
-          {/* Enhanced Floating Celebration Elements */}
-          <div className="absolute top-4 left-4 text-5xl animate-bounce-super">🎉</div>
-          <div className="absolute top-4 right-4 text-5xl animate-bounce-super" style={{animationDelay: '0.2s'}}>🎊</div>
-          <div className="absolute bottom-4 left-4 text-4xl animate-pulse-super">✨</div>
-          <div className="absolute bottom-4 right-4 text-4xl animate-pulse-super" style={{animationDelay: '0.3s'}}>🌟</div>
-          <div className="absolute top-1/2 left-8 text-3xl animate-bounce-super" style={{animationDelay: '0.4s'}}>🎁</div>
-          <div className="absolute top-1/2 right-8 text-3xl animate-bounce-super" style={{animationDelay: '0.6s'}}>🎈</div>
+          {/* Bright Flashing Lights */}
+          <div className="absolute top-8 left-1/3 w-4 h-4 bg-yellow-400 rounded-full animate-ping"></div>
+          <div className="absolute top-8 right-1/3 w-4 h-4 bg-pink-400 rounded-full animate-ping" style={{animationDelay: '0.5s'}}></div>
+          <div className="absolute bottom-8 left-1/3 w-4 h-4 bg-purple-400 rounded-full animate-ping" style={{animationDelay: '1s'}}></div>
+          <div className="absolute bottom-8 right-1/3 w-4 h-4 bg-blue-400 rounded-full animate-ping" style={{animationDelay: '1.5s'}}></div>
           
-          {/* Additional Floating Elements with More Movement */}
-          <div className="absolute top-8 left-1/4 text-2xl animate-float-3d">🪔</div>
-          <div className="absolute top-12 right-1/4 text-2xl animate-float-3d" style={{animationDelay: '0.8s'}}>🕉️</div>
-          <div className="absolute bottom-8 left-1/3 text-xl animate-float-3d" style={{animationDelay: '1s'}}>🌺</div>
-          <div className="absolute bottom-12 right-1/3 text-xl animate-float-3d" style={{animationDelay: '1.2s'}}>🔥</div>
+          {/* Shooting Stars */}
+          <div className="absolute top-4 right-4 w-24 h-2 bg-gradient-to-l from-yellow-400 to-transparent animate-shooting-star shadow-lg"></div>
+          <div className="absolute bottom-4 left-4 w-24 h-2 bg-gradient-to-r from-pink-400 to-transparent animate-shooting-star-reverse shadow-lg" style={{animationDelay: '2s'}}></div>
           
-          {/* Rotating Elements */}
-          <div className="absolute top-16 left-16 text-lg animate-spin-slow">🎯</div>
-          <div className="absolute bottom-16 right-16 text-lg animate-spin-slow-reverse">💎</div>
+          {/* Giant Glowing Border */}
+          <div className="absolute inset-0 rounded-2xl border-8 border-yellow-400 animate-border-glow pointer-events-none shadow-2xl"></div>
           
-          {/* Enhanced Sparkle Effects */}
-          <div className="absolute top-6 left-1/2 text-sm animate-sparkle-explosive">💫</div>
-          <div className="absolute bottom-6 left-1/2 text-sm animate-sparkle-explosive" style={{animationDelay: '0.5s'}}>⭐</div>
-          <div className="absolute top-1/3 left-6 text-sm animate-sparkle-explosive" style={{animationDelay: '0.7s'}}>✦</div>
-          <div className="absolute top-1/3 right-6 text-sm animate-sparkle-explosive" style={{animationDelay: '0.9s'}}>✧</div>
-          <div className="absolute top-2/3 left-12 text-xs animate-sparkle-explosive" style={{animationDelay: '1.1s'}}>🌠</div>
-          <div className="absolute top-2/3 right-12 text-xs animate-sparkle-explosive" style={{animationDelay: '1.3s'}}>💥</div>
+          {/* Bright Overlay Pulse */}
+          <div className="absolute inset-0 bg-gradient-to-r from-yellow-300/30 via-pink-300/30 to-purple-300/30 animate-pulse-fast pointer-events-none"></div>
           
-          {/* Shooting Star Effect */}
-          <div className="absolute top-4 right-4 w-20 h-1 bg-gradient-to-l from-yellow-400 to-transparent animate-shooting-star"></div>
-          <div className="absolute bottom-8 left-4 w-16 h-1 bg-gradient-to-r from-pink-400 to-transparent animate-shooting-star-reverse" style={{animationDelay: '2s'}}></div>
-          
-          {/* Glowing Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/10 via-pink-400/10 to-purple-400/10 animate-pulse-fast pointer-events-none"></div>
-          
-          <div className="relative p-8 lg:p-12 z-10">
+          <div className="relative p-8 lg:p-12 z-20 bg-white/90 backdrop-blur-sm rounded-xl">
             <div className="lg:grid lg:grid-cols-2 lg:gap-12 items-center">
               {/* Left Column: Promotional Content */}
               <div className="mb-8 lg:mb-0">
