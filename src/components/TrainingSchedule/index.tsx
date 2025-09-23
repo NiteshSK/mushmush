@@ -237,6 +237,27 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
           <p className="text-gray-700 text-lg leading-relaxed">{program.description}</p>
         </div>
 
+        {/* Quick Enroll CTA */}
+        <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg shadow-md p-6 mb-8 border border-green-200">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="text-center md:text-left">
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Ready to Start Your Journey?</h3>
+              <p className="text-gray-600">Join this comprehensive training program and become an expert in mushroom cultivation.</p>
+            </div>
+            <button
+              onClick={handleRegisterClick}
+              disabled={schedules.length === 0}
+              className={`px-8 py-3 text-lg font-bold rounded-lg transition-all duration-300 whitespace-nowrap ${
+                schedules.length === 0
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white transform hover:scale-105 shadow-lg"
+              }`}
+            >
+              {schedules.length === 0 ? "Schedule Not Available" : "🚀 Enroll Now"}
+            </button>
+          </div>
+        </div>
+
         {/* Schedule Section - Timetable Style */}
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Training Schedule</h2>
@@ -471,18 +492,53 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
           )}
         </div>
 
+        {/* Post-Schedule Enroll CTA */}
+        <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg shadow-md p-6 mb-8 border border-blue-200">
+          <div className="text-center">
+            <h3 className="text-2xl font-bold text-gray-900 mb-3">Ready to Transform Your Career?</h3>
+            <p className="text-gray-600 mb-4 max-w-2xl mx-auto">
+              You've reviewed the comprehensive training schedule. Now take the next step in your mushroom cultivation journey with expert guidance and hands-on experience.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
+              <div className="flex items-center gap-2 text-green-600 font-semibold">
+                <span className="text-2xl">💰</span>
+                <span>Investment: ₹{program?.price?.toLocaleString()}</span>
+              </div>
+              <div className="flex items-center gap-2 text-blue-600 font-semibold">
+                <span className="text-2xl">📅</span>
+                <span>Duration: {program?.duration} Days</span>
+              </div>
+              <div className="flex items-center gap-2 text-purple-600 font-semibold">
+                <span className="text-2xl">🎯</span>
+                <span>Expert-Led Training</span>
+              </div>
+            </div>
+            <button
+              onClick={handleRegisterClick}
+              disabled={schedules.length === 0}
+              className={`px-10 py-4 text-xl font-bold rounded-lg transition-all duration-300 shadow-lg ${
+                schedules.length === 0
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white transform hover:scale-105 hover:shadow-xl"
+              }`}
+            >
+              {schedules.length === 0 ? "Schedule Not Available" : "🚀 Enroll Now - Start Your Journey"}
+            </button>
+          </div>
+        </div>
+
         {/* Registration CTA */}
         <div className="text-center">
           <button
             onClick={handleRegisterClick}
             disabled={schedules.length === 0}
-            className={`px-8 py-4 text-lg font-semibold rounded-lg transition-all duration-300 ${
+            className={`px-12 py-5 text-xl font-bold rounded-lg transition-all duration-300 shadow-lg ${
               schedules.length === 0
                 ? "bg-gray-400 cursor-not-allowed"
-                : "bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white transform hover:scale-105"
+                : "bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white transform hover:scale-105 hover:shadow-xl"
             }`}
           >
-            {schedules.length === 0 ? "Schedule Not Available" : "Register for This Program"}
+            {schedules.length === 0 ? "Schedule Not Available" : "🚀 Enroll Now"}
           </button>
           <p className="mt-4 text-gray-600">
             <Link href="/training" className="text-blue-600 hover:text-blue-800 underline">
