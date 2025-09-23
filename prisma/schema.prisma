@@ -288,6 +288,13 @@ model TrainingProgram {
   dailyHours  String   @default("5-6 hours")
   type        TrainingType
   isActive    Boolean  @default(true)
+  
+  // Early Bird Pricing Fields
+  hasEarlyBirdOffer Boolean  @default(false)
+  earlyBirdPrice    Float?
+  originalPrice     Float?   // For displaying strikethrough price
+  earlyBirdEndDate  DateTime? // When the Early Bird offer ends
+  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   registrations TrainingRegistration[]

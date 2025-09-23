@@ -16,6 +16,12 @@ interface TrainingProgram {
   dailyHours: string;
   type: string;
   isActive: boolean;
+  
+  // Early Bird Pricing Fields
+  hasEarlyBirdOffer: boolean;
+  earlyBirdPrice?: number;
+  originalPrice?: number;
+  earlyBirdEndDate?: Date;
 }
 
 const TrainingPrograms = () => {
@@ -210,9 +216,34 @@ const TrainingPrograms = () => {
                       </div>
                     </div>
                     <div className="text-left sm:text-right">
-                      <div className="text-2xl md:text-3xl font-bold text-green-600">
-                        ₹{program.price.toLocaleString()}
-                      </div>
+                      {program.hasEarlyBirdOffer && (
+                        <div className="mb-2">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800 border border-red-200">
+                            🎟️ Early Bird Offer
+                          </span>
+                        </div>
+                      )}
+                      
+                      {program.hasEarlyBirdOffer && program.originalPrice && program.earlyBirdPrice ? (
+                        <div className="flex flex-col sm:items-end">
+                          {/* Strikethrough Original Price */}
+                          <div className="text-lg md:text-xl text-gray-400 line-through">
+                            ₹{program.originalPrice.toLocaleString()}
+                          </div>
+                          {/* Early Bird Price */}
+                          <div className="text-2xl md:text-3xl font-bold text-green-600">
+                            ₹{program.earlyBirdPrice.toLocaleString()}
+                          </div>
+                          {/* Savings Badge */}
+                          <div className="text-sm font-medium text-red-600">
+                            SAVE ₹{(program.originalPrice - program.earlyBirdPrice).toLocaleString()}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-2xl md:text-3xl font-bold text-green-600">
+                          ₹{program.price.toLocaleString()}
+                        </div>
+                      )}
                       <div className="text-sm text-gray-500">per participant</div>
                     </div>
                   </div>
@@ -255,7 +286,7 @@ const TrainingPrograms = () => {
                         "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
                       }`}
                     >
-                      Register Now
+                      Enroll Now
                     </button>
                   </div>
                 </div>
