@@ -1028,3 +1028,34 @@ html body div.Toastify__toast-container div.Toastify__toast.Toastify__toast--inf
 .animate-pulse-super {
   animation: pulse-super 1.5s ease-in-out infinite;
 }
+/* ... [Your existing globals.css content should remain here] ... */
+
+/* NEW ANIMATION: Mushroom Falling Effect */
+@keyframes mushroom-fall {
+  0% {
+    transform: translateY(-100vh) translateX(0) rotate(0deg) scale(0.8);
+    opacity: 0;
+  }
+  10% { opacity: 0.7; } /* Become visible quickly */
+  80% { opacity: 0.7; } /* Stay visible for most of the animation */
+  100% {
+    transform: translateY(100vh) translateX(50px) rotate(360deg) scale(1.2);
+    opacity: 0; /* Fade out at the bottom */
+  }
+}
+
+/* NEW ANIMATION UTILITY CLASS */
+.animate-mushroom-fall {
+  animation: mushroom-fall 10s linear infinite; /* Adjust duration as needed */
+}
+
+/* ... [Rest of your existing animations and utility classes] ... */
+
+/* Ensure the utility class is also included if you don't have it already */
+/* (It was added in the JSX, but defining it explicitly here is good practice) */
+.animate-mushroom-fall {
+  animation: mushroom-fall var(--animation-duration, 10s) linear infinite; /* Using CSS variable for flexibility */
+}
+
+/* If you need a quick fix for the previous step without updating the JS again */
+/* The previous JSX already applied `animate-mushroom-fall`, so adding this to CSS will make it work. */

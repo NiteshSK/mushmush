@@ -37,10 +37,10 @@ const PromoBanner = () => {
     <section className="relative py-16 sm:py-24 bg-gradient-to-b from-[#E9E6F4] to-white overflow-hidden">
       {/* Full section festive background elements - z-index below content */}
       <div className="absolute inset-0 z-0 pointer-events-none">
-        {/* Confetti sprinkle effect across the whole section (can be adjusted for Navratri theme if needed) */}
+        {/* Effect 1: Sparkle Dots across the whole section */}
         {[...Array(50)].map((_, i) => (
           <div
-            key={`section-sparkle-dots-${i}`} // Renamed key to avoid clash and distinguish
+            key={`section-sparkle-dots-${i}`}
             className="absolute w-2 h-2 rounded-full bg-red-400 animate-section-sparkle"
             style={{
               left: `${Math.random() * 100}%`,
@@ -54,7 +54,7 @@ const PromoBanner = () => {
         {/* Soft pulse overlay for the entire section */}
         <div className="absolute inset-0 bg-purple-200/10 animate-pulse-soft"></div>
 
-        {/* NEW: Om and Diya Symbols scattered across the section */}
+        {/* Om and Diya Symbols scattered across the section */}
         {[...Array(15)].map((_, i) => (
           <div
             key={`om-diya-${i}`}
@@ -71,7 +71,7 @@ const PromoBanner = () => {
           </div>
         ))}
 
-        {/* NEW: Firecracker Explosion Animation in the section background */}
+        {/* Firecracker Explosion Animation in the section background */}
         {[...Array(8)].map((_, i) => (
           <div
             key={`firecracker-${i}`}
@@ -86,20 +86,38 @@ const PromoBanner = () => {
           ></div>
         ))}
 
-        {/* MOVED: Confetti Rain for the entire section (outside the banner) */}
-        {[...Array(30)].map((_, i) => ( // Increased count for more visible confetti outside
+        {/* Effect 2: Traditional Confetti falling for the entire section */}
+        {[...Array(30)].map((_, i) => (
           <div
             key={`section-confetti-fall-${i}`}
-            className="absolute w-2 h-6 animate-confetti-fall z-0" // Ensure z-0 to stay behind banner
+            className="absolute w-2 h-6 animate-confetti-fall z-0"
             style={{
               left: `${Math.random() * 100}%`,
               top: `-${Math.random() * 20}%`, // Start above the section
-              animationDelay: `${Math.random() * 6}s`, // Longer delay for section-wide fall
-              animationDuration: `${8 + Math.random() * 6}s`, // Longer duration for full section fall
+              animationDelay: `${Math.random() * 6}s`,
+              animationDuration: `${8 + Math.random() * 6}s`,
               backgroundColor: ['#ff6b6b', '#ffa500', '#32cd32', '#1e90ff', '#9370db', '#ff69b4'][Math.floor(Math.random() * 6)],
               transform: `rotate(${Math.random() * 360}deg)`,
             }}
           />
+        ))}
+
+        {/* Effect 3: Mushroom "Confetti" falling for the entire section */}
+        {[...Array(40)].map((_, i) => (
+          <div
+            key={`falling-mushroom-${i}`}
+            className="absolute text-2xl animate-mushroom-fall z-0" // Ensure z-0 to stay behind banner
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `-${Math.random() * 30}%`, // Start higher above the section
+              animationDelay: `${Math.random() * 7}s`,
+              animationDuration: `${10 + Math.random() * 8}s`, // Longer duration for full section fall
+              transform: `rotate(${Math.random() * 360}deg) scale(${0.8 + Math.random() * 0.4})`, // Varied rotation and size
+              opacity: 0.7 + Math.random() * 0.3, // Varied opacity
+            }}
+          >
+            🍄
+          </div>
         ))}
 
       </div>
@@ -107,9 +125,9 @@ const PromoBanner = () => {
       <div className="max-w-6xl mx-auto px-4 relative z-10"> {/* Ensure content is above section effects */}
         <div className="mb-12 text-center">
           <h2 className="text-3xl lg:text-4xl xl:text-5xl font-bold mb-4 text-gray-800">
-            Special Festive Sale!
+          💥🎊🎉 Special Festive Sale! 🎊🎉💥
           </h2>
-          <p className="text-gray-600 text-lg">Exclusive deals just for you</p>
+          <p className="text-gray-600 text-lg">🍄 Exclusive deals just for you! 🍄</p>
         </div>
 
         {/* Festive Promotional Banner */}
@@ -130,7 +148,6 @@ const PromoBanner = () => {
                 }}
               />
             ))}
-            {/* REMOVED: Confetti Rain from inside the banner */}
             
             {/* Corner Emojis - more prominent */}
             <div className="absolute top-4 left-4 text-6xl animate-bounce-super drop-shadow-lg text-red-500">🎉</div>
