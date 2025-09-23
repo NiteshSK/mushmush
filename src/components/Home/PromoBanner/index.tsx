@@ -69,35 +69,74 @@ const PromoBanner = () => {
         </div>
 
         {/* UPDATED & CATCHY: Promotional Banner */}
-        <div className="relative overflow-hidden rounded-2xl shadow-xl transform transition-all duration-700 hover:scale-[1.02] hover:shadow-2xl mb-8 bg-gradient-to-br from-white to-gray-50 border border-gray-200">
-          {/* Animated Background Effects */}
-          <div className="absolute inset-0 bg-gradient-to-r from-yellow-100/20 via-pink-100/20 to-purple-100/20 animate-gradient-x"></div>
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxjaXJjbGUgY3g9IjMwIiBjeT0iMzAiIHI9IjIiIGZpbGw9IiNmZmQ3MDAiIGZpbGwtb3BhY2l0eT0iMC4zIi8+PGNpcmNsZSBjeD0iMTAiIGN5PSIxMCIgcj0iMSIgZmlsbD0iI2ZmNzAwMCIgZmlsbC1vcGFjaXR5PSIwLjMiLz48Y2lyY2xlIGN4PSI1MCIgY3k9IjIwIiByPSIxLjUiIGZpbGw9IiNmZjAwZmYiIGZpbGwtb3BhY2l0eT0iMC4yIi8+PGNpcmNsZSBjeD0iMjAiIGN5PSI0NSIgcj0iMSIgZmlsbD0iIzcwMDBmZiIgZmlsbC1vcGFjaXR5PSIwLjI1Ii8+PGNpcmNsZSBjeD0iNDUiIGN5PSI1MCIgcj0iMiIgZmlsbD0iI2ZmZmQ3MDAiIGZpbGwtb3BhY2l0eT0iMC4yIi8+PC9nPjwvc3ZnPg==')] opacity-30"></div>
+        <div className="relative overflow-hidden rounded-2xl shadow-2xl transform transition-all duration-500 hover:scale-[1.03] hover:shadow-3xl mb-8 bg-gradient-to-br from-white to-gray-50 border-2 border-transparent hover:border-yellow-400">
+          {/* Dynamic Rainbow Background */}
+          <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 via-yellow-500/10 via-green-500/10 via-blue-500/10 via-purple-500/10 to-pink-500/10 animate-rainbow-flow"></div>
           
-          {/* Floating Celebration Elements */}
-          <div className="absolute top-4 left-4 text-4xl animate-bounce">🎉</div>
-          <div className="absolute top-4 right-4 text-4xl animate-bounce" style={{animationDelay: '0.2s'}}>🎊</div>
-          <div className="absolute bottom-4 left-4 text-3xl animate-pulse">✨</div>
-          <div className="absolute bottom-4 right-4 text-3xl animate-pulse" style={{animationDelay: '0.3s'}}>🌟</div>
-          <div className="absolute top-1/2 left-8 text-2xl animate-bounce" style={{animationDelay: '0.4s'}}>🎁</div>
-          <div className="absolute top-1/2 right-8 text-2xl animate-bounce" style={{animationDelay: '0.6s'}}>🎈</div>
+          {/* Animated Particle Background */}
+          <div className="absolute inset-0">
+            {[...Array(20)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute w-1 h-1 bg-yellow-400 rounded-full animate-particle-float"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                  animationDelay: `${Math.random() * 3}s`,
+                  animationDuration: `${3 + Math.random() * 4}s`,
+                }}
+              />
+            ))}
+          </div>
           
-          {/* Additional Floating Elements */}
-          <div className="absolute top-8 left-1/4 text-xl animate-float">🪔</div>
-          <div className="absolute top-12 right-1/4 text-xl animate-float" style={{animationDelay: '0.8s'}}>🕉️</div>
-          <div className="absolute bottom-8 left-1/3 text-lg animate-float" style={{animationDelay: '1s'}}>🌺</div>
-          <div className="absolute bottom-12 right-1/3 text-lg animate-float" style={{animationDelay: '1.2s'}}>🔥</div>
+          {/* Geometric Pattern Overlay */}
+          <div className="absolute inset-0 opacity-20">
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBzdHJva2U9IiNmZmQ3MDAiIHN0cm9rZS13aWR0aD0iMSI+PHBhdGggZD0iTTAgMEw0MCA0ME00MCAwTDAgNDAiLz48L2c+PC9zdmc+')]"></div>
+          </div>
           
-          {/* Sparkle Effects */}
-          <div className="absolute top-6 left-1/2 text-xs animate-sparkle">💫</div>
-          <div className="absolute bottom-6 left-1/2 text-xs animate-sparkle" style={{animationDelay: '0.5s'}}>⭐</div>
-          <div className="absolute top-1/3 left-6 text-xs animate-sparkle" style={{animationDelay: '0.7s'}}>✦</div>
-          <div className="absolute top-1/3 right-6 text-xs animate-sparkle" style={{animationDelay: '0.9s'}}>✧</div>
+          {/* Glowing Corner Accents */}
+          <div className="absolute top-0 left-0 w-20 h-20 bg-gradient-to-br from-yellow-400 to-transparent rounded-tl-2xl animate-pulse-slow"></div>
+          <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-pink-400 to-transparent rounded-tr-2xl animate-pulse-slow" style={{animationDelay: '0.5s'}}></div>
+          <div className="absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-tr from-purple-400 to-transparent rounded-bl-2xl animate-pulse-slow" style={{animationDelay: '1s'}}></div>
+          <div className="absolute bottom-0 right-0 w-20 h-20 bg-gradient-to-tl from-blue-400 to-transparent rounded-br-2xl animate-pulse-slow" style={{animationDelay: '1.5s'}}></div>
           
-          {/* Glowing Border Effect */}
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-yellow-400/20 via-pink-400/20 to-purple-400/20 animate-pulse pointer-events-none"></div>
+          {/* Animated Border Lights */}
+          <div className="absolute inset-0 rounded-2xl border-4 border-transparent animate-border-rainbow pointer-events-none"></div>
           
-          <div className="relative p-8 lg:p-12">
+          {/* Enhanced Floating Celebration Elements */}
+          <div className="absolute top-4 left-4 text-5xl animate-bounce-super">🎉</div>
+          <div className="absolute top-4 right-4 text-5xl animate-bounce-super" style={{animationDelay: '0.2s'}}>🎊</div>
+          <div className="absolute bottom-4 left-4 text-4xl animate-pulse-super">✨</div>
+          <div className="absolute bottom-4 right-4 text-4xl animate-pulse-super" style={{animationDelay: '0.3s'}}>🌟</div>
+          <div className="absolute top-1/2 left-8 text-3xl animate-bounce-super" style={{animationDelay: '0.4s'}}>🎁</div>
+          <div className="absolute top-1/2 right-8 text-3xl animate-bounce-super" style={{animationDelay: '0.6s'}}>🎈</div>
+          
+          {/* Additional Floating Elements with More Movement */}
+          <div className="absolute top-8 left-1/4 text-2xl animate-float-3d">🪔</div>
+          <div className="absolute top-12 right-1/4 text-2xl animate-float-3d" style={{animationDelay: '0.8s'}}>🕉️</div>
+          <div className="absolute bottom-8 left-1/3 text-xl animate-float-3d" style={{animationDelay: '1s'}}>🌺</div>
+          <div className="absolute bottom-12 right-1/3 text-xl animate-float-3d" style={{animationDelay: '1.2s'}}>🔥</div>
+          
+          {/* Rotating Elements */}
+          <div className="absolute top-16 left-16 text-lg animate-spin-slow">🎯</div>
+          <div className="absolute bottom-16 right-16 text-lg animate-spin-slow-reverse">💎</div>
+          
+          {/* Enhanced Sparkle Effects */}
+          <div className="absolute top-6 left-1/2 text-sm animate-sparkle-explosive">💫</div>
+          <div className="absolute bottom-6 left-1/2 text-sm animate-sparkle-explosive" style={{animationDelay: '0.5s'}}>⭐</div>
+          <div className="absolute top-1/3 left-6 text-sm animate-sparkle-explosive" style={{animationDelay: '0.7s'}}>✦</div>
+          <div className="absolute top-1/3 right-6 text-sm animate-sparkle-explosive" style={{animationDelay: '0.9s'}}>✧</div>
+          <div className="absolute top-2/3 left-12 text-xs animate-sparkle-explosive" style={{animationDelay: '1.1s'}}>🌠</div>
+          <div className="absolute top-2/3 right-12 text-xs animate-sparkle-explosive" style={{animationDelay: '1.3s'}}>💥</div>
+          
+          {/* Shooting Star Effect */}
+          <div className="absolute top-4 right-4 w-20 h-1 bg-gradient-to-l from-yellow-400 to-transparent animate-shooting-star"></div>
+          <div className="absolute bottom-8 left-4 w-16 h-1 bg-gradient-to-r from-pink-400 to-transparent animate-shooting-star-reverse" style={{animationDelay: '2s'}}></div>
+          
+          {/* Glowing Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/10 via-pink-400/10 to-purple-400/10 animate-pulse-fast pointer-events-none"></div>
+          
+          <div className="relative p-8 lg:p-12 z-10">
             <div className="lg:grid lg:grid-cols-2 lg:gap-12 items-center">
               {/* Left Column: Promotional Content */}
               <div className="mb-8 lg:mb-0">
@@ -249,6 +288,212 @@ const customStyles = `
     }
   }
   
+  /* NEW ENHANCED ANIMATIONS */
+  
+  @keyframes rainbow-flow {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+  
+  @keyframes particle-float {
+    0% {
+      transform: translateY(100vh) translateX(0) scale(0);
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    90% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-100px) translateX(50px) scale(1);
+      opacity: 0;
+    }
+  }
+  
+  @keyframes pulse-slow {
+    0%, 100% {
+      opacity: 0.3;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.8;
+      transform: scale(1.1);
+    }
+  }
+  
+  @keyframes border-rainbow {
+    0% {
+      border-color: #ff6b6b;
+      box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+    }
+    16.66% {
+      border-color: #ffa500;
+      box-shadow: 0 0 20px rgba(255, 165, 0, 0.5);
+    }
+    33.33% {
+      border-color: #32cd32;
+      box-shadow: 0 0 20px rgba(50, 205, 50, 0.5);
+    }
+    50% {
+      border-color: #1e90ff;
+      box-shadow: 0 0 20px rgba(30, 144, 255, 0.5);
+    }
+    66.66% {
+      border-color: #9370db;
+      box-shadow: 0 0 20px rgba(147, 112, 219, 0.5);
+    }
+    83.33% {
+      border-color: #ff69b4;
+      box-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
+    }
+    100% {
+      border-color: #ff6b6b;
+      box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+    }
+  }
+  
+  @keyframes bounce-super {
+    0%, 20%, 50%, 80%, 100% {
+      transform: translateY(0) scale(1);
+    }
+    40% {
+      transform: translateY(-30px) scale(1.1);
+    }
+    60% {
+      transform: translateY(-15px) scale(1.05);
+    }
+  }
+  
+  @keyframes pulse-super {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 0.8;
+    }
+    50% {
+      transform: scale(1.3);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes float-3d {
+    0%, 100% {
+      transform: translateY(0px) translateX(0px) rotateY(0deg) rotateZ(0deg);
+      opacity: 0.7;
+    }
+    25% {
+      transform: translateY(-20px) translateX(10px) rotateY(180deg) rotateZ(5deg);
+      opacity: 1;
+    }
+    50% {
+      transform: translateY(-10px) translateX(-10px) rotateY(360deg) rotateZ(-3deg);
+      opacity: 0.9;
+    }
+    75% {
+      transform: translateY(-25px) translateX(5px) rotateY(540deg) rotateZ(2deg);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes spin-slow {
+    0% {
+      transform: rotate(0deg) scale(1);
+    }
+    50% {
+      transform: rotate(180deg) scale(1.2);
+    }
+    100% {
+      transform: rotate(360deg) scale(1);
+    }
+  }
+  
+  @keyframes spin-slow-reverse {
+    0% {
+      transform: rotate(360deg) scale(1);
+    }
+    50% {
+      transform: rotate(180deg) scale(1.2);
+    }
+    100% {
+      transform: rotate(0deg) scale(1);
+    }
+  }
+  
+  @keyframes sparkle-explosive {
+    0% {
+      transform: scale(0) rotate(0deg);
+      opacity: 0;
+    }
+    20% {
+      transform: scale(0.5) rotate(90deg);
+      opacity: 0.5;
+    }
+    50% {
+      transform: scale(1.5) rotate(180deg);
+      opacity: 1;
+    }
+    80% {
+      transform: scale(1) rotate(270deg);
+      opacity: 0.7;
+    }
+    100% {
+      transform: scale(0) rotate(360deg);
+      opacity: 0;
+    }
+  }
+  
+  @keyframes shooting-star {
+    0% {
+      transform: translateX(-100px) translateY(0);
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    90% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateX(100px) translateY(-50px);
+      opacity: 0;
+    }
+  }
+  
+  @keyframes shooting-star-reverse {
+    0% {
+      transform: translateX(100px) translateY(0);
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    90% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateX(-100px) translateY(-50px);
+      opacity: 0;
+    }
+  }
+  
+  @keyframes pulse-fast {
+    0%, 100% {
+      opacity: 0.1;
+    }
+    50% {
+      opacity: 0.3;
+    }
+  }
+  
+  /* Animation Classes */
   .animate-gradient-x {
     background-size: 200% 200%;
     animation: gradient-x 8s ease infinite;
@@ -260,6 +505,59 @@ const customStyles = `
   
   .animate-sparkle {
     animation: sparkle 2s ease-in-out infinite;
+  }
+  
+  .animate-rainbow-flow {
+    background-size: 300% 300%;
+    animation: rainbow-flow 6s ease infinite;
+  }
+  
+  .animate-particle-float {
+    animation: particle-float 7s ease-in-out infinite;
+  }
+  
+  .animate-pulse-slow {
+    animation: pulse-slow 3s ease-in-out infinite;
+  }
+  
+  .animate-border-rainbow {
+    animation: border-rainbow 4s linear infinite;
+  }
+  
+  .animate-bounce-super {
+    animation: bounce-super 2s ease-in-out infinite;
+  }
+  
+  .animate-pulse-super {
+    animation: pulse-super 1.5s ease-in-out infinite;
+  }
+  
+  .animate-float-3d {
+    animation: float-3d 8s ease-in-out infinite;
+  }
+  
+  .animate-spin-slow {
+    animation: spin-slow 4s linear infinite;
+  }
+  
+  .animate-spin-slow-reverse {
+    animation: spin-slow-reverse 4s linear infinite;
+  }
+  
+  .animate-sparkle-explosive {
+    animation: sparkle-explosive 2.5s ease-in-out infinite;
+  }
+  
+  .animate-shooting-star {
+    animation: shooting-star 3s ease-in-out infinite;
+  }
+  
+  .animate-shooting-star-reverse {
+    animation: shooting-star-reverse 3s ease-in-out infinite;
+  }
+  
+  .animate-pulse-fast {
+    animation: pulse-fast 1s ease-in-out infinite;
   }
 `;
 
