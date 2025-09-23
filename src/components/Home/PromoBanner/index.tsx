@@ -124,7 +124,7 @@ const PromoBanner = () => {
 
         {/* Enhanced Banner Pagination */}
         {banners.length > 1 && (
-          <div className="flex flex-col items-center gap-4 -mt-4 mb-8">
+          <div className="flex flex-col items-center gap-0 -mt-0 mb-0">
             {/* Navigation Controls */}
             <div className="flex items-center gap-4">
               <button

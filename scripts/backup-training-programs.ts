@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, TrainingType } from '@prisma/client';
 import fs from 'fs';
 import path from 'path';
 
@@ -12,7 +12,7 @@ interface TrainingProgramBackup {
   price: number;
   duration: number;
   dailyHours: string;
-  type: string;
+  type: TrainingType;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -195,7 +195,7 @@ async function restoreTrainingPrograms(backupFile: string) {
           price: program.price,
           duration: program.duration,
           dailyHours: program.dailyHours,
-          type: program.type,
+          type: program.type as TrainingType,
           isActive: program.isActive,
           updatedAt: program.updatedAt
         },
@@ -207,7 +207,7 @@ async function restoreTrainingPrograms(backupFile: string) {
           price: program.price,
           duration: program.duration,
           dailyHours: program.dailyHours,
-          type: program.type,
+          type: program.type as TrainingType,
           isActive: program.isActive,
           createdAt: program.createdAt,
           updatedAt: program.updatedAt
