@@ -279,3 +279,752 @@ html body div.Toastify__toast-container div.Toastify__toast.Toastify__toast--inf
     height: 140px !important;
   }
 }
+
+@keyframes bounce-super {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0) scale(1); }
+  40% { transform: translateY(-25px) scale(1.1); }
+  60% { transform: translateY(-12px) scale(1.05); }
+}
+
+@keyframes pulse-super {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.2); opacity: 1; }
+}
+
+@keyframes glitter-sparkle {
+  0%, 100% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes rainbow-border {
+  0%   { border-color: #ffadad; box-shadow: 0 0 15px #ffadad; }
+  25%  { border-color: #ffd6a5; box-shadow: 0 0 15px #ffd6a5; }
+  50%  { border-color: #caffbf; box-shadow: 0 0 15px #caffbf; }
+  75%  { border-color: #a0c4ff; box-shadow: 0 0 15px #a0c4ff; }
+  100% { border-color: #ffadad; box-shadow: 0 0 15px #ffadad; }
+}
+
+/* Animation Utility Classes */
+.animate-bounce-super {
+  animation: bounce-super 2s ease-in-out infinite;
+}
+.animate-pulse-super {
+  animation: pulse-super 1.5s ease-in-out infinite;
+}
+.animate-glitter-sparkle {
+  animation: glitter-sparkle 2.5s ease-in-out infinite;
+}
+.animate-rainbow-border {
+  animation: rainbow-border 4s linear infinite;
+}
+
+/* Particle Float Animation */
+@keyframes particle-float {
+  0% {
+    transform: translateY(100vh) translateX(0) scale(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100px) translateX(50px) scale(1);
+    opacity: 0;
+  }
+}
+
+/* Enhanced Bounce Animation */
+@keyframes bounce-super {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(-30px) scale(1.1);
+  }
+  60% {
+    transform: translateY(-15px) scale(1.05);
+  }
+}
+
+/* Enhanced Pulse Animation */
+@keyframes pulse-super {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 1;
+  }
+}
+
+/* 3D Float Animation */
+@keyframes float-3d {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px) rotateY(0deg) rotateZ(0deg);
+    opacity: 0.7;
+  }
+  25% {
+    transform: translateY(-20px) translateX(10px) rotateY(180deg) rotateZ(5deg);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-10px) translateX(-10px) rotateY(360deg) rotateZ(-3deg);
+    opacity: 0.9;
+  }
+  75% {
+    transform: translateY(-25px) translateX(5px) rotateY(540deg) rotateZ(2deg);
+    opacity: 1;
+  }
+}
+
+/* Explosive Sparkle Animation */
+@keyframes sparkle-explosive {
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 0;
+  }
+  20% {
+    transform: scale(0.5) rotate(90deg);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.5) rotate(180deg);
+    opacity: 1;
+  }
+  80% {
+    transform: scale(1) rotate(270deg);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(0) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Shooting Star Animation */
+@keyframes shooting-star {
+  0% {
+    transform: translateX(-100px) translateY(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100px) translateY(-50px);
+    opacity: 0;
+  }
+}
+
+/* Reverse Shooting Star Animation */
+@keyframes shooting-star-reverse {
+  0% {
+    transform: translateX(100px) translateY(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-100px) translateY(-50px);
+    opacity: 0;
+  }
+}
+
+/* Fast Pulse Animation */
+@keyframes pulse-fast {
+  0%, 100% {
+    opacity: 0.1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* Border Glow Animation */
+@keyframes border-glow {
+  0%, 100% {
+    border-color: #fbbf24;
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.6), inset 0 0 20px rgba(251, 191, 36, 0.2);
+  }
+  25% {
+    border-color: #f59e0b;
+    box-shadow: 0 0 30px rgba(245, 158, 11, 0.8), inset 0 0 30px rgba(245, 158, 11, 0.3);
+  }
+  50% {
+    border-color: #d97706;
+    box-shadow: 0 0 40px rgba(217, 119, 6, 1), inset 0 0 40px rgba(217, 119, 6, 0.4);
+  }
+  75% {
+    border-color: #f59e0b;
+    box-shadow: 0 0 30px rgba(245, 158, 11, 0.8), inset 0 0 30px rgba(245, 158, 11, 0.3);
+  }
+}
+
+/* Confetti Fall Animation */
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-100vh) translateX(0) rotate(0deg);
+    opacity: 1;
+  }
+  25% {
+    transform: translateY(-50vh) translateX(20px) rotate(90deg);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(0vh) translateX(-20px) rotate(180deg);
+    opacity: 0.8;
+  }
+  75% {
+    transform: translateY(50vh) translateX(30px) rotate(270deg);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(100vh) translateX(-30px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Firework Explosion Animation */
+@keyframes firework-explosion {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+
+/* Celebration Wave Animation */
+@keyframes celebration-wave {
+  0%, 100% {
+    transform: translateY(0) scaleY(1);
+  }
+  25% {
+    transform: translateY(-10px) scaleY(1.1);
+  }
+  50% {
+    transform: translateY(0) scaleY(0.9);
+  }
+  75% {
+    transform: translateY(10px) scaleY(1.05);
+  }
+}
+
+/* Glitter Sparkle Animation */
+@keyframes glitter-sparkle {
+  0%, 100% {
+    transform: scale(0) rotate(0deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1) rotate(180deg);
+    opacity: 1;
+  }
+}
+
+/* Rainbow Border Animation */
+@keyframes rainbow-border {
+  0% {
+    border-color: #ff6b6b;
+    box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+  }
+  16.66% {
+    border-color: #ffa500;
+    box-shadow: 0 0 20px rgba(255, 165, 0, 0.5);
+  }
+  33.33% {
+    border-color: #32cd32;
+    box-shadow: 0 0 20px rgba(50, 205, 50, 0.5);
+  }
+  50% {
+    border-color: #1e90ff;
+    box-shadow: 0 0 20px rgba(30, 144, 255, 0.5);
+  }
+  66.66% {
+    border-color: #9370db;
+    box-shadow: 0 0 20px rgba(147, 112, 219, 0.5);
+  }
+  83.33% {
+    border-color: #ff69b4;
+    box-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
+  }
+  100% {
+    border-color: #ff6b6b;
+    box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+  }
+}
+
+/* Animation Classes */
+.animate-rainbow-flow {
+  background-size: 300% 300%;
+  animation: rainbow-flow 6s ease infinite;
+}
+
+.animate-particle-float {
+  animation: particle-float 7s ease-in-out infinite;
+}
+
+.animate-bounce-super {
+  animation: bounce-super 2s ease-in-out infinite;
+}
+
+.animate-pulse-super {
+  animation: pulse-super 1.5s ease-in-out infinite;
+}
+
+.animate-float-3d {
+  animation: float-3d 8s ease-in-out infinite;
+}
+
+.animate-sparkle-explosive {
+  animation: sparkle-explosive 2.5s ease-in-out infinite;
+}
+
+.animate-shooting-star {
+  animation: shooting-star 3s ease-in-out infinite;
+}
+
+.animate-shooting-star-reverse {
+  animation: shooting-star-reverse 3s ease-in-out infinite;
+}
+
+.animate-pulse-fast {
+  animation: pulse-fast 1s ease-in-out infinite;
+}
+
+.animate-border-glow {
+  animation: border-glow 2s ease-in-out infinite;
+}
+
+.animate-confetti-fall {
+  animation: confetti-fall 8s linear infinite;
+}
+
+.animate-firework-explosion {
+  animation: firework-explosion 1.5s ease-out infinite;
+}
+
+.animate-celebration-wave {
+  animation: celebration-wave 3s ease-in-out infinite;
+}
+
+.animate-glitter-sparkle {
+  animation: glitter-sparkle 2s ease-in-out infinite;
+}
+
+.animate-rainbow-border {
+  animation: rainbow-border 4s linear infinite;
+}
+
+/* ... [Your existing globals.css content like Toast Notifications, etc., should remain here] ... */
+
+/* NEW ANIMATIONS FOR FESTIVE EFFECTS */
+
+/* Animation for the glitter sparkles (stronger version) */
+@keyframes glitter-sparkle-strong {
+  0%, 100% {
+    transform: scale(0) rotate(0deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.5) rotate(180deg); /* Larger scale */
+    opacity: 1; /* Fully opaque */
+  }
+}
+
+/* Animation for confetti falling */
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-100vh) translateX(0) rotate(0deg);
+    opacity: 0;
+  }
+  10% { opacity: 1; }
+  80% { opacity: 1; }
+  100% {
+    transform: translateY(100vh) translateX(50px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Animation for floating elements with a pulse */
+@keyframes float-pulse {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+    opacity: 0.8;
+  }
+  25% {
+    transform: translateY(-10px) scale(1.1);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(0px) scale(1);
+    opacity: 0.8;
+  }
+  75% {
+    transform: translateY(10px) scale(1.1);
+    opacity: 1;
+  }
+}
+
+/* Animation for the border glow (more fancy) */
+@keyframes rainbow-border-fancy {
+  0% { border-color: #ffadad; box-shadow: 0 0 20px #ffadad, inset 0 0 10px #ffadad; }
+  16% { border-color: #ffd6a5; box-shadow: 0 0 20px #ffd6a5, inset 0 0 10px #ffd6a5; }
+  33% { border-color: #caffbf; box-shadow: 0 0 20px #caffbf, inset 0 0 10px #caffbf; }
+  50% { border-color: #a0c4ff; box-shadow: 0 0 20px #a0c4ff, inset 0 0 10px #a0c4ff; }
+  66% { border-color: #bdb2ff; box-shadow: 0 0 20px #bdb2ff, inset 0 0 10px #bdb2ff; }
+  83% { border-color: #ffc6ff; box-shadow: 0 0 20px #ffc6ff, inset 0 0 10px #ffc6ff; }
+  100% { border-color: #ffadad; box-shadow: 0 0 20px #ffadad, inset 0 0 10px #ffadad; }
+}
+
+/* Animation for subtle section background sparkle */
+@keyframes section-sparkle {
+  0% {
+    transform: translateY(0) translateX(0) scale(0);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.5;
+    transform: translateY(-10px) translateX(5px) scale(1);
+  }
+  80% {
+    opacity: 0.5;
+    transform: translateY(10px) translateX(-5px) scale(1);
+  }
+  100% {
+    transform: translateY(0) translateX(0) scale(0);
+    opacity: 0;
+  }
+}
+
+/* Animation for a soft, subtle pulse overlay */
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 0.2; }
+}
+
+/* Animation for subtitle scale and pulse */
+@keyframes scale-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* Animation for text glow */
+@keyframes text-glow {
+  0%, 100% { text-shadow: 0 0 3px rgba(255, 255, 255, 0.5); }
+  50% { text-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 12px rgba(255, 255, 255, 0.6); }
+}
+
+/* Animation for text breathing effect */
+@keyframes text-breathe {
+  0%, 100% { letter-spacing: 0; }
+  50% { letter-spacing: 1.5px; }
+}
+
+/* Animation for button pop effect */
+@keyframes button-pop {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+/* Animation for spinning with fade */
+@keyframes spin-slow-fade {
+  0% { transform: rotate(0deg) scale(1); opacity: 0.6; }
+  50% { transform: rotate(180deg) scale(1.1); opacity: 0.8; }
+  100% { transform: rotate(360deg) scale(1); opacity: 0.6; }
+}
+
+
+/* Animation Utility Classes (Make sure these are at the end or in a separate file if using PostCSS/Tailwind JIT) */
+.animate-glitter-sparkle-strong {
+  animation: glitter-sparkle-strong 2s ease-in-out infinite;
+}
+.animate-confetti-fall {
+  animation: confetti-fall 10s linear infinite; /* Adjusted duration */
+}
+.animate-float-pulse {
+  animation: float-pulse 7s ease-in-out infinite;
+}
+.animate-rainbow-border-fancy {
+  animation: rainbow-border-fancy 5s linear infinite; /* Adjusted duration */
+}
+.animate-section-sparkle {
+  animation: section-sparkle 7s ease-in-out infinite;
+}
+.animate-pulse-soft {
+  animation: pulse-soft 4s ease-in-out infinite;
+}
+.animate-scale-pulse {
+  animation: scale-pulse 2s ease-in-out infinite;
+}
+.animate-text-glow {
+  animation: text-glow 2.5s ease-in-out infinite;
+}
+.animate-text-breathe {
+  animation: text-breathe 3s ease-in-out infinite;
+}
+.animate-button-pop {
+  animation: button-pop 1.5s ease-in-out infinite;
+}
+.animate-spin-slow-fade {
+  animation: spin-slow-fade 8s linear infinite;
+}
+
+/* Existing animations from previous steps */
+@keyframes bounce-super {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0) scale(1); }
+  40% { transform: translateY(-25px) scale(1.1); }
+  60% { transform: translateY(-12px) scale(1.05); }
+}
+@keyframes pulse-super {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.2); opacity: 1; }
+}
+
+.animate-bounce-super {
+  animation: bounce-super 2s ease-in-out infinite;
+}
+.animate-pulse-super {
+  animation: pulse-super 1.5s ease-in-out infinite;
+}
+/* ... [Your existing globals.css content should remain here] ... */
+
+/* NEW ANIMATIONS FOR NAVRATRI FESTIVE EFFECTS */
+
+/* Gentle floating animation for Om/Diya */
+@keyframes float-gentle {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg) scale(1);
+    opacity: 0.7;
+  }
+  25% {
+    transform: translateY(-10px) rotate(5deg) scale(1.05);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(0px) rotate(0deg) scale(1);
+    opacity: 0.7;
+  }
+  75% {
+    transform: translateY(10px) rotate(-5deg) scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+/* Firecracker explosion animation */
+@keyframes firecracker-explosion {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+    box-shadow: 0 0 0px rgba(255, 165, 0, 0.7); /* Inner glow */
+  }
+  20% {
+    transform: scale(2); /* Rapid expansion */
+    opacity: 1;
+    box-shadow: 0 0 20px rgba(255, 165, 0, 1), 0 0 40px rgba(255, 255, 0, 0.8);
+  }
+  100% {
+    transform: scale(3); /* Slightly more expansion */
+    opacity: 0; /* Fade out */
+    box-shadow: 0 0 0px rgba(255, 165, 0, 0); /* Fade shadow */
+  }
+}
+
+
+/* NEW ANIMATION UTILITY CLASSES */
+.animate-float-gentle {
+  animation: float-gentle 10s ease-in-out infinite;
+}
+.animate-firecracker {
+  animation: firecracker-explosion 1.5s ease-out infinite; /* Quick burst, repeat indefinitely */
+}
+
+
+/* Existing animations from previous steps */
+
+/* ... (All your previously defined animations should be below this) ... */
+
+/* Animation for the glitter sparkles (stronger version) */
+@keyframes glitter-sparkle-strong {
+  0%, 100% {
+    transform: scale(0) rotate(0deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.5) rotate(180deg); /* Larger scale */
+    opacity: 1; /* Fully opaque */
+  }
+}
+
+/* Animation for confetti falling */
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-100vh) translateX(0) rotate(0deg);
+    opacity: 0;
+  }
+  10% { opacity: 1; }
+  80% { opacity: 1; }
+  100% {
+    transform: translateY(100vh) translateX(50px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Animation for floating elements with a pulse */
+@keyframes float-pulse {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+    opacity: 0.8;
+  }
+  25% {
+    transform: translateY(-10px) scale(1.1);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(0px) scale(1);
+    opacity: 0.8;
+  }
+  75% {
+    transform: translateY(10px) scale(1.1);
+    opacity: 1;
+  }
+}
+
+/* Animation for the border glow (more fancy) */
+@keyframes rainbow-border-fancy {
+  0% { border-color: #ffadad; box-shadow: 0 0 20px #ffadad, inset 0 0 10px #ffadad; }
+  16% { border-color: #ffd6a5; box-shadow: 0 0 20px #ffd6a5, inset 0 0 10px #ffd6a5; }
+  33% { border-color: #caffbf; box-shadow: 0 0 20px #caffbf, inset 0 0 10px #caffbf; }
+  50% { border-color: #a0c4ff; box-shadow: 0 0 20px #a0c4ff, inset 0 0 10px #a0c4ff; }
+  66% { border-color: #bdb2ff; box-shadow: 0 0 20px #bdb2ff, inset 0 0 10px #bdb2ff; }
+  83% { border-color: #ffc6ff; box-shadow: 0 0 20px #ffc6ff, inset 0 0 10px #ffc6ff; }
+  100% { border-color: #ffadad; box-shadow: 0 0 20px #ffadad, inset 0 0 10px #ffadad; }
+}
+
+/* Animation for subtle section background sparkle */
+@keyframes section-sparkle {
+  0% {
+    transform: translateY(0) translateX(0) scale(0);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.5;
+    transform: translateY(-10px) translateX(5px) scale(1);
+  }
+  80% {
+    opacity: 0.5;
+    transform: translateY(10px) translateX(-5px) scale(1);
+  }
+  100% {
+    transform: translateY(0) translateX(0) scale(0);
+    opacity: 0;
+  }
+}
+
+/* Animation for a soft, subtle pulse overlay */
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 0.2; }
+}
+
+/* Animation for subtitle scale and pulse */
+@keyframes scale-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* Animation for text glow */
+@keyframes text-glow {
+  0%, 100% { text-shadow: 0 0 3px rgba(255, 255, 255, 0.5); }
+  50% { text-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 12px rgba(255, 255, 255, 0.6); }
+}
+
+/* Animation for text breathing effect */
+@keyframes text-breathe {
+  0%, 100% { letter-spacing: 0; }
+  50% { letter-spacing: 1.5px; }
+}
+
+/* Animation for button pop effect */
+@keyframes button-pop {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+/* Animation for spinning with fade */
+@keyframes spin-slow-fade {
+  0% { transform: rotate(0deg) scale(1); opacity: 0.6; }
+  50% { transform: rotate(180deg) scale(1.1); opacity: 0.8; }
+  100% { transform: rotate(360deg) scale(1); opacity: 0.6; }
+}
+
+
+/* Animation Utility Classes (Make sure these are at the end or in a separate file if using PostCSS/Tailwind JIT) */
+.animate-glitter-sparkle-strong {
+  animation: glitter-sparkle-strong 2s ease-in-out infinite;
+}
+.animate-confetti-fall {
+  animation: confetti-fall 10s linear infinite; /* Adjusted duration */
+}
+.animate-float-pulse {
+  animation: float-pulse 7s ease-in-out infinite;
+}
+.animate-rainbow-border-fancy {
+  animation: rainbow-border-fancy 5s linear infinite; /* Adjusted duration */
+}
+.animate-section-sparkle {
+  animation: section-sparkle 7s ease-in-out infinite;
+}
+.animate-pulse-soft {
+  animation: pulse-soft 4s ease-in-out infinite;
+}
+.animate-scale-pulse {
+  animation: scale-pulse 2s ease-in-out infinite;
+}
+.animate-text-glow {
+  animation: text-glow 2.5s ease-in-out infinite;
+}
+.animate-text-breathe {
+  animation: text-breathe 3s ease-in-out infinite;
+}
+.animate-button-pop {
+  animation: button-pop 1.5s ease-in-out infinite;
+}
+.animate-spin-slow-fade {
+  animation: spin-slow-fade 8s linear infinite;
+}
+
+/* Existing animations from previous steps */
+@keyframes bounce-super {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0) scale(1); }
+  40% { transform: translateY(-25px) scale(1.1); }
+  60% { transform: translateY(-12px) scale(1.05); }
+}
+@keyframes pulse-super {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.2); opacity: 1; }
+}
+
+.animate-bounce-super {
+  animation: bounce-super 2s ease-in-out infinite;
+}
+.animate-pulse-super {
+  animation: pulse-super 1.5s ease-in-out infinite;
+}
