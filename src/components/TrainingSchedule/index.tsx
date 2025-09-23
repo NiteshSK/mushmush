@@ -17,10 +17,10 @@ interface TrainingProgram {
   duration: number;
   dailyHours: string;
   type: string;
-  hasEarlyBirdOffer?: boolean;
+  hasEarlyBirdOffer: boolean;
   earlyBirdPrice?: number;
   originalPrice?: number;
-  earlyBirdEndDate?: string;
+  earlyBirdEndDate?: Date;
   isActive: boolean;
 }
 
