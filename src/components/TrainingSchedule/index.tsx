@@ -17,6 +17,10 @@ interface TrainingProgram {
   duration: number;
   dailyHours: string;
   type: string;
+  hasEarlyBirdOffer?: boolean;
+  earlyBirdPrice?: number;
+  originalPrice?: number;
+  earlyBirdEndDate?: string;
   isActive: boolean;
 }
 
