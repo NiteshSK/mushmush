@@ -250,7 +250,7 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
               className={`px-8 py-3 text-lg font-bold rounded-lg transition-all duration-300 whitespace-nowrap ${
                 schedules.length === 0
                   ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white transform hover:scale-105 shadow-lg"
+                  : "bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-black transform hover:scale-105 shadow-lg"
               }`}
             >
               {schedules.length === 0 ? "Schedule Not Available" : "🚀 Enroll Now"}
