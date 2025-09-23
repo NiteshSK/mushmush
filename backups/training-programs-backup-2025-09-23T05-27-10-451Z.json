@@ -1,0 +1,890 @@
+{
+  "trainingPrograms": [
+    {
+      "id": 2,
+      "name": "Shitake Mushroom Training",
+      "slug": "shitake-mushroom-training",
+      "description": "Embark on an intensive 5-day journey into the specialized world of Shiitake mushroom cultivation, designed to transform novices into knowledgeable growers. You will begin by mastering the fundamentals of mycology and the hands-on process of sawdust block substrate preparation. From there, you'll learn the critical sterile techniques of inoculation, how to manage the precise incubation and fruiting environments, and the secrets to protecting your crop from contamination. As your practical skills grow, so will your business acumen, with sessions dedicated to the art of harvesting, post-harvest handling, and the essential economics of costing and marketing your product. The program culminates in a forward-looking session on business planning and value-addition, ensuring you leave with a complete roadmap for success in the lucrative field of Shiitake cultivation.",
+      "price": 8000,
+      "duration": 5,
+      "dailyHours": "5-6 hours",
+      "type": "SHIITAKE",
+      "isActive": true,
+      "createdAt": "2025-09-17T18:58:37.755Z",
+      "updatedAt": "2025-09-17T19:04:52.439Z"
+    },
+    {
+      "id": 1,
+      "name": "Oyster Mushroom Training",
+      "slug": "oyster-mushroom-training",
+      "description": "Embark on an intensive 5-day journey into the world of Oyster mushroom cultivation, designed to take you from novice to knowledgeable grower. You will begin by mastering the fundamentals of mycology and the hands-on process of substrate preparation. From there, you'll learn the critical, sterile techniques of inoculation, how to manage the delicate incubation and fruiting environments, and the secrets to protecting your crop from contamination. As your practical skills grow, so will your business acumen, with sessions dedicated to the art of harvesting, post-harvest handling, and the essential economics of costing and marketing your product. The program culminates in a forward-looking session on business planning, exploring value-added products and designing your own small-scale farm, ensuring you leave with a complete farm-to-market skillset and a clear roadmap for success.",
+      "price": 5000,
+      "duration": 5,
+      "dailyHours": "5-6 Hours ",
+      "type": "OYSTER",
+      "isActive": true,
+      "createdAt": "2025-09-13T17:17:07.529Z",
+      "updatedAt": "2025-09-17T18:57:53.311Z"
+    }
+  ],
+  "trainingSchedules": [
+    {
+      "id": 8,
+      "trainingProgramId": 1,
+      "dayNumber": 5,
+      "date": "2025-09-29T00:00:00.000Z",
+      "title": "Scaling, Value Addition & Business Planning",
+      "description": "The final day focuses on future growth. We will explore value-added products, discuss farm design for scaling up, and hold a comprehensive Q&A session to help you solidify your own cultivation and business plan before the certificate ceremony.",
+      "topics": [
+        "Farm Design",
+        "Scaling Up",
+        "Value-Added Products",
+        "Business Planning",
+        "Course Review"
+      ],
+      "practicalSessions": [
+        {
+          "title": "Farm Design Workshop",
+          "duration": "2 hours",
+          "description": "Sketching a layout for your own small-scale farm"
+        },
+        {
+          "title": "Business Plan Outline",
+          "duration": "2 hours",
+          "description": "Working in groups to create a basic business plan"
+        }
+      ],
+      "theoreticalSessions": [
+        {
+          "title": "Value Addition & Scaling Up",
+          "duration": "2 hours",
+          "description": "From fresh mushrooms to other products and larger operations"
+        },
+        {
+          "title": "Final Q&A and Next Steps",
+          "duration": "1.5 hours",
+          "description": "Open forum for all remaining questions and guidance"
+        }
+      ],
+      "learningObjectives": [
+        "Draft a basic layout for a small-scale farm",
+        "List three potential value-added products",
+        "Outline the key sections of a business plan",
+        "Finalize a personal action plan"
+      ],
+      "materials": [
+        "Graph Paper",
+        "Pencils",
+        "Business Plan Template",
+        "Course Notes"
+      ],
+      "instructorId": 1,
+      "startTime": "09:00",
+      "endTime": "17:00",
+      "isActive": true,
+      "createdAt": "2025-09-17T11:40:25.817Z",
+      "updatedAt": "2025-09-22T16:59:40.028Z"
+    },
+    {
+      "id": 7,
+      "trainingProgramId": 1,
+      "dayNumber": 4,
+      "date": "2025-09-28T00:00:00.000Z",
+      "title": "Harvest, Post-Harvest & Business Essentials",
+      "description": "A \"farm-to-market\" day covering the techniques of harvesting and packaging for maximum shelf life. The afternoon shifts focus to the essential economics of running a mushroom business, including costing, pricing, and finding customers.",
+      "topics": [
+        "Harvesting Techniques",
+        "Grading",
+        "Packaging",
+        "Cold Storage",
+        "Cost of Production",
+        "Pricing",
+        "Marketing"
+      ],
+      "practicalSessions": [
+        {
+          "title": "Live Harvesting & Grading",
+          "duration": "2.5 hours",
+          "description": "Harvesting mature mushroom clusters and sorting them by quality"
+        },
+        {
+          "title": "Costing & Pricing Workshop",
+          "duration": "2 hours",
+          "description": "Calculating your production costs on a provided template"
+        }
+      ],
+      "theoreticalSessions": [
+        {
+          "title": "Post-Harvest Management",
+          "duration": "1.5 hours",
+          "description": "Maximizing shelf life and quality"
+        },
+        {
+          "title": "Farm Economics & Marketing",
+          "duration": "2 hours",
+          "description": "Understanding the numbers and how to find your first customer"
+        }
+      ],
+      "learningObjectives": [
+        "Harvest mushrooms at the optimal stage",
+        "Grade and pack mushrooms for retail",
+        "Calculate the cost of production",
+        "Develop a basic pricing and marketing strategy"
+      ],
+      "materials": [
+        "Harvesting Knife",
+        "Crates",
+        "Weighing Scale",
+        "Packaging Materials",
+        "Calculator"
+      ],
+      "instructorId": 2,
+      "startTime": "09:00",
+      "endTime": "17:00",
+      "isActive": true,
+      "createdAt": "2025-09-17T11:39:24.799Z",
+      "updatedAt": "2025-09-22T16:59:33.722Z"
+    },
+    {
+      "id": 6,
+      "trainingProgramId": 1,
+      "dayNumber": 3,
+      "date": "2025-09-27T00:00:00.000Z",
+      "title": "Fruiting Environment & Farm Health Management",
+      "description": "Learn to trigger mushroom formation by managing the fruiting environment's key parameters: humidity, air exchange, temperature, and light. This session also covers the proactive identification and organic management of common farm pests and diseases.",
+      "topics": [
+        "Fruiting Triggers",
+        "Pinning",
+        "Humidity Control",
+        "FAE",
+        "Pest Management",
+        "Farm Hygiene"
+      ],
+      "practicalSessions": [
+        {
+          "title": "Fruiting Room Initiation",
+          "duration": "2 hours",
+          "description": "Moving colonized blocks and demonstrating environmental control setup"
+        },
+        {
+          "title": "Integrated Pest Management",
+          "duration": "2 hours",
+          "description": "Setting up sticky traps and performing a farm hygiene audit"
+        }
+      ],
+      "theoreticalSessions": [
+        {
+          "title": "The Science of Fruiting",
+          "duration": "2 hours",
+          "description": "Understanding the biological triggers for mushroom formation"
+        },
+        {
+          "title": "Organic Pest & Disease Management",
+          "duration": "2 hours",
+          "description": "Proactive and reactive strategies for farm health"
+        }
+      ],
+      "learningObjectives": [
+        "Initiate pinning in colonized substrates",
+        "Manage a fruiting chamber environment",
+        "Identify common pests like fungus gnats",
+        "Implement a preventative farm sanitation plan"
+      ],
+      "materials": [
+        "Spray Bottles",
+        "Hygrometer",
+        "Box Cutter",
+        "Sticky Traps",
+        "Disinfectants"
+      ],
+      "instructorId": 1,
+      "startTime": "09:00",
+      "endTime": "17:00",
+      "isActive": true,
+      "createdAt": "2025-09-17T11:38:38.661Z",
+      "updatedAt": "2025-09-22T16:59:25.219Z"
+    },
+    {
+      "id": 13,
+      "trainingProgramId": 2,
+      "dayNumber": 5,
+      "date": "2025-09-26T00:00:00.000Z",
+      "title": "Value Addition, Marketing & Business Planning",
+      "description": "The final day focuses on adding value to Shiitake products, exploring market opportunities, developing a business plan, and understanding the economic aspects of a mushroom farm.",
+      "topics": [
+        "Drying",
+        "Freezing",
+        "Pickling",
+        "Powdering",
+        "Market research",
+        "Pricing strategies",
+        "Sales channels",
+        "Financial planning",
+        "Cost analysis",
+        "Profit margins",
+        "Licensing"
+      ],
+      "practicalSessions": [
+        {
+          "title": "Shiitake Processing Methods",
+          "duration": "2 hours",
+          "description": "Demonstration of drying and powdering techniques for value addition"
+        },
+        {
+          "title": "Business Plan Workshop",
+          "duration": "2.5 hours",
+          "description": "Group exercise on developing a simple business plan for a mushroom farm"
+        }
+      ],
+      "theoreticalSessions": [
+        {
+          "title": "Value-Added Shiitake Products and Preservation",
+          "duration": "1.5 hours",
+          "description": "Drying, freezing, culinary uses, nutritional benefits"
+        },
+        {
+          "title": "Market Analysis and Marketing Strategies",
+          "duration": "1.5 hours",
+          "description": "Identifying target markets, pricing, branding, and sales channels"
+        },
+        {
+          "title": "Economics of Shiitake Cultivation",
+          "duration": "1.5 hours",
+          "description": "Cost-benefit analysis, financial projections, and scaling a mushroom business"
+        }
+      ],
+      "learningObjectives": [
+        "Explore Shiitake value-added products; Develop marketing strategies; Create a basic business plan; Analyze costs and profitability."
+      ],
+      "materials": [
+        "Notebook",
+        "Pen",
+        "Business plan templates",
+        "Market research data"
+      ],
+      "instructorId": 1,
+      "startTime": "09:00",
+      "endTime": "17:00",
+      "isActive": true,
+      "createdAt": "2025-09-17T19:03:56.846Z",
+      "updatedAt": "2025-09-17T19:03:56.846Z"
+    },
+    {
+      "id": 5,
+      "trainingProgramId": 1,
+      "dayNumber": 2,
+      "date": "2025-09-26T00:00:00.000Z",
+      "title": "Inoculation, Incubation & Contamination Control",
+      "description": "A crucial day focused on the sterile transfer of mushroom culture (spawn) to the prepared substrate. You will then learn how to manage the incubation environment and, most importantly, how to identify and prevent common contaminants.\n\n",
+      "topics": [
+        "Grain Spawn",
+        "Aseptic Techniques",
+        "Inoculation",
+        "Incubation Parameters",
+        "Common Contaminants"
+      ],
+      "practicalSessions": [
+        {
+          "title": "Sterile Inoculation Workshop",
+          "duration": "3 hours",
+          "description": "Mixing grain spawn into your pasteurized straw bags"
+        },
+        {
+          "title": "Contaminant Identification Lab",
+          "duration": "1.5 hours",
+          "description": "Examining pictures and prepared samples of common molds"
+        }
+      ],
+      "theoreticalSessions": [
+        {
+          "title": "All About Spawn",
+          "duration": "1.5 hours",
+          "description": "Understanding spawn quality and handling"
+        },
+        {
+          "title": "The Incubation Phase & Contamination",
+          "duration": "2 hours",
+          "description": "Managing mycelial growth and troubleshooting issues"
+        }
+      ],
+      "learningObjectives": [
+        "Perform sterile inoculation of substrate bags",
+        "Understand ideal incubation conditions",
+        "Identify the top 3 common farm contaminants",
+        "Maintain proper records for spawn runs"
+      ],
+      "materials": [
+        "Lab Coat",
+        "Gloves",
+        "Face Mask",
+        "Grain Spawn",
+        "Grow Bags",
+        "Impulse Sealer"
+      ],
+      "instructorId": 2,
+      "startTime": "09:00",
+      "endTime": "17:00",
+      "isActive": true,
+      "createdAt": "2025-09-17T11:37:52.778Z",
+      "updatedAt": "2025-09-22T16:59:18.014Z"
+    },
+    {
+      "id": 4,
+      "trainingProgramId": 1,
+      "dayNumber": 1,
+      "date": "2025-09-25T00:00:00.000Z",
+      "title": "Fundamentals & Hands-On Substrate Preparation",
+      "description": "An intensive introduction to mushroom cultivation, covering essential mycology, lab safety, and the science of substrates. The day culminates in a practical session where you will prepare and pasteurize your own straw substrate.",
+      "topics": [
+        "Mushroom Biology",
+        "Lab Safety",
+        "Substrate Science",
+        "Pasteurization",
+        "Straw Preparation"
+      ],
+      "practicalSessions": [
+        {
+          "title": "Lab Familiarization & Safety Drill",
+          "duration": "1 hour",
+          "description": "Tour of facilities and safety protocols"
+        },
+        {
+          "title": "Hands-on Straw Pasteurization",
+          "duration": "3 hours",
+          "description": "Chopping, bagging, and pasteurizing agricultural straw"
+        }
+      ],
+      "theoreticalSessions": [
+        {
+          "title": "Introduction to Mycology & Oyster Varieties",
+          "duration": "2 hours",
+          "description": "The basics of fungi and popular Pleurotus species"
+        },
+        {
+          "title": "Substrate Science & Preparation Methods",
+          "duration": "2 hours",
+          "description": "Understanding C/N ratios, hydration, and pasteurization vs. sterilization"
+        }
+      ],
+      "learningObjectives": [
+        "Understand the mushroom lifecycle",
+        "Demonstrate lab safety",
+        "Explain the science behind substrate nutrition",
+        "Prepare a straw substrate using hot water pasteurization"
+      ],
+      "materials": [
+        "Notebook",
+        "Lab Coat",
+        "Safety Goggles",
+        "Gloves",
+        "Straw Chopper",
+        "Pasteurization Drum"
+      ],
+      "instructorId": 1,
+      "startTime": "09:00",
+      "endTime": "17:00",
+      "isActive": true,
+      "createdAt": "2025-09-17T11:37:08.470Z",
+      "updatedAt": "2025-09-22T16:59:12.186Z"
+    },
+    {
+      "id": 12,
+      "trainingProgramId": 2,
+      "dayNumber": 4,
+      "date": "2025-09-25T00:00:00.000Z",
+      "title": "Inducing Fruiting & Mastering Harvest Techniques",
+      "description": "This day delves into the crucial stage of inducing fruit body development, proper harvesting techniques to maximize yield and quality, and initial post-harvest processing.",
+      "topics": [
+        "Cold shock",
+        "Water shock",
+        "Air circulation",
+        "Cap development",
+        "Gill observation",
+        "Harvesting tools",
+        "Cleaning",
+        "Sorting",
+        "Grading",
+        "Packaging"
+      ],
+      "practicalSessions": [
+        {
+          "title": "Fruiting Induction Techniques",
+          "duration": "2 hours",
+          "description": "Applying cold and water shock to spawn blocks to stimulate fruiting"
+        },
+        {
+          "title": "Harvesting Shiitake Mushrooms",
+          "duration": "2 hours",
+          "description": "Demonstration and practice of proper harvesting methods"
+        }
+      ],
+      "theoreticalSessions": [
+        {
+          "title": "Inducing Fruiting Bodies (Pinning)",
+          "duration": "1.5 hours",
+          "description": "Techniques like cold shock, water shock, and optimal environmental cues"
+        },
+        {
+          "title": "Optimal Harvesting Times and Techniques",
+          "duration": "1 hour",
+          "description": "Judging maturity, tools, and methods for clean harvest"
+        },
+        {
+          "title": "Post-Harvest Processing (Cleaning, Sorting, Grading)",
+          "duration": "1.5 hours",
+          "description": "Best practices for maintaining quality post-harvest"
+        }
+      ],
+      "learningObjectives": [
+        "Successfully induce Shiitake fruiting; Harvest mushrooms correctly for quality; Clean and sort harvested mushrooms; Understand basic packaging."
+      ],
+      "materials": [
+        "Notebook",
+        "Pen",
+        "Lab coat",
+        "Harvesting knife",
+        "Brushes",
+        "Trays",
+        "Packaging materials"
+      ],
+      "instructorId": 2,
+      "startTime": "09:00",
+      "endTime": "17:00",
+      "isActive": true,
+      "createdAt": "2025-09-17T19:03:16.348Z",
+      "updatedAt": "2025-09-17T19:03:16.348Z"
+    },
+    {
+      "id": 3,
+      "trainingProgramId": 1,
+      "dayNumber": 3,
+      "date": "2025-09-24T00:00:00.000Z",
+      "title": "adsfadf",
+      "description": "dfasdfasdfas",
+      "topics": [
+        "asdfasdfadf"
+      ],
+      "practicalSessions": [
+        {
+          "title": "adsfasdf",
+          "duration": "",
+          "description": ""
+        }
+      ],
+      "theoreticalSessions": [
+        {
+          "title": "asdfasdfasdf",
+          "duration": "",
+          "description": ""
+        }
+      ],
+      "learningObjectives": [
+        "asdfasdfasdf"
+      ],
+      "materials": [
+        "asdfasdfasd"
+      ],
+      "instructorId": 2,
+      "startTime": "09:00",
+      "endTime": "17:00",
+      "isActive": false,
+      "createdAt": "2025-09-17T11:35:48.335Z",
+      "updatedAt": "2025-09-17T11:36:08.523Z"
+    },
+    {
+      "id": 11,
+      "trainingProgramId": 2,
+      "dayNumber": 3,
+      "date": "2025-09-24T00:00:00.000Z",
+      "title": "Optimizing Growth Conditions & Recognizing Contaminants",
+      "description": "This day focuses on maintaining the ideal environmental parameters for Shiitake mycelial growth and fruit body formation, along with identifying and managing common contaminations.",
+      "topics": [
+        "Temperature",
+        "Humidity",
+        "CO2 levels",
+        "Fresh air exchange",
+        "Light cycles",
+        "Pinhead formation",
+        "Common molds",
+        "Bacteria",
+        "Pests",
+        "Prevention",
+        "Remediation"
+      ],
+      "practicalSessions": [
+        {
+          "title": "Environmental Monitoring Setup",
+          "duration": "1.5 hours",
+          "description": "Setting up and reading temperature/humidity sensors, CO2 meters"
+        },
+        {
+          "title": "Contamination Identification Lab",
+          "duration": "2 hours",
+          "description": "Microscopic and visual identification of common mushroom contaminants"
+        }
+      ],
+      "theoreticalSessions": [
+        {
+          "title": "Environmental Parameters for Shiitake Mycelial Growth & Fruiting",
+          "duration": "1.5 hours",
+          "description": "Optimal ranges for temperature, humidity, ventilation, light"
+        },
+        {
+          "title": "Common Shiitake Contaminants (Molds, Bacteria, Pests)",
+          "duration": "1.5 hours",
+          "description": "Visual identification, causes, and impacts on yield"
+        },
+        {
+          "title": "Strategies for Contamination Prevention and Management",
+          "duration": "1 hour",
+          "description": "Hygiene protocols, air filtration, biological controls"
+        }
+      ],
+      "learningObjectives": [
+        "Control environmental factors; Induce pinning effectively; Identify common contaminants; Implement contamination prevention."
+      ],
+      "materials": [
+        "Notebook",
+        "Pen",
+        "Lab coat",
+        "Magnifying glass",
+        "Microscope",
+        "Contaminated samples"
+      ],
+      "instructorId": 1,
+      "startTime": "09:00",
+      "endTime": "17:00",
+      "isActive": true,
+      "createdAt": "2025-09-17T19:02:35.850Z",
+      "updatedAt": "2025-09-17T19:02:35.850Z"
+    },
+    {
+      "id": 10,
+      "trainingProgramId": 2,
+      "dayNumber": 2,
+      "date": "2025-09-23T00:00:00.000Z",
+      "title": "Sterilization Techniques & Aseptic Inoculation",
+      "description": "Focus on achieving sterile conditions for substrate preparation and the precise, aseptic techniques required for inoculating the substrate with Shiitake spawn.",
+      "topics": [
+        "Sterilization methods",
+        "Autoclaving",
+        "Pasteurization",
+        "Aseptic technique",
+        "Laminar flow hood",
+        "Shiitake spawn types",
+        "Inoculation process",
+        "Spawn running conditions"
+      ],
+      "practicalSessions": [
+        {
+          "title": "Autoclave Operation",
+          "duration": "2 hours",
+          "description": "Loading and operating an autoclave for substrate sterilization"
+        },
+        {
+          "title": "Aseptic Inoculation under Laminar Flow",
+          "duration": "2.5 hours",
+          "description": "Inoculating sterilized substrate bags with Shiitake spawn"
+        }
+      ],
+      "theoreticalSessions": [
+        {
+          "title": "Principles of Sterilization and Contamination Control",
+          "duration": "1.5 hours",
+          "description": "Importance of sterility, common contaminants and prevention"
+        },
+        {
+          "title": "Shiitake Spawn Types and Selection",
+          "duration": "1 hour",
+          "description": "Understanding grain spawn, sawdust spawn, and their applications"
+        },
+        {
+          "title": "Inoculation Procedures and Best Practices",
+          "duration": "1.5 hours",
+          "description": "Detailed steps for aseptic inoculation and common pitfalls"
+        }
+      ],
+      "learningObjectives": [
+        "Master substrate sterilization; Perform aseptic inoculation; Understand spawn characteristics; Identify optimal spawn run conditions."
+      ],
+      "materials": [
+        "Notebook",
+        "Pen",
+        "Lab coat",
+        "Gloves",
+        "Face mask",
+        "Shiitake spawn"
+      ],
+      "instructorId": 2,
+      "startTime": "09:00",
+      "endTime": "17:00",
+      "isActive": true,
+      "createdAt": "2025-09-17T19:01:48.731Z",
+      "updatedAt": "2025-09-17T19:01:48.731Z"
+    },
+    {
+      "id": 2,
+      "trainingProgramId": 1,
+      "dayNumber": 2,
+      "date": "2025-09-23T00:00:00.000Z",
+      "title": "Substrate Science & Preparation Theory",
+      "description": "A deep dive into what mushrooms eat. This day focuses on the science of substrates, understanding the nutritional needs of Oyster mushrooms, and comparing different preparation methods like pasteurization and sterilization.",
+      "topics": [
+        "Substrate Types",
+        "C/N Ratio",
+        "Hydration",
+        "Pasteurization",
+        "Sterilization",
+        "Supplementation"
+      ],
+      "practicalSessions": [
+        {
+          "title": "Substrate Showcase",
+          "duration": "1.5 hours",
+          "description": "Hands-on examination of straw, sawdust, and other raw materials"
+        },
+        {
+          "title": "Hydration Calculation Workshop",
+          "duration": "1.5 hours",
+          "description": "Working in groups to calculate water requirements for different substrates"
+        }
+      ],
+      "theoreticalSessions": [
+        {
+          "title": "Mushroom Nutrition",
+          "duration": "2 hours",
+          "description": "Understanding cellulose, lignin, and nutrient requirements"
+        },
+        {
+          "title": "Methods of Preparation",
+          "duration": "2 hours",
+          "description": "Comparing hot water pasteurization, cold pasteurization, and steam sterilization"
+        }
+      ],
+      "learningObjectives": [
+        "Differentiate between various substrates",
+        "Calculate correct substrate hydration levels",
+        "Explain the purpose of pasteurization vs. sterilization",
+        "Select appropriate supplements"
+      ],
+      "materials": [
+        "Notebook",
+        "Calculator",
+        "Sample Substrates",
+        "Weighing Scale"
+      ],
+      "instructorId": null,
+      "startTime": "09:00",
+      "endTime": "17:00",
+      "isActive": false,
+      "createdAt": "2025-09-17T10:53:22.521Z",
+      "updatedAt": "2025-09-17T11:36:11.328Z"
+    },
+    {
+      "id": 9,
+      "trainingProgramId": 2,
+      "dayNumber": 1,
+      "date": "2025-09-22T00:00:00.000Z",
+      "title": "Introduction to Shiitake Cultivation & Substrate Fundamentals",
+      "description": "This day covers the basics of Shiitake mushrooms, their biology, and the critical first steps of preparing the substrate for cultivation.",
+      "topics": [
+        "Shiitake biology",
+        "Life cycle",
+        "Log cultivation",
+        "Sawdust block cultivation",
+        "Substrate ingredients",
+        "Substrate mixing",
+        "pH adjustment",
+        "Nutritional supplements"
+      ],
+      "practicalSessions": [
+        {
+          "title": "Substrate Formulation and Mixing",
+          "duration": "2 hours",
+          "description": "Hands-on mixing of sawdust, bran, and supplements"
+        },
+        {
+          "title": "Substrate Bagging",
+          "duration": "1.5 hours",
+          "description": "Filling and sealing substrate bags for sterilization"
+        }
+      ],
+      "theoreticalSessions": [
+        {
+          "title": "Shiitake Mushroom Biology and Life Cycle",
+          "duration": "1.5 hours",
+          "description": "Understanding the fungal life cycle and environmental needs"
+        },
+        {
+          "title": "Overview of Shiitake Cultivation Methods (Log vs. Sawdust)",
+          "duration": "1 hour",
+          "description": "Pros and cons of different approaches"
+        },
+        {
+          "title": "Substrate Ingredients and Formulation",
+          "duration": "1.5 hours",
+          "description": "Detailed discussion on sawdust types, supplements, and water content"
+        }
+      ],
+      "learningObjectives": [
+        "Understand Shiitake biology; Identify suitable cultivation methods; Prepare various Shiitake substrates; Adjust substrate pH and nutrition."
+      ],
+      "materials": [
+        "Notebook",
+        "Pen",
+        "Lab coat",
+        "pH meter"
+      ],
+      "instructorId": 1,
+      "startTime": "09:00",
+      "endTime": "17:00",
+      "isActive": true,
+      "createdAt": "2025-09-17T19:01:06.968Z",
+      "updatedAt": "2025-09-17T19:01:06.968Z"
+    },
+    {
+      "id": 1,
+      "trainingProgramId": 1,
+      "dayNumber": 1,
+      "date": "2025-09-22T00:00:00.000Z",
+      "title": "Introduction to Mycology & Oyster Mushroom Cultivation",
+      "description": " A foundational day covering the basics of the mushroom kingdom, the lifecycle of fungi, and why Oyster mushrooms are an ideal species for cultivation. Includes a tour of the facility and essential safety protocols.",
+      "topics": [
+        "Mushroom Biology",
+        "Fungal Lifecycle",
+        "Oyster Mushroom Varieties",
+        "Lab Safety",
+        "Cultivation Overview"
+      ],
+      "practicalSessions": [
+        {
+          "title": "Lab Familiarization",
+          "duration": "1.5 hours",
+          "description": "Tour of facilities and equipment identification"
+        },
+        {
+          "title": "Sterile Technique Practice",
+          "duration": "2 hours",
+          "description": "Working in front of a laminar flow hood and using alcohol lamps"
+        }
+      ],
+      "theoreticalSessions": [
+        {
+          "title": "The Kingdom of Fungi",
+          "duration": "1.5 hours",
+          "description": "An introduction to mycology"
+        },
+        {
+          "title": "All About Oysters",
+          "duration": "1.5 hours",
+          "description": "Deep dive into Pleurotus species and their benefits"
+        },
+        {
+          "title": "Safety & Hygiene",
+          "duration": "1 hour",
+          "description": "Protocols for preventing contamination"
+        }
+      ],
+      "learningObjectives": [
+        "Understand the complete mushroom lifecycle",
+        "Identify 3-4 common Oyster mushroom varieties",
+        "Demonstrate proper lab safety and hygiene",
+        "Outline the end-to-end cultivation process"
+      ],
+      "materials": [
+        "Notebook",
+        "Pen",
+        "Lab Coat",
+        "Disposable Gloves"
+      ],
+      "instructorId": null,
+      "startTime": "09:00",
+      "endTime": "17:00",
+      "isActive": false,
+      "createdAt": "2025-09-17T10:52:03.051Z",
+      "updatedAt": "2025-09-17T11:36:14.322Z"
+    }
+  ],
+  "trainingRegistrations": [
+    {
+      "id": "cmfobwols0001jo041enykwmr",
+      "registrationNumber": "TR1758134534031822",
+      "status": "CONFIRMED",
+      "participantName": "Bhartendu",
+      "participantEmail": "bharu310194@gmail.com",
+      "participantPhone": "8445528589",
+      "participantAddress": {
+        "city": "dehradun",
+        "state": "uttrakhand",
+        "street": "bhaniyawala",
+        "pincode": "248001"
+      },
+      "preferredStartDate": "2025-09-22T00:00:00.000Z",
+      "specialRequirements": "",
+      "totalAmount": 100,
+      "paymentStatus": "COMPLETED",
+      "paymentMethod": "UPI",
+      "paymentReference": null,
+      "paymentDate": "2025-09-17T18:45:07.300Z",
+      "upiTransactionId": "562768908275",
+      "createdAt": "2025-09-17T18:42:14.032Z",
+      "updatedAt": "2025-09-17T18:45:07.301Z",
+      "trainingProgramId": 1,
+      "userId": "cmf2rtavq0001l504oy7lle1e"
+    },
+    {
+      "id": "cmfoanv4b0001jx04z6or1axm",
+      "registrationNumber": "TR1758132442954236",
+      "status": "CONFIRMED",
+      "participantName": "Nitesh Singh Kataria",
+      "participantEmail": "katarianiteshsingh@gmail.com",
+      "participantPhone": "9632721376",
+      "participantAddress": {
+        "city": "Dehradun",
+        "state": "Uttrakhand",
+        "street": "H-2 Cross 2B",
+        "pincode": "248001"
+      },
+      "preferredStartDate": "2025-09-24T00:00:00.000Z",
+      "specialRequirements": "",
+      "totalAmount": 1,
+      "paymentStatus": "COMPLETED",
+      "paymentMethod": "UPI",
+      "paymentReference": null,
+      "paymentDate": "2025-09-17T18:08:48.418Z",
+      "upiTransactionId": "562627498403",
+      "createdAt": "2025-09-17T18:07:22.956Z",
+      "updatedAt": "2025-09-17T18:08:48.419Z",
+      "trainingProgramId": 1,
+      "userId": "cmf2pq9sg0000ld04m1r234gc"
+    },
+    {
+      "id": "cmfij5oue0002la04gj68hckd",
+      "registrationNumber": "TR1757783914501471",
+      "status": "PENDING",
+      "participantName": "Pravesh rawat",
+      "participantEmail": "pravesh.rawat340@gmail.com",
+      "participantPhone": "7417165960",
+      "participantAddress": {
+        "city": "dehr",
+        "state": "dfsdf",
+        "street": "dfsghs",
+        "pincode": "248001"
+      },
+      "preferredStartDate": "2025-02-10T00:00:00.000Z",
+      "specialRequirements": "fsdgsdfgfds",
+      "totalAmount": 5000,
+      "paymentStatus": "PENDING",
+      "paymentMethod": null,
+      "paymentReference": null,
+      "paymentDate": null,
+      "upiTransactionId": null,
+      "createdAt": "2025-09-13T17:18:34.503Z",
+      "updatedAt": "2025-09-13T17:18:34.503Z",
+      "trainingProgramId": 1,
+      "userId": "cmfiiwshp0000jx04hy1n4esx"
+    }
+  ],
+  "backupDate": "2025-09-23T05:27:14.669Z",
+  "environment": "development"
+}

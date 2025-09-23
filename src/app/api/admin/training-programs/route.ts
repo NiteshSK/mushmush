@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, description, price, duration, dailyHours, type } = body;
+    const { name, description, price, duration, dailyHours, type, hasEarlyBirdOffer, earlyBirdPrice, originalPrice, earlyBirdEndDate } = body;
 
     // Validate required fields
     if (!name || !description || !price || !duration || !type) {
@@ -59,6 +59,22 @@ export async function POST(request: NextRequest) {
         { error: "Missing required fields" },
         { status: 400 }
       );
+    }
+
+    // Validate Early Bird pricing if enabled
+    if (hasEarlyBirdOffer) {
+      if (!earlyBirdPrice || !originalPrice) {
+        return NextResponse.json(
+          { error: "Early Bird price and original price are required when Early Bird offer is enabled" },
+          { status: 400 }
+        );
+      }
+      if (parseFloat(earlyBirdPrice) >= parseFloat(originalPrice)) {
+        return NextResponse.json(
+          { error: "Early Bird price must be less than original price" },
+          { status: 400 }
+        );
+      }
     }
 
     // Generate slug from name
@@ -73,6 +89,10 @@ export async function POST(request: NextRequest) {
         duration: parseInt(duration),
         dailyHours: dailyHours || "5-6 hours",
         type,
+        hasEarlyBirdOffer: hasEarlyBirdOffer || false,
+        earlyBirdPrice: hasEarlyBirdOffer ? parseFloat(earlyBirdPrice) : null,
+        originalPrice: hasEarlyBirdOffer ? parseFloat(originalPrice) : null,
+        earlyBirdEndDate: hasEarlyBirdOffer && earlyBirdEndDate ? new Date(earlyBirdEndDate) : null,
       },
     });
 

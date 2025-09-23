@@ -87,7 +87,7 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { name, description, price, duration, dailyHours, type, isActive } = body;
+    const { name, description, price, duration, dailyHours, type, isActive, hasEarlyBirdOffer, earlyBirdPrice, originalPrice, earlyBirdEndDate } = body;
 
     // Generate slug from name if name is updated
     let updateData: any = {};
@@ -102,6 +102,41 @@ export async function PUT(
     if (dailyHours !== undefined) updateData.dailyHours = dailyHours;
     if (type !== undefined) updateData.type = type;
     if (isActive !== undefined) updateData.isActive = isActive;
+    
+    // Handle Early Bird pricing fields
+    if (hasEarlyBirdOffer !== undefined) {
+      updateData.hasEarlyBirdOffer = hasEarlyBirdOffer;
+      
+      // Validate Early Bird pricing if enabled
+      if (hasEarlyBirdOffer) {
+        if (!earlyBirdPrice || !originalPrice) {
+          return NextResponse.json(
+            { error: "Early Bird price and original price are required when Early Bird offer is enabled" },
+            { status: 400 }
+          );
+        }
+        if (parseFloat(earlyBirdPrice) >= parseFloat(originalPrice)) {
+          return NextResponse.json(
+            { error: "Early Bird price must be less than original price" },
+            { status: 400 }
+          );
+        }
+        
+        updateData.earlyBirdPrice = parseFloat(earlyBirdPrice);
+        updateData.originalPrice = parseFloat(originalPrice);
+        updateData.earlyBirdEndDate = earlyBirdEndDate ? new Date(earlyBirdEndDate) : null;
+      } else {
+        // Clear Early Bird fields if disabled
+        updateData.earlyBirdPrice = null;
+        updateData.originalPrice = null;
+        updateData.earlyBirdEndDate = null;
+      }
+    } else {
+      // Handle individual Early Bird field updates
+      if (earlyBirdPrice !== undefined) updateData.earlyBirdPrice = earlyBirdPrice ? parseFloat(earlyBirdPrice) : null;
+      if (originalPrice !== undefined) updateData.originalPrice = originalPrice ? parseFloat(originalPrice) : null;
+      if (earlyBirdEndDate !== undefined) updateData.earlyBirdEndDate = earlyBirdEndDate ? new Date(earlyBirdEndDate) : null;
+    }
 
     const trainingProgram = await prisma.trainingProgram.update({
       where: { id },

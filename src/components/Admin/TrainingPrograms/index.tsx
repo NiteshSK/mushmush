@@ -18,6 +18,13 @@ interface TrainingProgram {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  
+  // Early Bird Pricing Fields
+  hasEarlyBirdOffer: boolean;
+  earlyBirdPrice?: number;
+  originalPrice?: number;
+  earlyBirdEndDate?: string;
+  
   _count: {
     registrations: number;
   };
@@ -125,7 +132,10 @@ const TrainingProgramsAdmin = () => {
                 Type
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Price
+                Regular Price
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Early Bird Offer
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Duration
@@ -157,6 +167,23 @@ const TrainingProgramsAdmin = () => {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   ₹{program.price.toLocaleString()}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {program.hasEarlyBirdOffer ? (
+                    <div>
+                      <div className="text-green-600 font-medium">
+                        ₹{program.earlyBirdPrice?.toLocaleString()}
+                      </div>
+                      <div className="text-xs text-gray-500 line-through">
+                        ₹{program.originalPrice?.toLocaleString()}
+                      </div>
+                      <div className="text-xs text-red-600">
+                        Save ₹{((program.originalPrice || 0) - (program.earlyBirdPrice || 0)).toLocaleString()}
+                      </div>
+                    </div>
+                  ) : (
+                    <span className="text-gray-400">No Offer</span>
+                  )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {program.duration} days
@@ -262,10 +289,14 @@ const ProgramModal = ({
   const [formData, setFormData] = useState({
     name: program?.name || "",
     description: program?.description || "",
-    price: program?.price || 0,
-    duration: program?.duration || 0,
+    price: program?.price ?? 0, // Use nullish coalescing to ensure 0 instead of undefined/null
+    duration: program?.duration ?? 0,
     dailyHours: program?.dailyHours || "5-6 hours",
     type: program?.type || "OYSTER",
+    hasEarlyBirdOffer: program?.hasEarlyBirdOffer || false,
+    earlyBirdPrice: program?.earlyBirdPrice ?? "",
+    originalPrice: program?.originalPrice ?? "",
+    earlyBirdEndDate: program?.earlyBirdEndDate ? program.earlyBirdEndDate.split('T')[0] : "",
   });
   const [loading, setLoading] = useState(false);
 
@@ -359,9 +390,13 @@ const ProgramModal = ({
             <input
               type="number"
               value={formData.duration}
-              onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) })}
+              onChange={(e) => {
+                const value = parseInt(e.target.value);
+                setFormData({ ...formData, duration: isNaN(value) ? 0 : value });
+              }}
               className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
+              min="1"
             />
           </div>
 
@@ -390,6 +425,60 @@ const ProgramModal = ({
               required
             />
           </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Has Early Bird Offer
+            </label>
+            <input
+              type="checkbox"
+              checked={formData.hasEarlyBirdOffer}
+              onChange={(e) => setFormData({ ...formData, hasEarlyBirdOffer: e.target.checked })}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          {formData.hasEarlyBirdOffer && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Early Bird Price (₹)
+              </label>
+              <input
+                type="number"
+                value={formData.earlyBirdPrice}
+                onChange={(e) => setFormData({ ...formData, earlyBirdPrice: parseFloat(e.target.value) })}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          )}
+
+          {formData.hasEarlyBirdOffer && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Original Price (₹)
+              </label>
+              <input
+                type="number"
+                value={formData.originalPrice}
+                onChange={(e) => setFormData({ ...formData, originalPrice: parseFloat(e.target.value) })}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          )}
+
+          {formData.hasEarlyBirdOffer && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Early Bird End Date
+              </label>
+              <input
+                type="date"
+                value={formData.earlyBirdEndDate}
+                onChange={(e) => setFormData({ ...formData, earlyBirdEndDate: e.target.value })}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          )}
 
           <div className="flex justify-end space-x-3 pt-4">
             <button
