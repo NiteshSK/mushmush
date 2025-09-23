@@ -63,14 +63,18 @@ const PromoBanner = () => {
         {/* Headline Section */}
         <div className="mb-12 text-center">
           <h2 className="text-3xl lg:text-4xl xl:text-5xl font-bold mb-4 text-gray-800">
-            Special Festive Offers
+            Special Festive Sale !
           </h2>
           <p className="text-gray-600 text-lg">Exclusive deals just for you</p>
         </div>
 
         {/* UPDATED & CATCHY: Promotional Banner */}
         <div className="relative overflow-hidden rounded-2xl shadow-xl transform transition-all duration-700 hover:scale-[1.02] hover:shadow-2xl mb-8 bg-gradient-to-br from-white to-gray-50 border border-gray-200">
-          {/* Celebration Elements */}
+          {/* Animated Background Effects */}
+          <div className="absolute inset-0 bg-gradient-to-r from-yellow-100/20 via-pink-100/20 to-purple-100/20 animate-gradient-x"></div>
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxjaXJjbGUgY3g9IjMwIiBjeT0iMzAiIHI9IjIiIGZpbGw9IiNmZmQ3MDAiIGZpbGwtb3BhY2l0eT0iMC4zIi8+PGNpcmNsZSBjeD0iMTAiIGN5PSIxMCIgcj0iMSIgZmlsbD0iI2ZmNzAwMCIgZmlsbC1vcGFjaXR5PSIwLjMiLz48Y2lyY2xlIGN4PSI1MCIgY3k9IjIwIiByPSIxLjUiIGZpbGw9IiNmZjAwZmYiIGZpbGwtb3BhY2l0eT0iMC4yIi8+PGNpcmNsZSBjeD0iMjAiIGN5PSI0NSIgcj0iMSIgZmlsbD0iIzcwMDBmZiIgZmlsbC1vcGFjaXR5PSIwLjI1Ii8+PGNpcmNsZSBjeD0iNDUiIGN5PSI1MCIgcj0iMiIgZmlsbD0iI2ZmZmQ3MDAiIGZpbGwtb3BhY2l0eT0iMC4yIi8+PC9nPjwvc3ZnPg==')] opacity-30"></div>
+          
+          {/* Floating Celebration Elements */}
           <div className="absolute top-4 left-4 text-4xl animate-bounce">🎉</div>
           <div className="absolute top-4 right-4 text-4xl animate-bounce" style={{animationDelay: '0.2s'}}>🎊</div>
           <div className="absolute bottom-4 left-4 text-3xl animate-pulse">✨</div>
@@ -78,7 +82,22 @@ const PromoBanner = () => {
           <div className="absolute top-1/2 left-8 text-2xl animate-bounce" style={{animationDelay: '0.4s'}}>🎁</div>
           <div className="absolute top-1/2 right-8 text-2xl animate-bounce" style={{animationDelay: '0.6s'}}>🎈</div>
           
-          <div className="p-8 lg:p-12">
+          {/* Additional Floating Elements */}
+          <div className="absolute top-8 left-1/4 text-xl animate-float">🪔</div>
+          <div className="absolute top-12 right-1/4 text-xl animate-float" style={{animationDelay: '0.8s'}}>🕉️</div>
+          <div className="absolute bottom-8 left-1/3 text-lg animate-float" style={{animationDelay: '1s'}}>🌺</div>
+          <div className="absolute bottom-12 right-1/3 text-lg animate-float" style={{animationDelay: '1.2s'}}>🔥</div>
+          
+          {/* Sparkle Effects */}
+          <div className="absolute top-6 left-1/2 text-xs animate-sparkle">💫</div>
+          <div className="absolute bottom-6 left-1/2 text-xs animate-sparkle" style={{animationDelay: '0.5s'}}>⭐</div>
+          <div className="absolute top-1/3 left-6 text-xs animate-sparkle" style={{animationDelay: '0.7s'}}>✦</div>
+          <div className="absolute top-1/3 right-6 text-xs animate-sparkle" style={{animationDelay: '0.9s'}}>✧</div>
+          
+          {/* Glowing Border Effect */}
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-yellow-400/20 via-pink-400/20 to-purple-400/20 animate-pulse pointer-events-none"></div>
+          
+          <div className="relative p-8 lg:p-12">
             <div className="lg:grid lg:grid-cols-2 lg:gap-12 items-center">
               {/* Left Column: Promotional Content */}
               <div className="mb-8 lg:mb-0">
@@ -189,5 +208,59 @@ const PromoBanner = () => {
   );
 };
 
+// Custom CSS for animations
+const customStyles = `
+  @keyframes gradient-x {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+  
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px) rotate(0deg);
+      opacity: 0.8;
+    }
+    25% {
+      transform: translateY(-10px) rotate(5deg);
+      opacity: 1;
+    }
+    50% {
+      transform: translateY(-5px) rotate(-3deg);
+      opacity: 0.9;
+    }
+    75% {
+      transform: translateY(-15px) rotate(2deg);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes sparkle {
+    0%, 100% {
+      transform: scale(0) rotate(0deg);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.2) rotate(180deg);
+      opacity: 1;
+    }
+  }
+  
+  .animate-gradient-x {
+    background-size: 200% 200%;
+    animation: gradient-x 8s ease infinite;
+  }
+  
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  .animate-sparkle {
+    animation: sparkle 2s ease-in-out infinite;
+  }
+`;
 
 export default PromoBanner;
