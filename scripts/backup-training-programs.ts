@@ -1,4 +1,4 @@
-import { PrismaClient, TrainingType } from '@prisma/client';
+import { PrismaClient, TrainingType, RegistrationStatus } from '@prisma/client';
 import fs from 'fs';
 import path from 'path';
 
@@ -41,7 +41,7 @@ interface TrainingScheduleBackup {
 interface TrainingRegistrationBackup {
   id: string;
   registrationNumber: string;
-  status: string;
+  status: RegistrationStatus;
   participantName: string;
   participantEmail: string;
   participantPhone: string;
@@ -295,7 +295,7 @@ async function restoreTrainingPrograms(backupFile: string) {
         where: { id: registration.id },
         update: {
           registrationNumber: registration.registrationNumber,
-          status: registration.status,
+          status: registration.status as RegistrationStatus,
           participantName: registration.participantName,
           participantEmail: registration.participantEmail,
           participantPhone: registration.participantPhone,
@@ -315,7 +315,7 @@ async function restoreTrainingPrograms(backupFile: string) {
         create: {
           id: registration.id,
           registrationNumber: registration.registrationNumber,
-          status: registration.status,
+          status: registration.status as RegistrationStatus,
           participantName: registration.participantName,
           participantEmail: registration.participantEmail,
           participantPhone: registration.participantPhone,
