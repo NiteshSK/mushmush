@@ -154,9 +154,9 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 py-40">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-green-600 to-blue-600 text-white py-16">
+      <div className="bg-gradient-to-r from-green-600 to-blue-600 text-black py-30">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center mb-4">
             <span className="text-4xl mr-3">{getTypeIcon(program.type)}</span>
@@ -178,8 +178,8 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
       </div>
 
       {/* Program Overview */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="bg-white rounded-lg shadow-md p-8 mb-8">
+      <div className="container mx-auto px-4 py-0">
+        <div className="bg-white rounded-lg shadow-md border p-8 mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Program Overview</h2>
           <p className="text-gray-700 text-lg leading-relaxed">{program.description}</p>
         </div>
