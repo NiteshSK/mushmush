@@ -181,7 +181,7 @@ const PromoBanner = () => {
 
                 <Link
                   href={generateBannerLink(currentBanner)}
-                  className="inline-flex items-center gap-3 text-base text-white bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 py-3 px-8 rounded-full shadow-lg transform transition-all duration-300 hover:scale-105 font-semibold animate-button-pop"
+                  className="inline-flex items-center gap-3 text-base text-black bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 py-3 px-8 rounded-full shadow-lg transform transition-all duration-300 hover:scale-105 font-semibold animate-button-pop"
                 >
                   <span>{currentBanner.buttonText}</span>
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
