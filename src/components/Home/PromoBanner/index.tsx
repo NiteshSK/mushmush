@@ -63,13 +63,21 @@ const PromoBanner = () => {
         {/* Headline Section */}
         <div className="mb-12 text-center">
           <h2 className="text-3xl lg:text-4xl xl:text-5xl font-bold mb-4 text-gray-800">
-            Special Offers
+            Special Festive Offers
           </h2>
           <p className="text-gray-600 text-lg">Exclusive deals just for you</p>
         </div>
 
         {/* UPDATED & CATCHY: Promotional Banner */}
         <div className="relative overflow-hidden rounded-2xl shadow-xl transform transition-all duration-700 hover:scale-[1.02] hover:shadow-2xl mb-8 bg-gradient-to-br from-white to-gray-50 border border-gray-200">
+          {/* Celebration Elements */}
+          <div className="absolute top-4 left-4 text-4xl animate-bounce">🎉</div>
+          <div className="absolute top-4 right-4 text-4xl animate-bounce" style={{animationDelay: '0.2s'}}>🎊</div>
+          <div className="absolute bottom-4 left-4 text-3xl animate-pulse">✨</div>
+          <div className="absolute bottom-4 right-4 text-3xl animate-pulse" style={{animationDelay: '0.3s'}}>🌟</div>
+          <div className="absolute top-1/2 left-8 text-2xl animate-bounce" style={{animationDelay: '0.4s'}}>🎁</div>
+          <div className="absolute top-1/2 right-8 text-2xl animate-bounce" style={{animationDelay: '0.6s'}}>🎈</div>
+          
           <div className="p-8 lg:p-12">
             <div className="lg:grid lg:grid-cols-2 lg:gap-12 items-center">
               {/* Left Column: Promotional Content */}
