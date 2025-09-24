@@ -36,7 +36,7 @@
     "test:production-auth": "node test-production-auth.js",
     "deploy:clean": "./scripts/clean-deploy.sh",
     "run-blog-post-seed": "tsx scripts/seed-blog-post.ts",
-    "fix:product-slugs": "tsx scripts/fix-product-slugs.ts",
+    "fix:product_slugs": "tsx scripts/fix-product-slugs.ts",
     "add:early-bird-pricing": "tsx scripts/add-early-bird-pricing.ts",
     "check:early-bird-banners": "tsx scripts/check-early-bird-banners.ts",
     "seed:early-bird-banners": "tsx scripts/seed-early-bird-banners.ts",
@@ -47,7 +47,8 @@
     "test:admin-early-bird": "tsx scripts/test-admin-early-bird.ts",
     "resolve:instructorid-migration": "psql \"$DATABASE_URL\" -f scripts/resolve-instructorid-migration.sql",
     "setup:site-settings": "tsx scripts/add-site-settings.ts",
-    "setup:festive-effects": "tsx scripts/setup-festive-effects.ts"
+    "setup:festive-effects": "tsx scripts/setup-festive-effects.ts",
+    "check:site-settings": "tsx scripts/check-site-settings.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",

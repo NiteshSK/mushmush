@@ -47,18 +47,25 @@ const FestiveWrapper: React.FC<FestiveWrapperProps> = ({
   useEffect(() => {
     setIsClient(true);
     
-    // Fetch global festive effects setting if useGlobalSetting is true
-    if (useGlobalSetting) {
-      fetch('/api/site-settings')
-        .then(res => res.json())
-        .then(data => {
+    // Function to fetch global festive effects setting
+    const fetchGlobalSetting = async () => {
+      if (useGlobalSetting) {
+        try {
+          const res = await fetch('/api/site-settings');
+          const data = await res.json();
           setGlobalFestiveEnabled(data.enableFestiveEffects || false);
-        })
-        .catch(error => {
+        } catch (error) {
           console.error('Error fetching festive effects setting:', error);
           setGlobalFestiveEnabled(false);
-        });
-    }
+        }
+      }
+    };
+    
+    // Initial fetch
+    fetchGlobalSetting();
+    
+    // Set up periodic refresh every 30 seconds to check for setting changes
+    const intervalId = setInterval(fetchGlobalSetting, 30000);
     
     // Generate sparkle configurations
     const newSparkleConfigs: SparkleConfig[] = Array.from({ length: sparkleCount }, () => ({
@@ -82,10 +89,24 @@ const FestiveWrapper: React.FC<FestiveWrapperProps> = ({
     
     setSparkleConfigs(newSparkleConfigs);
     setMushroomConfigs(newMushroomConfigs);
+    
+    // Cleanup interval on component unmount
+    return () => clearInterval(intervalId);
   }, [sparkleCount, mushroomCount, useGlobalSetting]);
 
   // Determine if festive effects should be enabled
-  const shouldEnableEffects = useGlobalSetting ? globalFestiveEnabled : enableFestiveEffects;
+  const shouldEnableEffects = useGlobalSetting 
+  ? (isClient ? globalFestiveEnabled : false) // Don't show effects until client-side and API response
+  : enableFestiveEffects;
+  
+  // Debug logging - remove this after fixing
+  console.log('🎄 FestiveWrapper Debug:', {
+    useGlobalSetting,
+    globalFestiveEnabled,
+    enableFestiveEffects,
+    shouldEnableEffects,
+    isClient
+  });
 
   return (
     <div className={`relative overflow-hidden ${className}`}>

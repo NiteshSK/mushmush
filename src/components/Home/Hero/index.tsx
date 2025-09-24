@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import HeroFeature from "./HeroFeature";
 import Image from "next/image";
-import FestiveWrapper from "@/components/FestiveWrapper";
 
 const Hero = () => {
   // Array of image sources
@@ -31,7 +30,7 @@ const Hero = () => {
   }, [images.length]);
 
   return (
-    <FestiveWrapper className="pb-0 mt-40 bg-white" useGlobalSetting={true}>
+    <div className="pb-0 mt-40 bg-white">
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
         <div className="flex flex-col lg:flex-row gap-8 items-center mb-8">
           {/* */}
@@ -85,7 +84,7 @@ const Hero = () => {
 
       {/* */}
       <HeroFeature />
-    </FestiveWrapper>
+    </div>
   );
 };
 

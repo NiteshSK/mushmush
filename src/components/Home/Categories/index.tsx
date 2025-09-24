@@ -4,7 +4,6 @@ import { useCallback, useRef, useEffect, useState } from "react";
 import { useCategories } from "@/hooks/useCategories";
 import Image from "next/image";
 import Link from "next/link";
-import FestiveWrapper from "@/components/FestiveWrapper";
 
 // Import Swiper styles
 import "swiper/css/navigation";
@@ -45,8 +44,8 @@ const Categories = () => {
   }, [categories]);
 
   return (
-    <FestiveWrapper className="overflow-hidden">
-      <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0 pb-15 border-b border-gray-3">
+      <div className="overflow-hidden">
+        <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0 pb-15 border-b border-gray-3">
         <div className="swiper categories-carousel common-carousel">
           <div className="mb-10 flex items-center justify-between">
             <div>
@@ -208,7 +207,7 @@ const Categories = () => {
           </Swiper>
         </div>
       </div>
-    </FestiveWrapper>
+    </div>
   );
 };
 

@@ -4,7 +4,6 @@ import SingleItem from "./SingleItem";
 import NotifyMeModal from "../../NotifyMeModal";
 import Image from "next/image";
 import Link from "next/link";
-import FestiveWrapper from "@/components/FestiveWrapper";
 import { Product } from "@/types/product";
 import { useProducts } from "@/hooks/useProducts";
 import { usePromotionalBanners } from "@/hooks/usePromotionalBanners";
@@ -32,11 +31,11 @@ const BestSeller = () => {
   };
 
   return (
-    <FestiveWrapper className={`overflow-hidden ${hasBanners ? 'pt-20' : ''}`}>
+    <section className={`overflow-hidden ${hasBanners ? 'pt-20' : ''}`}>
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
         <div className="mb-10 flex items-center justify-between">
           <div>
-            <span className="flex items-center gap-2.5 font-medium text-dark mb-1.5 animate-text-glow">
+            <span className="flex items-center gap-2.5 font-medium text-dark mb-1.5">
               <Image
                 src="/images/icons/icon-07.svg"
                 alt="icon"
@@ -45,7 +44,7 @@ const BestSeller = () => {
               />
               This Month
             </span>
-            <h2 className="font-semibold text-xl xl:text-heading-5 text-dark animate-text-breathe">
+            <h2 className="font-semibold text-xl xl:text-heading-5 text-dark">
               Best Sellers
             </h2>
           </div>
@@ -60,7 +59,7 @@ const BestSeller = () => {
         <div className="text-center mt-12.5">
           <Link
             href="/shop"
-            className="inline-flex font-medium text-custom-sm py-3 px-7 sm:px-12.5 rounded-md border-gray-3 border bg-gray-1 text-dark ease-out duration-200 hover:bg-dark hover:text-white hover:border-transparent animate-scale-pulse"
+            className="inline-flex font-medium text-custom-sm py-3 px-7 sm:px-12.5 rounded-md border-gray-3 border bg-gray-1 text-dark ease-out duration-200 hover:bg-dark hover:text-white hover:border-transparent"
           >
             Explore All
           </Link>
@@ -76,7 +75,7 @@ const BestSeller = () => {
           productTitle={selectedProduct.title}
         />
       )}
-    </FestiveWrapper>
+    </section>
   );
 };
 

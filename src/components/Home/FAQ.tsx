@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import FestiveWrapper from "@/components/FestiveWrapper";
 
 const FAQ = () => {
   const [openQuestion, setOpenQuestion] = useState<number | null>(null);
@@ -46,7 +45,7 @@ const FAQ = () => {
   ];
 
   return (
-    <FestiveWrapper className="py-16 sm:py-24 bg-cream overflow-hidden">
+    <div className="py-16 sm:py-24 bg-cream overflow-hidden">
       <div className="max-w-6xl mx-auto px-4">
         {/* Headline Section - Updated for vertical stacking */}
         <div className="mb-12 lg:mb-16 flex flex-col items-center text-center">
@@ -122,7 +121,7 @@ const FAQ = () => {
           </div>
         </div>
       </div>
-    </FestiveWrapper>
+    </div>
   );
 };
 
