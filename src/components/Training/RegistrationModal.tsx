@@ -49,6 +49,34 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({
   });
   const [loading, setLoading] = useState(false);
 
+  // Helper function to get the correct price based on Early Bird availability
+const getProgramPrice = (program: TrainingProgram) => {
+    if (program.hasEarlyBirdOffer && 
+        program.earlyBirdPrice && 
+        program.originalPrice && 
+        program.earlyBirdEndDate) {
+      const now = new Date();
+      const endDate = new Date(program.earlyBirdEndDate);
+      if (now <= endDate) {
+        return program.earlyBirdPrice;
+      }
+    }
+    return program.originalPrice || program.price;
+  };
+  
+  // Helper function to check if Early Bird offer is valid
+  const isEarlyBirdValid = (program: TrainingProgram) => {
+    if (!program.hasEarlyBirdOffer || 
+        !program.earlyBirdPrice || 
+        !program.originalPrice || 
+        !program.earlyBirdEndDate) {
+      return false;
+    }
+    const now = new Date();
+    const endDate = new Date(program.earlyBirdEndDate);
+    return now <= endDate;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -113,15 +141,21 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({
           </div>
 
           <div className="bg-blue-50 p-4 rounded-lg mb-6">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="font-semibold">{program.name}</h3>
-                <p className="text-sm text-gray-600">
-                  {program.duration} days • {program.dailyHours} • ₹{program.price.toLocaleString()}
-                </p>
-              </div>
-            </div>
-          </div>
+  <div className="flex justify-between items-center">
+    <div>
+      <h3 className="font-semibold">{program.name}</h3>
+      <p className="text-sm text-gray-600">
+        {program.duration} days • {program.dailyHours} • 
+        ₹{getProgramPrice(program).toLocaleString()}
+        {isEarlyBirdValid(program) && (
+          <span className="ml-2 line-through text-sm opacity-75">
+            ₹{(program.originalPrice || program.price).toLocaleString()}
+          </span>
+        )}
+      </p>
+    </div>
+  </div>
+</div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

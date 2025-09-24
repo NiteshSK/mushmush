@@ -133,6 +133,34 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
     }
   };
 
+  // Helper function to get the correct price based on Early Bird availability
+const getProgramPrice = () => {
+  if (program.hasEarlyBirdOffer && 
+      program.earlyBirdPrice && 
+      program.originalPrice && 
+      program.earlyBirdEndDate) {
+    const now = new Date();
+    const endDate = new Date(program.earlyBirdEndDate);
+    if (now <= endDate) {
+      return program.earlyBirdPrice;
+    }
+  }
+  return program.originalPrice || program.price;
+};
+
+// Helper function to check if Early Bird offer is valid
+const isEarlyBirdValid = () => {
+  if (!program.hasEarlyBirdOffer || 
+      !program.earlyBirdPrice || 
+      !program.originalPrice || 
+      !program.earlyBirdEndDate) {
+    return false;
+  }
+  const now = new Date();
+  const endDate = new Date(program.earlyBirdEndDate);
+  return now <= endDate;
+};
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -152,6 +180,10 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
       </div>
     );
   }
+  // Now we know program is not null, so we can safely call these functions
+const currentPrice = getProgramPrice();
+const earlyBirdValid = isEarlyBirdValid();
+  
 
   return (
     <div className="min-h-screen bg-gray-50 py-40">
@@ -164,9 +196,14 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
           </div>
           <p className="text-xl mb-6">Detailed Training Schedule</p>
           <div className="flex flex-wrap justify-center gap-4 text-sm">
-            <span className="bg-white/20 px-4 py-2 rounded-full">
-              💰 ₹{program.price.toLocaleString()}
-            </span>
+          <span className="bg-white/20 px-4 py-2 rounded-full">
+  💰 ₹{currentPrice.toLocaleString()}
+  {earlyBirdValid && (
+    <span className="ml-2 line-through text-sm opacity-75">
+      ₹{(program.originalPrice || program.price).toLocaleString()}
+    </span>
+  )}
+</span>
             <span className="bg-white/20 px-4 py-2 rounded-full">
               📅 {program.duration} Days
             </span>
@@ -449,7 +486,14 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
               <div className="flex items-center gap-2 text-green-600 font-semibold">
                 <span className="text-2xl">💰</span>
-                <span>Investment: ₹{program?.price?.toLocaleString()}</span>
+                <span>
+                  Investment: ₹{currentPrice.toLocaleString()}
+                  {earlyBirdValid && (
+                    <span className="ml-2 line-through text-sm opacity-75">
+                      ₹{(program.originalPrice || program.price).toLocaleString()}
+                    </span>
+                  )}
+                </span>
               </div>
               <div className="flex items-center gap-2 text-blue-600 font-semibold">
                 <span className="text-2xl">📅</span>

@@ -20,6 +20,21 @@ export async function POST(request: NextRequest) {
       specialRequirements,
     } = body;
 
+    // Helper function to get the correct price based on Early Bird availability
+const getTrainingProgramPrice = (program: any) => {
+  if (program.hasEarlyBirdOffer && 
+      program.earlyBirdPrice && 
+      program.originalPrice && 
+      program.earlyBirdEndDate) {
+    const now = new Date();
+    const endDate = new Date(program.earlyBirdEndDate);
+    if (now <= endDate) {
+      return program.earlyBirdPrice;
+    }
+  }
+  return program.originalPrice || program.price;
+};
+
     // Validate required fields
     if (!trainingProgramId || !participantName || !participantEmail || !participantPhone || !participantAddress) {
       return NextResponse.json(
@@ -71,24 +86,24 @@ export async function POST(request: NextRequest) {
     // Generate unique registration number
     const registrationNumber = `TR${Date.now()}${Math.floor(Math.random() * 1000)}`;
 
-    // Create registration with authenticated user
-    const registration = await prisma.trainingRegistration.create({
-      data: {
-        registrationNumber,
-        trainingProgramId,
-        participantName,
-        participantEmail,
-        participantPhone,
-        participantAddress,
-        preferredStartDate: preferredStartDate ? new Date(preferredStartDate) : null,
-        specialRequirements,
-        totalAmount: trainingProgram.price,
-        userId: user.id, // Always use authenticated user ID
-      },
-      include: {
-        trainingProgram: true,
-      },
-    });
+// Create registration with authenticated user
+const registration = await prisma.trainingRegistration.create({
+  data: {
+    registrationNumber,
+    trainingProgramId,
+    participantName,
+    participantEmail,
+    participantPhone,
+    participantAddress,
+    preferredStartDate: preferredStartDate ? new Date(preferredStartDate) : null,
+    specialRequirements,
+    totalAmount: getTrainingProgramPrice(trainingProgram), // Use correct pricing
+    userId: user.id, // Always use authenticated user ID
+  },
+  include: {
+    trainingProgram: true,
+  },
+});
 
     // Send confirmation email with timetable information
     await sendRegistrationConfirmationEmail({
