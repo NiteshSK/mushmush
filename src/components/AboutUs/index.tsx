@@ -9,7 +9,7 @@ const AboutUs = () => {
       <Breadcrumb title={"About Us"} pages={["about-us"]} />
 
       {/* Hero Section */}
-      <FestiveWrapper className="relative py-20 bg-gradient-to-br from-green-50 to-white" sparkleCount={50} mushroomCount={35}>
+      <FestiveWrapper className="relative py-20 bg-gradient-to-b from-[#E9E6F4] to-[#f3f4f6] overflow-hidden" sparkleCount={50} mushroomCount={35}>
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
           <div className="text-center">
             <h1 className="font-bold text-4xl sm:text-5xl xl:text-6xl text-dark mb-6 animate-text-breathe">

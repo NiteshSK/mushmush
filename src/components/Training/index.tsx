@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { toast } from "react-hot-toast";
 import Breadcrumb from "@/components/Common/Breadcrumb";
 import AutomatedPaymentModal from "./AutomatedPaymentModal";
+import FestiveWrapper from "@/components/FestiveWrapper";
 
 interface TrainingProgram {
   id: number;
@@ -220,7 +221,7 @@ const TrainingPrograms = () => {
       </section>
 
       {/* Training Programs Section */}
-      <section className="relative py-20 bg-gradient-to-b from-[#E9E6F4] to-[#f3f4f6] overflow-hidden">
+      <section className="relative py-20 overflow-hidden">
         {/* Full section festive background elements - z-index below content */}
         <div className="absolute inset-0 z-0 pointer-events-none">
           {/* Effect 1: Sparkle Dots across the whole section */}

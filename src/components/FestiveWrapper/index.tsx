@@ -42,7 +42,7 @@ const FestiveWrapper: React.FC<FestiveWrapperProps> = ({
   const [sparkleConfigs, setSparkleConfigs] = useState<SparkleConfig[]>([]);
   const [mushroomConfigs, setMushroomConfigs] = useState<MushroomConfig[]>([]);
   const [isClient, setIsClient] = useState(false);
-  const [globalFestiveEnabled, setGlobalFestiveEnabled] = useState(true);
+  const [globalFestiveEnabled, setGlobalFestiveEnabled] = useState(false);
 
   useEffect(() => {
     setIsClient(true);

@@ -157,10 +157,10 @@ const FestiveEffectsToggle: React.FC = () => {
             onClick={handleToggle}
             disabled={updating}
             className={`
-              relative inline-flex h-6 w-12 items-center rounded-full transition-colors duration-200 ease-in-out border-2
+              relative inline-flex h-6 w-12 items-center rounded-full transition-colors duration-200 ease-in-out border
               focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2
               ${updating ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-              ${settings.enable_festive_effects ? 'bg-indigo-600 border-indigo-700' : 'bg-gray-200 border-gray-400'}
+              ${settings.enable_festive_effects ? 'bg-indigo-600 border-indigo-600' : 'bg-gray-300 border-gray-400'}
             `}
             aria-pressed={settings.enable_festive_effects}
           >
