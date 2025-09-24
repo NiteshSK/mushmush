@@ -1,5 +1,6 @@
 import MyAccount from "@/components/MyAccount";
 import React from "react";
+import FestiveWrapper from "@/components/FestiveWrapper";
 
 import { Metadata } from "next";
 
@@ -14,7 +15,9 @@ export const metadata: Metadata = {
 const MyAccountPage = () => {
   return (
     <main>
-      <MyAccount />
+      <FestiveWrapper className="min-h-screen bg-gray-2 py-20" sparkleCount={35} mushroomCount={20}>
+        <MyAccount />
+      </FestiveWrapper>
     </main>
   );
 };

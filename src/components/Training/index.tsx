@@ -167,13 +167,51 @@ const TrainingPrograms = () => {
       <Breadcrumb title={"Training Programs"} pages={["training"]} />
 
       {/* Hero Section */}
-      <section className="relative py-2 bg-gradient-to-br from-green-50 to-blue-50">
-        <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
+      <section className="relative py-16 sm:py-24 bg-gradient-to-b from-[#E9E6F4] to-white overflow-hidden">
+        {/* Full section festive background elements - z-index below content */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          {/* Effect 1: Sparkle Dots across the whole section */}
+          {[...Array(50)].map((_, i) => (
+            <div
+              key={`training-sparkle-dots-${i}`}
+              className="absolute w-2 h-2 rounded-full bg-red-400 animate-section-sparkle"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 5}s`,
+                animationDuration: `${3 + Math.random() * 4}s`,
+                backgroundColor: ['#f87171', '#fbbf24', '#a78bfa', '#60a5fa'][Math.floor(Math.random() * 4)],
+              }}
+            />
+          ))}
+          {/* Soft pulse overlay for the entire section */}
+          <div className="absolute inset-0 bg-purple-200/10 animate-pulse-soft"></div>
+
+          {/* Mushroom "Confetti" falling for the entire section */}
+          {[...Array(40)].map((_, i) => (
+            <div
+              key={`training-falling-mushroom-${i}`}
+              className="absolute text-2xl animate-mushroom-fall z-0"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `-${Math.random() * 30}%`,
+                animationDelay: `${Math.random() * 7}s`,
+                animationDuration: `${10 + Math.random() * 8}s`,
+                transform: `rotate(${Math.random() * 360}deg) scale(${0.8 + Math.random() * 0.4})`,
+                opacity: 0.7 + Math.random() * 0.3,
+              }}
+            >
+              🍄
+            </div>
+          ))}
+        </div>
+
+        <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0 relative z-10">
           <div className="text-center">
-            <h1 className="font-bold text-4xl sm:text-5xl xl:text-6xl text-dark mb-6">
+            <h1 className="font-bold text-4xl sm:text-5xl xl:text-6xl text-dark mb-6 animate-text-breathe">
               Mushroom Cultivation Training Programs
             </h1>
-            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto animate-text-glow">
               Master the art of mushroom cultivation with our comprehensive, hands-on training programs. 
               Learn from experts and start your journey in sustainable agriculture.
             </p>
@@ -182,13 +220,51 @@ const TrainingPrograms = () => {
       </section>
 
       {/* Training Programs Section */}
-      <section className="py-20 bg-[#f3f4f6]">
-        <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
+      <section className="relative py-20 bg-gradient-to-b from-[#E9E6F4] to-[#f3f4f6] overflow-hidden">
+        {/* Full section festive background elements - z-index below content */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          {/* Effect 1: Sparkle Dots across the whole section */}
+          {[...Array(40)].map((_, i) => (
+            <div
+              key={`programs-sparkle-dots-${i}`}
+              className="absolute w-2 h-2 rounded-full bg-red-400 animate-section-sparkle"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 5}s`,
+                animationDuration: `${3 + Math.random() * 4}s`,
+                backgroundColor: ['#f87171', '#fbbf24', '#a78bfa', '#60a5fa'][Math.floor(Math.random() * 4)],
+              }}
+            />
+          ))}
+          {/* Soft pulse overlay for the entire section */}
+          <div className="absolute inset-0 bg-purple-200/10 animate-pulse-soft"></div>
+
+          {/* Mushroom "Confetti" falling for the entire section */}
+          {[...Array(30)].map((_, i) => (
+            <div
+              key={`programs-falling-mushroom-${i}`}
+              className="absolute text-2xl animate-mushroom-fall z-0"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `-${Math.random() * 30}%`,
+                animationDelay: `${Math.random() * 7}s`,
+                animationDuration: `${10 + Math.random() * 8}s`,
+                transform: `rotate(${Math.random() * 360}deg) scale(${0.8 + Math.random() * 0.4})`,
+                opacity: 0.7 + Math.random() * 0.3,
+              }}
+            >
+              🍄
+            </div>
+          ))}
+        </div>
+
+        <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0 relative z-10">
           <div className="text-center mb-12">
-            <h2 className="font-bold text-3xl sm:text-4xl text-dark mb-4">
+            <h2 className="font-bold text-3xl sm:text-4xl text-dark mb-4 animate-text-breathe">
               Choose Your Training Program
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto animate-text-glow">
               We offer specialized training programs for different types of mushroom cultivation. 
               Each program includes both theoretical knowledge and hands-on practical experience.
             </p>

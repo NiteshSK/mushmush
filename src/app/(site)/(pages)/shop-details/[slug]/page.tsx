@@ -1,5 +1,6 @@
 import React from "react";
 import ShopDetails from "@/components/ShopDetails";
+import FestiveWrapper from "@/components/FestiveWrapper";
 import { Metadata } from "next";
 
 interface ShopDetailsPageProps {
@@ -23,7 +24,9 @@ const ShopDetailsPage = async ({ params }: ShopDetailsPageProps) => {
   
   return (
     <main>
-      <ShopDetails key={`shop-details-${slug}`} />
+      <FestiveWrapper className="min-h-screen bg-gray-2 py-20" sparkleCount={45} mushroomCount={30}>
+        <ShopDetails key={`shop-details-${slug}`} />
+      </FestiveWrapper>
     </main>
   );
 };

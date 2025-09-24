@@ -4,6 +4,9 @@ import Link from 'next/link';
 import TrainingProgramsAdmin from "@/components/Admin/TrainingPrograms";
 import PaymentVerification from "@/components/Admin/PaymentVerification";
 import AdminAuthWrapper from "@/components/Admin/AdminAuthWrapper";
+import FestiveEffectsToggle from "@/components/Admin/FestiveEffectsToggle";
+
+console.log('🎉 Admin page: FestiveEffectsToggle imported');
 
 interface DashboardStats {
   totalProducts: number;
@@ -181,6 +184,9 @@ const AdminDashboardContent: React.FC = () => {
           </Link>
         ))}
       </div>
+
+      {/* Festive Effects Toggle */}
+      <FestiveEffectsToggle />
 
       {/* Quick Actions */}
       <div className="bg-white rounded-lg shadow-1 p-6">

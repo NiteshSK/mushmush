@@ -34,7 +34,7 @@ const PromoBanner = () => {
 
   return (
     // Section now includes relative positioning for full-section effects
-    <section className="relative py-16 sm:py-24 bg-gradient-to-b from-[#E9E6F4] to-white overflow-hidden">
+    <section className="relative py-16 sm:py-24">
       {/* Full section festive background elements - z-index below content */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         {/* Effect 1: Sparkle Dots across the whole section */}

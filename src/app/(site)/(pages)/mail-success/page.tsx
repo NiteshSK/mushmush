@@ -1,5 +1,6 @@
 import React from "react";
 import MailSuccess from "@/components/MailSuccess";
+import FestiveWrapper from "@/components/FestiveWrapper";
 
 import { Metadata } from "next";
 export const metadata: Metadata = {
@@ -11,7 +12,9 @@ export const metadata: Metadata = {
 const MailSuccessPage = () => {
   return (
     <main>
-      <MailSuccess />
+      <FestiveWrapper className="min-h-screen bg-gray-2 py-20" sparkleCount={35} mushroomCount={20}>
+        <MailSuccess />
+      </FestiveWrapper>
     </main>
   );
 };

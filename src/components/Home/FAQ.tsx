@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import FestiveWrapper from "@/components/FestiveWrapper";
 
 const FAQ = () => {
   const [openQuestion, setOpenQuestion] = useState<number | null>(null);
@@ -45,14 +46,14 @@ const FAQ = () => {
   ];
 
   return (
-    <section className="py-16 sm:py-24 bg-cream overflow-hidden">
+    <FestiveWrapper className="py-16 sm:py-24 bg-cream overflow-hidden">
       <div className="max-w-6xl mx-auto px-4">
         {/* Headline Section - Updated for vertical stacking */}
         <div className="mb-12 lg:mb-16 flex flex-col items-center text-center">
-          <p className="inline-block bg-tan px-4 py-1 text-lg text-brown font-semibold mb-2 rounded-md">
+          <p className="inline-block bg-tan px-4 py-1 text-lg text-brown font-semibold mb-2 rounded-md animate-text-glow">
             Your curiosities about functional wellness, answered.
           </p>
-          <h2 className="inline-block bg-tan px-5 py-2 font-bold text-4xl sm:text-5xl text-brown rounded-lg">
+          <h2 className="inline-block bg-tan px-5 py-2 font-bold text-4xl sm:text-5xl text-brown rounded-lg animate-text-breathe">
           The Mush-Knows
           </h2>
         </div>
@@ -61,7 +62,7 @@ const FAQ = () => {
           {/* Left Column: FAQ Questions */}
           <div className="space-y-4 mb-12 lg:mb-0">
             {faqItems.map((item, index) => (
-              <div key={index} className="bg-tan rounded-lg overflow-hidden">
+              <div key={index} className="bg-tan rounded-lg overflow-hidden animate-scale-pulse">
                 <button
                   onClick={() => toggleQuestion(index)}
                   className="w-full px-6 py-5 text-left flex items-center justify-between"
@@ -107,7 +108,7 @@ const FAQ = () => {
           {/* Right Column: Image */}
           <div className="relative flex justify-center items-center h-full min-h-[300px] lg:min-h-[600px] mt-8 lg:mt-0">
             <div className="relative w-[85%] h-[85%] max-w-[500px] max-h-[500px] lg:max-w-full lg:max-h-full aspect-square flex items-center justify-center">
-              <div className="absolute inset-0 bg-purple-blob rounded-full transform scale-105" 
+              <div className="absolute inset-0 bg-purple-blob rounded-full transform scale-105 animate-pulse-soft" 
                    style={{ transform: 'rotate(10deg) scale(1.05)', backgroundColor: 'rgba(168, 150, 203, 0.4)' }}>
               </div>
               <div className="relative z-10 w-[80%] h-[80%]">
@@ -121,7 +122,7 @@ const FAQ = () => {
           </div>
         </div>
       </div>
-    </section>
+    </FestiveWrapper>
   );
 };
 

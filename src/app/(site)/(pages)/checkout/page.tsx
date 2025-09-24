@@ -1,5 +1,6 @@
 import React from "react";
 import Checkout from "@/components/Checkout";
+import FestiveWrapper from "@/components/FestiveWrapper";
 
 import { Metadata } from "next";
 
@@ -14,7 +15,9 @@ export const metadata: Metadata = {
 const CheckoutPage = () => {
   return (
     <main>
-      <Checkout />
+      <FestiveWrapper className="min-h-screen bg-gray-2 py-20" sparkleCount={30} mushroomCount={15}>
+        <Checkout />
+      </FestiveWrapper>
     </main>
   );
 };

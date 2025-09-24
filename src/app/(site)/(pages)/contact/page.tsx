@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import FestiveWrapper from "@/components/FestiveWrapper";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -65,14 +66,14 @@ export default function ContactPage() {
 
   return (
     <main>
-      <div className="min-h-screen bg-gray-2 py-55">
+      <FestiveWrapper className="min-h-screen bg-gray-2 py-55" sparkleCount={40} mushroomCount={30}>
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
-          <h1 className="text-3xl font-bold text-center mb-8">Contact Us</h1>
+          <h1 className="text-3xl font-bold text-center mb-8 animate-text-breathe">Contact Us</h1>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Contact Information */}
-            <div className="bg-white rounded-xl shadow-1 p-8">
-              <h2 className="text-2xl font-bold mb-6">Get in Touch</h2>
+            <div className="bg-white rounded-xl shadow-1 p-8 animate-scale-pulse">
+              <h2 className="text-2xl font-bold mb-6 animate-text-breathe">Get in Touch</h2>
               
               <div className="space-y-6">
                 <div className="flex items-start gap-4">
@@ -112,7 +113,7 @@ export default function ContactPage() {
                 </div>
               </div>
 
-              <div className="mt-8 p-4 bg-blue-50 rounded-lg">
+              <div className="mt-8 p-4 bg-blue-50 rounded-lg animate-scale-pulse">
                 <h3 className="font-semibold text-lg mb-2">Business Hours</h3>
                 <p className="text-gray-600">Monday - Saturday: 9:00 AM - 6:00 PM</p>
                 <p className="text-gray-600">Sunday: Closed</p>
@@ -120,8 +121,8 @@ export default function ContactPage() {
             </div>
 
             {/* Contact Form */}
-            <div className="bg-white rounded-xl shadow-1 p-8">
-              <h2 className="text-2xl font-bold mb-6">Send us a Message</h2>
+            <div className="bg-white rounded-xl shadow-1 p-8 animate-scale-pulse">
+              <h2 className="text-2xl font-bold mb-6 animate-text-breathe">Send us a Message</h2>
               
               {submitStatus.type && (
                 <div
@@ -203,7 +204,7 @@ export default function ContactPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark"
+                  className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark animate-scale-pulse"
                 >
                   {isSubmitting ? "Sending..." : "Send Message"}
                 </button>
@@ -211,7 +212,7 @@ export default function ContactPage() {
             </div>
           </div>
         </div>
-      </div>
+      </FestiveWrapper>
     </main>
   );
 }

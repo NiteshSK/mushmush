@@ -188,15 +188,53 @@ const earlyBirdValid = isEarlyBirdValid();
   return (
     <div className="min-h-screen bg-gray-50 py-40">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-green-600 to-blue-600 text-black py-30">
-        <div className="container mx-auto px-4 text-center">
+      <div className="relative py-16 sm:py-24 bg-gradient-to-b from-[#E9E6F4] to-white overflow-hidden">
+        {/* Full section festive background elements - z-index below content */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          {/* Effect 1: Sparkle Dots across the whole section */}
+          {[...Array(50)].map((_, i) => (
+            <div
+              key={`schedule-sparkle-dots-${i}`}
+              className="absolute w-2 h-2 rounded-full bg-red-400 animate-section-sparkle"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 5}s`,
+                animationDuration: `${3 + Math.random() * 4}s`,
+                backgroundColor: ['#f87171', '#fbbf24', '#a78bfa', '#60a5fa'][Math.floor(Math.random() * 4)],
+              }}
+            />
+          ))}
+          {/* Soft pulse overlay for the entire section */}
+          <div className="absolute inset-0 bg-purple-200/10 animate-pulse-soft"></div>
+
+          {/* Mushroom "Confetti" falling for the entire section */}
+          {[...Array(40)].map((_, i) => (
+            <div
+              key={`schedule-falling-mushroom-${i}`}
+              className="absolute text-2xl animate-mushroom-fall z-0"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `-${Math.random() * 30}%`,
+                animationDelay: `${Math.random() * 7}s`,
+                animationDuration: `${10 + Math.random() * 8}s`,
+                transform: `rotate(${Math.random() * 360}deg) scale(${0.8 + Math.random() * 0.4})`,
+                opacity: 0.7 + Math.random() * 0.3,
+              }}
+            >
+              🍄
+            </div>
+          ))}
+        </div>
+
+        <div className="container mx-auto px-4 text-center relative z-10">
           <div className="flex items-center justify-center mb-4">
             <span className="text-4xl mr-3">{getTypeIcon(program.type)}</span>
-            <h1 className="text-4xl md:text-5xl font-bold">{program.name}</h1>
+            <h1 className="text-4xl md:text-5xl font-bold animate-text-breathe">{program.name}</h1>
           </div>
-          <p className="text-xl mb-6">Detailed Training Schedule</p>
+          <p className="text-xl mb-6 animate-text-glow">Detailed Training Schedule</p>
           <div className="flex flex-wrap justify-center gap-4 text-sm">
-          <span className="bg-white/20 px-4 py-2 rounded-full">
+          <span className="bg-white/20 px-4 py-2 rounded-full animate-scale-pulse">
   💰 ₹{currentPrice.toLocaleString()}
   {earlyBirdValid && (
     <span className="ml-2 line-through text-sm opacity-75">
@@ -204,10 +242,10 @@ const earlyBirdValid = isEarlyBirdValid();
     </span>
   )}
 </span>
-            <span className="bg-white/20 px-4 py-2 rounded-full">
+            <span className="bg-white/20 px-4 py-2 rounded-full animate-scale-pulse">
               📅 {program.duration} Days
             </span>
-            <span className="bg-white/20 px-4 py-2 rounded-full">
+            <span className="bg-white/20 px-4 py-2 rounded-full animate-scale-pulse">
               ⏰ {program.dailyHours} Daily
             </span>
           </div>

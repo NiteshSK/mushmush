@@ -4,6 +4,7 @@ import { useCallback, useRef, useEffect, useState } from "react";
 import { useCategories } from "@/hooks/useCategories";
 import Image from "next/image";
 import Link from "next/link";
+import FestiveWrapper from "@/components/FestiveWrapper";
 
 // Import Swiper styles
 import "swiper/css/navigation";
@@ -44,12 +45,12 @@ const Categories = () => {
   }, [categories]);
 
   return (
-    <section className="overflow-hidden">
+    <FestiveWrapper className="overflow-hidden">
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0 pb-15 border-b border-gray-3">
         <div className="swiper categories-carousel common-carousel">
           <div className="mb-10 flex items-center justify-between">
             <div>
-              <span className="flex items-center gap-2.5 font-medium text-dark mb-1.5">
+              <span className="flex items-center gap-2.5 font-medium text-dark mb-1.5 animate-text-glow">
                 <svg
                   width="20"
                   height="20"
@@ -87,7 +88,7 @@ const Categories = () => {
                 </svg>
                 Categories
               </span>
-              <h2 className="font-semibold text-xl xl:text-heading-5 text-dark">
+              <h2 className="font-semibold text-xl xl:text-heading-5 text-dark animate-text-breathe">
                 Shop by Category
               </h2>
             </div>
@@ -96,7 +97,7 @@ const Categories = () => {
             <div className="flex items-center gap-3">
               <button
                 onClick={handlePrev}
-                className="swiper-button-prev disabled:opacity-50 disabled:cursor-not-allowed"
+                className="swiper-button-prev disabled:opacity-50 disabled:cursor-not-allowed animate-scale-pulse"
                 disabled={isBeginning}
               >
                 <svg
@@ -118,7 +119,7 @@ const Categories = () => {
 
               <button
                 onClick={handleNext}
-                className="swiper-button-next disabled:opacity-50 disabled:cursor-not-allowed"
+                className="swiper-button-next disabled:opacity-50 disabled:cursor-not-allowed animate-scale-pulse"
                 disabled={isEnd}
               >
                 <svg
@@ -190,7 +191,7 @@ const Categories = () => {
                         />
                       </div>
                       <div>
-                        <h3 className="font-medium text-dark group-hover:text-blue transition-colors duration-300">
+                        <h3 className="font-medium text-dark group-hover:text-blue transition-colors duration-300 animate-text-glow">
                           {category.title}
                         </h3>
                         {category.productCount && (
@@ -207,7 +208,7 @@ const Categories = () => {
           </Swiper>
         </div>
       </div>
-    </section>
+    </FestiveWrapper>
   );
 };
 

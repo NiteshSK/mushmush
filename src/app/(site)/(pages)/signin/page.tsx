@@ -1,5 +1,6 @@
 import Signin from "@/components/Auth/Signin";
 import React from "react";
+import FestiveWrapper from "@/components/FestiveWrapper";
 import { Metadata } from "next";
 
 // Prevent static generation to avoid useSession context issues during build
@@ -13,7 +14,9 @@ export const metadata: Metadata = {
 const SigninPage = () => {
   return (
     <main>
-      <Signin />
+      <FestiveWrapper className="min-h-screen bg-gray-2 py-20" sparkleCount={35} mushroomCount={20}>
+        <Signin />
+      </FestiveWrapper>
     </main>
   );
 };

@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import BlogDetails from '@/components/BlogDetails'
+import FestiveWrapper from '@/components/FestiveWrapper'
 import { prisma } from '@/lib/prisma'
 
 interface BlogDetailsPageProps {
@@ -52,7 +53,9 @@ export default async function BlogDetailsPage({ params }: BlogDetailsPageProps) 
 
     return (
       <main>
-        <BlogDetails slug={slug} />
+        <FestiveWrapper className="min-h-screen bg-gray-2 py-20" sparkleCount={40} mushroomCount={25}>
+          <BlogDetails slug={slug} />
+        </FestiveWrapper>
       </main>
     )
   } catch (error) {

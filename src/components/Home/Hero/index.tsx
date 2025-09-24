@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import HeroFeature from "./HeroFeature";
 import Image from "next/image";
+import FestiveWrapper from "@/components/FestiveWrapper";
 
 const Hero = () => {
   // Array of image sources
@@ -30,13 +31,12 @@ const Hero = () => {
   }, [images.length]);
 
   return (
-    // --- UPDATED: Removed lg:pb-1 and xl:pb-2 to eliminate bottom padding ---
-    <section className="overflow-hidden pb-0 mt-32 bg-white" style={{ marginTop: '200px' }}>
+    <FestiveWrapper className="pb-0 mt-40 bg-white">
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
         <div className="flex flex-col lg:flex-row gap-8 items-center mb-8">
           {/* */}
           <div className="lg:w-1/2">
-            <h1 className="text-4xl lg:text-5xl xl:text-4xl text-dark mb-6">
+            <h1 className="text-4xl lg:text-5xl xl:text-4xl text-dark mb-6 animate-text-breathe">
               Discover the Power of
               <span className="text-blue block">
                 Mushrooms
@@ -49,19 +49,19 @@ const Hero = () => {
                 />
               </span>
             </h1>
-            <p className="text-lg text-gray-600 leading-relaxed mb-8">
+            <p className="text-lg text-gray-600 leading-relaxed mb-8 animate-text-glow">
               At <strong>MushMush</strong>, we're obsessed with the incredible world of fungi. We specialize in cultivating premium edible and medicinal mushrooms, all grown to the highest organic standards. Our passion is to provide you with the purest, most potent mushrooms on the market, whether you're looking to create a culinary masterpiece or enhance your daily wellness routine. Explore our collection and discover the MushMush difference.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
                 href="/shop"
-                className="border-2 border-blue text-blue hover:bg-blue hover:text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-300"
+                className="border-2 border-blue text-blue hover:bg-blue hover:text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-300 animate-scale-pulse"
               >
                 Shop Now
               </Link>
               <Link
                 href="blogs/blog-grid"
-                className="border-2 border-blue text-blue hover:bg-blue hover:text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-300"
+                className="border-2 border-blue text-blue hover:bg-blue hover:text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-300 animate-scale-pulse"
               >
                 Learn More
               </Link>
@@ -85,7 +85,7 @@ const Hero = () => {
 
       {/* */}
       <HeroFeature />
-    </section>
+    </FestiveWrapper>
   );
 };
 

@@ -1,6 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import Breadcrumb from "../Common/Breadcrumb";
+import FestiveWrapper from "@/components/FestiveWrapper";
 
 const AboutUs = () => {
   return (
@@ -8,25 +9,25 @@ const AboutUs = () => {
       <Breadcrumb title={"About Us"} pages={["about-us"]} />
 
       {/* Hero Section */}
-      <section className="relative py-20 bg-gradient-to-br from-green-50 to-white">
+      <FestiveWrapper className="relative py-20 bg-gradient-to-br from-green-50 to-white" sparkleCount={50} mushroomCount={35}>
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
           <div className="text-center">
-            <h1 className="font-bold text-4xl sm:text-5xl xl:text-6xl text-dark mb-6">
+            <h1 className="font-bold text-4xl sm:text-5xl xl:text-6xl text-dark mb-6 animate-text-breathe">
               MushMush: Cultivating Purity, From Our Farm to Your Fork
             </h1>
-            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto animate-text-glow">
               Born from passion, dedicated to purity. Discover our journey from dream to reality.
             </p>
           </div>
         </div>
-      </section>
+      </FestiveWrapper>
 
       {/* Our Story Section */}
-      <section className="py-20 bg-white">
+      <FestiveWrapper className="py-20 bg-white" sparkleCount={30} mushroomCount={25}>
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="order-2 lg:order-1">
-              <h2 className="font-bold text-3xl sm:text-4xl text-dark mb-6">
+              <h2 className="font-bold text-3xl sm:text-4xl text-dark mb-6 animate-text-breathe">
                 Our Story
               </h2>
               <div className="space-y-4 text-gray-700">
@@ -65,10 +66,10 @@ const AboutUs = () => {
             </div>
           </div>
         </div>
-      </section>
+      </FestiveWrapper>
 
       {/* Philosophy Section */}
-      <section className="py-20 bg-gray-50">
+      <FestiveWrapper className="py-20 bg-gray-50" sparkleCount={35} mushroomCount={30}>
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -104,7 +105,7 @@ const AboutUs = () => {
               </div>
             </div>
             <div>
-              <h2 className="font-bold text-3xl sm:text-4xl text-dark mb-6">
+              <h2 className="font-bold text-3xl sm:text-4xl text-dark mb-6 animate-text-breathe">
                 Our Philosophy: Naturally Grown, Seriously Cared For
               </h2>
               <div className="space-y-4 text-gray-700">
@@ -123,7 +124,7 @@ const AboutUs = () => {
               </div>
               
               {/* Certification Badge */}
-              <div className="mt-8 p-6 bg-white rounded-xl shadow-lg border border-green-200">
+              <div className="mt-8 p-6 bg-white rounded-xl shadow-lg border border-green-200 animate-scale-pulse">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
                     <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
@@ -139,35 +140,35 @@ const AboutUs = () => {
             </div>
           </div>
         </div>
-      </section>
+      </FestiveWrapper>
 
       {/* Harvest & Scale Section */}
-      <section className="py-20 bg-white">
+      <FestiveWrapper className="py-20 bg-white" sparkleCount={40} mushroomCount={30}>
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
           <div className="text-center mb-12">
-            <h2 className="font-bold text-3xl sm:text-4xl text-dark mb-4">
+            <h2 className="font-bold text-3xl sm:text-4xl text-dark mb-4 animate-text-breathe">
               Our Harvest & Scale
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto animate-text-glow">
               From our farm to your table, we're growing at scale while maintaining quality
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
             {/* Daily Production */}
-            <div className="bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-2xl text-center">
+            <div className="bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-2xl text-center animate-scale-pulse">
               <div className="text-4xl font-bold text-green-600 mb-2">25+ kg</div>
               <p className="text-lg text-gray-700">Daily Fresh Mushroom Production</p>
             </div>
 
             {/* Mushroom Varieties */}
-            <div className="bg-gradient-to-br from-amber-50 to-amber-100 p-8 rounded-2xl text-center">
+            <div className="bg-gradient-to-br from-amber-50 to-amber-100 p-8 rounded-2xl text-center animate-scale-pulse">
               <div className="text-4xl font-bold text-amber-600 mb-2">5+</div>
               <p className="text-lg text-gray-700">Premium Mushroom Varieties</p>
             </div>
 
             {/* Spawn Distribution */}
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-2xl text-center">
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-2xl text-center animate-scale-pulse">
               <div className="text-4xl font-bold text-blue-600 mb-2">2+ kg</div>
               <p className="text-lg text-gray-700">Daily Spawn Distribution</p>
             </div>
@@ -175,7 +176,7 @@ const AboutUs = () => {
 
           {/* Mushroom Varieties Grid */}
           <div className="bg-gray-50 rounded-2xl p-8">
-            <h3 className="font-bold text-2xl text-dark mb-6 text-center">Our Premium Varieties</h3>
+            <h3 className="font-bold text-2xl text-dark mb-6 text-center animate-text-breathe">Our Premium Varieties</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
               {[
                 { name: "Oyster Mushrooms", image: "/images/aboutus/oyster_about_us.png" },
@@ -201,17 +202,17 @@ const AboutUs = () => {
             </div>
           </div>
         </div>
-      </section>
+      </FestiveWrapper>
 
       {/* Future Products Section */}
-      <section className="py-20 bg-gradient-to-br from-purple-50 to-pink-50">
+      <FestiveWrapper className="py-20 bg-gradient-to-br from-purple-50 to-pink-50" sparkleCount={45} mushroomCount={35}>
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="font-bold text-3xl sm:text-4xl text-dark mb-6">
+              <h2 className="font-bold text-3xl sm:text-4xl text-dark mb-6 animate-text-breathe">
                 The Future is Fungi: Beyond Fresh Mushrooms
               </h2>
-              <p className="text-lg text-gray-700 mb-8 leading-relaxed">
+              <p className="text-lg text-gray-700 mb-8 leading-relaxed animate-text-glow">
                 Our passion for mushrooms doesn't stop at the harvest. We are excited to be expanding 
                 our product line to bring you the goodness of mushrooms in new and innovative forms. 
                 Soon, you will be able to enjoy:
@@ -224,7 +225,7 @@ const AboutUs = () => {
                   "Potent Health Tinctures",
                   "Versatile Dry Mushroom Powders"
                 ].map((product, index) => (
-                  <div key={index} className="flex items-center gap-3 bg-white p-4 rounded-lg shadow-sm">
+                  <div key={index} className="flex items-center gap-3 bg-white p-4 rounded-lg shadow-sm animate-scale-pulse">
                     <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
                       <svg className="w-4 h-4 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
@@ -271,10 +272,10 @@ const AboutUs = () => {
             </div>
           </div>
         </div>
-      </section>
+      </FestiveWrapper>
 
       {/* Training & Community Section */}
-      <section className="py-20 bg-white">
+      <FestiveWrapper className="py-20 bg-white" sparkleCount={35} mushroomCount={25}>
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -312,7 +313,7 @@ const AboutUs = () => {
               </div>
             </div>
             <div>
-              <h2 className="font-bold text-3xl sm:text-4xl text-dark mb-6">
+              <h2 className="font-bold text-3xl sm:text-4xl text-dark mb-6 animate-text-breathe">
                 Sharing Our Knowledge
               </h2>
               <div className="space-y-4 text-gray-700">
@@ -328,7 +329,7 @@ const AboutUs = () => {
                 </p>
               </div>
               
-              <div className="mt-8 p-6 bg-blue-50 rounded-xl border border-blue-200">
+              <div className="mt-8 p-6 bg-blue-50 rounded-xl border border-blue-200 animate-scale-pulse">
                 <h3 className="font-semibold text-lg text-dark mb-3">Join Our Training Program</h3>
                 <p className="text-gray-600 mb-4">Learn from the experts and start your mushroom cultivation journey</p>
                 <div className="flex items-center gap-4">
@@ -349,21 +350,21 @@ const AboutUs = () => {
             </div>
           </div>
         </div>
-      </section>
+      </FestiveWrapper>
 
       {/* Call to Action Section */}
-      <section className="py-20 bg-gradient-to-r from-green-600 to-green-700">
+      <FestiveWrapper className="py-20 bg-gradient-to-r from-green-600 to-green-700" sparkleCount={50} mushroomCount={40}>
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0 text-center">
-          <h2 className="font-bold text-3xl sm:text-4xl text-green mb-6">
+          <h2 className="font-bold text-3xl sm:text-4xl text-green mb-6 animate-text-breathe">
             Join us on our journey of growth, health, and flavour
           </h2>
-          <p className="text-xl text-green-100 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-green-100 mb-8 max-w-2xl mx-auto animate-text-glow">
             Experience the purity of naturally grown mushrooms, cultivated with care and dedication.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <a 
                 href="/shop" 
-                className="flex items-center justify-center font-semibold text-green-700 bg-white py-4 px-5 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 ease-out duration-300 transition-all hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-white/50 text-center w-full sm:w-auto"
+                className="flex items-center justify-center font-semibold text-green-700 bg-white py-4 px-5 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 ease-out duration-300 transition-all hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-white/50 text-center w-full sm:w-auto animate-scale-pulse"
             >
                 <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
@@ -372,13 +373,13 @@ const AboutUs = () => {
             </a>
             <a 
                 href="/contact" 
-                className="flex items-center justify-center font-semibold text-green-700 bg-white py-4 px-5 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 ease-out duration-300 transition-all hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-white/50 text-center w-full sm:w-auto"
+                className="flex items-center justify-center font-semibold text-green-700 bg-white py-4 px-5 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 ease-out duration-300 transition-all hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-white/50 text-center w-full sm:w-auto animate-scale-pulse"
             >
                 Contact Us
             </a>
           </div>
         </div>
-      </section>
+      </FestiveWrapper>
     </>
   );
 };
