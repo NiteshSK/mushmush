@@ -90,45 +90,6 @@ const PaymentMethod = () => {
               </div>
             </div>
           </label>
-
-          <label
-            htmlFor="paypal"
-            className="flex cursor-pointer select-none items-center gap-4"
-          >
-            <div className="relative">
-              <input
-                type="checkbox"
-                name="paypal"
-                id="paypal"
-                className="sr-only"
-                onChange={() => setPayment("paypal")}
-              />
-              <div
-                className={`flex h-4 w-4 items-center justify-center rounded-full ${
-                  payment === "paypal"
-                    ? "border-4 border-blue"
-                    : "border border-gray-4"
-                }`}
-              ></div>
-            </div>
-            <div
-              className={`rounded-md border-[0.5px] py-3.5 px-5 ease-out duration-200 hover:bg-gray-2 hover:border-transparent hover:shadow-none min-w-[240px] ${
-                payment === "paypal"
-                  ? "border-transparent bg-gray-2"
-                  : " border-gray-4 shadow-1"
-              }`}
-            >
-              <div className="flex items-center">
-                <div className="pr-2.5">
-                  <Image src="/images/checkout/paypal.svg" alt="paypal" width={75} height={20}/>
-                </div>
-
-                <div className="border-l border-gray-4 pl-2.5">
-                  <p>Paypal</p>
-                </div>
-              </div>
-            </div>
-          </label>
         </div>
       </div>
     </div>
