@@ -12,8 +12,14 @@ const BestSeller = () => {
   const { products, loading, error } = useProducts();
   const { hasBanners } = usePromotionalBanners();
   const bestSellers = products
-    .sort((a: Product, b: Product) => (b.reviewCount ?? 0) - (a.reviewCount ?? 0))
-    .slice(0, 3);
+  .sort((a: Product, b: Product) => (b.reviewCount ?? 0) - (a.reviewCount ?? 0))
+  .sort((a: Product, b: Product) => {
+    // Prioritize in-stock products
+    if (a.inStock && !b.inStock) return -1;
+    if (!a.inStock && b.inStock) return 1;
+    return 0;
+  })
+  .slice(0, 3);
 
   // NotifyMe modal state
   const [notifyModalOpen, setNotifyModalOpen] = useState(false);

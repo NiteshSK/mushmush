@@ -112,8 +112,17 @@ const Shop: React.FC<ShopProps> = ({ showFilters = true }) => {
   // --- CLIENT-SIDE PRICE FILTERING ONLY ---
   // Category filtering is now handled by the API
   const filteredProducts: Product[] = useMemo(() => {
-    // Only filter by price on client-side since category filtering is handled by API
-    return products.filter(product => product.price <= priceValue);
+    // First filter by price on client-side since category filtering is handled by API
+    const priceFilteredProducts = products.filter(product => product.price <= priceValue);
+    
+    // Then sort to prioritize in-stock products
+    return priceFilteredProducts.sort((a, b) => {
+      // In-stock products come first
+      if (a.inStock && !b.inStock) return -1;
+      if (!a.inStock && b.inStock) return 1;
+      // If both have same stock status, maintain original order
+      return 0;
+    });
   }, [products, priceValue]);
 
   useEffect(() => {
