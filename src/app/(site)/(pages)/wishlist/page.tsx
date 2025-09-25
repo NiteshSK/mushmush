@@ -1,6 +1,6 @@
 import React from "react";
 import { Wishlist } from "@/components/Wishlist";
-import { FestiveWrapper } from "@/components/FestiveWrapper";
+import FestiveWrapper from "@/components/FestiveWrapper";
 import { Metadata } from "next";
 
 // Prevent static generation to avoid useSession context issues during build
