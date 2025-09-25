@@ -399,9 +399,19 @@ const ShopDetails = () => {
   }, [product?.id, product?.title, addToRecentlyViewed]);
 
   const handlePreviewSlider = () => {
-    openPreviewModal();
+    console.log("1. Preview button clicked. Checking product data...");
+    console.log("Product to preview:", displayProduct);
+    
+    if (displayProduct && displayProduct.imgs && displayProduct.imgs.previews) {
+      console.log("2. Product data is valid. Calling openPreviewModal with:", displayProduct.imgs.previews);
+      openPreviewModal({
+        title: displayProduct.title,
+        imgs: displayProduct.imgs,
+      });
+    } else {
+      console.error("3. PREVIEW FAILED: displayProduct or its images are missing.");
+    }
   };
-
   return (
     <>
       <Breadcrumb title={"Shop Details"} pages={["shop details"]} />

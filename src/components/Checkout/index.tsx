@@ -9,7 +9,7 @@ import { selectCartItems, selectTotalPrice } from "@/redux/features/cart-slice";
 import Breadcrumb from "../Common/Breadcrumb";
 import Login from "./Login";
 import Shipping from "./Shipping";
-import ShippingMethod from "./ShippingMethod";
+// import ShippingMethod from "./ShippingMethod";
 import PaymentMethod from "./PaymentMethod";
 import Coupon from "./Coupon";
 import Billing from "./Billing";
@@ -54,8 +54,8 @@ const Checkout = () => {
   className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md mb-7.5" 
   role="alert"
 >
-  <p className="font-bold">Online Orders Paused</p>
-  <p>
+  <p className="font-bold text-red">Online Orders Paused</p>
+  <p className="text-red">
     We are not currently accepting orders from the website. To place an order, please reach out to us on WhatsApp or call us directly at: 
     <a 
       href="https://wa.me/917618362662" 
@@ -80,12 +80,17 @@ const Checkout = () => {
                     </div>
 
                     {cartItems.length > 0 ? (
-                      cartItems.map((item) => (
-                        <div key={item.id} className="flex items-center justify-between py-5 border-b border-gray-3">
-                          <p className="text-dark">{item.title}</p>
-                          <p className="text-dark text-right">₹{(item.discountedPrice * item.quantity).toFixed(2)}</p>
-                        </div>
-                      ))
+                      cartItems.map((item) => {
+                        // Use the discounted price if it exists, otherwise use the regular price
+                        const priceToDisplay = item.discountedPrice || item.price;
+                        
+                        return (
+                          <div key={item.id} className="flex items-center justify-between py-5 border-b border-gray-3">
+                            <p className="text-dark">{item.title}</p>
+                            <p className="text-dark text-right">₹{(priceToDisplay * item.quantity).toFixed(2)}</p>
+                          </div>
+                        );
+                      })
                     ) : (
                       <div className="py-5">
                         <p className="text-dark text-center">Your cart is empty.</p>
@@ -110,14 +115,14 @@ const Checkout = () => {
                 </div>
 
                 <Coupon />
-                <ShippingMethod />
+                {/* <ShippingMethod /> */}
                 <PaymentMethod />
 
                 {/* === BUTTON DISABLED AND STYLED === */}
                 <button
                   type="submit"
                   disabled 
-                  className="w-full flex justify-center font-medium text-white bg-gray-400 py-3 px-6 rounded-md mt-7.5 cursor-not-allowed"
+                  className="w-full flex justify-center font-medium bg-blue text-white bg-gray-400 py-3 px-6 rounded-md mt-7.5 cursor-not-allowed"
                 >
                   Process to Checkout
                 </button>
