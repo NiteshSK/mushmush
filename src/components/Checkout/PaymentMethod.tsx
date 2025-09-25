@@ -45,7 +45,7 @@ const PaymentMethod = () => {
                 </div>
 
                 <div className="border-l border-gray-4 pl-2.5">
-                  <p>Direct bank transfer</p>
+                  <p>UPI</p>
                 </div>
               </div>
             </div>

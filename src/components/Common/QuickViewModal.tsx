@@ -18,7 +18,12 @@ const QuickViewModal = () => {
 
   const handlePreviewSlider = () => {
     dispatch(updateproductDetails(product));
-    openPreviewModal();
+    openPreviewModal({
+      title: product.title,
+      imgs: {
+        previews: product.imgs?.previews || []
+      },
+    });
   };
 
   const handleAddToCart = () => {
