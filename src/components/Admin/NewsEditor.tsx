@@ -232,6 +232,7 @@ const NewsEditor: React.FC<NewsEditorProps> = ({
         setAllTags(prev => [...prev, newTag]);
         setSelectedTags(prev => [...prev, newTag.id]);
         setNewTagName('');
+        setTagSearch('');
         setShowTagDropdown(false);
       }
     } catch (error) {
@@ -495,7 +496,11 @@ const NewsEditor: React.FC<NewsEditorProps> = ({
                     {tagSearch && !filteredTags.some(tag => tag.name.toLowerCase() === tagSearch.toLowerCase()) && (
                       <button
                         type="button"
-                        onClick={createNewTag}
+                        onClick={() => {
+                          setNewTagName(tagSearch);
+                          createNewTag();
+                          setShowTagDropdown(false);
+                        }}
                         disabled={isCreatingTag}
                         className="w-full text-left px-3 py-2 hover:bg-gray-100 text-blue-600"
                       >
