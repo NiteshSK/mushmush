@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
 import SearchForm from "../Blog/SearchForm";
