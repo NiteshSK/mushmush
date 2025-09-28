@@ -138,6 +138,27 @@ const AdminDashboardContent: React.FC = () => {
       link: '/admin/payment-verification',
       color: 'bg-orange'
     },
+    {
+      title: 'Blog Management',
+      description: 'Create and manage blog posts',
+      icon: '📝',
+      link: '/admin/blogs',
+      color: 'bg-blue'
+    },
+    {
+      title: 'News Management',
+      description: 'Create and manage news articles',
+      icon: '📰',
+      link: '/admin/news',
+      color: 'bg-green'
+    },
+    {
+      title: 'Tag Management',
+      description: 'Manage blog and news tags',
+      icon: '🏷️',
+      link: '/admin/tags',
+      color: 'bg-purple'
+    },
   ];
 
   if (loading) {
