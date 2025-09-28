@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
 import SearchForm from "../Blog/SearchForm";
 import LatestPosts from "../Blog/LatestPosts";
@@ -8,6 +8,26 @@ import Image from "next/image";
  
 
 const BlogDetailsWithSidebar = () => {
+  // State for dynamic tags
+  const [tags, setTags] = useState<{id: number, name: string, slug: string}[]>([]);
+  
+  // Fetch tags from backend
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const response = await fetch('/api/admin/tags');
+        if (response.ok) {
+          const data = await response.json();
+          setTags(data.tags || []);
+        }
+      } catch (error) {
+        console.error('Error fetching tags:', error);
+      }
+    };
+    
+    fetchTags();
+  }, []);
+
   return (
     <>
       <Breadcrumb
@@ -148,32 +168,20 @@ const BlogDetailsWithSidebar = () => {
                     <p>Popular Tags :</p>
 
                     <ul className="flex flex-wrap items-center gap-3.5">
-                      <li>
-                        <a
-                          className="inline-flex hover:text-white border border-gray-3 bg-white py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
-                          href="#"
-                        >
-                          Edible
-                        </a>
-                      </li>
-
-                      <li>
-                        <a
-                          className="inline-flex hover:text-white border border-gray-3 bg-white py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
-                          href="#"
-                        >
-                          Macbook
-                        </a>
-                      </li>
-
-                      <li>
-                        <a
-                          className="inline-flex hover:text-white border border-gray-3 bg-white py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
-                          href="#"
-                        >
-                          PC
-                        </a>
-                      </li>
+                      {tags.length > 0 ? (
+                        tags.map((tag) => (
+                          <li key={tag.id}>
+                            <a
+                              className="inline-flex hover:text-white border border-gray-3 bg-white py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
+                              href="#"
+                            >
+                              {tag.name}
+                            </a>
+                          </li>
+                        ))
+                      ) : (
+                        <li className="text-gray-6">No tags available</li>
+                      )}
                     </ul>
                   </div>
 

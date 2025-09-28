@@ -42,7 +42,14 @@ export async function GET(request: NextRequest) {
           views: true,
           createdAt: true,
           updatedAt: true,
-          img: true
+          img: true,
+          tags: {
+            select: {
+              id: true,
+              name: true,
+              slug: true
+            }
+          }
         }
       }),
       prisma.blogPost.count()
@@ -78,7 +85,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { title, slug, excerpt, content, published, img } = body
+    const { title, slug, excerpt, content, published, img, tags } = body
 
     // Validate required fields
     if (!title || !slug || !excerpt || !content) {
@@ -109,8 +116,12 @@ export async function POST(request: NextRequest) {
         content,
         published: published || false,
         img: img || null,
-        views: 0
-      }
+        views: 0,
+        tags: tags && Array.isArray(tags)
+          ? { connect: tags.map((id: number) => ({ id })) }
+          : undefined
+      },
+      include: { tags: true }
     })
 
     return NextResponse.json({

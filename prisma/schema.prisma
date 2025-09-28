@@ -212,7 +212,20 @@ model BlogPost {
   metaTitle       String?
   metaDescription String?
 
+  tags            Tag[]    @relation("BlogPostTags")
+
   @@map("blog_posts")
+}
+
+model Tag {
+  id        Int        @id @default(autoincrement())
+  name      String     @unique
+  slug      String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  posts     BlogPost[] @relation("BlogPostTags")
+
+  @@map("tags")
 }
 
 model ProductNotification {

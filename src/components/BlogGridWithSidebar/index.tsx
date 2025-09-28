@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
 import BlogItem from "../Blog/BlogItem";
 import blogData from "../BlogGrid/blogData"; 
@@ -17,6 +17,26 @@ const generateSlug = (title: string) => {
 };
 
 const BlogGridWithSidebar = () => {
+  // State for dynamic tags
+  const [tags, setTags] = useState<{id: number, name: string, slug: string}[]>([]);
+  
+  // Fetch tags from backend
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const response = await fetch('/api/admin/tags');
+        if (response.ok) {
+          const data = await response.json();
+          setTags(data.tags || []);
+        }
+      } catch (error) {
+        console.error('Error fetching tags:', error);
+      }
+    };
+    
+    fetchTags();
+  }, []);
+
   const categories = [
     {
       name: "Edible",
@@ -188,54 +208,19 @@ const BlogGridWithSidebar = () => {
 
                 <div className="p-4 sm:p-6">
                   <div className="flex flex-wrap gap-3.5">
-                    <a
-                      className="inline-flex hover:text-white border border-gray-3 py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
-                      href="#"
-                    >
-                      Edible
-                    </a>
-
-                    <a
-                      className="inline-flex hover:text-white border border-gray-3 py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
-                      href="#"
-                    >
-                      Macbook
-                    </a>
-
-                    <a
-                      className="inline-flex hover:text-white border border-gray-3 py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
-                      href="#"
-                    >
-                      PC
-                    </a>
-
-                    <a
-                      className="inline-flex hover:text-white border border-gray-3 py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
-                      href="#"
-                    >
-                      USB Cable
-                    </a>
-
-                    <a
-                      className="inline-flex hover:text-white border border-gray-3 py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
-                      href="#"
-                    >
-                      Mouse
-                    </a>
-
-                    <a
-                      className="inline-flex hover:text-white border border-gray-3 py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
-                      href="#"
-                    >
-                      Windows PC
-                    </a>
-
-                    <a
-                      className="inline-flex hover:text-white border border-gray-3 py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
-                      href="#"
-                    >
-                      Tinctures
-                    </a>
+                    {tags.length > 0 ? (
+                      tags.map((tag) => (
+                        <a
+                          key={tag.id}
+                          className="inline-flex hover:text-white border border-gray-3 py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
+                          href="#"
+                        >
+                          {tag.name}
+                        </a>
+                      ))
+                    ) : (
+                      <span className="text-gray-6">No tags available</span>
+                    )}
                   </div>
                 </div>
               </div>

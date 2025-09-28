@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
 import Image from "next/image";
 import Link from "next/link";
@@ -16,6 +16,26 @@ const BlogDetails = ({ slug }: BlogDetailsProps) => {
   
   // Fetch blog post data
   const { blogPost, loading, error } = useBlogPost(slug);
+  
+  // State for dynamic tags
+  const [tags, setTags] = useState<{id: number, name: string, slug: string}[]>([]);
+  
+  // Fetch tags from backend
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const response = await fetch('/api/admin/tags');
+        if (response.ok) {
+          const data = await response.json();
+          setTags(data.tags || []);
+        }
+      } catch (error) {
+        console.error('Error fetching tags:', error);
+      }
+    };
+    
+    fetchTags();
+  }, []);
 
   if (loading) {
     return (
@@ -55,7 +75,15 @@ const BlogDetails = ({ slug }: BlogDetailsProps) => {
                 <div className="rounded-[10px] overflow-hidden mb-7.5">
                   <Image
                     className="rounded-[10px] w-full h-auto"
-                    src={blogPost.img || "/images/blog/oyster-blog-01.png"}
+                    src={(() => {
+                      let imgSrc = typeof blogPost.img === "string" && blogPost.img.trim() ? blogPost.img : "/images/blog/oyster-blog-01.png";
+                      if (imgSrc.startsWith('public/')) {
+                        imgSrc = '/' + imgSrc.substring(7);
+                      } else if (!imgSrc.startsWith('/') && !imgSrc.startsWith('http')) {
+                        imgSrc = '/' + imgSrc;
+                      }
+                      return imgSrc;
+                    })()}
                     alt={blogPost.title}
                     width={500}
                     height={200}
@@ -150,16 +178,20 @@ const BlogDetails = ({ slug }: BlogDetailsProps) => {
                     </div>
 
                     <ul className="flex flex-wrap items-center gap-3.5">
-                      {["Mushroom Growing", "Oyster Mushroom", "DIY", "Home Cultivation"].map((tag, index) => (
-                        <li key={index}>
-                          <a
-                            className="inline-flex hover:text-white border border-gray-3 bg-white py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
-                            href="#"
-                          >
-                            {tag}
-                          </a>
-                        </li>
-                      ))}
+                      {tags.length > 0 ? (
+                        tags.map((tag) => (
+                          <li key={tag.id}>
+                            <a
+                              className="inline-flex hover:text-white border border-gray-3 bg-white py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
+                              href="#"
+                            >
+                              {tag.name}
+                            </a>
+                          </li>
+                        ))
+                      ) : (
+                        <li className="text-gray-6">No tags available</li>
+                      )}
                     </ul>
                   </div>
                 </div>

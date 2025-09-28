@@ -48,7 +48,14 @@ export async function GET(request: NextRequest, context: RouteParams) {
         views: true,
         createdAt: true,
         updatedAt: true,
-        img: true
+        img: true,
+        tags: {
+          select: {
+            id: true,
+            name: true,
+            slug: true
+          }
+        }
       }
     })
 
@@ -93,7 +100,7 @@ export async function PUT(request: NextRequest, context: RouteParams) {
     }
 
     const body = await request.json()
-    const { title, slug, excerpt, content, published, img } = body
+    const { title, slug, excerpt, content, published, img, tags } = body
 
     // Validate required fields
     if (!title || !slug || !excerpt || !content) {
@@ -138,8 +145,12 @@ export async function PUT(request: NextRequest, context: RouteParams) {
         excerpt,
         content,
         published: published || false,
-        img: img || null
-      }
+        img: img || null,
+        tags: tags && Array.isArray(tags)
+          ? { set: tags.map((id: number) => ({ id })) }
+          : undefined
+      },
+      include: { tags: true }
     })
 
     return NextResponse.json({

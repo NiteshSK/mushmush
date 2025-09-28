@@ -33,7 +33,15 @@ const LatestPosts = ({ blogs }: LatestPostsProps) => {
                 className="max-w-[110px] w-full rounded-[10px] overflow-hidden"
               >
                 <Image
-                  src={blog.img}
+                  src={(() => {
+                    let imgSrc = typeof blog.img === "string" && blog.img.trim() ? blog.img : "/images/blog/blog-small-01.jpg";
+                    if (imgSrc.startsWith('public/')) {
+                      imgSrc = '/' + imgSrc.substring(7);
+                    } else if (!imgSrc.startsWith('/') && !imgSrc.startsWith('http')) {
+                      imgSrc = '/' + imgSrc;
+                    }
+                    return imgSrc;
+                  })()}
                   alt="blog"
                   className="rounded-[10px] w-full"
                   width={110}

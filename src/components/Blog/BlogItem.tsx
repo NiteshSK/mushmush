@@ -4,11 +4,20 @@ import Image from "next/image";
 import Link from "next/link";
 
 const BlogItem = ({ blog, slug }: { blog: BlogItem; slug: string }) => {
+  let imgSrc = typeof blog.img === "string" && blog.img.trim() ? blog.img : "/images/blog/blog-small-01.jpg";
+  
+  // Ensure the path starts with / for Next.js Image component
+  if (imgSrc.startsWith('public/')) {
+    imgSrc = '/' + imgSrc.substring(7); // Remove 'public/' and add leading '/'
+  } else if (!imgSrc.startsWith('/') && !imgSrc.startsWith('http')) {
+    imgSrc = '/' + imgSrc; // Add leading '/' if missing
+  }
+  
   return (
     <div className="shadow-1 bg-white rounded-xl px-4 sm:px-5 pt-5 pb-4">
       <Link href={`/blogs/${slug}`} className="rounded-md overflow-hidden">
         <Image
-          src={blog.img}
+          src={imgSrc}
           alt="blog"
           className="rounded-md w-full"
           width={330}

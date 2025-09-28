@@ -13,6 +13,7 @@ type BlogEditorProps = {
     img?: string;
     metaTitle?: string;
     metaDescription?: string;
+    tags?: { id: number; name: string; slug: string }[];
   };
   onSubmit: (data: any) => void;
   isSubmitting: boolean;
@@ -43,6 +44,12 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
   const [imageLoading, setImageLoading] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [allTags, setAllTags] = useState<{id: number, name: string, slug: string}[]>([]);
+  const [selectedTags, setSelectedTags] = useState<number[]>([]);
+  const [tagSearch, setTagSearch] = useState('');
+  const [showTagDropdown, setShowTagDropdown] = useState(false);
+  const [newTagName, setNewTagName] = useState('');
+  const [isCreatingTag, setIsCreatingTag] = useState(false);
 
   useEffect(() => {
     if (initialData) {
@@ -65,8 +72,31 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
           setImageSourceType('upload');
         }
       }
+      if (initialData.tags) {
+        setSelectedTags(initialData.tags.map((t: any) => t.id));
+      }
     }
   }, [initialData]);
+
+  useEffect(() => {
+    // Fetch all tags for selection
+    fetch('/api/admin/tags')
+      .then(res => res.json())
+      .then(data => setAllTags(data.tags || []));
+  }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest('.tag-dropdown-container')) {
+        setShowTagDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const title = e.target.value;
@@ -156,7 +186,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      onSubmit(formData);
+      onSubmit({ ...formData, tags: selectedTags });
     }
   };
 
@@ -272,6 +302,50 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
       img: url,
     }));
   };
+
+  const handleTagChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const options = Array.from(e.target.selectedOptions);
+    setSelectedTags(options.map(opt => Number(opt.value)));
+  };
+
+  const toggleTag = (tagId: number) => {
+    setSelectedTags(prev => 
+      prev.includes(tagId) 
+        ? prev.filter(id => id !== tagId)
+        : [...prev, tagId]
+    );
+  };
+
+  const createNewTag = async () => {
+    if (!newTagName.trim()) return;
+    
+    setIsCreatingTag(true);
+    try {
+      const slug = newTagName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const response = await fetch('/api/admin/tags', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newTagName.trim(), slug })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setAllTags(prev => [...prev, data.tag]);
+        setSelectedTags(prev => [...prev, data.tag.id]);
+        setNewTagName('');
+        setTagSearch('');
+      }
+    } catch (error) {
+      console.error('Error creating tag:', error);
+    } finally {
+      setIsCreatingTag(false);
+    }
+  };
+
+  const filteredTags = allTags.filter(tag => 
+    tag.name.toLowerCase().includes(tagSearch.toLowerCase()) &&
+    !selectedTags.includes(tag.id)
+  );
 
   const getImageDisplayUrl = (imgPath: string) => {
     if (!imgPath) return null;
@@ -616,6 +690,88 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
             {errors.content && (
               <p className="mt-1 text-sm text-red">{errors.content}</p>
             )}
+          </div>
+
+          {/* Tag Selection */}
+          <div className="mt-6">
+            <label className="block text-sm font-medium text-gray-7 mb-2">Tags</label>
+            
+            {/* Selected Tags Display */}
+            <div className="flex flex-wrap gap-2 mb-3">
+              {selectedTags.map(tagId => {
+                const tag = allTags.find(t => t.id === tagId);
+                return tag ? (
+                  <span 
+                    key={tag.id} 
+                    className="inline-flex items-center gap-1 bg-blue text-white px-3 py-1 rounded-full text-sm"
+                  >
+                    {tag.name}
+                    <button
+                      type="button"
+                      onClick={() => toggleTag(tag.id)}
+                      className="ml-1 hover:bg-blue/80 rounded-full p-0.5"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ) : null;
+              })}
+            </div>
+
+            {/* Tag Search and Selection */}
+            <div className="relative tag-dropdown-container">
+              <input
+                type="text"
+                value={tagSearch}
+                onChange={(e) => {
+                  setTagSearch(e.target.value);
+                  setShowTagDropdown(true);
+                }}
+                onFocus={() => setShowTagDropdown(true)}
+                placeholder="Search or add tags..."
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue"
+              />
+              
+              {/* Dropdown with available tags */}
+              {showTagDropdown && (filteredTags.length > 0 || tagSearch.trim()) && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-3 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                  {filteredTags.map(tag => (
+                    <button
+                      key={tag.id}
+                      type="button"
+                      onClick={() => {
+                        toggleTag(tag.id);
+                        setTagSearch('');
+                        setShowTagDropdown(false);
+                      }}
+                      className="w-full text-left px-3 py-2 hover:bg-gray-1 border-b border-gray-3 last:border-b-0"
+                    >
+                      {tag.name}
+                    </button>
+                  ))}
+                  
+                  {/* Create new tag option */}
+                  {tagSearch.trim() && !allTags.some(tag => tag.name.toLowerCase() === tagSearch.toLowerCase()) && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNewTagName(tagSearch);
+                        createNewTag();
+                        setShowTagDropdown(false);
+                      }}
+                      disabled={isCreatingTag}
+                      className="w-full text-left px-3 py-2 hover:bg-gray-1 text-blue font-medium"
+                    >
+                      {isCreatingTag ? 'Creating...' : `Create "${tagSearch}"`}
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+            
+            <p className="text-xs text-gray-6 mt-2">
+              Click tags to select/deselect. Type to search existing tags or create new ones.
+            </p>
           </div>
 
           <div className="mt-4 text-sm text-gray-6">

@@ -105,7 +105,10 @@ const BlogGrid = () => {
                   date: formatDate(blog.createdAt),
                   views: blog.views,
                   title: blog.title,
-                  img: blog.img || "/images/blog/oyster-blog-01.png"
+                  img:
+                    typeof blog.img === "string" && blog.img.trim()
+                      ? blog.img
+                      : "/images/blog/oyster-blog-01.png"
                 }}
                 slug={blog.slug}
               />
