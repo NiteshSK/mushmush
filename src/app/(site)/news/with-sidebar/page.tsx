@@ -2,24 +2,44 @@
 import React, { useState, useEffect } from "react";
 import Breadcrumb from "@/components/Common/Breadcrumb";
 import SearchForm from "@/components/Blog/SearchForm";
-import LatestPosts from "@/components/Blog/LatestPosts";
-import LatestProducts from "@/components/Blog/LatestProducts";
+import LatestNews from "@/components/News/LatestNews";
 import NewsGrid from "@/components/News/NewsGrid";
 
 const NewsWithSidebarPage = () => {
   // State for dynamic tags
   const [tags, setTags] = useState<{id: number, name: string, slug: string}[]>([]);
+  // State for latest news
+  const [latestNews, setLatestNews] = useState<{id: number, title: string, img: string, date: string, views: number, slug: string}[]>([]);
 
   useEffect(() => {
     // Fetch tags for the sidebar
     fetch('/api/admin/tags')
       .then(res => res.json())
       .then(data => setTags(data.tags || []));
+    
+    // Fetch latest news
+    fetch('/api/news?page=1&limit=3')
+      .then(res => res.json())
+      .then(data => {
+        const formattedNews = data.news?.map((item: any) => ({
+          id: item.id,
+          title: item.title,
+          img: item.img,
+          date: new Date(item.createdAt).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          }),
+          views: item.views,
+          slug: item.slug
+        })) || [];
+        setLatestNews(formattedNews);
+      });
   }, []);
 
   return (
     <main>
-      <Breadcrumb title="News" />
+      <Breadcrumb title="News" pages={["News"]} />
       
       <section className="overflow-hidden py-20 bg-gray-2">
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
@@ -39,10 +59,7 @@ const NewsWithSidebarPage = () => {
                 </div>
 
                 {/* Latest News */}
-                <div className="bg-white rounded-lg shadow-1 p-6">
-                  <h3 className="text-lg font-semibold text-dark mb-4">Latest News</h3>
-                  <LatestPosts />
-                </div>
+                <LatestNews news={latestNews} />
 
                 {/* Popular Tags */}
                 <div className="bg-white rounded-lg shadow-1 p-6">
@@ -60,11 +77,6 @@ const NewsWithSidebarPage = () => {
                   </div>
                 </div>
 
-                {/* Latest Products */}
-                <div className="bg-white rounded-lg shadow-1 p-6">
-                  <h3 className="text-lg font-semibold text-dark mb-4">Latest Products</h3>
-                  <LatestProducts />
-                </div>
               </div>
             </div>
           </div>
