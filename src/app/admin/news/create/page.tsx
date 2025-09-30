@@ -21,6 +21,9 @@ const CreateNewsPage: React.FC = () => {
 
       if (response.ok) {
         router.push('/admin/news');
+      } else if (response.status === 401) {
+        alert('You need to be logged in as an admin to create news articles');
+        router.push('/auth/signin');
       } else {
         const error = await response.json();
         alert(error.error || 'Failed to create news article');

@@ -35,8 +35,15 @@ const EditNewsPage: React.FC = () => {
       if (response.ok) {
         const data = await response.json();
         setNewsData(data);
-      } else {
+      } else if (response.status === 401) {
+        alert('You need to be logged in as an admin to edit news articles');
+        router.push('/auth/signin');
+      } else if (response.status === 404) {
         alert('News article not found');
+        router.push('/admin/news');
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error || 'Failed to load news article');
         router.push('/admin/news');
       }
     } catch (error) {
@@ -62,6 +69,9 @@ const EditNewsPage: React.FC = () => {
 
       if (response.ok) {
         router.push('/admin/news');
+      } else if (response.status === 401) {
+        alert('You need to be logged in as an admin to update news articles');
+        router.push('/auth/signin');
       } else {
         const error = await response.json();
         alert(error.error || 'Failed to update news article');

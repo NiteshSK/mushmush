@@ -243,7 +243,7 @@ const NewsEditor: React.FC<NewsEditorProps> = ({
   };
 
   const filteredTags = allTags.filter(tag => 
-    tag.name.toLowerCase().includes(tagSearch.toLowerCase())
+    tag && typeof tag.name === 'string' && tag.name.toLowerCase().includes(tagSearch.toLowerCase())
   );
 
   return (

@@ -103,6 +103,31 @@ const NewsDetails = ({ slug }: NewsDetailsProps) => {
                     className="text-base text-gray-6 leading-relaxed"
                     dangerouslySetInnerHTML={{ __html: blogPost.content }}
                   />
+                  
+                  {/* === ADD THIS ENTIRE DIV BLOCK HERE === */}
+                  <div className="mt-10 border-t border-gray-3 pt-10">
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="font-medium text-dark text-lg">Popular Tags:</h3>
+                    </div>
+
+                    <ul className="flex flex-wrap items-center gap-3.5">
+                      {tags.length > 0 ? (
+                        tags.map((tag) => (
+                          <li key={tag.id}>
+                            <a
+                              className="inline-flex hover:text-white border border-gray-3 bg-white py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
+                              href="#"
+                            >
+                              {tag.name}
+                            </a>
+                          </li>
+                        ))
+                      ) : (
+                        <li className="text-gray-6">No tags available</li>
+                      )}
+                    </ul>
+                  </div>
+                  
                 </div>
               </div>
             </div>
