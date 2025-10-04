@@ -64,17 +64,17 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
   const [showRegistrationModal, setShowRegistrationModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [pendingRegistration, setPendingRegistration] = useState<any>(null);
+  const [expandedDays, setExpandedDays] = useState<Set<number>>(new Set());
+  const [expandedSections, setExpandedSections] = useState<{[key: string]: boolean}>({});
 
   useEffect(() => {
     const fetchProgramAndSchedule = async () => {
       try {
-        // First fetch the program details
         const programResponse = await fetch(`/api/training-programs/${programSlug}`);
         if (programResponse.ok) {
           const programData = await programResponse.json();
           setProgram(programData);
 
-          // Then fetch the schedule using the program ID
           const scheduleResponse = await fetch(`/api/training-programs/${programData.id}/schedule`);
           if (scheduleResponse.ok) {
             const scheduleData = await scheduleResponse.json();
@@ -94,6 +94,23 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
     fetchProgramAndSchedule();
   }, [programSlug]);
 
+  const toggleDay = (dayId: number) => {
+    const newExpanded = new Set(expandedDays);
+    if (newExpanded.has(dayId)) {
+      newExpanded.delete(dayId);
+    } else {
+      newExpanded.add(dayId);
+    }
+    setExpandedDays(newExpanded);
+  };
+
+  const toggleSection = (sectionKey: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [sectionKey]: !prev[sectionKey]
+    }));
+  };
+
   const handleRegistrationSubmit = async (registration: any) => {
     setPendingRegistration(registration);
     setShowRegistrationModal(false);
@@ -107,15 +124,6 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
       return;
     }
     setShowRegistrationModal(true);
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
   };
 
   const getTypeIcon = (type: string) => {
@@ -133,33 +141,31 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
     }
   };
 
-  // Helper function to get the correct price based on Early Bird availability
-const getProgramPrice = () => {
-  if (program.hasEarlyBirdOffer && 
-      program.earlyBirdPrice && 
-      program.originalPrice && 
-      program.earlyBirdEndDate) {
+  const getProgramPrice = () => {
+    if (program.hasEarlyBirdOffer && 
+        program.earlyBirdPrice && 
+        program.originalPrice && 
+        program.earlyBirdEndDate) {
+      const now = new Date();
+      const endDate = new Date(program.earlyBirdEndDate);
+      if (now <= endDate) {
+        return program.earlyBirdPrice;
+      }
+    }
+    return program.originalPrice || program.price;
+  };
+
+  const isEarlyBirdValid = () => {
+    if (!program.hasEarlyBirdOffer || 
+        !program.earlyBirdPrice || 
+        !program.originalPrice || 
+        !program.earlyBirdEndDate) {
+      return false;
+    }
     const now = new Date();
     const endDate = new Date(program.earlyBirdEndDate);
-    if (now <= endDate) {
-      return program.earlyBirdPrice;
-    }
-  }
-  return program.originalPrice || program.price;
-};
-
-// Helper function to check if Early Bird offer is valid
-const isEarlyBirdValid = () => {
-  if (!program.hasEarlyBirdOffer || 
-      !program.earlyBirdPrice || 
-      !program.originalPrice || 
-      !program.earlyBirdEndDate) {
-    return false;
-  }
-  const now = new Date();
-  const endDate = new Date(program.earlyBirdEndDate);
-  return now <= endDate;
-};
+    return now <= endDate;
+  };
 
   if (loading) {
     return (
@@ -180,34 +186,33 @@ const isEarlyBirdValid = () => {
       </div>
     );
   }
-  // Now we know program is not null, so we can safely call these functions
-const currentPrice = getProgramPrice();
-const earlyBirdValid = isEarlyBirdValid();
-  
+
+  const currentPrice = getProgramPrice();
+  const earlyBirdValid = isEarlyBirdValid();
 
   return (
-    <div className="min-h-screen bg-gray-50 py-40">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-green-50 py-40">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-green-600 to-blue-600 text-black py-30">
+      <div className="bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 text-black py-16 shadow-2xl">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center mb-4">
-            <span className="text-4xl mr-3">{getTypeIcon(program.type)}</span>
-            <h1 className="text-4xl md:text-5xl font-bold">{program.name}</h1>
+            <span className="text-5xl mr-3 animate-bounce">{getTypeIcon(program.type)}</span>
+            <h1 className="text-4xl md:text-6xl font-extrabold drop-shadow-lg">{program.name}</h1>
           </div>
-          <p className="text-xl mb-6">Detailed Training Schedule</p>
-          <div className="flex flex-wrap justify-center gap-4 text-sm">
-          <span className="bg-white/20 px-4 py-2 rounded-full">
-  💰 ₹{currentPrice.toLocaleString()}
-  {earlyBirdValid && (
-    <span className="ml-2 line-through text-sm opacity-75">
-      ₹{(program.originalPrice || program.price).toLocaleString()}
-    </span>
-  )}
-</span>
-            <span className="bg-white/20 px-4 py-2 rounded-full">
+          <p className="text-2xl mb-8 font-semibold">📚 Comprehensive Training Schedule</p>
+          <div className="flex flex-wrap justify-center gap-4 text-base">
+            <span className="bg-white/30 backdrop-blur-sm px-6 py-3 rounded-full font-bold shadow-lg hover:scale-105 transition-transform">
+              💰 ₹{currentPrice.toLocaleString()}
+              {earlyBirdValid && (
+                <span className="ml-2 line-through text-sm opacity-75">
+                  ₹{(program.originalPrice || program.price).toLocaleString()}
+                </span>
+              )}
+            </span>
+            <span className="bg-white/30 backdrop-blur-sm px-6 py-3 rounded-full font-bold shadow-lg hover:scale-105 transition-transform">
               📅 {program.duration} Days
             </span>
-            <span className="bg-white/20 px-4 py-2 rounded-full">
+            <span className="bg-white/30 backdrop-blur-sm px-6 py-3 rounded-full font-bold shadow-lg hover:scale-105 transition-transform">
               ⏰ {program.dailyHours} Daily
             </span>
           </div>
@@ -215,18 +220,24 @@ const earlyBirdValid = isEarlyBirdValid();
       </div>
 
       {/* Program Overview */}
-      <div className="container mx-auto px-4 py-0">
-        <div className="bg-white rounded-lg shadow-md border p-8 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Program Overview</h2>
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-white rounded-2xl shadow-xl border-2 border-blue-200 p-8 mb-8 hover:shadow-2xl transition-shadow">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4 flex items-center">
+            <span className="text-4xl mr-3">📖</span>
+            Program Overview
+          </h2>
           <p className="text-gray-700 text-lg leading-relaxed">{program.description}</p>
         </div>
 
         {/* Quick Enroll CTA */}
-        <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg shadow-md p-6 mb-8 border border-green-200">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="bg-gradient-to-r from-green-100 via-blue-100 to-purple-100 rounded-2xl shadow-xl p-8 mb-8 border-2 border-green-300 hover:shadow-2xl transition-all">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="text-center md:text-left">
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Ready to Start Your Journey?</h3>
-              <p className="text-gray-600">Join this comprehensive training program and become an expert in mushroom cultivation.</p>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2 flex items-center justify-center md:justify-start">
+                <span className="text-3xl mr-2">🚀</span>
+                Ready to Start Your Journey?
+              </h3>
+              <p className="text-gray-700 text-lg">Join this comprehensive training program and become an expert in mushroom cultivation.</p>
             </div>
             <button
               onClick={handleRegisterClick}
@@ -242,293 +253,427 @@ const earlyBirdValid = isEarlyBirdValid();
           </div>
         </div>
 
-        {/* Schedule Section - Timetable Style */}
-        <div className="mb-8 bg-white rounded-lg shadow-lg border-2 border-blue-200 p-6">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Training Schedule</h2>
+        {/* Schedule Section */}
+        <div className="mb-8">
+          <div className="text-center mb-8">
+            <h2 className="text-4xl font-extrabold text-gray-900 mb-3 flex items-center justify-center">
+              <span className="text-5xl mr-3">📅</span>
+              Training Schedule
+            </h2>
+            <p className="text-gray-600 text-lg">Click on any day to view detailed information</p>
+          </div>
           
           {schedules.length === 0 ? (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center">
-              <h3 className="text-xl font-semibold text-yellow-800 mb-2">Schedule Not Available</h3>
-              <p className="text-yellow-700 mb-4">
+            <div className="bg-yellow-50 border-2 border-yellow-300 rounded-2xl p-8 text-center shadow-lg">
+              <span className="text-6xl mb-4 block">⚠️</span>
+              <h3 className="text-2xl font-bold text-yellow-800 mb-2">Schedule Not Available</h3>
+              <p className="text-yellow-700 text-lg">
                 The detailed schedule for this training program is not yet available. 
                 Please check back later or contact us for more information.
               </p>
             </div>
           ) : (
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-              {/* Timetable Header */}
-              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
-                <div className="grid grid-cols-1 md:grid-cols-6 gap-4 p-4 font-semibold text-sm">
-                  <div className="md:col-span-1 text-center">Day</div>
-                  <div className="md:col-span-2">Date & Title</div>
-                  <div className="md:col-span-1">Time</div>
-                  <div className="md:col-span-1">Instructor</div>
-                  <div className="md:col-span-1 text-center">Sessions</div>
-                </div>
-              </div>
-              
-              {/* Timetable Body */}
-              <div className="divide-y divide-gray-200">
-                {schedules.map((schedule, index) => (
-                  <div key={schedule.id} className="hover:bg-gray-50 transition-colors duration-200">
-                    <div className="p-4">
-                      {/* Main Row - Desktop */}
-                      <div className="hidden md:grid md:grid-cols-6 gap-4 items-center">
-                        {/* Day Number */}
-                        <div className="text-center">
-                          <div className="bg-indigo-100 text-indigo-800 rounded-full w-12 h-12 flex items-center justify-center font-bold mx-auto text-lg">
-                            {schedule.dayNumber}
-                          </div>
-                        </div>
-                        
-                        {/* Date & Title */}
-                        <div className="md:col-span-2">
-                          <div className="text-sm font-medium text-gray-900 mb-1">
-                            {new Date(schedule.date).toLocaleDateString('en-US', { 
-                              month: 'short', 
-                              day: 'numeric', 
-                              year: 'numeric' 
-                            })}
-                            <span className="text-gray-500 ml-2">
-                              ({new Date(schedule.date).toLocaleDateString('en-US', { weekday: 'short' })})
-                            </span>
-                          </div>
-                          <div className="font-medium text-gray-900">{schedule.title}</div>
-                        </div>
-                        
-                        {/* Time */}
-                        <div className="text-center">
-                          <div className="flex items-center justify-center space-x-2">
-                            <span className="text-lg">🕐</span>
-                            <div>
-                              <div className="font-medium text-gray-900">
-                                {schedule.startTime}
+            <div className="space-y-6">
+              {schedules.map((schedule) => {
+                const isExpanded = expandedDays.has(schedule.id);
+                const topicsKey = `${schedule.id}-topics`;
+                const materialsKey = `${schedule.id}-materials`;
+                const objectivesKey = `${schedule.id}-objectives`;
+                
+                return (
+                  <div 
+                    key={schedule.id} 
+                    className={`bg-white rounded-2xl shadow-lg border-2 overflow-hidden transition-all duration-300 ${
+                      isExpanded 
+                        ? 'border-blue-500 shadow-2xl' 
+                        : 'border-gray-200 hover:border-blue-300 hover:shadow-xl'
+                    }`}
+                  >
+                    {/* Day Header */}
+                    <div 
+                      className="cursor-pointer"
+                      onClick={() => toggleDay(schedule.id)}
+                    >
+                      {/* Desktop Layout */}
+                      <div className="hidden md:block">
+                        <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-black p-6">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-6">
+                              <div className="bg-white text-indigo-600 rounded-2xl w-20 h-20 flex flex-col items-center justify-center font-bold shadow-lg">
+                                <span className="text-xs uppercase">Day</span>
+                                <span className="text-3xl">{schedule.dayNumber}</span>
                               </div>
-                              <div className="text-xs text-gray-500">
-                                to {schedule.endTime}
+                              
+                              <div>
+                                <h3 className="text-2xl font-bold mb-2">{schedule.title}</h3>
+                                <div className="flex items-center space-x-4 text-sm">
+                                  <span className="flex items-center">
+                                    <span className="mr-2">📅</span>
+                                    {new Date(schedule.date).toLocaleDateString('en-US', { 
+                                      month: 'long', 
+                                      day: 'numeric', 
+                                      year: 'numeric',
+                                      weekday: 'long'
+                                    })}
+                                  </span>
+                                  <span className="flex items-center">
+                                    <span className="mr-2">🕐</span>
+                                    {schedule.startTime} - {schedule.endTime}
+                                  </span>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </div>
-                        
-                        {/* Instructor */}
-                        <div className="text-center">
-                          <div className="flex items-center justify-center space-x-2">
-                            <span className="text-lg">👨‍🏫</span>
-                            <div className="font-medium text-gray-900">
-                              {schedule.instructor?.name || 'TBA'}
-                            </div>
-                          </div>
-                        </div>
-                        
-                        {/* Sessions Count */}
-                        <div className="text-center">
-                          <div className="flex justify-center space-x-3">
-                            <div className="text-center">
-                              <div className="text-lg font-bold text-green-600">
-                                {schedule.practicalSessions?.length || 0}
+                            
+                            <div className="flex items-center space-x-6">
+                              <div className="text-right">
+                                <div className="text-xs uppercase opacity-75 mb-1">Instructor</div>
+                                <div className="flex items-center space-x-2">
+                                  <span className="text-2xl">👨‍🏫</span>
+                                  <span className="font-bold text-lg">{schedule.instructor?.name || 'TBA'}</span>
+                                </div>
                               </div>
-                              <div className="text-xs text-gray-500">Practical</div>
-                            </div>
-                            <div className="text-center">
-                              <div className="text-lg font-bold text-blue-600">
-                                {schedule.theoreticalSessions?.length || 0}
+                              
+                              <div className="flex space-x-4">
+                                <div className="bg-green-500 rounded-xl px-4 py-2 text-center shadow-lg">
+                                  <div className="text-2xl font-bold">{schedule.practicalSessions?.length || 0}</div>
+                                  <div className="text-xs uppercase">Practical</div>
+                                </div>
+                                <div className="bg-blue-500 rounded-xl px-4 py-2 text-center shadow-lg">
+                                  <div className="text-2xl font-bold">{schedule.theoreticalSessions?.length || 0}</div>
+                                  <div className="text-xs uppercase">Theory</div>
+                                </div>
                               </div>
-                              <div className="text-xs text-gray-500">Theory</div>
+                              
+                              <div className={`transform transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
+                                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
+                                </svg>
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
                       
                       {/* Mobile Layout */}
-                      <div className="md:hidden space-y-3">
-                        <div className="flex items-center justify-between">
+                      <div className="md:hidden bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-black p-6">
+                        <div className="flex items-start justify-between mb-4">
                           <div className="flex items-center space-x-3">
-                            <div className="bg-indigo-100 text-indigo-800 rounded-full w-10 h-10 flex items-center justify-center font-bold">
-                              {schedule.dayNumber}
+                            <div className="bg-white text-indigo-600 rounded-xl w-16 h-16 flex flex-col items-center justify-center font-bold shadow-lg">
+                              <span className="text-xs">Day</span>
+                              <span className="text-2xl">{schedule.dayNumber}</span>
                             </div>
                             <div>
-                              <div className="font-medium text-gray-900">{schedule.title}</div>
-                              <div className="text-sm text-gray-600">
+                              <h3 className="text-xl font-bold mb-1">{schedule.title}</h3>
+                              <div className="text-sm opacity-90">
                                 {new Date(schedule.date).toLocaleDateString('en-US', { 
                                   month: 'short', 
-                                  day: 'numeric' 
+                                  day: 'numeric'
                                 })}
                               </div>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <div className="font-medium text-gray-900">{schedule.startTime}</div>
-                            <div className="text-xs text-gray-500">{schedule.endTime}</div>
+                          <div className={`transform transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
+                            </svg>
                           </div>
                         </div>
                         
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center space-x-2">
-                            <span>👨‍🏫</span>
-                            <span className="text-gray-700">{schedule.instructor?.name || 'TBA'}</span>
+                        <div className="flex items-center justify-between text-sm mb-4">
+                          <span className="flex items-center">
+                            <span className="mr-1">🕐</span>
+                            {schedule.startTime} - {schedule.endTime}
+                          </span>
+                          <span className="flex items-center">
+                            <span className="mr-1">👨‍🏫</span>
+                            {schedule.instructor?.name || 'TBA'}
+                          </span>
+                        </div>
+                        
+                        <div className="flex space-x-3">
+                          <div className="bg-green-500 rounded-lg px-3 py-2 text-center flex-1 shadow-lg">
+                            <div className="text-xl font-bold">{schedule.practicalSessions?.length || 0}</div>
+                            <div className="text-xs">Practical</div>
                           </div>
-                          <div className="flex space-x-3">
-                            <span className="text-green-600 font-medium">
-                              {schedule.practicalSessions?.length || 0} Practical
-                            </span>
-                            <span className="text-blue-600 font-medium">
-                              {schedule.theoreticalSessions?.length || 0} Theory
-                            </span>
+                          <div className="bg-blue-500 rounded-lg px-3 py-2 text-center flex-1 shadow-lg">
+                            <div className="text-xl font-bold">{schedule.theoreticalSessions?.length || 0}</div>
+                            <div className="text-xs">Theory</div>
                           </div>
                         </div>
                       </div>
                     </div>
                     
                     {/* Expandable Details */}
-                    <div className="bg-gray-50 border-t border-gray-200 px-4 py-3">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {/* Topics */}
-                        {schedule.topics && schedule.topics.length > 0 && (
-                          <div className="bg-white p-3 rounded-lg border-2 border-indigo-200 shadow-sm">
-                            <h4 className="font-semibold text-gray-900 mb-2 text-sm flex items-center">
-                              <span className="mr-2">📋</span> Key Topics
+                    {isExpanded && (
+                      <div className="p-6 bg-gradient-to-br from-gray-50 to-blue-50 border-t-4 border-indigo-500">
+                        {schedule.description && (
+                          <div className="mb-6 bg-white rounded-xl p-6 shadow-md border-l-4 border-purple-500">
+                            <h4 className="font-bold text-gray-900 mb-3 text-xl flex items-center">
+                              <span className="text-2xl mr-2">📝</span>
+                              Description
                             </h4>
-                            <ul className="text-xs text-gray-700 space-y-1">
-                              {schedule.topics.slice(0, 4).map((topic, idx) => (
-                                <li key={idx} className="flex items-start">
-                                  <span className="text-indigo-500 mr-1">•</span>
-                                  <span>{topic}</span>
-                                </li>
-                              ))}
-                              {schedule.topics.length > 4 && (
-                                <li className="text-indigo-600 font-medium">
-                                  +{schedule.topics.length - 4} more topics
-                                </li>
-                              )}
-                            </ul>
+                            <p className="text-gray-700 text-base leading-relaxed">{schedule.description}</p>
                           </div>
                         )}
                         
-                        {/* Materials */}
-                        {schedule.materials && schedule.materials.length > 0 && (
-                          <div className="bg-white p-3 rounded-lg border-2 border-green-200 shadow-sm">
-                            <h4 className="font-semibold text-gray-900 mb-2 text-sm flex items-center">
-                              <span className="mr-2">🛠️</span> Materials
-                            </h4>
-                            <ul className="text-xs text-gray-700 space-y-1">
-                              {schedule.materials.slice(0, 4).map((material, idx) => (
-                                <li key={idx} className="flex items-start">
-                                  <span className="text-green-500 mr-1">•</span>
-                                  <span>{material}</span>
-                                </li>
-                              ))}
-                              {schedule.materials.length > 4 && (
-                                <li className="text-green-600 font-medium">
-                                  +{schedule.materials.length - 4} more items
-                                </li>
-                              )}
-                            </ul>
-                          </div>
-                        )}
-                        
-                        {/* Learning Objectives */}
-                        {schedule.learningObjectives && schedule.learningObjectives.length > 0 && (
-                          <div className="bg-white p-3 rounded-lg border-2 border-purple-200 shadow-sm">
-                            <h4 className="font-semibold text-gray-900 mb-2 text-sm flex items-center">
-                              <span className="mr-2">🎯</span> Learning Goals
-                            </h4>
-                            <ul className="text-xs text-gray-700 space-y-1">
-                              {schedule.learningObjectives.slice(0, 3).map((objective, idx) => (
-                                <li key={idx} className="flex items-start">
-                                  <span className="text-purple-500 mr-1">•</span>
-                                  <span>{objective}</span>
-                                </li>
-                              ))}
-                              {schedule.learningObjectives.length > 3 && (
-                                <li className="text-purple-600 font-medium">
-                                  +{schedule.learningObjectives.length - 3} more goals
-                                </li>
-                              )}
-                            </ul>
-                          </div>
-                        )}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          {/* Topics */}
+                          {schedule.topics && schedule.topics.length > 0 && (
+                            <div className="bg-white rounded-xl shadow-lg border-2 border-indigo-300 overflow-hidden hover:shadow-xl transition-shadow">
+                              <div 
+                                className="bg-gradient-to-r from-indigo-500 to-purple-500 text-black p-4 cursor-pointer flex items-center justify-between"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleSection(topicsKey);
+                                }}
+                              >
+                                <h4 className="font-bold text-lg flex items-center">
+                                  <span className="text-2xl mr-2">📋</span>
+                                  Key Topics ({schedule.topics.length})
+                                </h4>
+                                <svg 
+                                  className={`w-5 h-5 transform transition-transform ${expandedSections[topicsKey] ? 'rotate-180' : ''}`}
+                                  fill="none" 
+                                  stroke="currentColor" 
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                              </div>
+                              <div className="p-4">
+                                <ul className="space-y-2">
+                                  {schedule.topics.slice(0, expandedSections[topicsKey] ? undefined : 3).map((topic, idx) => (
+                                    <li key={idx} className="flex items-start text-gray-700">
+                                      <span className="text-indigo-500 mr-2 font-bold text-lg">✓</span>
+                                      <span className="text-sm">{topic}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                                {schedule.topics.length > 3 && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      toggleSection(topicsKey);
+                                    }}
+                                    className="mt-3 text-indigo-600 hover:text-indigo-800 font-semibold text-sm flex items-center w-full justify-center bg-indigo-50 hover:bg-indigo-100 py-2 rounded-lg transition-colors"
+                                  >
+                                    {expandedSections[topicsKey] ? (
+                                      <>
+                                        <span className="mr-1">Show less</span>
+                                        <svg className="w-4 h-4 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <span className="mr-1">Show {schedule.topics.length - 3} more</span>
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                      </>
+                                    )}
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Materials */}
+                          {schedule.materials && schedule.materials.length > 0 && (
+                            <div className="bg-white rounded-xl shadow-lg border-2 border-green-300 overflow-hidden hover:shadow-xl transition-shadow">
+                              <div 
+                                className="bg-gradient-to-r from-green-500 to-emerald-500 text-black p-4 cursor-pointer flex items-center justify-between"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleSection(materialsKey);
+                                }}
+                              >
+                                <h4 className="font-bold text-lg flex items-center">
+                                  <span className="text-2xl mr-2">🛠️</span>
+                                  Materials ({schedule.materials.length})
+                                </h4>
+                                <svg 
+                                  className={`w-5 h-5 transform transition-transform ${expandedSections[materialsKey] ? 'rotate-180' : ''}`}
+                                  fill="none" 
+                                  stroke="currentColor" 
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                              </div>
+                              <div className="p-4">
+                                <ul className="space-y-2">
+                                  {schedule.materials.slice(0, expandedSections[materialsKey] ? undefined : 3).map((material, idx) => (
+                                    <li key={idx} className="flex items-start text-gray-700">
+                                      <span className="text-green-500 mr-2 font-bold text-lg">✓</span>
+                                      <span className="text-sm">{material}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                                {schedule.materials.length > 3 && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      toggleSection(materialsKey);
+                                    }}
+                                    className="mt-3 text-green-600 hover:text-green-800 font-semibold text-sm flex items-center w-full justify-center bg-green-50 hover:bg-green-100 py-2 rounded-lg transition-colors"
+                                  >
+                                    {expandedSections[materialsKey] ? (
+                                      <>
+                                        <span className="mr-1">Show less</span>
+                                        <svg className="w-4 h-4 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <span className="mr-1">Show {schedule.materials.length - 3} more</span>
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                      </>
+                                    )}
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Learning Objectives */}
+                          {schedule.learningObjectives && schedule.learningObjectives.length > 0 && (
+                            <div className="bg-white rounded-xl shadow-lg border-2 border-purple-300 overflow-hidden hover:shadow-xl transition-shadow">
+                              <div 
+                                className="bg-gradient-to-r from-purple-500 to-pink-500 text-black p-4 cursor-pointer flex items-center justify-between"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleSection(objectivesKey);
+                                }}
+                              >
+                                <h4 className="font-bold text-lg flex items-center">
+                                  <span className="text-2xl mr-2">🎯</span>
+                                  Learning Goals ({schedule.learningObjectives.length})
+                                </h4>
+                                <svg 
+                                  className={`w-5 h-5 transform transition-transform ${expandedSections[objectivesKey] ? 'rotate-180' : ''}`}
+                                  fill="none" 
+                                  stroke="currentColor" 
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                              </div>
+                              <div className="p-4">
+                                <ul className="space-y-2">
+                                  {schedule.learningObjectives.slice(0, expandedSections[objectivesKey] ? undefined : 3).map((objective, idx) => (
+                                    <li key={idx} className="flex items-start text-gray-700">
+                                      <span className="text-purple-500 mr-2 font-bold text-lg">✓</span>
+                                      <span className="text-sm">{objective}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                                {schedule.learningObjectives.length > 3 && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      toggleSection(objectivesKey);
+                                    }}
+                                    className="mt-3 text-purple-600 hover:text-purple-800 font-semibold text-sm flex items-center w-full justify-center bg-purple-50 hover:bg-purple-100 py-2 rounded-lg transition-colors"
+                                  >
+                                    {expandedSections[objectivesKey] ? (
+                                      <>
+                                        <span className="mr-1">Show less</span>
+                                        <svg className="w-4 h-4 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <span className="mr-1">Show {schedule.learningObjectives.length - 3} more</span>
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                      </>
+                                    )}
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
-                ))}
-              </div>
-              
-              {/* Timetable Footer */}
-              <div className="bg-gray-100 px-6 py-4 border-t border-gray-200">
-                <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-600 space-y-2 md:space-y-0">
-                  <div className="flex items-center space-x-4">
-                    <span className="flex items-center">
-                      <span className="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
-                      Practical Sessions
-                    </span>
-                    <span className="flex items-center">
-                      <span className="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
-                      Theory Sessions
-                    </span>
-                  </div>
-                  <div className="font-medium">
-                    Total Duration: {program.duration} days • {program.dailyHours} daily
-                  </div>
-                </div>
-              </div>
+                );
+              })}
             </div>
           )}
         </div>
 
         {/* Post-Schedule Enroll CTA */}
-        <div className="bg-gradient-to-r from-green-100 to-blue-100 rounded-lg shadow-md p-6 mb-8 border border-green-300">
+        <div className="bg-gradient-to-r from-blue-100 via-purple-100 to-pink-100 rounded-2xl shadow-xl p-8 mb-8 border-2 border-blue-300 hover:shadow-2xl transition-all">
           <div className="text-center">
-            <h3 className="text-2xl font-bold text-gray-900 mb-3">Ready to Transform Your Career?</h3>
-            <p className="text-gray-600 mb-4 max-w-2xl mx-auto">
+            <h3 className="text-3xl font-bold text-gray-900 mb-4 flex items-center justify-center">
+              <span className="text-4xl mr-3">🎓</span>
+              Ready to Transform Your Career?
+            </h3>
+            <p className="text-gray-700 text-lg mb-6 max-w-2xl mx-auto">
               You've reviewed the comprehensive training schedule. Now take the next step in your mushroom cultivation journey with expert guidance and hands-on experience.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
-              <div className="flex items-center gap-2 text-green-600 font-semibold">
-                <span className="text-2xl">💰</span>
-                <span>
-                  Investment: ₹{currentPrice.toLocaleString()}
-                  {earlyBirdValid && (
-                    <span className="ml-2 line-through text-sm opacity-75">
-                      ₹{(program.originalPrice || program.price).toLocaleString()}
-                    </span>
-                  )}
-                </span>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-6">
+              <div className="flex items-center gap-3 bg-white px-6 py-3 rounded-xl shadow-md">
+                <span className="text-3xl">💰</span>
+                <div className="text-left">
+                  <div className="text-xs text-gray-500 uppercase">Investment</div>
+                  <div className="font-bold text-green-600 text-xl">
+                    ₹{currentPrice.toLocaleString()}
+                    {earlyBirdValid && (
+                      <span className="ml-2 line-through text-sm opacity-75 text-gray-500">
+                        ₹{(program.originalPrice || program.price).toLocaleString()}
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-blue-600 font-semibold">
-                <span className="text-2xl">📅</span>
-                <span>Duration: {program?.duration} Days</span>
+              <div className="flex items-center gap-3 bg-white px-6 py-3 rounded-xl shadow-md">
+                <span className="text-3xl">📅</span>
+                <div className="text-left">
+                  <div className="text-xs text-gray-500 uppercase">Duration</div>
+                  <div className="font-bold text-blue-600 text-xl">{program?.duration} Days</div>
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-purple-600 font-semibold">
-                <span className="text-2xl">🎯</span>
-                <span>Expert-Led Training</span>
+              <div className="flex items-center gap-3 bg-white px-6 py-3 rounded-xl shadow-md">
+                <span className="text-3xl">🎯</span>
+                <div className="text-left">
+                  <div className="text-xs text-gray-500 uppercase">Training</div>
+                  <div className="font-bold text-purple-600 text-xl">Expert-Led</div>
+                </div>
               </div>
             </div>
-            <button
+<button
               onClick={handleRegisterClick}
               disabled={schedules.length === 0}
-              className={`px-10 py-4 text-xl font-bold rounded-lg transition-all duration-300 shadow-lg ${
+              className={`px-8 py-3 text-lg font-bold rounded-lg transition-all duration-300 whitespace-nowrap ${
                 schedules.length === 0
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-blue hover:bg-blue-dark text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
               }`}
             >
-              {schedules.length === 0 ? "Schedule Not Available" : "🚀 Enroll Now - Start Your Journey"}
+              {schedules.length === 0 ? "Schedule Not Available" : "🚀 🚀 Enroll Now - Start Your Journey"}
             </button>
           </div>
         </div>
 
-        {/* Registration CTA */}
+        {/* Back Link */}
         <div className="text-center">
-          <p className="mt-4 text-gray-600">
-            <Link href="/training" className="text-blue-600 hover:text-blue-800 underline">
+          <p className="mt-4 text-gray-600 text-lg">
+            <Link href="/training" className="text-blue-600 hover:text-blue-800 underline font-semibold">
               ← Back to All Training Programs
             </Link>
           </p>
         </div>
       </div>
 
-      {/* Registration Modal */}
+      {/* Modals */}
       {showRegistrationModal && (
         <RegistrationModal
           program={program}
@@ -538,7 +683,6 @@ const earlyBirdValid = isEarlyBirdValid();
         />
       )}
 
-      {/* Payment Modal */}
       {showPaymentModal && pendingRegistration && (
         <PaymentModal
           registration={pendingRegistration}
