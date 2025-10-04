@@ -209,7 +209,7 @@ export async function POST(request: NextRequest) {
               excerpt,
               img,
               sourceUrl: link,
-              source: 'manual', // Add this line
+              source: 'scraped', // Add this line
               published: true,
               createdAt: pubDate ? new Date(pubDate) : new Date(),
             }
