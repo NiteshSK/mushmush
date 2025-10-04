@@ -3,4 +3,5 @@ export type NewsItem = {
   views: number;
   title: string;
   img: string;
+  sourceUrl: string;
 };

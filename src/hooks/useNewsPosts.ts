@@ -7,6 +7,7 @@ export interface NewsPost {
   content: string
   excerpt?: string
   img?: string
+  sourceUrl?: string
   views: number
   published: boolean
   createdAt: string

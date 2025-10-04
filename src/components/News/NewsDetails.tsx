@@ -70,7 +70,7 @@ const NewsDetails = ({ slug }: NewsDetailsProps) => {
               <div className="blog-details-content">
                 <div className="rounded-[10px] overflow-hidden mb-7.5">
                   <Image
-                    className="rounded-[10px] w-full h-auto"
+                    className="rounded-[10px] w-full max-h-96 object-cover"
                     src={(() => {
                       let imgSrc = typeof blogPost.img === "string" && blogPost.img.trim() ? blogPost.img : "/images/blog/oyster-blog-01.png";
                       if (imgSrc.startsWith('public/')) {
@@ -81,8 +81,9 @@ const NewsDetails = ({ slug }: NewsDetailsProps) => {
                       return imgSrc;
                     })()}
                     alt={blogPost.title}
-                    width={500}
-                    height={200}
+                    width={800}
+                    height={400}
+                    priority={false}
                   />
                 </div>
                 <div>

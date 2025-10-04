@@ -1,24 +1,46 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
 import NewsItem from "./NewsItem";
 import { useNewsPosts } from "@/hooks/useNewsPosts";
 
 const NewsGrid = () => {
-  // --- STATE MANAGEMENT FOR PAGINATION ---
   const [currentPage, setCurrentPage] = useState(1);
-  const newsPerPage = 6; // You can change this number
+  const newsPerPage = 6;
 
-  // --- FETCH DYNAMIC NEWS DATA ---
   const { data, loading, error } = useNewsPosts(currentPage, newsPerPage, true);
 
-  // --- PAGINATION LOGIC ---
+  // Trigger scraping check on mount - API handles cooldown
+  useEffect(() => {
+    const triggerScraping = async () => {
+      try {
+        console.log('🔍 Checking if news scraping is needed...');
+        
+        const response = await fetch('/api/admin/scrape-news/trigger', {
+          method: 'POST'
+        });
+        
+        const result = await response.json();
+        console.log('Scraping check result:', result);
+        
+        if (result.shouldScrape) {
+          console.log('✅ News scraping initiated');
+        } else {
+          console.log(`ℹ️ ${result.message} - ${result.hoursRemaining || 0} hours remaining`);
+        }
+      } catch (error) {
+        console.error('Failed to check scraping:', error);
+      }
+    };
+
+    triggerScraping();
+  }, []); // Runs on every mount, but API prevents duplicates
+
   const totalPages = data?.pagination?.pages || 1;
 
-  // --- HANDLER FUNCTIONS ---
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
-    window.scrollTo(0, 0); // Scroll to top on page change
+    window.scrollTo(0, 0);
   };
 
   const handlePrevPage = () => {
@@ -35,10 +57,8 @@ const NewsGrid = () => {
     }
   };
 
-  // Generate page numbers for the pagination control
   const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
 
-  // Format date for display
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -47,7 +67,6 @@ const NewsGrid = () => {
     });
   };
 
-  // Loading state
   if (loading) {
     return (
       <>
@@ -63,7 +82,6 @@ const NewsGrid = () => {
     );
   }
 
-  // Error state
   if (error) {
     return (
       <>
@@ -85,7 +103,6 @@ const NewsGrid = () => {
       <Breadcrumb title={"News"} pages={["news"]} />
       <section className="overflow-hidden py-20 bg-gray-2">
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
-          {/* --- NEWS HEADER --- */}
           <div className="text-center mb-10">
             <h1 className="font-bold text-dark text-3xl sm:text-4xl xl:text-[45px] xl:leading-[55px] mb-4">
               Latest News
@@ -95,9 +112,7 @@ const NewsGrid = () => {
             </p>
           </div>
 
-          {/* --- NEWS GRID --- */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-7.5">
-            {/* --- DISPLAY CURRENT PAGE'S NEWS --- */}
             {data?.news?.map((article) => (
               <NewsItem
                 key={article.id}
@@ -108,17 +123,16 @@ const NewsGrid = () => {
                   img:
                     typeof article.img === "string" && article.img.trim()
                       ? article.img
-                      : "/images/blog/oyster-blog-01.png"
+                      : "/images/blog/oyster-blog-01.png",
+                  sourceUrl: article.sourceUrl
                 }}
                 slug={article.slug}
               />
             ))}
           </div>
 
-          {/* --- PAGINATION --- */}
           {totalPages > 1 && (
             <div className="flex justify-center items-center gap-2 mt-12">
-              {/* Previous Button */}
               <button
                 onClick={handlePrevPage}
                 disabled={currentPage === 1}
@@ -131,7 +145,6 @@ const NewsGrid = () => {
                 Previous
               </button>
 
-              {/* Page Numbers */}
               {pageNumbers.map((number) => (
                 <button
                   key={number}
@@ -146,7 +159,6 @@ const NewsGrid = () => {
                 </button>
               ))}
 
-              {/* Next Button */}
               <button
                 onClick={handleNextPage}
                 disabled={currentPage === totalPages}

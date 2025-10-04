@@ -8,20 +8,59 @@ const NewsItem = ({ news, slug }: { news: NewsItemType; slug: string }) => {
   
   // Ensure the path starts with / for Next.js Image component
   if (imgSrc.startsWith('public/')) {
-    imgSrc = '/' + imgSrc.substring(7); // Remove 'public/' and add leading '/'
+    imgSrc = '/' + imgSrc.substring(7);
   } else if (!imgSrc.startsWith('/') && !imgSrc.startsWith('http')) {
-    imgSrc = '/' + imgSrc; // Add leading '/' if missing
+    imgSrc = '/' + imgSrc;
   }
+
+  // Use sourceUrl if available, otherwise use detail page
+  const readMoreLink = news.sourceUrl || `/news/${slug}`;
+  const isExternalLink = news.sourceUrl && news.sourceUrl.startsWith('http');
+
+  // Handle click for external links - increment view count
+const handleExternalLinkClick = async (e: React.MouseEvent) => {
+  if (isExternalLink) {
+    // Check if already viewed in this session
+    const viewedArticles = sessionStorage.getItem('viewedNewsArticles')
+    const viewedList = viewedArticles ? JSON.parse(viewedArticles) : []
+    const hasViewed = viewedList.includes(slug)
+    
+    if (!hasViewed) {
+      // Increment view count
+      try {
+        await fetch(`/api/news/${slug}/increment-view`, {
+          method: 'POST',
+        });
+        
+        // Mark as viewed
+        viewedList.push(slug)
+        sessionStorage.setItem('viewedNewsArticles', JSON.stringify(viewedList))
+        console.log('View counted for external article:', slug)
+      } catch (error) {
+        console.error('Failed to increment view:', error);
+      }
+    } else {
+      console.log('Already viewed in this session, not incrementing')
+    }
+  }
+};
   
   return (
     <div className="shadow-1 bg-white rounded-xl px-4 sm:px-5 pt-5 pb-4">
-      <Link href={`/news/${slug}`} className="rounded-md overflow-hidden">
+      <Link 
+        href={readMoreLink} 
+        className="rounded-md overflow-hidden block" 
+        target={isExternalLink ? "_blank" : undefined} 
+        rel={isExternalLink ? "noopener noreferrer" : undefined}
+        onClick={handleExternalLinkClick}
+      >
         <Image
           src={imgSrc}
           alt="news"
-          className="rounded-md w-full"
-          width={330}
-          height={210}
+          className="rounded-md w-full h-48 object-cover"
+          width={400}
+          height={250}
+          priority={false}
         />
       </Link>
 
@@ -34,7 +73,6 @@ const NewsItem = ({ news, slug }: { news: NewsItemType; slug: string }) => {
             {news.date}
           </a>
 
-          {/* <!-- divider --> */}
           <span className="block w-px h-4 bg-gray-4"></span>
 
           <a
@@ -46,14 +84,24 @@ const NewsItem = ({ news, slug }: { news: NewsItemType; slug: string }) => {
         </span>
 
         <h2 className="font-medium text-dark text-lg sm:text-xl ease-out duration-200 mb-4 hover:text-blue">
-          <Link href={`/news/${slug}`}>{news.title}</Link>
+          <Link 
+            href={readMoreLink} 
+            target={isExternalLink ? "_blank" : undefined} 
+            rel={isExternalLink ? "noopener noreferrer" : undefined}
+            onClick={handleExternalLinkClick}
+          >
+            {news.title}
+          </Link>
         </h2>
 
         <Link
-          href={`/news/${slug}`}
+          href={readMoreLink}
+          target={isExternalLink ? "_blank" : undefined}
+          rel={isExternalLink ? "noopener noreferrer" : undefined}
           className="text-custom-sm inline-flex items-center gap-2 py-2 ease-out duration-200 hover:text-blue"
+          onClick={handleExternalLinkClick}
         >
-          Read More
+          {isExternalLink ? "Read Full Article" : "Read More"}
           <svg
             className="fill-current"
             width="18"

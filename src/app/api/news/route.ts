@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
           slug: true,
           excerpt: true,
           img: true,
+          sourceUrl: true, // Add this line
           views: true,
           createdAt: true,
           tags: {

@@ -45,7 +45,10 @@
     "test:api-direct": "tsx test-api-direct.ts",
     "verify:early-bird-pricing": "tsx scripts/verify-early-bird-pricing.ts",
     "test:admin-early-bird": "tsx scripts/test-admin-early-bird.ts",
-    "resolve:instructorid-migration": "psql \"$DATABASE_URL\" -f scripts/resolve-instructorid-migration.sql"
+    "resolve:instructorid-migration": "psql \"$DATABASE_URL\" -f scripts/resolve-instructorid-migration.sql",
+    "scrape:mushroom-news": "tsx scripts/scrape-mushroom-news.ts",
+    "scrape:mushroom-news:debug": "tsx scripts/scrape-mushroom-news.ts --debug"
+
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",
@@ -74,12 +77,16 @@
     "swiper": "^10.2.0",
     "tailwindcss": "3.3.3",
     "tsx": "^4.20.5",
-    "zod": "^4.1.5"
+    "zod": "^4.1.5",
+    "axios": "^1.4.1",
+    "cheerio": "^1.0.0-rc.10",
+    "node-cron": "^3.0.1"
   },
   "devDependencies": {
     "@types/node": "20.6.2",
     "@types/react": "18.3.1",
     "@types/react-dom": "18.3.1",
+    "axios": "^1.5.1",
     "eslint": "8.49.0",
     "eslint-config-next": "15.2.3",
     "typescript": "5.2.2"
