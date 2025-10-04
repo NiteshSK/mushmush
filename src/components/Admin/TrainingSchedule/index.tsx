@@ -147,28 +147,54 @@ const TrainingScheduleManagement: React.FC<TrainingScheduleManagementProps> = ({
     }
   };
 
-  const handleEdit = (schedule: TrainingSchedule) => {
-    setEditingSchedule(schedule);
-    setFormData({
-      dayNumber: schedule.dayNumber.toString(),
-      date: new Date(schedule.date).toISOString().split('T')[0],
-      title: schedule.title,
-      description: schedule.description,
-      topics: schedule.topics.join(", "),
-      practicalSessions: schedule.practicalSessions.map(s => 
-        `${s.title}|${s.description || ""}|${s.duration || ""}`
-      ).join("; "),
-      theoreticalSessions: schedule.theoreticalSessions.map(s => 
-        `${s.title}|${s.description || ""}|${s.duration || ""}`
-      ).join("; "),
-      learningObjectives: schedule.learningObjectives.join(", "),
-      materials: schedule.materials.join(", "),
-      instructorId: schedule.instructorId || null,
-      startTime: schedule.startTime,
-      endTime: schedule.endTime,
-    });
-    setShowCreateModal(true);
-  };
+// Helper functions to safely convert values to arrays
+const toArray = (value: any): any[] => {
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+};
+
+const toStringArray = (value: any): string[] => {
+  const arr = toArray(value);
+  return arr.filter(item => typeof item === 'string');
+};
+
+const handleEdit = (schedule: TrainingSchedule) => {
+  // Safely convert all array fields
+  const topics = toStringArray(schedule.topics);
+  const practicalSessions = toArray(schedule.practicalSessions);
+  const theoreticalSessions = toArray(schedule.theoreticalSessions);
+  const learningObjectives = toStringArray(schedule.learningObjectives);
+  const materials = toStringArray(schedule.materials);
+
+  setEditingSchedule(schedule);
+  setFormData({
+    dayNumber: schedule.dayNumber.toString(),
+    date: new Date(schedule.date).toISOString().split('T')[0],
+    title: schedule.title,
+    description: schedule.description,
+    topics: topics.join(", "),
+    practicalSessions: practicalSessions.map(s => 
+      `${s.title}|${s.description || ""}|${s.duration || ""}`
+    ).join("; "),
+    theoreticalSessions: theoreticalSessions.map(s => 
+      `${s.title}|${s.description || ""}|${s.duration || ""}`
+    ).join("; "),
+    learningObjectives: learningObjectives.join(", "),
+    materials: materials.join(", "),
+    instructorId: schedule.instructorId || null,
+    startTime: schedule.startTime,
+    endTime: schedule.endTime,
+  });
+  setShowCreateModal(true);
+};
 
   const handleDelete = async (scheduleId: number) => {
     if (!confirm("Are you sure you want to delete this schedule?")) {
