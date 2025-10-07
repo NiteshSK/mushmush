@@ -178,11 +178,11 @@ const AboutUs = () => {
             <h3 className="font-bold text-2xl text-dark mb-6 text-center">Our Premium Varieties</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
               {[
-                { name: "Oyster Mushrooms", image: "/images/aboutus/oyster_about_us.png" },
-                { name: "Shiitake", image: "/images/aboutus/shitake_about_us.png" },
-                { name: "Ganoderma (Reishi)", image: "/images/aboutus/ganoderma_about_us.png" },
-                { name: "Button", image: "/images/aboutus/button_about_us.png" },
-                { name: "King Oyster", image: "/images/aboutus/king_oyster_about_us.png" }
+                { name: "Oyster Mushrooms", image: "/images/aboutus/oyster_about_us.png", link: "shop-details/oyster-mushroom" },
+                { name: "Shiitake", image: "/images/aboutus/shitake_about_us.png", link: "/shop-details/shitake" },
+                { name: "Ganoderma (Reishi)", image: "/images/aboutus/ganoderma_about_us.png", link: "/shop-details/ganoderma-lucidum" },
+                { name: "Button", image: "/images/aboutus/button_about_us.png", link: "/shop" },
+                { name: "King Oyster", image: "/images/aboutus/king_oyster_about_us.png", link: "/shop-details/king-oyster-eryngii" }
               ].map((mushroom, index) => (
                 <div key={index} className="text-center">
                   <div className="relative w-full h-16 rounded-lg mb-3 overflow-hidden shadow-md flex items-center justify-center bg-white">
@@ -195,7 +195,16 @@ const AboutUs = () => {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent"></div>
                   </div>
-                  <p className="text-sm font-medium text-gray-700">{mushroom.name}</p>
+                  {mushroom.link ? (
+                    <a 
+                      href={mushroom.link}
+                      className="text-sm font-medium text-gray-700 hover:text-green-600 transition-colors duration-200 underline decoration-dotted decoration-green-600/50 hover:decoration-solid"
+                    >
+                      {mushroom.name}
+                    </a>
+                  ) : (
+                    <p className="text-sm font-medium text-gray-700">{mushroom.name}</p>
+                  )}
                 </div>
               ))}
             </div>
