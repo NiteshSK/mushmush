@@ -185,25 +185,39 @@ const AboutUs = () => {
                 { name: "King Oyster", image: "/images/aboutus/king_oyster_about_us.png", link: "/shop-details/king-oyster-eryngii" }
               ].map((mushroom, index) => (
                 <div key={index} className="text-center">
-                  <div className="relative w-full h-16 rounded-lg mb-3 overflow-hidden shadow-md flex items-center justify-center bg-white">
-                    <Image
-                      src={mushroom.image}
-                      alt={`${mushroom.name} mushroom`}
-                      width={80}
-                      height={60}
-                      className="max-w-full max-h-full object-contain"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent"></div>
-                  </div>
                   {mushroom.link ? (
                     <a 
                       href={mushroom.link}
-                      className="text-sm font-medium text-gray-700 hover:text-green-600 transition-colors duration-200 underline decoration-dotted decoration-green-600/50 hover:decoration-solid"
+                      className="block group cursor-pointer"
                     >
-                      {mushroom.name}
+                      <div className="relative w-full h-16 rounded-lg mb-3 overflow-hidden shadow-md flex items-center justify-center bg-white group-hover:shadow-lg transition-all duration-200 group-hover:scale-105">
+                        <Image
+                          src={mushroom.image}
+                          alt={`${mushroom.name} mushroom`}
+                          width={80}
+                          height={60}
+                          className="max-w-full max-h-full object-contain"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent group-hover:from-green-600/10"></div>
+                      </div>
+                      <span className="text-sm font-medium text-gray-700 group-hover:text-green-600 transition-colors duration-200 underline decoration-dotted decoration-green-600/50 group-hover:decoration-solid">
+                        {mushroom.name}
+                      </span>
                     </a>
                   ) : (
-                    <p className="text-sm font-medium text-gray-700">{mushroom.name}</p>
+                    <div className="block">
+                      <div className="relative w-full h-16 rounded-lg mb-3 overflow-hidden shadow-md flex items-center justify-center bg-white">
+                        <Image
+                          src={mushroom.image}
+                          alt={`${mushroom.name} mushroom`}
+                          width={80}
+                          height={60}
+                          className="max-w-full max-h-full object-contain"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent"></div>
+                      </div>
+                      <p className="text-sm font-medium text-gray-700">{mushroom.name}</p>
+                    </div>
                   )}
                 </div>
               ))}
