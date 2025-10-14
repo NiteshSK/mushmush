@@ -1,8 +1,20 @@
 import React, { useState } from "react";
 import Image from "next/image";
 
-const PaymentMethod = () => {
-  const [payment, setPayment] = useState("bank");
+interface PaymentMethodProps {
+  onPaymentChange?: (method: string) => void;
+}
+
+const PaymentMethod = ({ onPaymentChange }: PaymentMethodProps) => {
+  const [payment, setPayment] = useState("cash");
+  
+  const handlePaymentChange = (method: string) => {
+    setPayment(method);
+    if (onPaymentChange) {
+      onPaymentChange(method);
+    }
+  };
+  
   return (
     <div className="bg-white shadow-1 rounded-[10px] mt-7.5">
       <div className="border-b border-gray-3 py-5 px-4 sm:px-8.5">
@@ -21,7 +33,7 @@ const PaymentMethod = () => {
                 name="bank"
                 id="bank"
                 className="sr-only"
-                onChange={() => setPayment("bank")}
+                onChange={() => handlePaymentChange("bank")}
               />
               <div
                 className={`flex h-4 w-4 items-center justify-center rounded-full ${
@@ -61,7 +73,7 @@ const PaymentMethod = () => {
                 name="cash"
                 id="cash"
                 className="sr-only"
-                onChange={() => setPayment("cash")}
+                onChange={() => handlePaymentChange("cash")}
               />
               <div
                 className={`flex h-4 w-4 items-center justify-center rounded-full ${

@@ -65,8 +65,9 @@ export default function OrdersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    
+    <div className="min-h-screen bg-gray-50 py-50">
+      <div className="max-w-7xl mx-auto px-50 sm:px-10 lg:px-10">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">My Orders</h1>
@@ -113,10 +114,13 @@ export default function OrdersPage() {
                         ₹{order.total.toFixed(2)}
                       </p>
                       <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                        order.status === 'DELIVERED' ? 'bg-green-100 text-green-800' :
-                        order.status === 'SHIPPED' ? 'bg-blue-100 text-blue-800' :
-                        order.status === 'PROCESSING' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-gray-100 text-gray-800'
+                        order.status === 'DELIVERED' ? 'bg-green-light-6 text-green-dark' :
+                        order.status === 'SHIPPED' ? 'bg-blue-light-4 text-blue' :
+                        order.status === 'PROCESSING' ? 'bg-yellow-light-2 text-yellow-dark-2' :
+                        order.status === 'CONFIRMED' ? 'bg-blue-light-5 text-blue-dark' :
+                        order.status === 'PENDING' ? 'bg-gray-2 text-gray-7' :
+                        order.status === 'CANCELLED' ? 'bg-red-light-6 text-red-dark' :
+                        'bg-gray-2 text-gray-7'
                       }`}>
                         {order.status}
                       </span>

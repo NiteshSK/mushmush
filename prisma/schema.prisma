@@ -9,26 +9,27 @@ datasource db {
 }
 
 model User {
-  id               String           @id @default(cuid())
-  email            String           @unique
-  name             String?
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
-  address          String?
-  emailVerified    DateTime?
-  image            String?
-  phone            String?
-  role             UserRole         @default(CUSTOMER)
-  password         String?
-  resetToken       String?
-  resetTokenExpiry DateTime?
-  accounts         Account[]
-  orders           Order[]
-  recentlyViewed   RecentlyViewed[]
-  reviews          Review[]
-  sessions         Session[]
-  wishlist         WishlistItem[]
+  id                    String                 @id @default(cuid())
+  email                 String                 @unique
+  name                  String?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  emailVerified         DateTime?
+  image                 String?
+  phone                 String?
+  role                  UserRole               @default(CUSTOMER)
+  password              String?
+  resetToken            String?
+  resetTokenExpiry      DateTime?
+  accounts              Account[]
+  addresses             addresses[]
+  orders                Order[]
+  recentlyViewed        RecentlyViewed[]
+  reviews               Review[]
+  sessions              Session[]
   trainingRegistrations TrainingRegistration[]
+  upi_payments          upi_payments[]
+  wishlist              WishlistItem[]
 
   @@map("users")
 }
@@ -72,45 +73,45 @@ model VerificationToken {
 }
 
 model Category {
-  id          Int               @id @default(autoincrement())
-  title       String            @unique
-  slug        String            @unique
-  img         String
-  path        String
-  description String?
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  products    ProductCategory[]
+  id                 Int                 @id @default(autoincrement())
+  title              String              @unique
+  slug               String              @unique
+  img                String
+  path               String
+  description        String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  products           ProductCategory[]
   promotionalBanners PromotionalBanner[]
 
   @@map("categories")
 }
 
 model Product {
-  id               Int                   @id @default(autoincrement())
-  title            String
-  slug             String                @unique
-  description      String
-  price            Float
-  measurementValue Int
-  measurementType  String
-  inStock          Boolean               @default(true)
-  featured         Boolean               @default(false)
-  createdAt        DateTime              @default(now())
-  updatedAt        DateTime              @updatedAt
-  imgs             Json
-  benefits         Json?
-  specifications   Json
-  howToConsume     Json
-  additionalInfo   Json
-  orderItems       OrderItem[]
-  categories       ProductCategory[]
-  recentlyViewed   RecentlyViewed[]
-  reviews          Review[]
-  wishlistItems    WishlistItem[]
-  discounts        ProductDiscount[]
-  notifications    ProductNotification[]
+  id                 Int                   @id @default(autoincrement())
+  title              String
+  slug               String                @unique
+  description        String
+  price              Float
+  measurementValue   Int
+  measurementType    String
+  inStock            Boolean               @default(true)
+  featured           Boolean               @default(false)
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+  imgs               Json
+  specifications     Json
+  howToConsume       Json
+  additionalInfo     Json
+  benefits           Json?
+  orderItems         OrderItem[]
+  categories         ProductCategory[]
+  discounts          ProductDiscount[]
+  notifications      ProductNotification[]
   promotionalBanners PromotionalBanner[]
+  recentlyViewed     RecentlyViewed[]
+  reviews            Review[]
+  wishlistItems      WishlistItem[]
 
   @@map("products")
 }
@@ -141,22 +142,27 @@ model Review {
 }
 
 model Order {
-  id              String      @id @default(cuid())
-  orderNumber     String      @unique
-  status          OrderStatus @default(PENDING)
-  total           Float
-  subtotal        Float
-  tax             Float       @default(0)
-  shipping        Float       @default(0)
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  customerName    String
-  customerEmail   String
-  customerPhone   String?
-  shippingAddress Json
-  userId          String?
-  orderItems      OrderItem[]
-  user            User?       @relation(fields: [userId], references: [id])
+  id                                            String         @id @default(cuid())
+  orderNumber                                   String         @unique
+  status                                        OrderStatus    @default(PENDING)
+  total                                         Float
+  subtotal                                      Float
+  tax                                           Float          @default(0)
+  shipping                                      Float          @default(0)
+  createdAt                                     DateTime       @default(now())
+  updatedAt                                     DateTime       @updatedAt
+  customerName                                  String
+  customerEmail                                 String
+  customerPhone                                 String?
+  userId                                        String?
+  billingAddressId                              String?
+  shippingAddressId                             String?
+  invoice                                       Invoice?
+  orderItems                                    OrderItem[]
+  addresses_orders_billingAddressIdToaddresses  addresses?     @relation("orders_billingAddressIdToaddresses", fields: [billingAddressId], references: [id])
+  addresses_orders_shippingAddressIdToaddresses addresses?     @relation("orders_shippingAddressIdToaddresses", fields: [shippingAddressId], references: [id])
+  user                                          User?          @relation(fields: [userId], references: [id])
+  upi_payments                                  upi_payments[]
 
   @@map("orders")
 }
@@ -211,7 +217,6 @@ model BlogPost {
   updatedAt       DateTime @updatedAt
   metaTitle       String?
   metaDescription String?
-
   tags            Tag[]    @relation("BlogPostTags")
 
   @@map("blog_posts")
@@ -224,15 +229,14 @@ model News {
   content         String
   excerpt         String?
   img             String
-  sourceUrl       String?
-  source          String   @default("manual") // "manual" or "scraped"
   views           Int      @default(0)
   published       Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   metaTitle       String?
   metaDescription String?
-
+  sourceUrl       String?
+  source          String   @default("manual")
   tags            Tag[]    @relation("NewsTags")
 
   @@map("news")
@@ -264,18 +268,188 @@ model ProductNotification {
 }
 
 model ProductDiscount {
-  id          Int      @id @default(autoincrement())
-  productId   Int
-  type        DiscountType
-  value       Float    // Percentage (0-100) or fixed amount
-  startDate   DateTime @default(now())
-  endDate     DateTime?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  id        Int          @id @default(autoincrement())
+  productId Int
+  type      DiscountType
+  value     Float
+  startDate DateTime     @default(now())
+  endDate   DateTime?
+  isActive  Boolean      @default(true)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  product   Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@map("product_discounts")
+}
+
+model PromotionalBanner {
+  id          Int       @id @default(autoincrement())
+  title       String
+  subtitle    String?
+  description String?
+  discount    String?
+  buttonText  String    @default("Buy Now")
+  buttonLink  String?
+  productId   Int?
+  categoryId  Int?
+  imageUrl    String
+  bgColor     String    @default("#F5F5F7")
+  textColor   String    @default("#000000")
+  isActive    Boolean   @default(true)
+  startDate   DateTime  @default(now())
+  endDate     DateTime?
+  priority    Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  category    Category? @relation(fields: [categoryId], references: [id])
+  product     Product?  @relation(fields: [productId], references: [id])
+
+  @@map("promotional_banners")
+}
+
+model TrainingProgram {
+  id                Int                    @id @default(autoincrement())
+  name              String                 @unique
+  slug              String                 @unique
+  description       String
+  price             Float
+  duration          Int
+  dailyHours        String                 @default("5-6 hours")
+  type              TrainingType
+  isActive          Boolean                @default(true)
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+  hasEarlyBirdOffer Boolean                @default(false)
+  earlyBirdPrice    Float?
+  originalPrice     Float?
+  earlyBirdEndDate  DateTime?
+  registrations     TrainingRegistration[]
+  schedules         TrainingSchedule[]
+
+  @@map("training_programs")
+}
+
+model Instructor {
+  id         Int                @id @default(autoincrement())
+  name       String             @unique
+  email      String?            @unique
+  phone      String?
+  bio        String?
+  expertise  String?
+  experience Int?
+  isActive   Boolean            @default(true)
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+  schedules  TrainingSchedule[]
+
+  @@map("instructors")
+}
+
+model TrainingSchedule {
+  id                  Int             @id @default(autoincrement())
+  trainingProgramId   Int
+  dayNumber           Int
+  date                DateTime
+  title               String
+  description         String
+  topics              Json
+  practicalSessions   Json
+  theoreticalSessions Json
+  learningObjectives  Json
+  materials           Json
+  startTime           String
+  endTime             String
+  isActive            Boolean         @default(true)
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  instructorId        Int?
+  instructor          Instructor?     @relation(fields: [instructorId], references: [id])
+  trainingProgram     TrainingProgram @relation(fields: [trainingProgramId], references: [id], onDelete: Cascade)
+
+  @@map("training_schedules")
+}
+
+model TrainingRegistration {
+  id                  String             @id @default(cuid())
+  registrationNumber  String             @unique
+  status              RegistrationStatus @default(PENDING)
+  participantName     String
+  participantEmail    String
+  participantPhone    String
+  participantAddress  Json
+  preferredStartDate  DateTime?
+  specialRequirements String?
+  totalAmount         Float
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  trainingProgramId   Int
+  userId              String?
+  trainingProgram     TrainingProgram    @relation(fields: [trainingProgramId], references: [id], onDelete: Cascade)
+  user                User?              @relation(fields: [userId], references: [id])
+  upi_payments        upi_payments[]
+
+  @@map("training_registrations")
+}
+
+model Invoice {
+  id              String        @id @default(cuid())
+  invoiceNumber   String        @unique
+  status          InvoiceStatus @default(DRAFT)
+  issuedAt        DateTime      @default(now())
+  dueAt           DateTime?
+  pdfPath         String?
+  customerName    String?
+  customerEmail   String?
+  customerPhone   String?
+  billingAddress  Json?
+  shippingAddress Json?
+  subtotal        Float?
+  tax             Float?
+  shipping        Float?
+  total           Float?
+  invoiceItems    Json?
+  generatedAt     DateTime?
+  emailSent       Boolean       @default(false)
+  emailSentAt     DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  orderId         String        @unique
+  order           Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("invoices")
+}
+
+model addresses {
+  id                                         String      @id
+  street                                     String
+  city                                       String
+  state                                      String
+  zip                                        String
+  country                                    String
+  type                                       AddressType
+  isDefault                                  Boolean     @default(false)
+  createdAt                                  DateTime    @default(now())
+  updatedAt                                  DateTime
+  userId                                     String
+  users                                      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders_orders_billingAddressIdToaddresses  Order[]     @relation("orders_billingAddressIdToaddresses")
+  orders_orders_shippingAddressIdToaddresses Order[]     @relation("orders_shippingAddressIdToaddresses")
+}
+
+model upi_payments {
+  id                     String                @id
+  amount                 Float
+  status                 UpiPaymentStatus      @default(PENDING)
+  resourceType           String
+  transactionId          String?               @unique
+  createdAt              DateTime              @default(now())
+  updatedAt              DateTime
+  orderId                String?
+  trainingRegistrationId String?
+  verifiedByUserId       String?
+  orders                 Order?                @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  training_registrations TrainingRegistration? @relation(fields: [trainingRegistrationId], references: [id], onDelete: Cascade)
+  users                  User?                 @relation(fields: [verifiedByUserId], references: [id])
 }
 
 enum UserRole {
@@ -286,122 +460,6 @@ enum UserRole {
 enum DiscountType {
   PERCENTAGE
   FIXED_AMOUNT
-}
-
-model PromotionalBanner {
-  id          Int      @id @default(autoincrement())
-  title       String
-  subtitle    String?
-  description String?
-  discount    String?  // e.g., "UP TO 10% OFF", "50% OFF", etc.
-  buttonText  String   @default("Buy Now")
-  buttonLink  String?  // Can be product URL, category URL, or external link
-  productId   Int?     // Optional: link to specific product
-  categoryId  Int?     // Optional: link to specific category
-  imageUrl    String
-  bgColor     String   @default("#F5F5F7")
-  textColor   String   @default("#000000")
-  isActive    Boolean  @default(true)
-  startDate   DateTime @default(now())
-  endDate     DateTime?
-  priority    Int      @default(0) // Higher number = higher priority
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  product     Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
-  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-
-  @@map("promotional_banners")
-}
-
-model TrainingProgram {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
-  slug        String   @unique
-  description String
-  price       Float
-  duration    Int      // Duration in days
-  dailyHours  String   @default("5-6 hours")
-  type        TrainingType
-  isActive    Boolean  @default(true)
-  
-  // Early Bird Pricing Fields
-  hasEarlyBirdOffer Boolean  @default(false)
-  earlyBirdPrice    Float?
-  originalPrice     Float?   // For displaying strikethrough price
-  earlyBirdEndDate  DateTime? // When the Early Bird offer ends
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  registrations TrainingRegistration[]
-  schedules    TrainingSchedule[]
-
-  @@map("training_programs")
-}
-
-model Instructor {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
-  email       String?  @unique
-  phone       String?
-  bio         String?
-  expertise   String?  // Areas of expertise
-  experience  Int?     // Years of experience
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  schedules   TrainingSchedule[]
-
-  @@map("instructors")
-}
-
-model TrainingSchedule {
-  id                Int      @id @default(autoincrement())
-  trainingProgramId Int
-  dayNumber         Int     // Day 1, 2, 3, etc.
-  date              DateTime // Specific date for this day
-  title             String   // Title for the day's content
-  description       String   // Detailed description of what will be covered
-  topics            Json     // Array of topics to be covered
-  practicalSessions Json     // Array of practical sessions with details
-  theoreticalSessions Json   // Array of theoretical sessions with details
-  learningObjectives Json   // What participants will learn
-  materials         Json     // Materials needed for the day
-  instructorId      Int?    // Foreign key to Instructor
-  startTime         String   // Start time (e.g., "09:00")
-  endTime           String   // End time (e.g., "17:00")
-  isActive          Boolean  @default(true)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  trainingProgram   TrainingProgram @relation(fields: [trainingProgramId], references: [id], onDelete: Cascade)
-  instructor        Instructor?      @relation(fields: [instructorId], references: [id], onDelete: SetNull)
-
-  @@map("training_schedules")
-}
-
-model TrainingRegistration {
-  id                String   @id @default(cuid())
-  registrationNumber String  @unique
-  status            RegistrationStatus @default(PENDING)
-  participantName   String
-  participantEmail  String
-  participantPhone  String
-  participantAddress Json
-  preferredStartDate DateTime?
-  specialRequirements String?
-  totalAmount       Float
-  paymentStatus     PaymentStatus @default(PENDING)
-  paymentMethod     String?
-  paymentReference  String?
-  paymentDate       DateTime?
-  upiTransactionId  String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  trainingProgramId Int
-  userId            String?
-  trainingProgram   TrainingProgram @relation(fields: [trainingProgramId], references: [id], onDelete: Cascade)
-  user              User?    @relation(fields: [userId], references: [id])
-
-  @@map("training_registrations")
 }
 
 enum TrainingType {
@@ -429,8 +487,28 @@ enum PaymentStatus {
 
 enum OrderStatus {
   PENDING
+  CONFIRMED
   PROCESSING
   SHIPPED
   DELIVERED
   CANCELLED
+  COMPLETED
+}
+
+enum AddressType {
+  BILLING
+  SHIPPING
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  VOID
+}
+
+enum UpiPaymentStatus {
+  PENDING
+  VERIFIED
+  FAILED
 }

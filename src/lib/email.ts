@@ -579,3 +579,284 @@ export async function sendPaymentConfirmationEmail(data: PaymentEmailData): Prom
 
   await sendTrainingEmail(emailData);
 }
+
+// Order and Invoice Email Templates
+
+export interface OrderInvoiceEmailData {
+  customerName: string;
+  customerEmail: string;
+  orderNumber: string;
+  invoiceNumber: string;
+  invoicePdfUrl: string;
+  orderDate: Date;
+  orderItems: Array<{
+    productTitle: string;
+    quantity: number;
+    price: number;
+    total: number;
+  }>;
+  subtotal: number;
+  tax: number;
+  shipping: number;
+  total: number;
+  shippingAddress: any;
+}
+
+/**
+ * Generate order completion and invoice email HTML
+ */
+export function generateOrderInvoiceEmail(data: OrderInvoiceEmailData): string {
+  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+  const invoiceDownloadUrl = `${baseUrl}${data.invoicePdfUrl}`;
+  
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
+      <!-- Header -->
+      <div style="text-align: center; margin-bottom: 30px; background: linear-gradient(135deg, #2d5016 0%, #4a7c2c 100%); padding: 30px; border-radius: 10px;">
+        <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Order Completed! 🎉</h1>
+        <p style="color: #e8f5e8; font-size: 16px; margin-top: 10px;">Thank you for your purchase</p>
+      </div>
+      
+      <!-- Order Details -->
+      <div style="background: white; padding: 30px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h2 style="color: #2d5016; margin-top: 0; border-bottom: 2px solid #2d5016; padding-bottom: 10px;">Order Details</h2>
+        
+        <p style="color: #333; line-height: 1.6; margin-bottom: 20px;">
+          Dear <strong>${data.customerName}</strong>,
+        </p>
+        
+        <p style="color: #333; line-height: 1.6; margin-bottom: 20px;">
+          Your order has been successfully completed and is ready for delivery! We've attached your invoice for your records.
+        </p>
+        
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+          <tr>
+            <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Order Number:</td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; color: #2d5016; font-weight: bold;">${data.orderNumber}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Invoice Number:</td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; color: #2d5016; font-weight: bold;">${data.invoiceNumber}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Order Date:</td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">${new Date(data.orderDate).toLocaleDateString('en-IN', { 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            })}</td>
+          </tr>
+        </table>
+      </div>
+      
+      <!-- Order Items -->
+      <div style="background: white; padding: 30px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h3 style="color: #2d5016; margin-top: 0; border-bottom: 2px solid #2d5016; padding-bottom: 10px;">Order Items</h3>
+        
+        <table style="width: 100%; border-collapse: collapse; margin: 15px 0;">
+          <thead>
+            <tr style="background-color: #f5f5f5;">
+              <th style="padding: 12px; text-align: left; border-bottom: 2px solid #2d5016; color: #2d5016;">Item</th>
+              <th style="padding: 12px; text-align: center; border-bottom: 2px solid #2d5016; color: #2d5016;">Qty</th>
+              <th style="padding: 12px; text-align: right; border-bottom: 2px solid #2d5016; color: #2d5016;">Price</th>
+              <th style="padding: 12px; text-align: right; border-bottom: 2px solid #2d5016; color: #2d5016;">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.orderItems.map(item => `
+              <tr>
+                <td style="padding: 12px; border-bottom: 1px solid #f0f0f0;">${item.productTitle}</td>
+                <td style="padding: 12px; text-align: center; border-bottom: 1px solid #f0f0f0;">${item.quantity}</td>
+                <td style="padding: 12px; text-align: right; border-bottom: 1px solid #f0f0f0;">₹${item.price.toFixed(2)}</td>
+                <td style="padding: 12px; text-align: right; border-bottom: 1px solid #f0f0f0;">₹${item.total.toFixed(2)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        
+        <!-- Totals -->
+        <table style="width: 100%; margin-top: 20px;">
+          <tr>
+            <td style="padding: 8px 0; text-align: right; color: #555;">Subtotal:</td>
+            <td style="padding: 8px 0; text-align: right; width: 100px; font-weight: bold;">₹${data.subtotal.toFixed(2)}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; text-align: right; color: #555;">Tax:</td>
+            <td style="padding: 8px 0; text-align: right; font-weight: bold;">₹${data.tax.toFixed(2)}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; text-align: right; color: #555;">Shipping:</td>
+            <td style="padding: 8px 0; text-align: right; font-weight: bold;">₹${data.shipping.toFixed(2)}</td>
+          </tr>
+          <tr style="border-top: 2px solid #2d5016;">
+            <td style="padding: 12px 0; text-align: right; color: #2d5016; font-size: 18px; font-weight: bold;">Total:</td>
+            <td style="padding: 12px 0; text-align: right; color: #2d5016; font-size: 18px; font-weight: bold;">₹${data.total.toFixed(2)}</td>
+          </tr>
+        </table>
+      </div>
+      
+      <!-- Shipping Address -->
+      <div style="background: white; padding: 30px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h3 style="color: #2d5016; margin-top: 0; border-bottom: 2px solid #2d5016; padding-bottom: 10px;">Shipping Address</h3>
+        <p style="color: #333; line-height: 1.6; margin: 0;">
+          ${data.shippingAddress.address || ''}<br>
+          ${data.shippingAddress.city || ''}, ${data.shippingAddress.state || ''} ${data.shippingAddress.zipCode || ''}<br>
+          ${data.shippingAddress.country || 'India'}
+        </p>
+      </div>
+      
+      <!-- Download Invoice Button -->
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${invoiceDownloadUrl}" 
+           style="background: #2d5016; color: white; padding: 15px 40px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; font-size: 16px;">
+          📄 Download Invoice
+        </a>
+      </div>
+      
+      <!-- What's Next -->
+      <div style="background: #e8f5e8; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #2d5016;">
+        <h4 style="color: #2d5016; margin-top: 0;">📦 What's Next?</h4>
+        <ul style="color: #2d5016; line-height: 1.8; margin-left: 20px;">
+          <li>Your order is being prepared for shipment</li>
+          <li>You'll receive a tracking number once shipped</li>
+          <li>Estimated delivery: 3-5 business days</li>
+          <li>Keep your invoice for warranty and returns</li>
+        </ul>
+      </div>
+      
+      <!-- Footer -->
+      <div style="border-top: 1px solid #eee; padding-top: 20px; text-align: center;">
+        <p style="color: #666; font-size: 14px; margin: 0;">
+          Need help with your order?
+        </p>
+        <p style="color: #2d5016; font-size: 14px; margin: 5px 0;">
+          📧 <a href="mailto:mushagroprod@gmail.com" style="color: #2d5016; text-decoration: none;">mushagroprod@gmail.com</a><br>
+          📞 <a href="tel:+917618362662" style="color: #2d5016; text-decoration: none;">+91-7618362662</a>
+        </p>
+        <p style="color: #666; font-size: 12px; margin-top: 20px;">
+          &copy; ${new Date().getFullYear()} Mush Agro Products. All rights reserved.
+        </p>
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Send order completion email with invoice
+ */
+export async function sendOrderInvoiceEmail(data: OrderInvoiceEmailData): Promise<void> {
+  try {
+    const emailData: EmailOptions = {
+      to: data.customerEmail,
+      subject: `Order Completed - Invoice #${data.invoiceNumber}`,
+      html: generateOrderInvoiceEmail(data),
+      text: stripHtml(generateOrderInvoiceEmail(data))
+    };
+
+    const result = await sendEmail(emailData);
+    
+    if (result.success) {
+      console.log('✅ Order invoice email sent successfully to:', data.customerEmail);
+    } else {
+      console.error('❌ Order invoice email failed:', result.error);
+    }
+  } catch (error) {
+    console.error('Error sending order invoice email:', error);
+    // Don't throw - email failure shouldn't break the order completion
+  }
+}
+
+// ============================================
+// OTP EMAIL FUNCTIONS
+// ============================================
+
+/**
+ * Generate a 6-digit OTP
+ */
+export function generateOTP(): string {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+/**
+ * Generate OTP email HTML
+ */
+export function generateOTPEmail(otp: string, customerName: string): string {
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
+      <!-- Header -->
+      <div style="text-align: center; margin-bottom: 30px; background: linear-gradient(135deg, #2d5016 0%, #4a7c2c 100%); padding: 30px; border-radius: 10px;">
+        <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Verify Your Order</h1>
+        <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 16px;">MushMush - Fresh Mushrooms</p>
+      </div>
+
+      <!-- Content -->
+      <div style="background: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <p style="font-size: 16px; color: #333; margin-bottom: 20px;">
+          Hello ${customerName},
+        </p>
+
+        <p style="font-size: 16px; color: #333; margin-bottom: 30px;">
+          To complete your order, please use the following One-Time Password (OTP):
+        </p>
+
+        <!-- OTP Box -->
+        <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 2px dashed #2d5016; border-radius: 10px; padding: 30px; text-align: center; margin: 30px 0;">
+          <p style="font-size: 14px; color: #666; margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 1px;">Your OTP Code</p>
+          <p style="font-size: 42px; font-weight: bold; color: #2d5016; margin: 0; letter-spacing: 8px; font-family: 'Courier New', monospace;">
+            ${otp}
+          </p>
+        </div>
+
+        <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; border-radius: 5px; margin: 30px 0;">
+          <p style="margin: 0; color: #856404; font-size: 14px;">
+            ⏰ <strong>Important:</strong> This OTP is valid for <strong>10 minutes</strong> only.
+          </p>
+        </div>
+
+        <p style="font-size: 14px; color: #666; margin-top: 30px;">
+          If you didn't request this OTP, please ignore this email or contact our support team.
+        </p>
+      </div>
+
+      <!-- Footer -->
+      <div style="text-align: center; margin-top: 30px; padding: 20px; color: #666; font-size: 12px;">
+        <p style="margin: 0 0 10px 0;">
+          <strong>MushMush - Fresh Edible and Medicinal Mushrooms</strong>
+        </p>
+        <p style="margin: 0 0 5px 0;">
+          📧 Email: mushagroprod@gmail.com | 📞 Phone: +91-7618362662
+        </p>
+        <p style="margin: 10px 0 0 0; color: #999;">
+          © ${new Date().getFullYear()} MushMush. All rights reserved.
+        </p>
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Send OTP email
+ */
+export async function sendOTPEmail(email: string, otp: string, customerName: string) {
+  try {
+    const emailData: EmailOptions = {
+      to: email,
+      subject: `Your OTP for Order Verification - ${otp}`,
+      html: generateOTPEmail(otp, customerName),
+      text: `Your OTP for order verification is: ${otp}. This OTP is valid for 10 minutes.`
+    };
+
+    const result = await sendEmail(emailData);
+    
+    if (result.success) {
+      console.log('✅ OTP email sent successfully to:', email);
+      return { success: true, messageId: result.messageId };
+    } else {
+      console.error('❌ OTP email failed:', result.error);
+      return { success: false, error: result.error };
+    }
+  } catch (error) {
+    console.error('Error sending OTP email:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
