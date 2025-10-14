@@ -4,10 +4,10 @@ import { sendEmail } from '@/lib/email';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, subject, message } = body;
+    const { name, email, phone, subject, message } = body;
 
     // Validate required fields
-    if (!name || !email || !subject || !message) {
+    if (!name || !email || !phone || !subject || !message) {
       return NextResponse.json(
         { error: 'All fields are required' },
         { status: 400 }
@@ -27,8 +27,8 @@ export async function POST(request: NextRequest) {
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #2d5016; margin: 0;">New Contact Form Submission</h1>
-          <p style="color: #666; font-size: 16px;">MushMush Website Contact Form</p>
+          <h1 style="color: #2d5016; margin: 0;">MushMush Contact Form Submission</h1>
+          <p style="color: #666; font-size: 16px;">Contact Form</p>
         </div>
         
         <div style="background: #f8f9fa; padding: 30px; border-radius: 10px; margin-bottom: 30px;">
@@ -41,6 +41,10 @@ export async function POST(request: NextRequest) {
             <tr>
               <td style="padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold;">Email:</td>
               <td style="padding: 10px; border-bottom: 1px solid #ddd;">${email}</td>
+            </tr>
+            <tr>
+              <td style="padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold;">Phone:</td>
+              <td style="padding: 10px; border-bottom: 1px solid #ddd;">${phone}</td>
             </tr>
             <tr>
               <td style="padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold;">Subject:</td>
@@ -73,6 +77,7 @@ New Contact Form Submission - MushMush Website
 Contact Details:
 Name: ${name}
 Email: ${email}
+Phone: ${phone}
 Subject: ${subject}
 
 Message:
