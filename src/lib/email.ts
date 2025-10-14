@@ -606,8 +606,17 @@ export interface OrderInvoiceEmailData {
  * Generate order completion and invoice email HTML
  */
 export function generateOrderInvoiceEmail(data: OrderInvoiceEmailData): string {
-  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
-  const invoiceDownloadUrl = `${baseUrl}${data.invoicePdfUrl}`;
+  // Check if invoicePdfUrl is already an absolute URL
+  let invoiceDownloadUrl = data.invoicePdfUrl;
+  
+  if (!invoiceDownloadUrl.startsWith('http://') && !invoiceDownloadUrl.startsWith('https://')) {
+    // It's a relative path, prepend the base URL
+    let baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+    if (baseUrl && !baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
+      baseUrl = `https://${baseUrl}`;
+    }
+    invoiceDownloadUrl = `${baseUrl}${data.invoicePdfUrl}`;
+  }
   
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
