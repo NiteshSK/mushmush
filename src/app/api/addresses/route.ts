@@ -8,15 +8,41 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session?.user?.id) {
+    if (!session?.user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       );
     }
 
+    // Get user ID from session or fetch from database
+    let userId = session.user.id;
+    
+    if (!userId && session.user.email) {
+      const user = await prisma.user.findUnique({
+        where: { email: session.user.email },
+        select: { id: true }
+      });
+      
+      if (!user) {
+        return NextResponse.json(
+          { error: 'User not found' },
+          { status: 404 }
+        );
+      }
+      
+      userId = user.id;
+    }
+    
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'Unauthorized - User ID not found' },
+        { status: 401 }
+      );
+    }
+
     const addresses = await prisma.addresses.findMany({
-      where: { userId: session.user.id },
+      where: { userId },
       orderBy: [
         { isDefault: 'desc' }, // Default address first
         { createdAt: 'desc' }
@@ -38,9 +64,35 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session?.user?.id) {
+    if (!session?.user) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Unauthorized - No session found' },
+        { status: 401 }
+      );
+    }
+
+    // Get user ID from session or fetch from database
+    let userId = session.user.id;
+    
+    if (!userId && session.user.email) {
+      const user = await prisma.user.findUnique({
+        where: { email: session.user.email },
+        select: { id: true }
+      });
+      
+      if (!user) {
+        return NextResponse.json(
+          { error: 'User not found' },
+          { status: 404 }
+        );
+      }
+      
+      userId = user.id;
+    }
+    
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'Unauthorized - User ID not found' },
         { status: 401 }
       );
     }
@@ -58,7 +110,7 @@ export async function POST(request: NextRequest) {
 
     // Check if user already has 5 addresses
     const addressCount = await prisma.addresses.count({
-      where: { userId: session.user.id }
+      where: { userId }
     });
 
     if (addressCount >= 5) {
@@ -72,7 +124,7 @@ export async function POST(request: NextRequest) {
     if (isDefault) {
       await prisma.addresses.updateMany({
         where: { 
-          userId: session.user.id,
+          userId,
           isDefault: true
         },
         data: { isDefault: false }
@@ -90,7 +142,7 @@ export async function POST(request: NextRequest) {
         country: country || 'India',
         type: type || 'BOTH',
         isDefault: isDefault || false,
-        userId: session.user.id,
+        userId,
         updatedAt: new Date()
       }
     });
@@ -100,10 +152,18 @@ export async function POST(request: NextRequest) {
       address 
     }, { status: 201 });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating address:', error);
+    console.error('Error details:', {
+      message: error?.message,
+      code: error?.code,
+      meta: error?.meta
+    });
     return NextResponse.json(
-      { error: 'Failed to create address' },
+      { 
+        error: 'Failed to create address',
+        details: error?.message || 'Unknown error'
+      },
       { status: 500 }
     );
   }
