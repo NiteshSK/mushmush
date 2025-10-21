@@ -498,6 +498,7 @@ enum OrderStatus {
 enum AddressType {
   BILLING
   SHIPPING
+  BOTH
 }
 
 enum InvoiceStatus {

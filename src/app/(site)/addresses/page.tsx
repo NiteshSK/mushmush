@@ -209,7 +209,7 @@ export default function AddressesPage() {
             className={`px-6 py-3 rounded-lg font-medium transition-colors ${
               addresses.length >= 5
                 ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-blue-600 text-white hover:bg-blue-700"
+                : "bg-blue text-white hover:bg-blue-dark"
             }`}
           >
             Add New Address
@@ -226,7 +226,7 @@ export default function AddressesPage() {
             </p>
             <button
               onClick={openAddModal}
-              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue hover:bg-blue-dark"
             >
               Add Address
             </button>
