@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { otpStore } from '../send-otp/route';
+import { otpStore } from '@/lib/otp-store';
 
 export async function POST(request: NextRequest) {
   try {

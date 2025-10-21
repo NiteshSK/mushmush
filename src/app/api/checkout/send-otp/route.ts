@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateOTP, sendOTPEmail } from '@/lib/email';
-
-// Store OTPs temporarily (in production, use Redis or database)
-const otpStore = new Map<string, { otp: string; expiresAt: number }>();
+import { otpStore } from '@/lib/otp-store';
 
 export async function POST(request: NextRequest) {
   try {
@@ -59,16 +57,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
-// Cleanup expired OTPs periodically
-setInterval(() => {
-  const now = Date.now();
-  for (const [email, data] of otpStore.entries()) {
-    if (data.expiresAt < now) {
-      otpStore.delete(email);
-    }
-  }
-}, 60000); // Clean up every minute
-
-// Export the OTP store for verification
-export { otpStore };
