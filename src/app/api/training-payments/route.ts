@@ -53,10 +53,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if payment already exists for this registration
-    const existingPayment = await prisma.trainingRegistration.findFirst({
+    const existingPayment = await prisma.upi_payments.findFirst({
       where: {
-        id: registrationId,
-        paymentStatus: { in: ['PROCESSING', 'COMPLETED'] }
+        trainingRegistrationId: registrationId,
+        status: { in: ['PENDING', 'VERIFIED'] }
       }
     });
 
@@ -68,10 +68,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Check for duplicate transaction ID
-    const duplicateTransaction = await prisma.trainingRegistration.findFirst({
+    const duplicateTransaction = await prisma.upi_payments.findFirst({
       where: {
-        upiTransactionId: upiTransactionId,
-        paymentStatus: { in: ['PROCESSING', 'COMPLETED'] }
+        transactionId: upiTransactionId,
+        status: { in: ['PENDING', 'VERIFIED'] }
       }
     });
 
@@ -91,20 +91,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Update registration with payment details - automatically confirm
+    // Create UPI payment record
+    const payment = await prisma.upi_payments.create({
+      data: {
+        id: `upi_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        amount: amount,
+        status: 'VERIFIED', // Automatically verify since we did verification
+        resourceType: 'training_registration',
+        transactionId: upiTransactionId,
+        trainingRegistrationId: registrationId,
+        updatedAt: new Date()
+      }
+    });
+
+    // Update registration status to confirmed
     const updatedRegistration = await prisma.trainingRegistration.update({
       where: { id: registrationId },
       data: {
-        paymentStatus: 'COMPLETED', // Mark as completed since we're doing automatic confirmation
-        paymentMethod: paymentMethod,
-        upiTransactionId: upiTransactionId,
-        paymentReference: upiId || null,
-        paymentDate: new Date(),
-        status: 'CONFIRMED' // Automatically confirm registration when payment is submitted
+        status: 'CONFIRMED'
       },
       include: {
         trainingProgram: true,
-        user: true
+        user: true,
+        upi_payments: true
       }
     });
 
@@ -114,10 +123,10 @@ export async function POST(request: NextRequest) {
       programName: updatedRegistration.trainingProgram.name,
       participantName: updatedRegistration.participantName,
       totalAmount: updatedRegistration.totalAmount,
-      paymentStatus: updatedRegistration.paymentStatus,
-      paymentMethod: updatedRegistration.paymentMethod,
-      upiTransactionId: updatedRegistration.upiTransactionId,
-      paymentDate: updatedRegistration.paymentDate,
+      paymentStatus: payment.status,
+      paymentMethod: paymentMethod,
+      upiTransactionId: payment.transactionId,
+      paymentDate: payment.createdAt,
       participantEmail: updatedRegistration.participantEmail,
       programDuration: updatedRegistration.trainingProgram.duration.toString(),
       programSchedule: updatedRegistration.trainingProgram.dailyHours,
@@ -134,9 +143,9 @@ export async function POST(request: NextRequest) {
       registration: {
         id: updatedRegistration.id,
         registrationNumber: updatedRegistration.registrationNumber,
-        paymentStatus: updatedRegistration.paymentStatus,
-        paymentDate: updatedRegistration.paymentDate,
-        upiTransactionId: updatedRegistration.upiTransactionId,
+        paymentStatus: payment.status,
+        paymentDate: payment.createdAt,
+        upiTransactionId: payment.transactionId,
         status: updatedRegistration.status
       }
     });
@@ -169,10 +178,6 @@ export async function GET(request: NextRequest) {
       select: {
         id: true,
         registrationNumber: true,
-        paymentStatus: true,
-        paymentMethod: true,
-        paymentDate: true,
-        upiTransactionId: true,
         status: true,
         totalAmount: true,
         trainingProgram: {
@@ -180,6 +185,18 @@ export async function GET(request: NextRequest) {
             name: true,
             price: true
           }
+        },
+        upi_payments: {
+          select: {
+            status: true,
+            transactionId: true,
+            createdAt: true,
+            amount: true
+          },
+          orderBy: {
+            createdAt: 'desc'
+          },
+          take: 1
         }
       }
     });
