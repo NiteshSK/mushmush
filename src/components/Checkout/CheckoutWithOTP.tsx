@@ -1,6 +1,6 @@
 // Checkout component with OTP verification
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { selectCartItems, selectTotalPrice } from "@/redux/features/cart-slice";
 import { useRouter } from "next/navigation";
@@ -44,9 +44,32 @@ const CheckoutWithOTP = () => {
   const [checkoutData, setCheckoutData] = useState<any>(null); // Store form data
   const [selectedAddress, setSelectedAddress] = useState<SavedAddress | null>(null);
   const [useNewAddress, setUseNewAddress] = useState(false);
+  const [useShippingAddress, setUseShippingAddress] = useState(false); // Track if using shipping section
+  const [userPhone, setUserPhone] = useState<string>(""); // Store user's phone from database
   
   const shippingFee = 50.00;
   const total = subtotal + shippingFee;
+
+  // Fetch user's phone number from database when logged in
+  useEffect(() => {
+    const fetchUserPhone = async () => {
+      if (session?.user?.email) {
+        try {
+          const response = await fetch(`/api/user/profile?email=${encodeURIComponent(session.user.email)}`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.phone) {
+              setUserPhone(data.phone);
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching user phone:', error);
+        }
+      }
+    };
+    
+    fetchUserPhone();
+  }, [session]);
 
   // Handle address selection from saved addresses
   const handleAddressSelect = (address: SavedAddress | null) => {
@@ -71,10 +94,11 @@ const CheckoutWithOTP = () => {
       console.log(`  ${key}: ${value}`);
     });
     
-    // Try both naming conventions
-    const firstName = formData.get('firstName') || formData.get('billingFirstName');
-    const lastName = formData.get('lastName') || formData.get('billingLastName');
-    const email = (formData.get('email') || formData.get('billingEmail')) as string;
+    // Get contact information - prioritize shipping fields if filled
+    const firstName = formData.get('firstName') as string;
+    const lastName = formData.get('lastName') as string;
+    const email = (formData.get('email') || formData.get('shippingEmail')) as string;
+    const phone = (formData.get('phone') || formData.get('shippingPhone')) as string;
     
     const customerName = `${firstName || ''} ${lastName || ''}`.trim();
     
@@ -82,9 +106,10 @@ const CheckoutWithOTP = () => {
     console.log('👤 Last Name:', lastName);
     console.log('👤 Customer Name:', customerName);
     console.log('📧 Email:', email);
+    console.log('📞 Phone:', phone);
     
     if (!email) {
-      const errorMsg = 'Please enter your email address';
+      const errorMsg = 'Please enter your email address in Contact Information';
       console.error('❌', errorMsg);
       setError(errorMsg);
       toast.error(errorMsg, { duration: 4000 });
@@ -92,7 +117,15 @@ const CheckoutWithOTP = () => {
     }
     
     if (!customerName || customerName === '') {
-      const errorMsg = 'Please enter your first and last name';
+      const errorMsg = 'Please enter your first and last name in Contact Information';
+      console.error('❌', errorMsg);
+      setError(errorMsg);
+      toast.error(errorMsg, { duration: 4000 });
+      return;
+    }
+    
+    if (!phone) {
+      const errorMsg = 'Please enter your phone number in Contact Information';
       console.error('❌', errorMsg);
       setError(errorMsg);
       toast.error(errorMsg, { duration: 4000 });
@@ -102,9 +135,8 @@ const CheckoutWithOTP = () => {
     // If COD, send OTP. Otherwise, proceed with UPI (to be implemented)
     if (paymentMethod === 'cash') {
       let addressData;
-      let phone;
 
-      // Use selected saved address or get from form
+      // Priority: 1. Saved address, 2. Shipping section, 3. Billing section
       if (selectedAddress && !useNewAddress) {
         // Using saved address
         addressData = {
@@ -114,43 +146,50 @@ const CheckoutWithOTP = () => {
           zip: selectedAddress.zip,
           country: selectedAddress.country
         };
-        phone = formData.get('phone') as string;
-        
-        if (!phone) {
-          const errorMsg = 'Please enter your phone number';
-          console.error('❌', errorMsg);
-          setError(errorMsg);
-          toast.error(errorMsg, { duration: 4000 });
-          setLoading(false);
-          return;
-        }
+        console.log('✅ Using saved address');
       } else {
-        // Using new address from form
-        phone = formData.get('phone') as string;
-        const address = formData.get('address') as string;
-        const town = formData.get('town') as string;
-        const state = formData.get('country') as string;
-        const zip = formData.get('zip') as string;
+        // Check if shipping section was filled (Ship to different address)
+        const shippingAddress = formData.get('shippingAddress') as string;
+        const shippingCity = formData.get('shippingCity') as string;
+        const shippingState = formData.get('shippingState') as string;
+        const shippingZip = formData.get('shippingZip') as string;
         
-        // Validate required fields
-        if (!phone || !address || !town || !state) {
-          const errorMsg = 'Please fill in all address fields (Address, City, State, Phone)';
-          console.error('❌', errorMsg);
-          setError(errorMsg);
-          toast.error(errorMsg, { duration: 4000 });
-          setLoading(false);
-          return;
+        if (shippingAddress && shippingCity && shippingState) {
+          // Use shipping address
+          addressData = {
+            street: shippingAddress,
+            city: shippingCity,
+            state: shippingState,
+            zip: shippingZip || '000000',
+            country: 'India'
+          };
+          console.log('✅ Using shipping address from "Ship to different address" section');
+        } else {
+          // Use billing address
+          const address = formData.get('address') as string;
+          const town = formData.get('town') as string;
+          const state = formData.get('country') as string;
+          const zip = formData.get('zip') as string;
+          
+          // Validate required fields
+          if (!address || !town || !state) {
+            const errorMsg = 'Please fill in all address fields (Street Address, City, State) in either Billing Address or "Ship to different address" section';
+            console.error('❌', errorMsg);
+            setError(errorMsg);
+            toast.error(errorMsg, { duration: 4000 });
+            setLoading(false);
+            return;
+          }
+          
+          addressData = {
+            street: address,
+            city: town,
+            state: state,
+            zip: zip || '000000',
+            country: 'India'
+          };
+          console.log('✅ Using billing address');
         }
-        
-        const zipCode = zip || '000000';
-        
-        addressData = {
-          street: address,
-          city: town,
-          state: state,
-          zip: zipCode,
-          country: 'India'
-        };
       }
       
       const storedData = {
@@ -279,6 +318,7 @@ const CheckoutWithOTP = () => {
                         name="firstName"
                         id="firstName"
                         required
+                        defaultValue={session?.user?.name?.split(' ')[0] || ''}
                         placeholder="Your first name"
                         className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                       />
@@ -292,6 +332,7 @@ const CheckoutWithOTP = () => {
                         name="lastName"
                         id="lastName"
                         required
+                        defaultValue={session?.user?.name?.split(' ').slice(1).join(' ') || ''}
                         placeholder="Your last name"
                         className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                       />
@@ -307,6 +348,7 @@ const CheckoutWithOTP = () => {
                       name="email"
                       id="email"
                       required
+                      defaultValue={session?.user?.email || ''}
                       placeholder="your.email@example.com"
                       className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                     />
@@ -321,6 +363,7 @@ const CheckoutWithOTP = () => {
                       name="phone"
                       id="phone"
                       required
+                      defaultValue={userPhone}
                       placeholder="10-digit mobile number"
                       maxLength={10}
                       pattern="[6-9]\d{9}"
