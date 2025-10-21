@@ -54,7 +54,8 @@
     "test:coverage": "jest --coverage",
     "test:unit": "jest --testPathPattern=__tests__/.*\\.test\\.tsx$",
     "test:integration": "jest --testPathPattern=integration",
-    "test:checkout": "jest --testPathPattern=Checkout"
+    "test:checkout": "jest --testPathPattern=Checkout",
+    "fix:order-status-enum": "tsx scripts/fix-order-status-enum.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",
