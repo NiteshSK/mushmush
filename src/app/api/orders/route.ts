@@ -92,6 +92,25 @@ export async function POST(request: NextRequest) {
     
     const total = subtotal + tax + shipping
 
+    // Create shipping address if provided
+    let shippingAddressId: string | undefined;
+    if (shippingAddress && userId) {
+      const address = await prisma.addresses.create({
+        data: {
+          id: `addr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          street: shippingAddress.street || '',
+          city: shippingAddress.city || '',
+          state: shippingAddress.state || '',
+          zip: shippingAddress.zip || shippingAddress.postalCode || '',
+          country: shippingAddress.country || 'India',
+          type: 'SHIPPING',
+          userId,
+          updatedAt: new Date()
+        }
+      });
+      shippingAddressId = address.id;
+    }
+
     const order = await prisma.order.create({
       data: {
         orderNumber,
@@ -99,7 +118,7 @@ export async function POST(request: NextRequest) {
         customerName,
         customerEmail,
         customerPhone,
-        shippingAddress,
+        shippingAddressId,
         subtotal,
         tax,
         shipping,
