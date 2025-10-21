@@ -29,16 +29,29 @@ export async function POST(request: NextRequest) {
       console.log('Webhook received without signature - proceeding in development mode');
     }
 
-    // Find pending registration by amount and UPI ID
+    // Find pending registration by amount with pending payment
     const registration = await prisma.trainingRegistration.findFirst({
       where: {
         totalAmount: amount,
-        paymentStatus: 'PENDING',
-        // Additional matching criteria can be added here
+        status: 'PENDING',
+        upi_payments: {
+          some: {
+            status: 'PENDING'
+          }
+        }
       },
       include: {
         trainingProgram: true,
-        user: true
+        user: true,
+        upi_payments: {
+          where: {
+            status: 'PENDING'
+          },
+          orderBy: {
+            createdAt: 'desc'
+          },
+          take: 1
+        }
       }
     });
 
@@ -52,32 +65,43 @@ export async function POST(request: NextRequest) {
 
     // Update registration based on payment status
     if (status === 'SUCCESS' || status === 'COMPLETED') {
+      const pendingPayment = registration.upi_payments[0];
+      
+      // Update the UPI payment status
+      await prisma.upi_payments.update({
+        where: { id: pendingPayment.id },
+        data: {
+          status: 'VERIFIED',
+          transactionId: transactionId,
+          updatedAt: new Date(timestamp || Date.now())
+        }
+      });
+
+      // Update registration status
       const updatedRegistration = await prisma.trainingRegistration.update({
         where: { id: registration.id },
         data: {
-          paymentStatus: 'COMPLETED',
-          paymentMethod: 'UPI',
-          upiTransactionId: transactionId,
-          paymentDate: new Date(timestamp || Date.now()),
           status: 'CONFIRMED'
         },
         include: {
           trainingProgram: true,
-          user: true
+          user: true,
+          upi_payments: true
         }
       });
 
       // Send payment confirmation email
       try {
+        const verifiedPayment = updatedRegistration.upi_payments.find(p => p.status === 'VERIFIED');
         await sendPaymentConfirmationEmail({
           registrationNumber: updatedRegistration.registrationNumber,
           programName: updatedRegistration.trainingProgram.name,
           participantName: updatedRegistration.user.name || 'Valued Customer',
           totalAmount: updatedRegistration.totalAmount,
-          paymentStatus: 'COMPLETED',
+          paymentStatus: 'VERIFIED',
           paymentMethod: 'UPI',
           upiTransactionId: transactionId,
-          paymentDate: updatedRegistration.paymentDate,
+          paymentDate: verifiedPayment?.createdAt || new Date(),
           participantEmail: updatedRegistration.user.email,
           programDuration: updatedRegistration.trainingProgram.duration.toString(),
           programSchedule: updatedRegistration.trainingProgram.dailyHours,
@@ -102,12 +126,14 @@ export async function POST(request: NextRequest) {
         registrationNumber: registration.registrationNumber
       });
     } else if (status === 'FAILED') {
-      await prisma.trainingRegistration.update({
-        where: { id: registration.id },
+      const pendingPayment = registration.upi_payments[0];
+      
+      await prisma.upi_payments.update({
+        where: { id: pendingPayment.id },
         data: {
-          paymentStatus: 'FAILED',
-          upiTransactionId: transactionId,
-          paymentDate: new Date(timestamp || Date.now())
+          status: 'FAILED',
+          transactionId: transactionId,
+          updatedAt: new Date(timestamp || Date.now())
         }
       });
 

@@ -113,10 +113,10 @@ class UPIPaymentVerifier {
     try {
       const { prisma } = await import('@/lib/prisma');
       
-      const existingPayment = await prisma.trainingRegistration.findFirst({
+      const existingPayment = await prisma.upi_payments.findFirst({
         where: {
-          upiTransactionId: transactionId,
-          paymentStatus: { in: ['PROCESSING', 'COMPLETED'] }
+          transactionId: transactionId,
+          status: { in: ['PENDING', 'VERIFIED'] }
         }
       });
 

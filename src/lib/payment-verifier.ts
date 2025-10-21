@@ -37,7 +37,8 @@ export async function verifyAndProcessPayment(
       where: { id: registrationId },
       include: {
         trainingProgram: true,
-        user: true
+        user: true,
+        upi_payments: true
       }
     });
 
@@ -49,7 +50,9 @@ export async function verifyAndProcessPayment(
       };
     }
 
-    if (registration.paymentStatus === 'COMPLETED') {
+    // Check if payment already completed
+    const completedPayment = registration.upi_payments.find(p => p.status === 'VERIFIED');
+    if (completedPayment) {
       return {
         success: false,
         message: 'Payment already completed',
@@ -67,10 +70,10 @@ export async function verifyAndProcessPayment(
     }
 
     // Check for duplicate transaction ID
-    const existingPayment = await prisma.trainingRegistration.findFirst({
+    const existingPayment = await prisma.upi_payments.findFirst({
       where: {
-        upiTransactionId: transactionId,
-        paymentStatus: { in: ['PROCESSING', 'COMPLETED'] }
+        transactionId: transactionId,
+        status: { in: ['PENDING', 'VERIFIED'] }
       }
     });
 
@@ -91,19 +94,29 @@ export async function verifyAndProcessPayment(
       };
     }
 
-    // Update registration with payment details
+    // Create UPI payment record
+    const payment = await prisma.upi_payments.create({
+      data: {
+        id: `upi_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        amount: amount,
+        status: 'VERIFIED',
+        resourceType: 'training_registration',
+        transactionId: transactionId,
+        trainingRegistrationId: registrationId,
+        updatedAt: new Date()
+      }
+    });
+
+    // Update registration status
     const updatedRegistration = await prisma.trainingRegistration.update({
       where: { id: registrationId },
       data: {
-        paymentStatus: 'COMPLETED',
-        paymentMethod: 'UPI',
-        upiTransactionId: transactionId,
-        paymentDate: new Date(),
         status: 'CONFIRMED'
       },
       include: {
         trainingProgram: true,
-        user: true
+        user: true,
+        upi_payments: true
       }
     });
 
@@ -114,10 +127,10 @@ export async function verifyAndProcessPayment(
         programName: updatedRegistration.trainingProgram.name,
         participantName: updatedRegistration.user.name || 'Valued Customer',
         totalAmount: updatedRegistration.totalAmount,
-        paymentStatus: 'COMPLETED',
+        paymentStatus: 'VERIFIED',
         paymentMethod: 'UPI',
         upiTransactionId: transactionId,
-        paymentDate: updatedRegistration.paymentDate,
+        paymentDate: payment.createdAt,
         participantEmail: updatedRegistration.user.email,
         programDuration: updatedRegistration.trainingProgram.duration.toString(),
         programSchedule: updatedRegistration.trainingProgram.dailyHours,
@@ -156,11 +169,21 @@ export async function getPendingRegistrations() {
   try {
     const pendingRegistrations = await prisma.trainingRegistration.findMany({
       where: {
-        paymentStatus: 'PENDING'
+        status: 'PENDING',
+        upi_payments: {
+          some: {
+            status: 'PENDING'
+          }
+        }
       },
       include: {
         trainingProgram: true,
-        user: true
+        user: true,
+        upi_payments: {
+          where: {
+            status: 'PENDING'
+          }
+        }
       },
       orderBy: {
         createdAt: 'desc'
@@ -184,11 +207,17 @@ export async function quickVerifyPayment(
     const registration = await prisma.trainingRegistration.findFirst({
       where: {
         totalAmount: amount,
-        paymentStatus: 'PENDING'
+        status: 'PENDING',
+        upi_payments: {
+          some: {
+            status: 'PENDING'
+          }
+        }
       },
       include: {
         trainingProgram: true,
-        user: true
+        user: true,
+        upi_payments: true
       }
     });
 
