@@ -369,7 +369,8 @@ export async function getInvoiceByOrderId(orderId: string) {
         select: {
           orderNumber: true,
           status: true,
-          createdAt: true
+          createdAt: true,
+          userId: true
         }
       }
     }
