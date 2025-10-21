@@ -16,11 +16,15 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status') || 'PROCESSING';
+    const status = searchParams.get('status') || 'PENDING';
 
     const registrations = await prisma.trainingRegistration.findMany({
       where: {
-        paymentStatus: status as any
+        upi_payments: {
+          some: {
+            status: status as any
+          }
+        }
       },
       include: {
         trainingProgram: {
@@ -34,10 +38,16 @@ export async function GET(request: NextRequest) {
             name: true,
             email: true
           }
+        },
+        upi_payments: {
+          orderBy: {
+            createdAt: 'desc'
+          },
+          take: 1
         }
       },
       orderBy: {
-        paymentDate: 'desc'
+        createdAt: 'desc'
       }
     });
 
@@ -82,7 +92,11 @@ export async function PUT(request: NextRequest) {
 
     const registration = await prisma.trainingRegistration.findUnique({
       where: { id: registrationId },
-      include: { trainingProgram: true, user: true }
+      include: { 
+        trainingProgram: true, 
+        user: true,
+        upi_payments: true
+      }
     });
 
     if (!registration) {
@@ -92,24 +106,36 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    let updateData: any = {
-      updatedAt: new Date()
-    };
-
-    if (action === 'approve') {
-      updateData.paymentStatus = 'COMPLETED';
-      updateData.status = 'CONFIRMED';
-    } else {
-      updateData.paymentStatus = 'FAILED';
-      updateData.status = 'CANCELLED';
+    if (!registration.upi_payments || registration.upi_payments.length === 0) {
+      return NextResponse.json(
+        { error: "No payment found for this registration" },
+        { status: 404 }
+      );
     }
 
+    // Update the UPI payment status
+    const latestPayment = registration.upi_payments[0];
+    
+    await prisma.upi_payments.update({
+      where: { id: latestPayment.id },
+      data: {
+        status: action === 'approve' ? 'VERIFIED' : 'FAILED',
+        verifiedByUserId: session.user.id,
+        updatedAt: new Date()
+      }
+    });
+
+    // Update registration status
     const updatedRegistration = await prisma.trainingRegistration.update({
       where: { id: registrationId },
-      data: updateData,
+      data: {
+        status: action === 'approve' ? 'CONFIRMED' : 'CANCELLED',
+        updatedAt: new Date()
+      },
       include: {
         trainingProgram: true,
-        user: true
+        user: true,
+        upi_payments: true
       }
     });
 
