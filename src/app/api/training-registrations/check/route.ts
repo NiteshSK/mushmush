@@ -36,18 +36,25 @@ export async function GET(request: NextRequest) {
         }
       },
       include: {
-        trainingProgram: true
+        trainingProgram: true,
+        upi_payments: {
+          orderBy: {
+            createdAt: 'desc'
+          },
+          take: 1
+        }
       }
     });
 
     if (existingRegistration) {
+      const latestPayment = existingRegistration.upi_payments[0];
       return NextResponse.json({
         isRegistered: true,
         registration: {
           id: existingRegistration.id,
           registrationNumber: existingRegistration.registrationNumber,
           status: existingRegistration.status,
-          paymentStatus: existingRegistration.paymentStatus,
+          paymentStatus: latestPayment?.status || 'PENDING',
           programName: existingRegistration.trainingProgram.name,
           createdAt: existingRegistration.createdAt
         }
