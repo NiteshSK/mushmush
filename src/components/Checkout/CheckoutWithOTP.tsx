@@ -67,9 +67,9 @@ const CheckoutWithOTP = () => {
     
     // Log all form data for debugging
     console.log('📋 Form data:');
-    for (let [key, value] of formData.entries()) {
+    Array.from(formData.entries()).forEach(([key, value]) => {
       console.log(`  ${key}: ${value}`);
-    }
+    });
     
     // Try both naming conventions
     const firstName = formData.get('firstName') || formData.get('billingFirstName');
