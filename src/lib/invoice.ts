@@ -387,7 +387,8 @@ export async function getInvoiceById(invoiceId: string) {
         select: {
           orderNumber: true,
           status: true,
-          createdAt: true
+          createdAt: true,
+          userId: true
         }
       }
     }
