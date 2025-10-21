@@ -1,4 +1,4 @@
-import { PrismaClient, TrainingType, RegistrationStatus, PaymentStatus } from '@prisma/client';
+import { PrismaClient, TrainingType, RegistrationStatus } from '@prisma/client';
 import fs from 'fs';
 import path from 'path';
 
@@ -49,11 +49,6 @@ interface TrainingRegistrationBackup {
   preferredStartDate?: Date;
   specialRequirements?: string;
   totalAmount: number;
-  paymentStatus: PaymentStatus;
-  paymentMethod?: string;
-  paymentReference?: string;
-  paymentDate?: Date;
-  upiTransactionId?: string;
   trainingProgramId: number;
   userId?: string;
   createdAt: Date;
@@ -303,11 +298,6 @@ async function restoreTrainingPrograms(backupFile: string) {
           preferredStartDate: registration.preferredStartDate,
           specialRequirements: registration.specialRequirements,
           totalAmount: registration.totalAmount,
-          paymentStatus: registration.paymentStatus as PaymentStatus,
-          paymentMethod: registration.paymentMethod,
-          paymentReference: registration.paymentReference,
-          paymentDate: registration.paymentDate,
-          upiTransactionId: registration.upiTransactionId,
           trainingProgramId: registration.trainingProgramId,
           userId: userId,
           updatedAt: registration.updatedAt
@@ -323,11 +313,6 @@ async function restoreTrainingPrograms(backupFile: string) {
           preferredStartDate: registration.preferredStartDate,
           specialRequirements: registration.specialRequirements,
           totalAmount: registration.totalAmount,
-          paymentStatus: registration.paymentStatus as PaymentStatus,
-          paymentMethod: registration.paymentMethod,
-          paymentReference: registration.paymentReference,
-          paymentDate: registration.paymentDate,
-          upiTransactionId: registration.upiTransactionId,
           trainingProgramId: registration.trainingProgramId,
           userId: userId,
           createdAt: registration.createdAt,
