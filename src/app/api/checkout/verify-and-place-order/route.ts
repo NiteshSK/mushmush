@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify OTP
-    const storedOTP = otpStore.get(email.toLowerCase());
+    const storedOTP = await otpStore.get(email.toLowerCase());
     
     if (!storedOTP) {
       return NextResponse.json(
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (storedOTP.expiresAt < Date.now()) {
-      otpStore.delete(email.toLowerCase());
+      await otpStore.delete(email.toLowerCase());
       return NextResponse.json(
         { error: 'OTP has expired. Please request a new OTP.' },
         { status: 400 }
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     }
 
     // OTP is valid, delete it
-    otpStore.delete(email.toLowerCase());
+    await otpStore.delete(email.toLowerCase());
 
     // For guest checkout, we need a userId. Create a guest user or use a default guest ID
     let userId = session?.user?.id;

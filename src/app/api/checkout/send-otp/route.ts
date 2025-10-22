@@ -17,14 +17,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check rate limiting
+    const rateLimitCheck = await otpStore.checkRateLimit(email.toLowerCase());
+    
+    if (!rateLimitCheck.allowed) {
+      console.log('⏱️ Rate limit exceeded for:', email);
+      return NextResponse.json(
+        { 
+          error: rateLimitCheck.message,
+          retryAfter: rateLimitCheck.retryAfter
+        },
+        { status: 429 }
+      );
+    }
+
     // Generate OTP
     const otp = generateOTP();
     console.log('🔐 Generated OTP:', otp, 'for', email);
     
-    // Store OTP with 10 minute expiration
-    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
-    otpStore.set(email.toLowerCase(), { otp, expiresAt });
-    console.log('💾 OTP stored in memory');
+    // Store OTP with 5 minute expiration
+    const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes
+    await otpStore.set(email.toLowerCase(), { otp, expiresAt });
+    console.log('💾 OTP stored in database');
 
     // Send OTP email
     console.log('📨 Attempting to send OTP email...');
@@ -35,7 +49,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         message: 'OTP sent successfully to your email',
-        expiresIn: 600, // 10 minutes in seconds
+        expiresIn: 300, // 5 minutes in seconds
         debug: {
           email,
           otpGenerated: true,

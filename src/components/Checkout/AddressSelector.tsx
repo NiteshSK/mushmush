@@ -113,7 +113,12 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({ onAddressSelect, sele
   return (
     <div className="mb-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-medium text-gray-900">Select Shipping Address</h3>
+        <div>
+          <h3 className="text-lg font-medium text-gray-900">Select Shipping Address</h3>
+          <p className="text-sm text-gray-500 mt-1">
+            {addresses.length} of 5 addresses saved
+          </p>
+        </div>
         <Link
           href="/addresses"
           className="text-sm text-blue-600 hover:text-blue-700 font-medium"
@@ -186,16 +191,26 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({ onAddressSelect, sele
         </label>
       </div>
 
-      {addresses.length < 5 && (
-        <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
-          <p className="text-sm text-gray-600">
-            💡 Tip: You can save up to 5 addresses.{" "}
-            <Link href="/addresses" className="text-blue-600 hover:text-blue-700 font-medium">
-              Add more addresses
-            </Link>
-          </p>
-        </div>
-      )}
+      <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+        <p className="text-sm text-gray-600">
+          {addresses.length < 5 ? (
+            <>
+              💡 You can save up to 5 addresses. You have {5 - addresses.length} slot{5 - addresses.length !== 1 ? 's' : ''} remaining.{" "}
+              <Link href="/addresses" className="text-blue-600 hover:text-blue-700 font-medium">
+                Manage addresses
+              </Link>
+            </>
+          ) : (
+            <>
+              ⚠️ You have reached the maximum limit of 5 addresses.{" "}
+              <Link href="/addresses" className="text-blue-600 hover:text-blue-700 font-medium">
+                Delete an address
+              </Link>
+              {" "}to add a new one.
+            </>
+          )}
+        </p>
+      </div>
     </div>
   );
 };

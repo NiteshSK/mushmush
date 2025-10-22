@@ -108,6 +108,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check for duplicate address
+    const existingAddress = await prisma.addresses.findFirst({
+      where: {
+        userId,
+        street,
+        city,
+        state,
+        zip,
+        country
+      }
+    });
+
+    if (existingAddress) {
+      return NextResponse.json(
+        { 
+          error: 'This address already exists in your saved addresses.',
+          code: 'DUPLICATE_ADDRESS'
+        },
+        { status: 400 }
+      );
+    }
+
     // Check if user already has 5 addresses
     const addressCount = await prisma.addresses.count({
       where: { userId }
@@ -115,7 +137,12 @@ export async function POST(request: NextRequest) {
 
     if (addressCount >= 5) {
       return NextResponse.json(
-        { error: 'Maximum 5 addresses allowed. Please delete an existing address first.' },
+        { 
+          error: 'You have reached the maximum limit of 5 saved addresses. Please delete an existing address before adding a new one.',
+          code: 'ADDRESS_LIMIT_REACHED',
+          currentCount: addressCount,
+          maxLimit: 5
+        },
         { status: 400 }
       );
     }
@@ -140,7 +167,7 @@ export async function POST(request: NextRequest) {
         state,
         zip,
         country: country || 'India',
-        type: type || 'BOTH',
+        type: type || 'SHIPPING',
         isDefault: isDefault || false,
         userId,
         updatedAt: new Date()

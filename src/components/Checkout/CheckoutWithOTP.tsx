@@ -61,6 +61,8 @@ const CheckoutWithOTP = () => {
   const [showOTPModal, setShowOTPModal] = useState(false);
   const [otp, setOtp] = useState("");
   const [checkoutData, setCheckoutData] = useState<any>(null);
+  const [resendingOTP, setResendingOTP] = useState(false);
+  const [resendTimer, setResendTimer] = useState(0);
   
   // Address management
   const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
@@ -324,10 +326,18 @@ const CheckoutWithOTP = () => {
           console.log('✅ OTP sent! Check your email:', email);
           console.log('📧 If email not received, check server logs for the OTP');
           console.log('🔍 Modal state - showOTPModal:', true);
-          toast.success(`OTP sent to ${email}! Please check your inbox.`, { duration: 6000 });
+          toast.success(`OTP sent to ${email}! Valid for 5 minutes.`, { duration: 6000 });
+        } else if (response.status === 429) {
+          // Rate limit error
+          console.error('Rate limit exceeded:', data);
+          toast.error(data.error || 'Too many OTP requests. Please wait.', { duration: 5000 });
+          if (data.retryAfter) {
+            setResendTimer(data.retryAfter);
+          }
         } else {
           console.error('Failed to send OTP:', data);
           setError(data.error || 'Failed to send OTP');
+          toast.error(data.error || 'Failed to send OTP', { duration: 4000 });
         }
       } catch (err) {
         setError('Network error. Please try again.');
@@ -337,6 +347,60 @@ const CheckoutWithOTP = () => {
     } else {
       // UPI payment flow (to be implemented later)
       toast.error('UPI payment will be implemented soon. Please use Cash on Delivery for now.', { duration: 5000 });
+    }
+  };
+
+  // Resend timer effect
+  useEffect(() => {
+    if (resendTimer > 0) {
+      const timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendTimer]);
+
+  // Start resend timer when OTP modal opens
+  useEffect(() => {
+    if (showOTPModal) {
+      setResendTimer(60); // 60 seconds cooldown
+    }
+  }, [showOTPModal]);
+
+  // Handle resend OTP
+  const handleResendOTP = async () => {
+    if (!checkoutData || resendTimer > 0) return;
+    
+    setResendingOTP(true);
+    setError("");
+    
+    try {
+      const response = await fetch('/api/checkout/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          email: checkoutData.email, 
+          customerName: checkoutData.customerName 
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        toast.success('New OTP sent! Valid for 5 minutes.', { duration: 4000 });
+        setResendTimer(60); // Reset timer to 60 seconds
+        setOtp(""); // Clear old OTP
+      } else if (response.status === 429) {
+        // Rate limit error
+        toast.error(data.error || 'Too many OTP requests. Please wait.', { duration: 5000 });
+        if (data.retryAfter) {
+          setResendTimer(data.retryAfter);
+        }
+      } else {
+        toast.error(data.error || 'Failed to resend OTP', { duration: 4000 });
+      }
+    } catch (err) {
+      toast.error('Network error. Please try again.');
+    } finally {
+      setResendingOTP(false);
     }
   };
 
@@ -690,12 +754,30 @@ const CheckoutWithOTP = () => {
 
       {/* OTP Modal */}
       {showOTPModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
-            <h3 className="text-2xl font-bold text-dark mb-4">Enter OTP</h3>
-            <p className="text-gray-600 mb-6">
-              We've sent a 6-digit OTP to your email. Please enter it below to complete your order.
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 sm:p-8 max-w-md w-full">
+            <h3 className="text-2xl font-bold text-dark mb-3">Enter OTP</h3>
+            <p className="text-gray-600 mb-2">
+              We've sent a 6-digit OTP to <span className="font-medium text-dark">{checkoutData?.email}</span>
             </p>
+            <p className="text-sm text-gray-500 mb-4">
+              ⏱️ OTP expires in <span className="font-medium text-dark">5 minutes</span>
+            </p>
+            
+            {/* Security Disclaimer */}
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+              <div className="flex items-start">
+                <svg className="w-5 h-5 text-yellow-600 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <div>
+                  <p className="text-sm font-medium text-yellow-800">Security Notice</p>
+                  <p className="text-xs text-yellow-700 mt-1">
+                    Please don't share this OTP with anyone. Our team will never ask for your OTP.
+                  </p>
+                </div>
+              </div>
+            </div>
             
             <form onSubmit={handleVerifyAndPlaceOrder}>
               <input
@@ -704,9 +786,27 @@ const CheckoutWithOTP = () => {
                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                 placeholder="Enter 6-digit OTP"
                 maxLength={6}
-                className="w-full px-4 py-3 border border-gray-3 rounded-md text-center text-2xl tracking-widest mb-4"
+                className="w-full px-4 py-3 border border-gray-3 rounded-md text-center text-2xl tracking-widest mb-3 focus:border-blue focus:ring-2 focus:ring-blue/20 outline-none"
                 autoFocus
               />
+              
+              {/* Resend OTP Button */}
+              <div className="text-center mb-4">
+                {resendTimer > 0 ? (
+                  <p className="text-sm text-gray-500">
+                    Resend OTP in <span className="font-medium text-dark">{resendTimer}s</span>
+                  </p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleResendOTP}
+                    disabled={resendingOTP}
+                    className="text-sm text-blue hover:text-blue-dark font-medium disabled:text-gray-400 disabled:cursor-not-allowed"
+                  >
+                    {resendingOTP ? 'Sending...' : 'Resend OTP'}
+                  </button>
+                )}
+              </div>
               
               {error && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm">
@@ -721,15 +821,16 @@ const CheckoutWithOTP = () => {
                     setShowOTPModal(false);
                     setOtp("");
                     setError("");
+                    setResendTimer(0);
                   }}
-                  className="flex-1 px-4 py-3 border border-gray-3 rounded-md hover:bg-gray-100"
+                  className="flex-1 px-4 py-3 border border-gray-3 rounded-md hover:bg-gray-100 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading || otp.length !== 6}
-                  className="flex-1 px-4 py-3 bg-blue text-white rounded-md hover:bg-blue-dark disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-3 bg-blue text-white rounded-md hover:bg-blue-dark disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                 >
                   {loading ? 'Verifying...' : 'Verify & Place Order'}
                 </button>

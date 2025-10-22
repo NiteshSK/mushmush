@@ -59,7 +59,7 @@ const AddressFormModal: React.FC<AddressFormModalProps> = ({
       const response = await fetch("/api/addresses", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, type: "BOTH" })
+        body: JSON.stringify({ ...formData, type: "SHIPPING" })
       });
 
       const data = await response.json();
@@ -78,7 +78,17 @@ const AddressFormModal: React.FC<AddressFormModalProps> = ({
           isDefault: false
         });
       } else {
-        toast.error(data.error || "Failed to add address");
+        // Handle specific error codes
+        if (data.code === 'ADDRESS_LIMIT_REACHED') {
+          toast.error(
+            `${data.error}\n\nManage your addresses to delete one before adding new.`,
+            { duration: 6000 }
+          );
+        } else if (data.code === 'DUPLICATE_ADDRESS') {
+          toast.error(data.error, { duration: 4000 });
+        } else {
+          toast.error(data.error || "Failed to add address");
+        }
       }
     } catch (error) {
       console.error("Error adding address:", error);
@@ -201,7 +211,7 @@ const AddressFormModal: React.FC<AddressFormModalProps> = ({
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-blue text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark"
             >
               {loading ? "Adding..." : "Add Address"}
             </button>

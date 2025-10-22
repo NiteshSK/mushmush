@@ -208,7 +208,7 @@ export default function AddressesPage() {
             disabled={addresses.length >= 5}
             className={`px-6 py-3 rounded-lg font-medium transition-colors ${
               addresses.length >= 5
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                ? "bg-gray text-gray-500 cursor-not-allowed"
                 : "bg-blue text-white hover:bg-blue-dark"
             }`}
           >
@@ -388,14 +388,14 @@ export default function AddressesPage() {
                 <div className="flex items-center space-x-4 pt-4">
                   <button
                     type="submit"
-                    className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                    className="flex-1 bg-blue text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-dark transition-colors"
                   >
                     {editingAddress ? "Update Address" : "Add Address"}
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+                    className="flex-1 bg-gray text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray transition-colors"
                   >
                     Cancel
                   </button>
