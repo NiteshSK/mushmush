@@ -40,7 +40,15 @@ export default function OrdersPage() {
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch("/api/orders");
+      // CRITICAL: Filter orders by current user ID
+      const userId = session?.user?.id;
+      if (!userId) {
+        console.error("No user ID found");
+        setLoading(false);
+        return;
+      }
+      
+      const response = await fetch(`/api/orders?userId=${userId}`);
       if (response.ok) {
         const data = await response.json();
         setOrders(data.orders || []);

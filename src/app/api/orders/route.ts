@@ -1,11 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
-// GET /api/orders - Fetch orders (with optional user filtering)
+// GET /api/orders - Fetch orders (with user filtering enforced)
 export async function GET(request: NextRequest) {
   try {
+    // CRITICAL SECURITY: Verify user is authenticated
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Unauthorized. Please sign in.' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url)
-    const userId = searchParams.get('userId')
+    const requestedUserId = searchParams.get('userId')
     const status = searchParams.get('status')
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '10')
@@ -13,8 +24,15 @@ export async function GET(request: NextRequest) {
 
     const where: any = {}
     
-    if (userId) {
-      where.userId = userId
+    // CRITICAL SECURITY: Non-admin users can ONLY see their own orders
+    if (session.user.role === 'ADMIN') {
+      // Admin can filter by any userId or see all
+      if (requestedUserId) {
+        where.userId = requestedUserId
+      }
+    } else {
+      // Regular users can ONLY see their own orders
+      where.userId = session.user.id
     }
     
     if (status) {
