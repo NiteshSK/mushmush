@@ -48,6 +48,7 @@
     "resolve:instructorid-migration": "psql \"$DATABASE_URL\" -f scripts/resolve-instructorid-migration.sql",
     "scrape:mushroom-news": "tsx scripts/scrape-mushroom-news.ts",
     "scrape:mushroom-news:debug": "tsx scripts/scrape-mushroom-news.ts --debug",
+    "test:checkout-flow": "tsx scripts/test-checkout-flow.ts",
     "test:invoice-system": "tsx scripts/test-invoice-system.ts",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -55,7 +56,8 @@
     "test:unit": "jest --testPathPattern=__tests__/.*\\.test\\.tsx$",
     "test:integration": "jest --testPathPattern=integration",
     "test:checkout": "jest --testPathPattern=Checkout",
-    "fix:order-status-enum": "tsx scripts/fix-order-status-enum.ts"
+    "fix:order-status-enum": "tsx scripts/fix-order-status-enum.ts",
+    "fix:production-order-status": "tsx scripts/fix-production-order-status.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",

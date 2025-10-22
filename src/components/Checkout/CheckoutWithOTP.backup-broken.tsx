@@ -11,8 +11,6 @@ import Link from "next/link";
 import Breadcrumb from "../Common/Breadcrumb";
 import PaymentMethod from "./PaymentMethod";
 import Coupon from "./Coupon";
-import AddressSelector from "./AddressSelector";
-import Shipping from "./Shipping";
 
 const INDIAN_STATES = [
   "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
@@ -79,12 +77,6 @@ const CheckoutWithOTP = () => {
     email: "",
     phone: ""
   });
-  
-  // Temporary compatibility variables (to be removed in full refactor)
-  const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
-  const [useNewAddress, setUseNewAddress] = useState(true);
-  const [otpSent, setOtpSent] = useState(false);
-  const userPhone = contactInfo.phone;
   
   const shippingFee = 50.00;
   const total = subtotal + shippingFee;
@@ -165,12 +157,6 @@ const CheckoutWithOTP = () => {
       setSelectedBillingId(defaultAddr.id);
       setUseNewBilling(false);
     }
-  };
-
-  // Temporary handler for old AddressSelector component
-  const handleAddressSelect = (address: Address | null) => {
-    setSelectedAddress(address);
-    setUseNewAddress(address === null);
   };
 
   // Handle checkout button click
