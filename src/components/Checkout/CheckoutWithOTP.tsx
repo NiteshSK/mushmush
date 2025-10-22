@@ -234,9 +234,28 @@ const CheckoutWithOTP = () => {
     if (paymentMethod === 'cash') {
       let addressData;
 
-      // Priority: 1. Saved address, 2. Shipping section, 3. Billing section
-      if (selectedAddress && !useNewAddress) {
-        // Using saved address
+      // Priority: 1. Saved address (selectedBillingId), 2. Shipping section, 3. Billing section
+      if (selectedBillingId && !useNewBilling) {
+        // Using saved billing address
+        const savedAddress = savedAddresses.find(addr => addr.id === selectedBillingId);
+        if (savedAddress) {
+          addressData = {
+            street: savedAddress.street,
+            city: savedAddress.city,
+            state: savedAddress.state,
+            zip: savedAddress.zip,
+            country: savedAddress.country
+          };
+          console.log('✅ Using saved billing address:', savedAddress);
+        } else {
+          const errorMsg = 'Selected address not found. Please select a valid address.';
+          console.error('❌', errorMsg);
+          setError(errorMsg);
+          toast.error(errorMsg, { duration: 4000 });
+          return;
+        }
+      } else if (selectedAddress && !useNewAddress) {
+        // Fallback: Using old selectedAddress (for compatibility)
         addressData = {
           street: selectedAddress.street,
           city: selectedAddress.city,
@@ -244,7 +263,7 @@ const CheckoutWithOTP = () => {
           zip: selectedAddress.zip,
           country: selectedAddress.country
         };
-        console.log('✅ Using saved address');
+        console.log('✅ Using selected address (legacy)');
       } else {
         // Check if shipping section was filled (Ship to different address)
         const shippingAddress = formData.get('shippingAddress') as string;
