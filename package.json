@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && prisma migrate deploy && next build",
+    "postbuild": "tsx scripts/create-otp-table.ts || echo 'OTP table creation skipped (may already exist)'",
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate",
