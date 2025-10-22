@@ -315,8 +315,8 @@ const CheckoutWithOTP = () => {
         customerPhone: phone,
         billingAddress: addressData,
         shippingAddress: addressData,
-        billingAddressId: selectedBillingId || null, // Send address ID if using saved address
-        shippingAddressId: (sameAsBilling ? selectedBillingId : selectedShippingId) || null,
+        billingAddressId: selectedBillingId || null, // Send address ID if using saved address (UPDATED)
+        shippingAddressId: (sameAsBilling ? selectedBillingId : selectedShippingId) || null, // Prevent duplicates (UPDATED)
         cartItems,
         subtotal,
         shippingFee,

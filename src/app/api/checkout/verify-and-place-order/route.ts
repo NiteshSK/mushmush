@@ -96,10 +96,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Handle billing address - use existing if ID provided, otherwise create new
+    // Handle billing address - use existing if ID provided, otherwise create new (UPDATED)
     let billingAddr;
     if (billingAddressId) {
-      // Use existing saved address
+      // Use existing saved address (prevents duplicates) (UPDATED)
       billingAddr = await prisma.addresses.findUnique({
         where: { id: billingAddressId }
       });
