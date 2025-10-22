@@ -72,6 +72,7 @@ async function testInvoiceSystem() {
         customerName: testUser.name || 'Test User',
         customerEmail: testUser.email,
         customerPhone: '+91-9876543210',
+        shippingAddress: `${shippingAddress.street}, ${shippingAddress.city}, ${shippingAddress.state} ${shippingAddress.zip}, ${shippingAddress.country}`,
         subtotal,
         tax,
         shipping,
