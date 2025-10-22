@@ -224,6 +224,57 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Order created successfully:', orderNumber);
 
+    // Generate invoice and send email for CONFIRMED orders
+    try {
+      console.log('🔄 Generating invoice for order...');
+      
+      const { generateInvoice, markInvoiceEmailSent } = await import('@/lib/invoice');
+      const { sendOrderInvoiceEmail } = await import('@/lib/email');
+      
+      // Generate invoice
+      const invoice = await generateInvoice(order.id);
+      console.log('✅ Invoice generated:', invoice.invoiceNumber);
+      
+      // Prepare email data
+      const emailData = {
+        customerName: order.customerName,
+        customerEmail: order.customerEmail,
+        orderNumber: order.orderNumber,
+        invoiceNumber: invoice.invoiceNumber,
+        invoicePdfUrl: invoice.pdfPath || '',
+        orderDate: order.createdAt,
+        orderItems: order.orderItems.map(item => ({
+          productTitle: item.product.title,
+          quantity: item.quantity,
+          price: item.price,
+          total: item.quantity * item.price
+        })),
+        subtotal: order.subtotal,
+        tax: order.tax,
+        shipping: order.shipping,
+        total: order.total,
+        shippingAddress: {
+          address: shippingAddr.street,
+          city: shippingAddr.city,
+          state: shippingAddr.state,
+          zipCode: shippingAddr.zip,
+          country: shippingAddr.country
+        }
+      };
+      
+      // Send email
+      console.log('📧 Sending invoice email...');
+      await sendOrderInvoiceEmail(emailData);
+      
+      // Mark email as sent
+      await markInvoiceEmailSent(invoice.id);
+      console.log('✅ Invoice email sent successfully');
+      
+    } catch (invoiceError) {
+      console.error('❌ Error generating invoice or sending email:', invoiceError);
+      // Don't fail the order if invoice/email fails
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Order placed successfully!',
