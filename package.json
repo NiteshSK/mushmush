@@ -52,7 +52,7 @@
     "test:invoice-system": "tsx scripts/test-invoice-system.ts",
     "fix:duplicate-addresses": "tsx scripts/fix-duplicate-addresses.ts",
     "fix:address-type-enum": "psql \"$DATABASE_URL\" -f scripts/fix-address-type-enum.sql",
-    "create:otp-table": "psql \"$DATABASE_URL\" -f scripts/create-otp-table.sql",
+    "create:otp-table": "tsx scripts/create-otp-table.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
