@@ -24,6 +24,7 @@
     "db:restore": "tsx scripts/backup-database.ts restore",
     "db:list": "tsx scripts/backup-database.ts list",
     "db:clean": "tsx scripts/backup-database.ts clean",
+    "db:check:schema": "tsx scripts/check-production-schema.ts",
     "backup:production": "tsx scripts/backup-production-db.ts",
     "deploy:production": "./scripts/deploy-to-production.sh",
     "migrate:safe": "tsx scripts/safe-migrate.ts migrate",

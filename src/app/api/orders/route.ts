@@ -111,10 +111,22 @@ export async function POST(request: NextRequest) {
       shippingAddressId = address.id;
     }
 
-    // Format shipping address string
-    const shippingAddressString = shippingAddress 
-      ? `${shippingAddress.street || ''}, ${shippingAddress.city || ''}, ${shippingAddress.state || ''} ${shippingAddress.zip || shippingAddress.postalCode || ''}, ${shippingAddress.country || 'India'}`
-      : 'No address provided';
+    // Format shipping address as JSON object
+    const shippingAddressJson = shippingAddress 
+      ? {
+          street: shippingAddress.street || '',
+          city: shippingAddress.city || '',
+          state: shippingAddress.state || '',
+          zip: shippingAddress.zip || shippingAddress.postalCode || '',
+          country: shippingAddress.country || 'India'
+        }
+      : {
+          street: '',
+          city: '',
+          state: '',
+          zip: '',
+          country: 'India'
+        };
 
     const order = await prisma.order.create({
       data: {
@@ -123,7 +135,7 @@ export async function POST(request: NextRequest) {
         customerName,
         customerEmail,
         customerPhone,
-        shippingAddress: shippingAddressString,
+        shippingAddress: shippingAddressJson,
         shippingAddressId,
         subtotal,
         tax,

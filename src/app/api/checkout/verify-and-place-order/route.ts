@@ -167,8 +167,26 @@ export async function POST(request: NextRequest) {
     // Generate order number
     const orderNumber = `ORD-${Date.now()}`;
 
-    // Format shipping address as string for legacy field
-    const shippingAddressString = `${shippingAddr.street}, ${shippingAddr.city}, ${shippingAddr.state} ${shippingAddr.zip}, ${shippingAddr.country}`;
+    // Format shipping address as JSON object (production DB expects jsonb)
+    const shippingAddressJson = {
+      street: shippingAddr.street || '',
+      city: shippingAddr.city || '',
+      state: shippingAddr.state || '',
+      zip: shippingAddr.zip || '',
+      country: shippingAddr.country || 'India'
+    };
+
+    console.log('📦 Creating order with data:', {
+      orderNumber,
+      customerName,
+      email,
+      customerPhone,
+      shippingAddress: shippingAddressJson,
+      billingAddressId: billingAddr.id,
+      shippingAddressId: shippingAddr.id,
+      userId: session?.user?.id || userId,
+      itemCount: cartItems.length
+    });
 
     // Create order
     // COD orders are CONFIRMED immediately since payment is collected on delivery
@@ -177,13 +195,13 @@ export async function POST(request: NextRequest) {
         orderNumber,
         customerName,
         customerEmail: email,
-        customerPhone,
+        customerPhone: customerPhone || '',
         subtotal,
         tax: 0, // Add tax calculation if needed
         shipping: shippingFee,
         total,
         status: 'CONFIRMED', // COD orders are confirmed immediately
-        shippingAddress: shippingAddressString, // Legacy field - formatted address
+        shippingAddress: shippingAddressJson, // JSON object for jsonb column
         billingAddressId: billingAddr.id,
         shippingAddressId: shippingAddr.id,
         userId: session?.user?.id || userId, // Use session user or guest user
