@@ -1,8 +1,8 @@
 // Clean Checkout component with OTP verification
 "use client";
 import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
-import { selectCartItems, selectTotalPrice } from "@/redux/features/cart-slice";
+import { useSelector, useDispatch } from "react-redux";
+import { selectCartItems, selectTotalPrice, removeAllItemsFromCart } from "@/redux/features/cart-slice";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { toast } from "react-hot-toast";
@@ -46,6 +46,7 @@ interface AddressData {
 
 const CheckoutWithOTP = () => {
   const router = useRouter();
+  const dispatch = useDispatch();
   const { data: session } = useSession();
   
   const cartItems = useSelector(selectCartItems);
@@ -459,6 +460,10 @@ const CheckoutWithOTP = () => {
       const data = await response.json();
       
       if (response.ok) {
+        // Clear the cart
+        dispatch(removeAllItemsFromCart());
+        console.log('✅ Cart cleared after successful order');
+        
         // Show success message
         toast.success(`Order placed successfully! Order Number: ${data.order.orderNumber}`, { duration: 5000 });
         
