@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && prisma migrate deploy && next build",
-    "postbuild": "tsx scripts/create-otp-table.ts && tsx scripts/create-invoice-table.ts || echo 'Table creation skipped (may already exist)'",
+    "postbuild": "tsx scripts/create-otp-table.ts && tsx scripts/create-invoice-table.ts && tsx scripts/fix-invoice-table-columns.ts || echo 'Table setup completed'",
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate",
@@ -26,6 +26,7 @@
     "db:clean": "tsx scripts/backup-database.ts clean",
     "db:check:schema": "tsx scripts/check-production-schema.ts",
     "db:create:invoice-table": "tsx scripts/create-invoice-table.ts",
+    "db:fix:invoice-table": "tsx scripts/fix-invoice-table-columns.ts",
     "test:order-flow": "tsx tests/order-invoice-flow.test.ts",
     "backup:production": "tsx scripts/backup-production-db.ts",
     "deploy:production": "./scripts/deploy-to-production.sh",
