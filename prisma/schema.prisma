@@ -154,6 +154,7 @@ model Order {
   customerName                                  String
   customerEmail                                 String
   customerPhone                                 String?
+  shippingAddress                               String         // Legacy field - formatted address string
   userId                                        String?
   billingAddressId                              String?
   shippingAddressId                             String?

@@ -16,6 +16,8 @@ export async function POST(request: NextRequest) {
       customerPhone,
       billingAddress,
       shippingAddress,
+      billingAddressId,
+      shippingAddressId,
       cartItems,
       subtotal,
       shippingFee,
@@ -94,40 +96,79 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create billing address
-    const billingAddr = await prisma.addresses.create({
-      data: {
-        id: `billing-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        street: billingAddress.street,
-        city: billingAddress.city,
-        state: billingAddress.state,
-        zip: billingAddress.zip,
-        country: billingAddress.country || 'India',
-        type: 'BILLING',
-        isDefault: false,
-        updatedAt: new Date(),
-        userId: userId
+    // Handle billing address - use existing if ID provided, otherwise create new
+    let billingAddr;
+    if (billingAddressId) {
+      // Use existing saved address
+      billingAddr = await prisma.addresses.findUnique({
+        where: { id: billingAddressId }
+      });
+      
+      if (!billingAddr) {
+        return NextResponse.json(
+          { error: 'Selected billing address not found' },
+          { status: 400 }
+        );
       }
-    });
+      console.log('✅ Using existing billing address:', billingAddressId);
+    } else {
+      // Create new billing address
+      billingAddr = await prisma.addresses.create({
+        data: {
+          id: `billing-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          street: billingAddress.street,
+          city: billingAddress.city,
+          state: billingAddress.state,
+          zip: billingAddress.zip,
+          country: billingAddress.country || 'India',
+          type: 'BILLING',
+          isDefault: false,
+          updatedAt: new Date(),
+          userId: userId
+        }
+      });
+      console.log('✅ Created new billing address');
+    }
 
-    // Create shipping address
-    const shippingAddr = await prisma.addresses.create({
-      data: {
-        id: `shipping-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        street: shippingAddress.street,
-        city: shippingAddress.city,
-        state: shippingAddress.state,
-        zip: shippingAddress.zip,
-        country: shippingAddress.country || 'India',
-        type: 'SHIPPING',
-        isDefault: false,
-        updatedAt: new Date(),
-        userId: userId
+    // Handle shipping address - use existing if ID provided, otherwise create new
+    let shippingAddr;
+    if (shippingAddressId) {
+      // Use existing saved address
+      shippingAddr = await prisma.addresses.findUnique({
+        where: { id: shippingAddressId }
+      });
+      
+      if (!shippingAddr) {
+        return NextResponse.json(
+          { error: 'Selected shipping address not found' },
+          { status: 400 }
+        );
       }
-    });
+      console.log('✅ Using existing shipping address:', shippingAddressId);
+    } else {
+      // Create new shipping address
+      shippingAddr = await prisma.addresses.create({
+        data: {
+          id: `shipping-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          street: shippingAddress.street,
+          city: shippingAddress.city,
+          state: shippingAddress.state,
+          zip: shippingAddress.zip,
+          country: shippingAddress.country || 'India',
+          type: 'SHIPPING',
+          isDefault: false,
+          updatedAt: new Date(),
+          userId: userId
+        }
+      });
+      console.log('✅ Created new shipping address');
+    }
 
     // Generate order number
     const orderNumber = `ORD-${Date.now()}`;
+
+    // Format shipping address as string for legacy field
+    const shippingAddressString = `${shippingAddr.street}, ${shippingAddr.city}, ${shippingAddr.state} ${shippingAddr.zip}, ${shippingAddr.country}`;
 
     // Create order
     // COD orders are CONFIRMED immediately since payment is collected on delivery
@@ -142,6 +183,7 @@ export async function POST(request: NextRequest) {
         shipping: shippingFee,
         total,
         status: 'CONFIRMED', // COD orders are confirmed immediately
+        shippingAddress: shippingAddressString, // Legacy field - formatted address
         billingAddressId: billingAddr.id,
         shippingAddressId: shippingAddr.id,
         userId: session?.user?.id || userId, // Use session user or guest user
