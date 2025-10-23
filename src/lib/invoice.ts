@@ -39,9 +39,10 @@ export function generateInvoiceNumber(): string {
 }
 
 /**
- * Generate PDF invoice and save to file system
+ * Generate PDF invoice and upload to Vercel Blob Storage
+ * Path format: userId/YYYY-MM-DD/invoiceNumber.pdf
  */
-export async function generateInvoicePDF(data: InvoiceData): Promise<string> {
+export async function generateInvoicePDF(data: InvoiceData, userId?: string): Promise<string> {
   const doc = new jsPDF();
   
   // Add logo
@@ -218,14 +219,23 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<string> {
   const pdfBuffer = doc.output('arraybuffer');
   const fileName = `${invoiceNumber}.pdf`;
   
-  // Upload to Vercel Blob
+  // Create structured path: userId/YYYY-MM-DD/invoiceNumber.pdf
+  const date = new Date();
+  const dateFolder = date.toISOString().split('T')[0]; // YYYY-MM-DD format
+  const userFolder = userId || 'guest';
+  const blobPath = `invoices/${userFolder}/${dateFolder}/${fileName}`;
+  
+  console.log('📁 Uploading invoice to path:', blobPath);
+  
+  // Upload to Vercel Blob with structured path
   try {
-    const blob = await put(`invoices/${fileName}`, Buffer.from(pdfBuffer), {
+    const blob = await put(blobPath, Buffer.from(pdfBuffer), {
       access: 'public',
       contentType: 'application/pdf',
     });
     
     console.log('✅ Invoice PDF uploaded to Vercel Blob:', blob.url);
+    console.log('📊 Storage path:', blobPath);
     return blob.url;
   } catch (error) {
     console.error('❌ Error uploading PDF to Vercel Blob:', error);
@@ -324,9 +334,9 @@ export async function generateInvoice(orderId: string): Promise<any> {
       orderDate: order.createdAt
     };
 
-    // Generate PDF and upload to Vercel Blob
-    const blobUrl = await generateInvoicePDF(invoiceData);
-    // Extract invoice number from the blob URL (format: https://...blob.vercel-storage.com/invoices/INV-XXX.pdf)
+    // Generate PDF and upload to Vercel Blob with structured path
+    const blobUrl = await generateInvoicePDF(invoiceData, order.userId || undefined);
+    // Extract invoice number from the blob URL (format: https://...blob.vercel-storage.com/invoices/userId/date/INV-XXX.pdf)
     const invoiceNumber = blobUrl.split('/').pop()?.replace('.pdf', '') || generateInvoiceNumber();
 
     // Create invoice record with Blob URL
