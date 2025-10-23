@@ -114,10 +114,10 @@ export default function OrdersPage() {
 
   return (
     
-    <div className="min-h-screen bg-gray-50 py-25 sm:py-12 lg:py-16">
+    <div className="min-h-screen bg-gray-50 py-55">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-6 mb-25">
+        <div className="mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">My Orders</h1>
           <p className="mt-2 text-sm sm:text-base text-gray-600">
             Track and manage your mushroom orders
