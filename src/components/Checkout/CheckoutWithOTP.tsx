@@ -13,6 +13,7 @@ import PaymentMethod from "./PaymentMethod";
 import Coupon from "./Coupon";
 import AddressSelector from "./AddressSelector";
 import Shipping from "./Shipping";
+import UPIPaymentModal from "./UPIPaymentModal";
 
 const INDIAN_STATES = [
   "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
@@ -56,7 +57,7 @@ const CheckoutWithOTP = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [notes, setNotes] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("cash");
+  const [paymentMethod, setPaymentMethod] = useState("bank"); // Changed to UPI
   
   // OTP Modal
   const [showOTPModal, setShowOTPModal] = useState(false);
@@ -64,6 +65,10 @@ const CheckoutWithOTP = () => {
   const [checkoutData, setCheckoutData] = useState<any>(null);
   const [resendingOTP, setResendingOTP] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
+  
+  // UPI Payment Modal
+  const [showUPIModal, setShowUPIModal] = useState(false);
+  const [orderCreated, setOrderCreated] = useState<any>(null);
   
   // Address management
   const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
@@ -231,144 +236,142 @@ const CheckoutWithOTP = () => {
       return;
     }
     
-    // If COD, send OTP. Otherwise, proceed with UPI (to be implemented)
-    if (paymentMethod === 'cash') {
-      let addressData;
+    // NEW FLOW: UPI payment with OTP verification
+    // Step 1: Collect address data
+    let addressData;
 
-      // Priority: 1. Saved address (selectedBillingId), 2. Shipping section, 3. Billing section
-      if (selectedBillingId && !useNewBilling) {
-        // Using saved billing address
-        const savedAddress = savedAddresses.find(addr => addr.id === selectedBillingId);
-        if (savedAddress) {
-          addressData = {
-            street: savedAddress.street,
-            city: savedAddress.city,
-            state: savedAddress.state,
-            zip: savedAddress.zip,
-            country: savedAddress.country
-          };
-          console.log('✅ Using saved billing address:', savedAddress);
-        } else {
-          const errorMsg = 'Selected address not found. Please select a valid address.';
+    // Priority: 1. Saved address (selectedBillingId), 2. Shipping section, 3. Billing section
+    if (selectedBillingId && !useNewBilling) {
+      // Using saved billing address
+      const savedAddress = savedAddresses.find(addr => addr.id === selectedBillingId);
+      if (savedAddress) {
+        addressData = {
+          street: savedAddress.street,
+          city: savedAddress.city,
+          state: savedAddress.state,
+          zip: savedAddress.zip,
+          country: savedAddress.country
+        };
+        console.log('✅ Using saved billing address:', savedAddress);
+      } else {
+        const errorMsg = 'Selected address not found. Please select a valid address.';
+        console.error('❌', errorMsg);
+        setError(errorMsg);
+        toast.error(errorMsg, { duration: 4000 });
+        return;
+      }
+    } else if (selectedAddress && !useNewAddress) {
+      // Fallback: Using old selectedAddress (for compatibility)
+      addressData = {
+        street: selectedAddress.street,
+        city: selectedAddress.city,
+        state: selectedAddress.state,
+        zip: selectedAddress.zip,
+        country: selectedAddress.country
+      };
+      console.log('✅ Using selected address (legacy)');
+    } else {
+      // Check if shipping section was filled (Ship to different address)
+      const shippingAddress = formData.get('shippingAddress') as string;
+      const shippingCity = formData.get('shippingCity') as string;
+      const shippingState = formData.get('shippingState') as string;
+      const shippingZip = formData.get('shippingZip') as string;
+      
+      if (shippingAddress && shippingCity && shippingState) {
+        // Use shipping address
+        addressData = {
+          street: shippingAddress,
+          city: shippingCity,
+          state: shippingState,
+          zip: shippingZip || '000000',
+          country: 'India'
+        };
+        console.log('✅ Using shipping address from "Ship to different address" section');
+      } else {
+        // Use billing address
+        const address = formData.get('address') as string;
+        const town = formData.get('town') as string;
+        const state = formData.get('country') as string;
+        const zip = formData.get('zip') as string;
+        
+        // Validate required fields
+        if (!address || !town || !state) {
+          const errorMsg = 'Please fill in all address fields (Street Address, City, State) in either Billing Address or "Ship to different address" section';
           console.error('❌', errorMsg);
           setError(errorMsg);
           toast.error(errorMsg, { duration: 4000 });
+          setLoading(false);
           return;
         }
-      } else if (selectedAddress && !useNewAddress) {
-        // Fallback: Using old selectedAddress (for compatibility)
+        
         addressData = {
-          street: selectedAddress.street,
-          city: selectedAddress.city,
-          state: selectedAddress.state,
-          zip: selectedAddress.zip,
-          country: selectedAddress.country
+          street: address,
+          city: town,
+          state: state,
+          zip: zip || '000000',
+          country: 'India'
         };
-        console.log('✅ Using selected address (legacy)');
+        console.log('✅ Using billing address');
+      }
+    }
+    
+    // Store checkout data for later use
+    const storedData = {
+      email,
+      customerName,
+      customerPhone: phone,
+      billingAddress: addressData,
+      shippingAddress: addressData,
+      billingAddressId: selectedBillingId || null,
+      shippingAddressId: (sameAsBilling ? selectedBillingId : selectedShippingId) || null,
+      cartItems,
+      subtotal,
+      shippingFee,
+      total,
+      paymentMethod: 'UPI',
+      notes
+    };
+    
+    setCheckoutData(storedData);
+    console.log('💾 Stored checkout data:', storedData);
+    
+    // Step 2: Send OTP for verification
+    setLoading(true);
+    setError("");
+    
+    try {
+      const response = await fetch('/api/checkout/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, customerName })
+      });
+      
+      const data = await response.json();
+      console.log('OTP Response:', data);
+      
+      if (response.ok) {
+        setOtpSent(true);
+        setShowOTPModal(true);
+        console.log('✅ OTP sent! Check your email:', email);
+        console.log('📧 If email not received, check server logs for the OTP');
+        console.log('🔍 Modal state - showOTPModal:', true);
+        toast.success(`OTP sent to ${email}! Valid for 5 minutes.`, { duration: 6000 });
+      } else if (response.status === 429) {
+        // Rate limit error
+        console.error('Rate limit exceeded:', data);
+        toast.error(data.error || 'Too many OTP requests. Please wait.', { duration: 5000 });
+        if (data.retryAfter) {
+          setResendTimer(data.retryAfter);
+        }
       } else {
-        // Check if shipping section was filled (Ship to different address)
-        const shippingAddress = formData.get('shippingAddress') as string;
-        const shippingCity = formData.get('shippingCity') as string;
-        const shippingState = formData.get('shippingState') as string;
-        const shippingZip = formData.get('shippingZip') as string;
-        
-        if (shippingAddress && shippingCity && shippingState) {
-          // Use shipping address
-          addressData = {
-            street: shippingAddress,
-            city: shippingCity,
-            state: shippingState,
-            zip: shippingZip || '000000',
-            country: 'India'
-          };
-          console.log('✅ Using shipping address from "Ship to different address" section');
-        } else {
-          // Use billing address
-          const address = formData.get('address') as string;
-          const town = formData.get('town') as string;
-          const state = formData.get('country') as string;
-          const zip = formData.get('zip') as string;
-          
-          // Validate required fields
-          if (!address || !town || !state) {
-            const errorMsg = 'Please fill in all address fields (Street Address, City, State) in either Billing Address or "Ship to different address" section';
-            console.error('❌', errorMsg);
-            setError(errorMsg);
-            toast.error(errorMsg, { duration: 4000 });
-            setLoading(false);
-            return;
-          }
-          
-          addressData = {
-            street: address,
-            city: town,
-            state: state,
-            zip: zip || '000000',
-            country: 'India'
-          };
-          console.log('✅ Using billing address');
-        }
+        console.error('Failed to send OTP:', data);
+        setError(data.error || 'Failed to send OTP');
+        toast.error(data.error || 'Failed to send OTP', { duration: 4000 });
       }
-      
-      const storedData = {
-        email,
-        customerName,
-        customerPhone: phone,
-        billingAddress: addressData,
-        shippingAddress: addressData,
-        billingAddressId: selectedBillingId || null, // Send address ID if using saved address (UPDATED)
-        shippingAddressId: (sameAsBilling ? selectedBillingId : selectedShippingId) || null, // Prevent duplicates (UPDATED)
-        cartItems,
-        subtotal,
-        shippingFee,
-        total,
-        paymentMethod: 'COD',
-        notes
-      };
-      
-      setCheckoutData(storedData);
-      console.log('💾 Stored checkout data:', storedData);
-      
-      setLoading(true);
-      setError("");
-      
-      try {
-        const response = await fetch('/api/checkout/send-otp', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, customerName })
-        });
-        
-        const data = await response.json();
-        console.log('OTP Response:', data);
-        
-        if (response.ok) {
-          setOtpSent(true);
-          setShowOTPModal(true);
-          console.log('✅ OTP sent! Check your email:', email);
-          console.log('📧 If email not received, check server logs for the OTP');
-          console.log('🔍 Modal state - showOTPModal:', true);
-          toast.success(`OTP sent to ${email}! Valid for 5 minutes.`, { duration: 6000 });
-        } else if (response.status === 429) {
-          // Rate limit error
-          console.error('Rate limit exceeded:', data);
-          toast.error(data.error || 'Too many OTP requests. Please wait.', { duration: 5000 });
-          if (data.retryAfter) {
-            setResendTimer(data.retryAfter);
-          }
-        } else {
-          console.error('Failed to send OTP:', data);
-          setError(data.error || 'Failed to send OTP');
-          toast.error(data.error || 'Failed to send OTP', { duration: 4000 });
-        }
-      } catch (err) {
-        setError('Network error. Please try again.');
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      // UPI payment flow (to be implemented later)
-      toast.error('UPI payment will be implemented soon. Please use Cash on Delivery for now.', { duration: 5000 });
+    } catch (err) {
+      setError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -426,7 +429,7 @@ const CheckoutWithOTP = () => {
     }
   };
 
-  // Handle verify OTP and place order
+  // Handle verify OTP and create order (then show UPI payment modal)
   const handleVerifyAndPlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -449,7 +452,7 @@ const CheckoutWithOTP = () => {
         otp
       };
       
-      console.log('📦 Placing order with data:', orderData);
+      console.log('📦 Creating order with verified OTP:', orderData);
       
       const response = await fetch('/api/checkout/verify-and-place-order', {
         method: 'POST',
@@ -460,30 +463,47 @@ const CheckoutWithOTP = () => {
       const data = await response.json();
       
       if (response.ok) {
-        // Clear the cart immediately
-        dispatch(removeAllItemsFromCart());
-        console.log('✅ Cart cleared after successful order');
+        console.log('✅ Order created successfully:', data.order);
         
         // Close OTP modal
         setShowOTPModal(false);
         setOtp("");
-        setCheckoutData(null);
         
-        // Show success message
-        toast.success(`Order placed successfully! Order Number: ${data.order.orderNumber}`, { duration: 5000 });
+        // Store order data and show UPI payment modal
+        setOrderCreated(data.order);
+        setShowUPIModal(true);
         
-        // Small delay to ensure cart is persisted before redirect
-        setTimeout(() => {
-          router.push(`/orders?success=true&orderNumber=${data.order.orderNumber}`);
-        }, 100);
+        toast.success(`Order created! Order Number: ${data.order.orderNumber}. Please complete UPI payment.`, { duration: 5000 });
       } else {
-        setError(data.error || 'Failed to place order');
+        setError(data.error || 'Failed to create order');
       }
     } catch (err) {
       setError('Network error. Please try again.');
     } finally {
       setLoading(false);
     }
+  };
+  
+  // Handle UPI payment completion
+  const handleUPIPaymentComplete = (paymentData: any) => {
+    console.log('✅ UPI Payment completed:', paymentData);
+    
+    // Clear the cart
+    dispatch(removeAllItemsFromCart());
+    console.log('✅ Cart cleared after successful payment');
+    
+    // Close UPI modal
+    setShowUPIModal(false);
+    setCheckoutData(null);
+    setOrderCreated(null);
+    
+    // Show success message
+    toast.success(`Payment submitted successfully! Your order is being processed.`, { duration: 5000 });
+    
+    // Redirect to orders page
+    setTimeout(() => {
+      router.push(`/orders?success=true&orderNumber=${orderCreated?.orderNumber}`);
+    }, 100);
   };
 
   return (
@@ -774,11 +794,9 @@ const CheckoutWithOTP = () => {
                   {loading ? 'Processing...' : 'Proceed to Checkout'}
                 </button>
                 
-                {paymentMethod === 'cash' && (
-                  <p className="text-sm text-black text-center mt-3">
-                    OTP will be sent to your email for verification
-                  </p>
-                )}
+                <p className="text-sm text-black text-center mt-3">
+                  OTP will be sent to your email for verification
+                </p>
               </div>
             </div>
           </form>
@@ -865,12 +883,29 @@ const CheckoutWithOTP = () => {
                   disabled={loading || otp.length !== 6}
                   className="flex-1 px-4 py-3 bg-blue text-white rounded-md hover:bg-blue-dark disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                 >
-                  {loading ? 'Verifying...' : 'Verify & Place Order'}
+                  {loading ? 'Verifying...' : 'Verify & Continue to Payment'}
                 </button>
               </div>
             </form>
           </div>
         </div>
+      )}
+
+      {/* UPI Payment Modal */}
+      {showUPIModal && orderCreated && checkoutData && (
+        <UPIPaymentModal
+          orderData={{
+            orderNumber: orderCreated.orderNumber,
+            customerName: checkoutData.customerName,
+            email: checkoutData.email,
+            total: checkoutData.total
+          }}
+          onClose={() => {
+            setShowUPIModal(false);
+            setOrderCreated(null);
+          }}
+          onPaymentComplete={handleUPIPaymentComplete}
+        />
       )}
     </>
   );
