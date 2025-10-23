@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
@@ -22,6 +22,7 @@ const Header = () => {
   const { openCartModal } = useCartModalContext();
   const { data: session, status, update } = useSession();
   const router = useRouter();
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   const product = useAppSelector((state) => state.cartReducer.items);
   const totalPrice = useSelector(selectTotalPrice);
@@ -65,6 +66,23 @@ const Header = () => {
       update();
     }
   }, [status, update]);
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+
+    if (userMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [userMenuOpen]);
 
   const options = [
     { label: "All Mushrooms", value: "0" },
@@ -174,7 +192,7 @@ const Header = () => {
                   </div>
                 </div>
               ) : session ? (
-                <div className="relative">
+                <div className="relative" ref={userMenuRef}>
                   <button
                     onClick={() => setUserMenuOpen(!userMenuOpen)}
                     className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"

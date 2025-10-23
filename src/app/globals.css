@@ -51,6 +51,42 @@
     padding: 15px !important;
     gap: 10px !important;
   }
+
+  /* Prevent horizontal scroll on mobile */
+  body {
+    overflow-x: hidden;
+  }
+
+  /* Make tables responsive */
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  /* Responsive images */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Better button sizing on mobile */
+  button {
+    min-height: 44px; /* iOS touch target size */
+  }
+
+  /* Responsive text */
+  h1 {
+    font-size: 1.75rem !important;
+  }
+
+  h2 {
+    font-size: 1.5rem !important;
+  }
+
+  h3 {
+    font-size: 1.25rem !important;
+  }
 }
 
 /* Error Toast Styling */

@@ -114,12 +114,12 @@ export default function OrdersPage() {
 
   return (
     
-    <div className="min-h-screen bg-gray-50 py-50">
-      <div className="max-w-7xl mx-auto px-50 sm:px-10 lg:px-10">
+    <div className="min-h-screen bg-gray-50 py-8 sm:py-12 lg:py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">My Orders</h1>
-          <p className="mt-2 text-gray-600">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">My Orders</h1>
+          <p className="mt-2 text-sm sm:text-base text-gray-600">
             Track and manage your mushroom orders
           </p>
         </div>
@@ -147,8 +147,62 @@ export default function OrdersPage() {
           <div className="space-y-6">
             {orders.map((order) => (
               <div key={order.id} className="bg-white rounded-lg shadow overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-200">
-                  <div className="flex items-center justify-between">
+                <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
+                  {/* Mobile Layout */}
+                  <div className="block sm:hidden space-y-3">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="text-base font-medium text-gray-900">
+                          Order #{order.orderNumber}
+                        </h3>
+                        <p className="text-xs text-gray-600 mt-1">
+                          {new Date(order.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap ${
+                        order.status === 'DELIVERED' ? 'bg-green-light-6 text-green-dark' :
+                        order.status === 'SHIPPED' ? 'bg-blue-light-4 text-blue' :
+                        order.status === 'PROCESSING' ? 'bg-yellow-light-2 text-yellow-dark-2' :
+                        order.status === 'CONFIRMED' ? 'bg-blue-light-5 text-blue-dark' :
+                        order.status === 'PENDING' ? 'bg-gray-2 text-gray-7' :
+                        order.status === 'CANCELLED' ? 'bg-red-light-6 text-red-dark' :
+                        'bg-gray-2 text-gray-7'
+                      }`}>
+                        {order.status}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <p className="text-lg font-semibold text-gray-900">
+                        ₹{order.total.toFixed(2)}
+                      </p>
+                      <button
+                        onClick={() => handleDownloadInvoice(order.id)}
+                        disabled={downloadingInvoice === order.id}
+                        className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green hover:bg-green-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Download Invoice"
+                      >
+                        {downloadingInvoice === order.id ? (
+                          <>
+                            <svg className="animate-spin h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span className="ml-1.5">Loading...</span>
+                          </>
+                        ) : (
+                          <>
+                            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span className="ml-1.5">Invoice</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Desktop Layout */}
+                  <div className="hidden sm:flex items-center justify-between">
                     <div>
                       <h3 className="text-lg font-medium text-gray-900">
                         Order #{order.orderNumber}
@@ -201,11 +255,11 @@ export default function OrdersPage() {
                   </div>
                 </div>
                 
-                <div className="px-6 py-4">
+                <div className="px-4 sm:px-6 py-4">
                   <div className="space-y-3">
                     {order.orderItems.map((item) => (
-                      <div key={item.id} className="flex items-center space-x-4">
-                        <div className="flex-shrink-0 w-16 h-16 bg-gray-100 rounded-lg overflow-hidden">
+                      <div key={item.id} className="flex items-center space-x-3 sm:space-x-4">
+                        <div className="flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 rounded-lg overflow-hidden">
                           {item.product.imgs && (
                             <img
                               src={item.product.imgs.thumbnails?.[0] || '/images/placeholder.jpg'}
@@ -214,15 +268,15 @@ export default function OrdersPage() {
                             />
                           )}
                         </div>
-                        <div className="flex-1">
-                          <h4 className="text-sm font-medium text-gray-900">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-medium text-gray-900 truncate">
                             {item.product.title}
                           </h4>
-                          <p className="text-sm text-gray-600">
-                            Quantity: {item.quantity} × ₹{item.price}
+                          <p className="text-xs sm:text-sm text-gray-600">
+                            Qty: {item.quantity} × ₹{item.price}
                           </p>
                         </div>
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-medium text-gray-900 whitespace-nowrap">
                           ₹{(item.quantity * item.price).toFixed(2)}
                         </div>
                       </div>

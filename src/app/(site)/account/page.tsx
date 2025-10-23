@@ -4,9 +4,19 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+interface Order {
+  id: string;
+  orderNumber: string;
+  status: string;
+  total: number;
+  createdAt: string;
+}
+
 export default function AccountPage() {
   const { data: session, status } = useSession();
   const [loading, setLoading] = useState(true);
+  const [recentOrders, setRecentOrders] = useState<Order[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -18,6 +28,29 @@ export default function AccountPage() {
       setLoading(false);
     }
   }, [session, status, router]);
+
+  // Fetch recent orders
+  useEffect(() => {
+    const fetchRecentOrders = async () => {
+      if (!session?.user?.id) return;
+      
+      try {
+        const response = await fetch(`/api/orders?userId=${session.user.id}&limit=3`);
+        if (response.ok) {
+          const data = await response.json();
+          setRecentOrders(data.orders || []);
+        }
+      } catch (error) {
+        console.error("Error fetching recent orders:", error);
+      } finally {
+        setLoadingOrders(false);
+      }
+    };
+
+    if (session?.user) {
+      fetchRecentOrders();
+    }
+  }, [session]);
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: "/" });
@@ -36,12 +69,12 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-30">
+    <div className="min-h-screen bg-gray-50 py-8 sm:py-12 lg:py-16">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">My Account</h1>
-          <p className="mt-2 text-gray-600">
+        <div className="mb-6 mb-25">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">My Account</h1>
+          <p className="mt-2 text-sm sm:text-base text-gray-600">
             Manage your account settings and preferences
           </p>
         </div>
@@ -70,30 +103,71 @@ export default function AccountPage() {
             </div>
 
             {/* Recent Orders */}
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-lg shadow p-4 sm:p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-900">Recent Orders</h2>
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Recent Orders</h2>
                 <Link 
                   href="/orders"
-                  className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                  className="text-blue-600 hover:text-blue-700 text-xs sm:text-sm font-medium"
                 >
-                  View all orders
+                  View all
                 </Link>
               </div>
-              <div className="text-center py-8">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                  </svg>
+              {loadingOrders ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
                 </div>
-                <p className="text-gray-600">No recent orders</p>
-                <Link
-                  href="/shop"
-                  className="inline-flex items-center mt-4 px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-                >
-                  Start Shopping
-                </Link>
-              </div>
+              ) : recentOrders.length > 0 ? (
+                <div className="space-y-3">
+                  {recentOrders.map((order) => (
+                    <Link
+                      key={order.id}
+                      href="/orders"
+                      className="block p-3 sm:p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            Order #{order.orderNumber}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {new Date(order.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="ml-4 flex-shrink-0 text-right">
+                          <p className="text-sm font-semibold text-gray-900">
+                            ₹{order.total.toFixed(2)}
+                          </p>
+                          <span className={`inline-flex mt-1 px-2 py-0.5 text-xs font-medium rounded-full ${
+                            order.status === 'DELIVERED' ? 'bg-green-100 text-green-800' :
+                            order.status === 'SHIPPED' ? 'bg-blue-100 text-blue-800' :
+                            order.status === 'PROCESSING' ? 'bg-yellow-100 text-yellow-800' :
+                            order.status === 'CONFIRMED' ? 'bg-blue-100 text-blue-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {order.status}
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                    <svg className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                  </div>
+                  <p className="text-sm sm:text-base text-gray-600">No recent orders</p>
+                  <Link
+                    href="/shop"
+                    className="inline-flex items-center mt-4 px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                  >
+                    Start Shopping
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
 
@@ -112,6 +186,19 @@ export default function AccountPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                     </svg>
                     View Orders
+                  </div>
+                </Link>
+
+                <Link
+                  href="/addresses"
+                  className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-md border border-gray-200"
+                >
+                  <div className="flex items-center">
+                    <svg className="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    My Addresses
                   </div>
                 </Link>
                 
