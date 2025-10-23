@@ -460,15 +460,22 @@ const CheckoutWithOTP = () => {
       const data = await response.json();
       
       if (response.ok) {
-        // Clear the cart
+        // Clear the cart immediately
         dispatch(removeAllItemsFromCart());
         console.log('✅ Cart cleared after successful order');
+        
+        // Close OTP modal
+        setShowOTPModal(false);
+        setOtp("");
+        setCheckoutData(null);
         
         // Show success message
         toast.success(`Order placed successfully! Order Number: ${data.order.orderNumber}`, { duration: 5000 });
         
-        // Redirect to success page or orders page
-        router.push(`/orders?success=true&orderNumber=${data.order.orderNumber}`);
+        // Small delay to ensure cart is persisted before redirect
+        setTimeout(() => {
+          router.push(`/orders?success=true&orderNumber=${data.order.orderNumber}`);
+        }, 100);
       } else {
         setError(data.error || 'Failed to place order');
       }
