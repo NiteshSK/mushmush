@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if payment already exists for this order
-    const existingPayment = await prisma.payment.findFirst({
+    const existingPayment = await prisma.upi_payments.findFirst({
       where: { orderId: order.id }
     });
 
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check for duplicate transaction ID
-    const duplicateTransaction = await prisma.payment.findFirst({
+    const duplicateTransaction = await prisma.upi_payments.findFirst({
       where: { transactionId: upiTransactionId }
     });
 
@@ -100,16 +100,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Create payment record with PENDING status (requires admin verification)
-    const payment = await prisma.payment.create({
+    const payment = await prisma.upi_payments.create({
       data: {
+        id: `upi_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         orderId: order.id,
         amount,
-        paymentMethod: 'UPI',
+        // paymentMethod: 'UPI', // Not in schema
         transactionId: upiTransactionId,
-        upiId: upiId || null,
+        // upiId: upiId || null, // Not in schema
         status: 'PENDING', // Requires admin verification
-        paymentProof: paymentProofPath,
-        paidAt: new Date()
+        // paymentProof: paymentProofPath, // Not in schema
+        resourceType: 'order',
+        updatedAt: new Date()
+        // paidAt: new Date() // Not in schema
       }
     });
 
