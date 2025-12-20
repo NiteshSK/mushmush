@@ -15,14 +15,14 @@ const NewsGrid = () => {
     const triggerScraping = async () => {
       try {
         console.log('🔍 Checking if news scraping is needed...');
-        
+
         const response = await fetch('/api/admin/scrape-news/trigger', {
           method: 'POST'
         });
-        
+
         const result = await response.json();
         console.log('Scraping check result:', result);
-        
+
         if (result.shouldScrape) {
           console.log('✅ News scraping initiated');
         } else {
@@ -57,7 +57,40 @@ const NewsGrid = () => {
     }
   };
 
-  const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
+  const getPageNumbers = () => {
+    const delta = 2;
+    const range = [];
+    const rangeWithDots = [];
+    let l;
+
+    range.push(1);
+
+    if (totalPages <= 1) return [1];
+
+    for (let i = currentPage - delta; i <= currentPage + delta; i++) {
+      if (i < totalPages && i > 1) {
+        range.push(i);
+      }
+    }
+
+    range.push(totalPages);
+
+    for (let i of range) {
+      if (l) {
+        if (i - l === 2) {
+          rangeWithDots.push(l + 1);
+        } else if (i - l !== 1) {
+          rangeWithDots.push('...');
+        }
+      }
+      rangeWithDots.push(i);
+      l = i;
+    }
+
+    return rangeWithDots;
+  };
+
+  const pageNumbers = getPageNumbers();
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -136,24 +169,25 @@ const NewsGrid = () => {
               <button
                 onClick={handlePrevPage}
                 disabled={currentPage === 1}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                  currentPage === 1
-                    ? "bg-gray-3 text-gray-5 cursor-not-allowed"
-                    : "bg-white text-dark hover:bg-blue hover:text-white border border-gray-3"
-                }`}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${currentPage === 1
+                  ? "bg-gray-3 text-gray-5 cursor-not-allowed"
+                  : "bg-white text-dark hover:bg-blue hover:text-white border border-gray-3"
+                  }`}
               >
                 Previous
               </button>
 
-              {pageNumbers.map((number) => (
+              {pageNumbers.map((number, index) => (
                 <button
-                  key={number}
-                  onClick={() => handlePageChange(number)}
-                  className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                    currentPage === number
+                  key={index}
+                  onClick={() => typeof number === 'number' ? handlePageChange(number) : null}
+                  disabled={typeof number !== 'number'}
+                  className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors duration-200 ${number === currentPage
                       ? "bg-blue text-white"
-                      : "bg-white text-dark hover:bg-blue hover:text-white border border-gray-3"
-                  }`}
+                      : typeof number !== 'number'
+                        ? "bg-transparent text-gray-5 cursor-default"
+                        : "bg-white text-dark hover:bg-blue hover:text-white border border-gray-3"
+                    }`}
                 >
                   {number}
                 </button>
@@ -162,11 +196,10 @@ const NewsGrid = () => {
               <button
                 onClick={handleNextPage}
                 disabled={currentPage === totalPages}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                  currentPage === totalPages
-                    ? "bg-gray-3 text-gray-5 cursor-not-allowed"
-                    : "bg-white text-dark hover:bg-blue hover:text-white border border-gray-3"
-                }`}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${currentPage === totalPages
+                  ? "bg-gray-3 text-gray-5 cursor-not-allowed"
+                  : "bg-white text-dark hover:bg-blue hover:text-white border border-gray-3"
+                  }`}
               >
                 Next
               </button>
