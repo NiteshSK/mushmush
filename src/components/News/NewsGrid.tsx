@@ -102,13 +102,13 @@ const NewsGrid = () => {
     <>
       <Breadcrumb title={"News"} pages={["news"]} />
       <section className="overflow-hidden py-20 bg-gray-2">
-        <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
+        <div className="max-w-[1170px] w-full mx-auto px-2 sm:px-8 xl:px-0">
           <div className="text-center mb-10">
             <h1 className="font-bold text-dark text-3xl sm:text-4xl xl:text-[45px] xl:leading-[55px] mb-4">
               Latest News
             </h1>
             <p className="text-base text-gray-6 max-w-[600px] mx-auto">
-              Stay informed with the latest updates, announcements, and news from MushMush
+              Stay informed with the latest updates, announcements, and news on Mushroom
             </p>
           </div>
 
