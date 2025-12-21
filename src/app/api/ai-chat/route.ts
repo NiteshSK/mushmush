@@ -23,6 +23,8 @@ export async function POST(req: Request) {
             return new Response("AI key not configured", { status: 500 });
         }
 
+        console.log("DEBUG: AI Key Source:", process.env.GOOGLE_GENERATIVE_AI_API_KEY ? "GOOGLE_GENERATIVE_AI_API_KEY" : "GEMINI_API_KEY");
+
         // Get the last user message for RAG context
         const lastMessage = messages[messages.length - 1];
         let lastUserMessage = "";
