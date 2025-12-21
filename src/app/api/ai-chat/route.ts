@@ -1,34 +1,35 @@
-import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { streamText } from "ai";
+import { google } from "@ai-sdk/google";
 import { prisma } from "@/lib/prisma";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+// Allow streaming responses up to 30 seconds
+export const maxDuration = 30;
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
     try {
         const { messages } = await req.json();
 
         if (!messages || !Array.isArray(messages)) {
-            return NextResponse.json({ error: "Invalid messages" }, { status: 400 });
+            return new Response("Invalid messages", { status: 400 });
         }
 
         if (!process.env.GEMINI_API_KEY) {
             console.error("DEBUG: GEMINI_API_KEY is missing from environment variables");
-            return NextResponse.json(
-                { error: "AI key not configured. Please add GEMINI_API_KEY to your .env file." },
-                { status: 500 }
-            );
+            return new Response("AI key not configured", { status: 500 });
         }
 
-        const lastMessage = messages[messages.length - 1].content;
+        // Get the last user message for RAG context
+        const lastUserMessage = messages
+            .filter((m: any) => m.role === "user")
+            .pop()?.content || "";
 
         // Search for relevant context in the DB
         const [products, programs, blogs, featured, banners] = await Promise.all([
             prisma.product.findMany({
                 where: {
                     OR: [
-                        { title: { contains: lastMessage, mode: "insensitive" } },
-                        { description: { contains: lastMessage, mode: "insensitive" } },
+                        { title: { contains: lastUserMessage, mode: "insensitive" } },
+                        { description: { contains: lastUserMessage, mode: "insensitive" } },
                     ],
                 },
                 take: 3,
@@ -36,8 +37,8 @@ export async function POST(req: NextRequest) {
             prisma.trainingProgram.findMany({
                 where: {
                     OR: [
-                        { name: { contains: lastMessage, mode: "insensitive" } },
-                        { description: { contains: lastMessage, mode: "insensitive" } },
+                        { name: { contains: lastUserMessage, mode: "insensitive" } },
+                        { description: { contains: lastUserMessage, mode: "insensitive" } },
                     ],
                 },
                 take: 2,
@@ -45,8 +46,8 @@ export async function POST(req: NextRequest) {
             prisma.blogPost.findMany({
                 where: {
                     OR: [
-                        { title: { contains: lastMessage, mode: "insensitive" } },
-                        { content: { contains: lastMessage, mode: "insensitive" } },
+                        { title: { contains: lastUserMessage, mode: "insensitive" } },
+                        { content: { contains: lastUserMessage, mode: "insensitive" } },
                     ],
                     published: true,
                 },
@@ -96,47 +97,15 @@ Our main offerings:
 
 Answer concisely and helpfully.`;
 
-        let result;
-        try {
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-            result = await model.generateContent([
-                systemPrompt,
-                ...messages.map((m: any) => `${m.role === "user" ? "User" : "Mushy"}: ${m.content}`),
-            ]);
-        } catch (modelError: any) {
-            console.error("DEBUG: Primary model (gemini-1.5-flash) failed. Checking available models...");
-
-            // diagnostic: list models to see what is available
-            try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${process.env.GEMINI_API_KEY}`);
-                const data = await response.json();
-                console.log("DEBUG: Available Models for this API Key:", JSON.stringify(data, null, 2));
-
-                // Try fallback to gemini-pro if available
-                console.log("DEBUG: Attempting fallback to gemini-pro...");
-                const fallbackModel = genAI.getGenerativeModel({ model: "gemini-pro" });
-                result = await fallbackModel.generateContent([
-                    systemPrompt,
-                    ...messages.map((m: any) => `${m.role === "user" ? "User" : "Mushy"}: ${m.content}`),
-                ]);
-            } catch (innerError: any) {
-                throw new Error(`Both primary and fallback models failed. ${modelError.message}`);
-            }
-        }
-
-        const response = await result.response;
-        const text = response.text();
-
-        return NextResponse.json({ content: text });
-    } catch (error: any) {
-        console.error("AI Chat Error - Full Details:", {
-            message: error.message,
-            stack: error.stack,
-            cause: error.cause
+        const result = streamText({
+            model: google("gemini-2.0-flash"),
+            system: systemPrompt,
+            messages,
         });
-        return NextResponse.json(
-            { error: `Gemini Error: ${error.message}. Check server logs for available models.` },
-            { status: 500 }
-        );
+
+        return result.toDataStreamResponse();
+    } catch (error: any) {
+        console.error("AI Chat Error:", error);
+        return new Response("Failed to generate response", { status: 500 });
     }
 }

@@ -2,57 +2,28 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, User, Bot, Loader2, Sparkles } from "lucide-react";
-
-interface Message {
-    role: "user" | "assistant";
-    content: string;
-}
+import { useChat } from "ai/react";
 
 const ChatBot = () => {
     const [isOpen, setIsOpen] = useState(false);
-    const [messages, setMessages] = useState<Message[]>([
-        { role: "assistant", content: "Hi! I'm Mushy, your AI guide. How can I help you today?" }
-    ]);
-    const [input, setInput] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat({
+        api: "/api/ai-chat",
+        initialMessages: [
+            { id: "welcome", role: "assistant", content: "Hi! I'm Mushy, your AI guide. How can I help you today?" }
+        ],
+    });
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
     useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!input.trim() || isLoading) return;
-
-        const userMessage = input.trim();
-        setInput("");
-        setMessages(prev => [...prev, { role: "user", content: userMessage }]);
-        setIsLoading(true);
-
-        try {
-            const response = await fetch("/api/ai-chat", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    messages: [...messages, { role: "user", content: userMessage }]
-                }),
-            });
-
-            if (!response.ok) throw new Error("Failed to send message");
-
-            const data = await response.json();
-            setMessages(prev => [...prev, { role: "assistant", content: data.content }]);
-        } catch (error) {
-            setMessages(prev => [...prev, { role: "assistant", content: "Sorry, I encountered an error. Please try again later." }]);
-        } finally {
-            setIsLoading(false);
+        if (isOpen) {
+            scrollToBottom();
         }
-    };
+    }, [messages, isOpen]);
 
     return (
         <div className="fixed bottom-6 right-6 z-[9999]">
@@ -74,7 +45,7 @@ const ChatBot = () => {
 
             {/* Chat Window */}
             {isOpen && (
-                <div className="bg-white/80 backdrop-blur-md border border-white/20 rounded-2xl shadow-2xl w-[380px] h-[520px] flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 duration-300 transition-all">
+                <div className="bg-white/90 backdrop-blur-md border border-white/20 rounded-2xl shadow-2xl w-[380px] h-[520px] flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 duration-300 transition-all">
                     {/* Header */}
                     <div className="bg-gradient-to-r from-blue to-blue-dark p-4 flex justify-between items-center text-white">
                         <div className="flex items-center gap-2">
@@ -99,15 +70,15 @@ const ChatBot = () => {
 
                     {/* Messages */}
                     <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50">
-                        {messages.map((msg, i) => (
+                        {messages.map((msg) => (
                             <div
-                                key={i}
+                                key={msg.id}
                                 className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                             >
                                 <div
                                     className={`max-w-[85%] p-3 rounded-2xl text-sm ${msg.role === "user"
-                                            ? "bg-blue text-white rounded-tr-none"
-                                            : "bg-white border border-gray-100 shadow-sm rounded-tl-none text-gray-800"
+                                        ? "bg-blue text-white rounded-tr-none"
+                                        : "bg-white border border-gray-100 shadow-sm rounded-tl-none text-gray-800"
                                         }`}
                                 >
                                     <div className="flex items-center gap-2 mb-1">
@@ -124,16 +95,23 @@ const ChatBot = () => {
                                             {msg.role === "user" ? "You" : "Mushy"}
                                         </span>
                                     </div>
-                                    {msg.content}
+                                    <div className="whitespace-pre-wrap leading-relaxed">
+                                        {msg.content}
+                                    </div>
                                 </div>
                             </div>
                         ))}
-                        {isLoading && (
+                        {isLoading && messages[messages.length - 1]?.role === "user" && (
                             <div className="flex justify-start">
                                 <div className="bg-white border border-gray-100 shadow-sm rounded-2xl rounded-tl-none p-3 max-w-[85%] flex items-center gap-2">
                                     <Loader2 className="animate-spin text-blue" size={16} />
-                                    <span className="text-xs text-gray-500 italic">Thinking...</span>
+                                    <span className="text-xs text-gray-500 italic">Mushy is thinking...</span>
                                 </div>
+                            </div>
+                        )}
+                        {error && (
+                            <div className="p-2 bg-red-50 text-red-500 text-xs rounded-lg border border-red-100">
+                                Connection lost. Please try again or check your API key.
                             </div>
                         )}
                         <div ref={messagesEndRef} />
@@ -147,7 +125,7 @@ const ChatBot = () => {
                         <input
                             type="text"
                             value={input}
-                            onChange={(e) => setInput(e.target.value)}
+                            onChange={handleInputChange}
                             placeholder="Ask about training, products..."
                             className="flex-1 text-sm border-none focus:ring-0 focus:outline-none placeholder:text-gray-400"
                             disabled={isLoading}
@@ -156,8 +134,8 @@ const ChatBot = () => {
                             type="submit"
                             disabled={!input.trim() || isLoading}
                             className={`p-2 rounded-lg transition-all ${input.trim() && !isLoading
-                                    ? "bg-blue text-white shadow-md hover:scale-105 active:scale-95"
-                                    : "bg-gray-100 text-gray-400"
+                                ? "bg-blue text-white shadow-md hover:scale-105 active:scale-95"
+                                : "bg-gray-100 text-gray-400"
                                 }`}
                         >
                             <Send size={18} />
@@ -166,7 +144,7 @@ const ChatBot = () => {
 
                     {/* Footer */}
                     <div className="px-4 py-2 bg-gray-50 text-[10px] text-center text-gray-400">
-                        Powered by Mushmush AI • Always helpful
+                        Powered by Mushmush AI • Real-time Streaming
                     </div>
                 </div>
             )}
