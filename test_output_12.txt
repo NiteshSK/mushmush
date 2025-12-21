@@ -1,0 +1,553 @@
+
+> next-commerce-community@0.1.0 test
+> jest src/components/Checkout/__tests__/AddressFormModal.test.tsx
+
+  console.log
+    Street changed: 123 Main St
+
+      at log (src/components/Checkout/AddressFormModal.tsx:136:25)
+
+  console.log
+    State changed: Maharashtra
+
+      at log (src/components/Checkout/AddressFormModal.tsx:168:27)
+
+  console.log
+    Street changed: Test Street
+
+      at log (src/components/Checkout/AddressFormModal.tsx:136:25)
+
+  console.log
+    Test set toast.error.testId to: unique-id-123
+
+      at Object.log (src/components/Checkout/__tests__/AddressFormModal.test.tsx:246:15)
+
+  console.log
+    Street changed: 123 Main St
+
+      at log (src/components/Checkout/AddressFormModal.tsx:136:25)
+
+  console.log
+    State changed: Maharashtra
+
+      at log (src/components/Checkout/AddressFormModal.tsx:168:27)
+
+  console.log
+    Component toast.error.testId: unique-id-123
+
+      at log (src/components/Checkout/AddressFormModal.tsx:58:15)
+
+  console.log
+    Street changed: 123 Main St
+
+      at log (src/components/Checkout/AddressFormModal.tsx:136:25)
+
+  console.log
+    State changed: Maharashtra
+
+      at log (src/components/Checkout/AddressFormModal.tsx:168:27)
+
+  console.log
+    Street changed: 123 Main St
+
+      at log (src/components/Checkout/AddressFormModal.tsx:136:25)
+
+  console.log
+    State changed: Maharashtra
+
+      at log (src/components/Checkout/AddressFormModal.tsx:168:27)
+
+  console.log
+    Street changed: 123 Main St
+
+      at log (src/components/Checkout/AddressFormModal.tsx:136:25)
+
+  console.log
+    State changed: Maharashtra
+
+      at log (src/components/Checkout/AddressFormModal.tsx:168:27)
+
+  console.error
+    Error adding address: Error: Network error
+        at Object.<anonymous> (/Users/kataria/projects/mushmush-website/src/components/Checkout/__tests__/AddressFormModal.test.tsx:377:57)
+        at Promise.then.completed (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/utils.js:298:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/utils.js:231:10)
+        at _callCircusTest (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:316:40)
+        at _runTest (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:252:3)
+        at _runTestsForDescribeBlock (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:126:9)
+        at _runTestsForDescribeBlock (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:121:9)
+        at _runTestsForDescribeBlock (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:121:9)
+        at run (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:71:3)
+        at runAndTransformResultsToJestFormat (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+        at jestAdapter (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+        at runTestInternal (/Users/kataria/projects/mushmush-website/node_modules/jest-runner/build/runTest.js:367:16)
+        at runTest (/Users/kataria/projects/mushmush-website/node_modules/jest-runner/build/runTest.js:444:34)
+
+       98 |       }
+       99 |     } catch (error) {
+    > 100 |       console.error("Error adding address:", error);
+          |               ^
+      101 |       toast.error("Failed to add address");
+      102 |     } finally {
+      103 |       setLoading(false);
+
+      at error (src/components/Checkout/AddressFormModal.tsx:100:15)
+
+  console.log
+    Street changed: 123 Main St
+
+      at log (src/components/Checkout/AddressFormModal.tsx:136:25)
+
+  console.log
+    State changed: Maharashtra
+
+      at log (src/components/Checkout/AddressFormModal.tsx:168:27)
+
+  console.log
+    Street changed: 123 Main St
+
+      at log (src/components/Checkout/AddressFormModal.tsx:136:25)
+
+  console.log
+    State changed: Maharashtra
+
+      at log (src/components/Checkout/AddressFormModal.tsx:168:27)
+
+  console.log
+    Street changed: 123 Main St
+
+      at log (src/components/Checkout/AddressFormModal.tsx:136:25)
+
+  console.log
+    State changed: Maharashtra
+
+      at log (src/components/Checkout/AddressFormModal.tsx:168:27)
+
+FAIL src/components/Checkout/__tests__/AddressFormModal.test.tsx
+  AddressFormModal
+    Unit Tests
+      ✓ should use the mocked toast (5 ms)
+      ✓ should not render when isOpen is false (20 ms)
+      ✓ should render modal when isOpen is true (81 ms)
+      ✓ should render custom title when provided (40 ms)
+      ✓ should render all form fields (38 ms)
+      ✓ should call onClose when close button is clicked (67 ms)
+      ✓ should call onClose when Cancel button is clicked (25 ms)
+      ✕ should validate form inputs (1106 ms)
+      ✓ should only allow numeric input in PIN code field (60 ms)
+      ✓ should limit PIN code to 6 digits (42 ms)
+      ✓ should have Country field disabled with value "India" (7 ms)
+      ✓ should render all Indian states in dropdown (86 ms)
+    Integration Tests
+      ✓ should update input value on change (11 ms)
+      ✓ should display error for empty fields (14 ms)
+      ✓ should validate form inputs (29 ms)
+      ✓ should submit form with valid data (41 ms)
+      ✓ should handle API error gracefully (29 ms)
+      ✓ should handle network error (27 ms)
+      ✓ should submit with isDefault checked (31 ms)
+      ✓ should reset form after successful submission (24 ms)
+      ✓ should show loading state during submission (125 ms)
+    Accessibility Tests
+      ✓ should have proper ARIA labels (12 ms)
+      ✓ should mark required fields with asterisk (5 ms)
+      ✓ should be keyboard navigable (15 ms)
+
+  ● AddressFormModal › Unit Tests › should validate form inputs
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    Expected: "PIN code must be 6 digits"
+
+    Number of calls: 0
+
+    Ignored nodes: comments, script, style
+    [36m<html>[39m
+      [36m<head />[39m
+      [36m<body>[39m
+        [36m<div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between"[39m
+              [36m>[39m
+                [36m<h2[39m
+                  [33mclass[39m=[32m"text-xl font-bold text-gray-900"[39m
+                [36m>[39m
+                  [0mAdd New Address[0m
+                [36m</h2>[39m
+                [36m<button[39m
+                  [33maria-label[39m=[32m"Close"[39m
+                  [33mclass[39m=[32m"text-gray-400 hover:text-gray-600 transition-colors"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33mclass[39m=[32m"w-6 h-6"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M6 18L18 6M6 6l12 12"[39m
+                      [33mstroke-linecap[39m=[32m"round"[39m
+                      [33mstroke-linejoin[39m=[32m"round"[39m
+                      [33mstroke-width[39m=[32m"2"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                [36m</button>[39m
+              [36m</div>[39m
+              [36m<form[39m
+                [33mclass[39m=[32m"p-6 space-y-4"[39m
+              [36m>[39m
+                [36m<div>[39m
+                  [36m<label[39m
+                    [33mclass[39m=[32m"block text-sm font-medium text-gray-700 mb-2"[39m
+                    [33mfor[39m=[32m"street"[39m
+                  [36m>[39m
+                    [0mStreet Address [0m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"text-red-500"[39m
+                    [36m>[39m
+                      [0m*[0m
+                    [36m</span>[39m
+                  [36m</label>[39m
+                  [36m<input[39m
+                    [33mclass[39m=[32m"w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"[39m
+                    [33mid[39m=[32m"street"[39m
+                    [33mplaceholder[39m=[32m"House no, Building name, Street"[39m
+                    [33mrequired[39m=[32m""[39m
+                    [33mtype[39m=[32m"text"[39m
+                    [33mvalue[39m=[32m"123 Main St"[39m
+                  [36m/>[39m
+                [36m</div>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"grid grid-cols-2 gap-4"[39m
+                [36m>[39m
+                  [36m<div>[39m
+                    [36m<label[39m
+                      [33mclass[39m=[32m"block text-sm font-medium text-gray-700 mb-2"[39m
+                      [33mfor[39m=[32m"city"[39m
+                    [36m>[39m
+                      [0mCity [0m
+                      [36m<span[39m
+                        [33mclass[39m=[32m"text-red-500"[39m
+                      [36m>[39m
+                        [0m*[0m
+                      [36m</span>[39m
+                    [36m</label>[39m
+                    [36m<input[39m
+                      [33mclass[39m=[32m"w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"[39m
+                      [33mid[39m=[32m"city"[39m
+                      [33mrequired[39m=[32m""[39m
+                      [33mtype[39m=[32m"text"[39m
+                      [33mvalue[39m=[32m"Mumbai"[39m
+                    [36m/>[39m
+                  [36m</div>[39m
+                  [36m<div>[39m
+                    [36m<label[39m
+                      [33mclass[39m=[32m"block text-sm font-medium text-gray-700 mb-2"[39m
+                      [33mfor[39m=[32m"state"[39m
+                    [36m>[39m
+                      [0mState [0m
+                      [36m<span[39m
+                        [33mclass[39m=[32m"text-red-500"[39m
+                      [36m>[39m
+                        [0m*[0m
+                      [36m</span>[39m
+                    [36m</label>[39m
+                    [36m<select[39m
+                      [33mclass[39m=[32m"w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"[39m
+                      [33mid[39m=[32m"state"[39m
+                      [33mrequired[39m=[32m""[39m
+                    [36m>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m""[39m
+                      [36m>[39m
+                        [0mSelect State[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Andhra Pradesh"[39m
+                      [36m>[39m
+                        [0mAndhra Pradesh[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Arunachal Pradesh"[39m
+                      [36m>[39m
+                        [0mArunachal Pradesh[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Assam"[39m
+                      [36m>[39m
+                        [0mAssam[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Bihar"[39m
+                      [36m>[39m
+                        [0mBihar[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Chhattisgarh"[39m
+                      [36m>[39m
+                        [0mChhattisgarh[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Goa"[39m
+                      [36m>[39m
+                        [0mGoa[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Gujarat"[39m
+                      [36m>[39m
+                        [0mGujarat[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Haryana"[39m
+                      [36m>[39m
+                        [0mHaryana[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Himachal Pradesh"[39m
+                      [36m>[39m
+                        [0mHimachal Pradesh[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Jharkhand"[39m
+                      [36m>[39m
+                        [0mJharkhand[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Karnataka"[39m
+                      [36m>[39m
+                        [0mKarnataka[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Kerala"[39m
+                      [36m>[39m
+                        [0mKerala[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Madhya Pradesh"[39m
+                      [36m>[39m
+                        [0mMadhya Pradesh[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Maharashtra"[39m
+                      [36m>[39m
+                        [0mMaharashtra[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Manipur"[39m
+                      [36m>[39m
+                        [0mManipur[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Meghalaya"[39m
+                      [36m>[39m
+                        [0mMeghalaya[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Mizoram"[39m
+                      [36m>[39m
+                        [0mMizoram[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Nagaland"[39m
+                      [36m>[39m
+                        [0mNagaland[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Odisha"[39m
+                      [36m>[39m
+                        [0mOdisha[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Punjab"[39m
+                      [36m>[39m
+                        [0mPunjab[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Rajasthan"[39m
+                      [36m>[39m
+                        [0mRajasthan[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Sikkim"[39m
+                      [36m>[39m
+                        [0mSikkim[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Tamil Nadu"[39m
+                      [36m>[39m
+                        [0mTamil Nadu[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Telangana"[39m
+                      [36m>[39m
+                        [0mTelangana[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Tripura"[39m
+                      [36m>[39m
+                        [0mTripura[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Uttar Pradesh"[39m
+                      [36m>[39m
+                        [0mUttar Pradesh[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Uttarakhand"[39m
+                      [36m>[39m
+                        [0mUttarakhand[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"West Bengal"[39m
+                      [36m>[39m
+                        [0mWest Bengal[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Andaman and Nicobar Islands"[39m
+                      [36m>[39m
+                        [0mAndaman and Nicobar Islands[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Chandigarh"[39m
+                      [36m>[39m
+                        [0mChandigarh[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Dadra and Nagar Haveli and Daman and Diu"[39m
+                      [36m>[39m
+                        [0mDadra and Nagar Haveli and Daman and Diu[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Delhi"[39m
+                      [36m>[39m
+                        [0mDelhi[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Jammu and Kashmir"[39m
+                      [36m>[39m
+                        [0mJammu and Kashmir[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Ladakh"[39m
+                      [36m>[39m
+                        [0mLadakh[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Lakshadweep"[39m
+                      [36m>[39m
+                        [0mLakshadweep[0m
+                      [36m</option>[39m
+                      [36m<option[39m
+                        [33mvalue[39m=[32m"Puducherry"[39m
+                      [36m>[39m
+                        [0mPuducherry[0m
+                      [36m</option>[39m
+                    [36m</select>[39m
+                  [36m</div>[39m
+                [36m</div>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"grid grid-cols-2 gap-4"[39m
+                [36m>[39m
+                  [36m<div>[39m
+                    [36m<label[39m
+                      [33mclass[39m=[32m"block text-sm font-medium text-gray-700 mb-2"[39m
+                      [33mfor[39m=[32m"zip"[39m
+                    [36m>[39m
+                      [0mPIN Code [0m
+                      [36m<span[39m
+                        [33mclass[39m=[32m"text-red-500"[39m
+                      [36m>[39m
+                        [0m*[0m
+                      [36m</span>[39m
+                    [36m</label>[39m
+                    [36m<input[39m
+                      [33mclass[39m=[32m"w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"[39m
+                      [33mid[39m=[32m"zip"[39m
+                      [33mmaxlength[39m=[32m"6"[39m
+                      [33mpattern[39m=[32m"\\d{6}"[39m
+                      [33mplaceholder[39m=[32m"6-digit PIN code"[39m
+                      [33mrequired[39m=[32m""[39m
+                      [33mtype[39m=[32m"text"[39m
+                      [33mvalue[39m=[32m"12345"[39m
+                    [36m/>[39m
+                  [36m</div>[39m
+                  [36m<div>[39m
+                    [36m<label[39m
+                      [33mclass[39m=[32m"block text-sm font-medium text-gray-700 mb-2"[39m
+                      [33mfor[39m=[32m"country"[39m
+                    [36m>[39m
+                      [0mCountry[0m
+                    [36m</label>[39m
+                    [36m<input[39m
+                      [33mclass[39m=[32m"w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 text-gray-600"[39m
+                      [33mdisabled[39m=[32m""[39m
+                      [33mid[39m=[32m"country"[39m
+                      [33mtype[39m=[32m"text"[39m
+                      [33mvalue[39m=[32m"India"[39m
+                    [36m/>[39m
+                  [36m</div>[39m
+                [36m</div>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex items-center pt-2"[39m
+                [36m>[39m
+                  [36m<input[39m
+                    [33mclass[39m=[32m"h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"[39m
+                    [33mid[39m=[32m"isDefault"[39m
+                    [33mtype[39m=[32m"checkbox"[39m
+                  [36m/>[39m
+                  [36m<label[39m
+                    [33mclass[39m=[32m"ml-2 block text-sm text-gray-900"[39m
+                    [33mfor[39m=[32m"isDefault"[39m
+                  [36m>[39m
+                    [0mSet as default address[0m
+                  [36m</label>[39m
+                [36m</div>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex items-center space-x-4 pt-4 border-t border-gray-200"[39m
+                [36m>[39m
+                  [36m<button[39m
+                    [33mclass[39m=[32m"inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark"[39m
+                    [33mtype[39m=[32m"submit"[39m
+                  [36m>[39m
+                    [0mAdd Address[0m
+                  [36m</button>[39m
+                  [36m<button[39m
+                    [33mclass[39m=[32m"flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors"[39m
+                    [33mtype[39m=[32m"button"[39m
+                  [36m>[39m
+                    [0mCancel[0m
+                  [36m</button>[39m
+                [36m</div>[39m
+              [36m</form>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</body>[39m
+    [36m</html>[39m
+
+      135 |
+      136 |       await waitFor(() => {
+    > 137 |         expect(toast.error).toHaveBeenCalledWith('PIN code must be 6 digits');
+          |                             ^
+      138 |       });
+      139 |     });
+      140 |
+
+      at toHaveBeenCalledWith (src/components/Checkout/__tests__/AddressFormModal.test.tsx:137:29)
+      at runWithExpensiveErrorDiagnosticsDisabled (node_modules/@testing-library/dom/dist/config.js:47:12)
+      at checkCallback (node_modules/@testing-library/dom/dist/wait-for.js:124:77)
+      at checkRealTimersCallback (node_modules/@testing-library/dom/dist/wait-for.js:118:16)
+      at Timeout.task [as _onTimeout] (node_modules/jsdom/lib/jsdom/browser/Window.js:520:19)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 23 passed, 24 total
+Snapshots:   0 total
+Time:        3.172 s
+Ran all test suites matching /src\/components\/Checkout\/__tests__\/AddressFormModal.test.tsx/i.

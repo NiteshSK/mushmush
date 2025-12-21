@@ -1,0 +1,156 @@
+
+> next-commerce-community@0.1.0 test
+> jest src/components/Checkout/__tests__/AddressFormModal.test.tsx
+
+  console.log
+    Street changed: 123 Main St
+
+      at log (src/components/Checkout/AddressFormModal.tsx:134:25)
+
+  console.log
+    State changed: Maharashtra
+
+      at log (src/components/Checkout/AddressFormModal.tsx:166:27)
+
+  console.log
+    Street changed: Test Street
+
+      at log (src/components/Checkout/AddressFormModal.tsx:134:25)
+
+  console.log
+    Test set toast.error.testId to: unique-id-123
+
+      at Object.log (src/components/Checkout/__tests__/AddressFormModal.test.tsx:248:15)
+
+  console.log
+    Street changed: 123 Main St
+
+      at log (src/components/Checkout/AddressFormModal.tsx:134:25)
+
+  console.log
+    State changed: Maharashtra
+
+      at log (src/components/Checkout/AddressFormModal.tsx:166:27)
+
+  console.log
+    Street changed: 123 Main St
+
+      at log (src/components/Checkout/AddressFormModal.tsx:134:25)
+
+  console.log
+    State changed: Maharashtra
+
+      at log (src/components/Checkout/AddressFormModal.tsx:166:27)
+
+  console.log
+    Street changed: 123 Main St
+
+      at log (src/components/Checkout/AddressFormModal.tsx:134:25)
+
+  console.log
+    State changed: Maharashtra
+
+      at log (src/components/Checkout/AddressFormModal.tsx:166:27)
+
+  console.log
+    Street changed: 123 Main St
+
+      at log (src/components/Checkout/AddressFormModal.tsx:134:25)
+
+  console.log
+    State changed: Maharashtra
+
+      at log (src/components/Checkout/AddressFormModal.tsx:166:27)
+
+  console.error
+    Error adding address: Error: Network error
+        at Object.<anonymous> (/Users/kataria/projects/mushmush-website/src/components/Checkout/__tests__/AddressFormModal.test.tsx:381:57)
+        at Promise.then.completed (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/utils.js:298:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/utils.js:231:10)
+        at _callCircusTest (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:316:40)
+        at _runTest (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:252:3)
+        at _runTestsForDescribeBlock (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:126:9)
+        at _runTestsForDescribeBlock (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:121:9)
+        at _runTestsForDescribeBlock (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:121:9)
+        at run (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:71:3)
+        at runAndTransformResultsToJestFormat (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+        at jestAdapter (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+        at runTestInternal (/Users/kataria/projects/mushmush-website/node_modules/jest-runner/build/runTest.js:367:16)
+        at runTest (/Users/kataria/projects/mushmush-website/node_modules/jest-runner/build/runTest.js:444:34)
+
+       96 |       }
+       97 |     } catch (error) {
+    >  98 |       console.error("Error adding address:", error);
+          |               ^
+       99 |       toast.error("Failed to add address");
+      100 |     } finally {
+      101 |       setLoading(false);
+
+      at error (src/components/Checkout/AddressFormModal.tsx:98:15)
+
+  console.log
+    Street changed: 123 Main St
+
+      at log (src/components/Checkout/AddressFormModal.tsx:134:25)
+
+  console.log
+    State changed: Maharashtra
+
+      at log (src/components/Checkout/AddressFormModal.tsx:166:27)
+
+  console.log
+    Street changed: 123 Main St
+
+      at log (src/components/Checkout/AddressFormModal.tsx:134:25)
+
+  console.log
+    State changed: Maharashtra
+
+      at log (src/components/Checkout/AddressFormModal.tsx:166:27)
+
+  console.log
+    Street changed: 123 Main St
+
+      at log (src/components/Checkout/AddressFormModal.tsx:134:25)
+
+  console.log
+    State changed: Maharashtra
+
+      at log (src/components/Checkout/AddressFormModal.tsx:166:27)
+
+PASS src/components/Checkout/__tests__/AddressFormModal.test.tsx
+  AddressFormModal
+    Unit Tests
+      ✓ should use the mocked toast (3 ms)
+      ✓ should not render when isOpen is false (10 ms)
+      ✓ should render modal when isOpen is true (27 ms)
+      ✓ should render custom title when provided (8 ms)
+      ✓ should render all form fields (16 ms)
+      ✓ should call onClose when close button is clicked (36 ms)
+      ✓ should call onClose when Cancel button is clicked (15 ms)
+      ✓ should validate form inputs (59 ms)
+      ✓ should only allow numeric input in PIN code field (52 ms)
+      ✓ should limit PIN code to 6 digits (41 ms)
+      ✓ should have Country field disabled with value "India" (6 ms)
+      ✓ should render all Indian states in dropdown (80 ms)
+    Integration Tests
+      ✓ should update input value on change (9 ms)
+      ✓ should display error for empty fields (14 ms)
+      ✓ should validate form inputs (35 ms)
+      ✓ should submit form with valid data (36 ms)
+      ✓ should handle API error gracefully (30 ms)
+      ✓ should handle network error (45 ms)
+      ✓ should submit with isDefault checked (32 ms)
+      ✓ should reset form after successful submission (34 ms)
+      ✓ should show loading state during submission (127 ms)
+    Accessibility Tests
+      ✓ should have proper ARIA labels (7 ms)
+      ✓ should mark required fields with asterisk (6 ms)
+      ✓ should be keyboard navigable (16 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       24 passed, 24 total
+Snapshots:   0 total
+Time:        1.681 s, estimated 3 s
+Ran all test suites matching /src\/components\/Checkout\/__tests__\/AddressFormModal.test.tsx/i.

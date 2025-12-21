@@ -39,7 +39,7 @@ const MyAccount = () => {
 
                   <div>
                     <p className="font-medium text-dark mb-0.5">
-                    Mush Agro Products
+                      Mush Agro Products
                     </p>
                     <p className="text-custom-xs">Member Since Sep 2020</p>
                   </div>
@@ -49,11 +49,10 @@ const MyAccount = () => {
                   <div className="flex flex-wrap xl:flex-nowrap xl:flex-col gap-4">
                     <button
                       onClick={() => setActiveTab("dashboard")}
-                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
-                        activeTab === "dashboard"
-                          ? "text-white bg-blue"
-                          : "text-dark-2 bg-gray-1"
-                      }`}
+                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${activeTab === "dashboard"
+                        ? "text-white bg-blue"
+                        : "text-dark-2 bg-gray-1"
+                        }`}
                     >
                       <svg
                         className="fill-current"
@@ -92,11 +91,10 @@ const MyAccount = () => {
                     </button>
                     <button
                       onClick={() => setActiveTab("orders")}
-                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
-                        activeTab === "orders"
-                          ? "text-white bg-blue"
-                          : "text-dark-2 bg-gray-1"
-                      }`}
+                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${activeTab === "orders"
+                        ? "text-white bg-blue"
+                        : "text-dark-2 bg-gray-1"
+                        }`}
                     >
                       <svg
                         className="fill-current"
@@ -130,11 +128,10 @@ const MyAccount = () => {
 
                     <button
                       onClick={() => setActiveTab("downloads")}
-                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
-                        activeTab === "downloads"
-                          ? "text-white bg-blue"
-                          : "text-dark-2 bg-gray-1"
-                      }`}
+                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${activeTab === "downloads"
+                        ? "text-white bg-blue"
+                        : "text-dark-2 bg-gray-1"
+                        }`}
                     >
                       <svg
                         className="fill-current"
@@ -158,11 +155,10 @@ const MyAccount = () => {
 
                     <button
                       onClick={() => setActiveTab("addresses")}
-                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
-                        activeTab === "addresses"
-                          ? "text-white bg-blue"
-                          : "text-dark-2 bg-gray-1"
-                      }`}
+                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${activeTab === "addresses"
+                        ? "text-white bg-blue"
+                        : "text-dark-2 bg-gray-1"
+                        }`}
                     >
                       <svg
                         className="fill-current"
@@ -188,11 +184,10 @@ const MyAccount = () => {
 
                     <button
                       onClick={() => setActiveTab("account-details")}
-                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
-                        activeTab === "account-details"
-                          ? "text-white bg-blue"
-                          : "text-dark-2 bg-gray-1"
-                      }`}
+                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${activeTab === "account-details"
+                        ? "text-white bg-blue"
+                        : "text-dark-2 bg-gray-1"
+                        }`}
                     >
                       <svg
                         className="fill-current"
@@ -220,11 +215,10 @@ const MyAccount = () => {
 
                     <button
                       onClick={() => setActiveTab("logout")}
-                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
-                        activeTab === "logout"
-                          ? "text-white bg-blue"
-                          : "text-dark-2 bg-gray-1"
-                      }`}
+                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${activeTab === "logout"
+                        ? "text-white bg-blue"
+                        : "text-dark-2 bg-gray-1"
+                        }`}
                     >
                       <svg
                         className="fill-current"
@@ -256,9 +250,8 @@ const MyAccount = () => {
             {/* <!-- dashboard tab content start --> */}
 
             <div
-              className={`xl:max-w-[770px] w-full bg-white rounded-xl shadow-1 py-9.5 px-4 sm:px-7.5 xl:px-10 ${
-                activeTab === "dashboard" ? "block" : "hidden"
-              }`}
+              className={`xl:max-w-[770px] w-full bg-white rounded-xl shadow-1 py-9.5 px-4 sm:px-7.5 xl:px-10 ${activeTab === "dashboard" ? "block" : "hidden"
+                }`}
             >
               <p className="text-dark">
                 Hello Annie (not Annie?
@@ -281,9 +274,8 @@ const MyAccount = () => {
 
           <!-- orders tab content start --> */}
             <div
-              className={`xl:max-w-[770px] w-full bg-white rounded-xl shadow-1 ${
-                activeTab === "orders" ? "block" : "hidden"
-              }`}
+              className={`xl:max-w-[770px] w-full bg-white rounded-xl shadow-1 ${activeTab === "orders" ? "block" : "hidden"
+                }`}
             >
               <Orders />
             </div>
@@ -291,9 +283,8 @@ const MyAccount = () => {
 
           <!-- downloads tab content start --> */}
             <div
-              className={`xl:max-w-[770px] w-full bg-white rounded-xl shadow-1 py-9.5 px-4 sm:px-7.5 xl:px-10 ${
-                activeTab === "downloads" ? "block" : "hidden"
-              }`}
+              className={`xl:max-w-[770px] w-full bg-white rounded-xl shadow-1 py-9.5 px-4 sm:px-7.5 xl:px-10 ${activeTab === "downloads" ? "block" : "hidden"
+                }`}
             >
               <p>You don&apos;t have any download</p>
             </div>
@@ -301,9 +292,8 @@ const MyAccount = () => {
 
           <!-- addresses tab content start --> */}
             <div
-              className={`flex-col sm:flex-row gap-7.5 ${
-                activeTab === "addresses" ? "flex" : "hidden"
-              }`}
+              className={`flex-col sm:flex-row gap-7.5 ${activeTab === "addresses" ? "flex" : "hidden"
+                }`}
             >
               <div className="xl:max-w-[370px] w-full bg-white shadow-1 rounded-xl">
                 <div className="flex items-center justify-between py-5 px-4 sm:pl-7.5 sm:pr-6 border-b border-gray-3">
@@ -431,7 +421,7 @@ const MyAccount = () => {
                           </clipPath>
                         </defs>
                       </svg>
-                      Address: Block A, Samridhi Enclave, Kargi Chowk, Dehradun, 248001
+                      Address: NH 507, Herbertpur, Dehradun, 248142
                     </p>
                   </div>
                 </div>
@@ -563,7 +553,7 @@ const MyAccount = () => {
                           </clipPath>
                         </defs>
                       </svg>
-                      Address: Block A, Samridhi Enclave, Kargi Chowk, Dehradun, 248001
+                      Address: NH 507, Herbertpur, Dehradun, 248142
                     </p>
                   </div>
                 </div>
@@ -573,9 +563,8 @@ const MyAccount = () => {
 
           <!-- details tab content start --> */}
             <div
-              className={`xl:max-w-[770px] w-full ${
-                activeTab === "account-details" ? "block" : "hidden"
-              }`}
+              className={`xl:max-w-[770px] w-full ${activeTab === "account-details" ? "block" : "hidden"
+                }`}
             >
               <form>
                 <div className="bg-white shadow-1 rounded-xl p-4 sm:p-8.5">

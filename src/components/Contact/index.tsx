@@ -80,7 +80,7 @@ const Contact = () => {
                         fill="#3C50E0"
                       />
                     </svg>
-                    Address: Block A, Samridhi Enclave, Kargi Chowk, Dehradun, 248001
+                    Address: NH 507, Herbertpur, Dehradun, 248142
                   </p>
                 </div>
               </div>

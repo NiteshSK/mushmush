@@ -48,7 +48,11 @@ const AddressFormModal: React.FC<AddressFormModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate PIN code
+    if (!formData.street || !formData.city || !formData.state || !formData.zip) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
     if (!/^\d{6}$/.test(formData.zip)) {
       toast.error("PIN code must be 6 digits");
       return;
@@ -108,6 +112,7 @@ const AddressFormModal: React.FC<AddressFormModalProps> = ({
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
+            aria-label="Close"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -117,14 +122,18 @@ const AddressFormModal: React.FC<AddressFormModalProps> = ({
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="street" className="block text-sm font-medium text-gray-700 mb-2">
               Street Address <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
+              id="street"
               required
               value={formData.street}
-              onChange={(e) => setFormData({ ...formData, street: e.target.value })}
+              onChange={(e) => {
+                console.log('Street changed:', e.target.value);
+                setFormData({ ...formData, street: e.target.value });
+              }}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="House no, Building name, Street"
             />
@@ -132,11 +141,12 @@ const AddressFormModal: React.FC<AddressFormModalProps> = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-2">
                 City <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
+                id="city"
                 required
                 value={formData.city}
                 onChange={(e) => setFormData({ ...formData, city: e.target.value })}
@@ -145,13 +155,17 @@ const AddressFormModal: React.FC<AddressFormModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-2">
                 State <span className="text-red-500">*</span>
               </label>
               <select
+                id="state"
                 required
                 value={formData.state}
-                onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                onChange={(e) => {
+                  console.log('State changed:', e.target.value);
+                  setFormData({ ...formData, state: e.target.value });
+                }}
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">Select State</option>
@@ -166,11 +180,12 @@ const AddressFormModal: React.FC<AddressFormModalProps> = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="zip" className="block text-sm font-medium text-gray-700 mb-2">
                 PIN Code <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
+                id="zip"
                 required
                 pattern="\d{6}"
                 maxLength={6}
@@ -182,11 +197,12 @@ const AddressFormModal: React.FC<AddressFormModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-2">
                 Country
               </label>
               <input
                 type="text"
+                id="country"
                 value="India"
                 disabled
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 text-gray-600"

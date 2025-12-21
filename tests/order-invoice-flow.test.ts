@@ -9,6 +9,11 @@
  * 5. Status transitions
  */
 
+import { TextEncoder, TextDecoder } from 'util';
+global.TextEncoder = TextEncoder;
+// @ts-ignore
+global.TextDecoder = TextDecoder;
+
 import { PrismaClient } from '@prisma/client';
 import { generateInvoice, markInvoiceEmailSent } from '../src/lib/invoice';
 import { sendOrderInvoiceEmail, OrderInvoiceEmailData } from '../src/lib/email';
@@ -30,7 +35,7 @@ async function cleanup() {
         }
       }
     });
-    
+
     await prisma.orderItem.deleteMany({
       where: {
         order: {
@@ -38,13 +43,13 @@ async function cleanup() {
         }
       }
     });
-    
+
     await prisma.order.deleteMany({
       where: {
         customerEmail: testUserEmail
-        }
+      }
     });
-    
+
     await prisma.addresses.deleteMany({
       where: {
         users: {
@@ -52,13 +57,13 @@ async function cleanup() {
         }
       }
     });
-    
+
     await prisma.user.deleteMany({
       where: {
         email: testUserEmail
       }
     });
-    
+
     console.log('✅ Cleanup completed');
   } catch (error) {
     console.error('❌ Cleanup error:', error);
@@ -69,7 +74,7 @@ async function cleanup() {
 async function testOrderCreationWithNewAddress() {
   console.log('\n📝 Test 1: Order Creation with New Address');
   console.log('='.repeat(60));
-  
+
   try {
     // Create test user
     const user = await prisma.user.create({
@@ -82,7 +87,7 @@ async function testOrderCreationWithNewAddress() {
       }
     });
     console.log('✅ Test user created:', user.email);
-    
+
     // Create test product
     const product = await prisma.product.create({
       data: {
@@ -96,7 +101,7 @@ async function testOrderCreationWithNewAddress() {
       }
     });
     console.log('✅ Test product created:', product.title);
-    
+
     // Create address
     const address = await prisma.addresses.create({
       data: {
@@ -112,7 +117,7 @@ async function testOrderCreationWithNewAddress() {
       }
     });
     console.log('✅ Address created:', address.id);
-    
+
     // Create order
     const order = await prisma.order.create({
       data: {
@@ -151,12 +156,12 @@ async function testOrderCreationWithNewAddress() {
         }
       }
     });
-    
+
     console.log('✅ Order created:', order.orderNumber);
     console.log('   Status:', order.status);
     console.log('   Total:', order.total);
     console.log('   Items:', order.orderItems.length);
-    
+
     // Verify address was reused (not duplicated)
     const addressCount = await prisma.addresses.count({
       where: {
@@ -164,15 +169,15 @@ async function testOrderCreationWithNewAddress() {
         street: address.street
       }
     });
-    
+
     if (addressCount === 1) {
       console.log('✅ Address reused correctly (no duplicates)');
     } else {
       console.log('❌ Address duplicated! Count:', addressCount);
     }
-    
+
     return { order, user, product, address };
-    
+
   } catch (error) {
     console.error('❌ Test 1 failed:', error);
     throw error;
@@ -183,16 +188,16 @@ async function testOrderCreationWithNewAddress() {
 async function testInvoiceGeneration(orderId: string) {
   console.log('\n📝 Test 2: Invoice Generation');
   console.log('='.repeat(60));
-  
+
   try {
     // Generate invoice
     const invoice = await generateInvoice(orderId);
-    
+
     console.log('✅ Invoice generated:', invoice.invoiceNumber);
     console.log('   PDF Path:', invoice.pdfPath);
     console.log('   Total:', invoice.total);
     console.log('   Email Sent:', invoice.emailSent);
-    
+
     // Verify invoice data
     if (!invoice.invoiceNumber) {
       throw new Error('Invoice number missing');
@@ -203,11 +208,11 @@ async function testInvoiceGeneration(orderId: string) {
     if (invoice.total <= 0) {
       throw new Error('Invalid invoice total');
     }
-    
+
     console.log('✅ Invoice data validated');
-    
+
     return invoice;
-    
+
   } catch (error) {
     console.error('❌ Test 2 failed:', error);
     throw error;
@@ -218,13 +223,13 @@ async function testInvoiceGeneration(orderId: string) {
 async function testEmailSending(order: any, invoice: any) {
   console.log('\n📝 Test 3: Email Sending (Dry Run)');
   console.log('='.repeat(60));
-  
+
   try {
     // Prepare email data
     const shippingAddr = await prisma.addresses.findUnique({
       where: { id: order.shippingAddressId }
     });
-    
+
     const emailData: OrderInvoiceEmailData = {
       customerName: order.customerName,
       customerEmail: order.customerEmail,
@@ -256,26 +261,26 @@ async function testEmailSending(order: any, invoice: any) {
         country: 'India'
       }
     };
-    
+
     console.log('✅ Email data prepared');
     console.log('   To:', emailData.customerEmail);
     console.log('   Order:', emailData.orderNumber);
     console.log('   Invoice:', emailData.invoiceNumber);
     console.log('   Items:', emailData.orderItems.length);
-    
+
     // Note: Actual email sending is commented out to avoid sending test emails
     // Uncomment the line below to test actual email delivery
     // await sendOrderInvoiceEmail(emailData);
-    
+
     console.log('⚠️  Email sending skipped (dry run)');
     console.log('   To test actual email, uncomment sendOrderInvoiceEmail() call');
-    
+
     // Mark email as sent for testing
     await markInvoiceEmailSent(invoice.id);
     console.log('✅ Invoice marked as email sent');
-    
+
     return emailData;
-    
+
   } catch (error) {
     console.error('❌ Test 3 failed:', error);
     throw error;
@@ -286,7 +291,7 @@ async function testEmailSending(order: any, invoice: any) {
 async function testStatusTransition(orderId: string) {
   console.log('\n📝 Test 4: Status Transition to COMPLETED');
   console.log('='.repeat(60));
-  
+
   try {
     // Update order status to COMPLETED
     const updatedOrder = await prisma.order.update({
@@ -300,14 +305,14 @@ async function testStatusTransition(orderId: string) {
         }
       }
     });
-    
+
     console.log('✅ Order status updated to:', updatedOrder.status);
-    
+
     // Check if invoice exists
     const invoice = await prisma.invoice.findUnique({
       where: { orderId }
     });
-    
+
     if (invoice) {
       console.log('✅ Invoice exists for completed order');
       console.log('   Invoice Number:', invoice.invoiceNumber);
@@ -315,9 +320,9 @@ async function testStatusTransition(orderId: string) {
     } else {
       console.log('⚠️  No invoice found (should be generated by status update API)');
     }
-    
+
     return updatedOrder;
-    
+
   } catch (error) {
     console.error('❌ Test 4 failed:', error);
     throw error;
@@ -328,19 +333,19 @@ async function testStatusTransition(orderId: string) {
 async function testDuplicateAddressPrevention(userId: string) {
   console.log('\n📝 Test 5: Duplicate Address Prevention');
   console.log('='.repeat(60));
-  
+
   try {
     // Get existing address
     const existingAddress = await prisma.addresses.findFirst({
       where: { userId }
     });
-    
+
     if (!existingAddress) {
       throw new Error('No existing address found');
     }
-    
+
     console.log('✅ Found existing address:', existingAddress.id);
-    
+
     // Create product for second order
     const product = await prisma.product.create({
       data: {
@@ -353,7 +358,7 @@ async function testDuplicateAddressPrevention(userId: string) {
         stockQuantity: 10
       }
     });
-    
+
     // Create second order using SAME address
     const order2 = await prisma.order.create({
       data: {
@@ -385,9 +390,9 @@ async function testDuplicateAddressPrevention(userId: string) {
         }
       }
     });
-    
+
     console.log('✅ Second order created:', order2.orderNumber);
-    
+
     // Count addresses for this user
     const addressCount = await prisma.addresses.count({
       where: {
@@ -395,7 +400,7 @@ async function testDuplicateAddressPrevention(userId: string) {
         street: existingAddress.street
       }
     });
-    
+
     if (addressCount === 1) {
       console.log('✅ SUCCESS: Address reused, no duplicates created');
       console.log('   Address count:', addressCount);
@@ -404,9 +409,9 @@ async function testDuplicateAddressPrevention(userId: string) {
       console.log('   Address count:', addressCount);
       throw new Error('Duplicate address prevention failed');
     }
-    
+
     return order2;
-    
+
   } catch (error) {
     console.error('❌ Test 5 failed:', error);
     throw error;
@@ -417,29 +422,29 @@ async function testDuplicateAddressPrevention(userId: string) {
 async function runAllTests() {
   console.log('\n🧪 Starting Comprehensive Order & Invoice Flow Tests');
   console.log('='.repeat(60));
-  
+
   try {
     // Cleanup before tests
     await cleanup();
-    
+
     // Test 1: Order Creation
     const { order, user, product, address } = await testOrderCreationWithNewAddress();
-    
+
     // Test 2: Invoice Generation
     const invoice = await testInvoiceGeneration(order.id);
-    
+
     // Test 3: Email Sending
     await testEmailSending(order, invoice);
-    
+
     // Test 4: Status Transition
     await testStatusTransition(order.id);
-    
+
     // Test 5: Duplicate Prevention
     await testDuplicateAddressPrevention(user.id);
-    
+
     console.log('\n✅ All tests passed!');
     console.log('='.repeat(60));
-    
+
     // Summary
     console.log('\n📊 Test Summary:');
     console.log('   ✅ Order creation with new address');
@@ -447,7 +452,7 @@ async function runAllTests() {
     console.log('   ✅ Email data preparation');
     console.log('   ✅ Status transition');
     console.log('   ✅ Duplicate address prevention');
-    
+
   } catch (error) {
     console.error('\n❌ Test suite failed:', error);
     process.exit(1);

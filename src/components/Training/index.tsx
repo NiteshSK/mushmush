@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { toast } from "react-hot-toast";
 import Breadcrumb from "@/components/Common/Breadcrumb";
 import AutomatedPaymentModal from "./AutomatedPaymentModal";
+import { getTrainingProgramPrice, isEarlyBirdOfferValid } from "@/lib/utils";
 
 interface TrainingProgram {
   id: number;
@@ -16,13 +17,17 @@ interface TrainingProgram {
   dailyHours: string;
   type: string;
   isActive: boolean;
-  
+
   // Early Bird Pricing Fields
   hasEarlyBirdOffer: boolean;
   earlyBirdPrice?: number;
   originalPrice?: number;
-  earlyBirdEndDate?: Date;
+  earlyBirdEndDate?: string | Date; // Can be string from API or Date object
 }
+
+const isEarlyBirdValid = (program: any) => {
+  return isEarlyBirdOfferValid(program);
+};
 
 const TrainingPrograms = () => {
   const { data: session } = useSession();
@@ -75,10 +80,10 @@ const TrainingPrograms = () => {
     try {
       // Check if user is already registered for this program
       const checkResponse = await fetch(`/api/training-registrations/check?programId=${program.id}`);
-      
+
       if (checkResponse.ok) {
         const checkData = await checkResponse.json();
-        
+
         if (checkData.isRegistered) {
           // User is already registered, show existing registration details
           const registration = checkData.registration;
@@ -103,7 +108,7 @@ const TrainingPrograms = () => {
       // If check fails, continue with registration flow
       toast.error('Could not verify registration status. Continuing with registration...');
     }
-    
+
     // User is not registered or check failed, proceed with registration
     setSelectedProgram(program);
     setShowRegistrationModal(true);
@@ -166,21 +171,6 @@ const TrainingPrograms = () => {
     <>
       <Breadcrumb title={"Training Programs"} pages={["training"]} />
 
-      {/* Hero Section */}
-      <section className="relative py-2 bg-gradient-to-br from-green-50 to-blue-50">
-        <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
-          <div className="text-center">
-            <h1 className="font-bold text-4xl sm:text-5xl xl:text-6xl text-dark mb-6">
-              Mushroom Cultivation Training Programs
-            </h1>
-            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
-              Master the art of mushroom cultivation with our comprehensive, hands-on training programs. 
-              Learn from experts and start your journey in sustainable agriculture.
-            </p>
-          </div>
-        </div>
-      </section>
-
       {/* Training Programs Section */}
       <section className="py-20 bg-[#f3f4f6]">
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
@@ -189,7 +179,7 @@ const TrainingPrograms = () => {
               Choose Your Training Program
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              We offer specialized training programs for different types of mushroom cultivation. 
+              We offer specialized training programs for different types of mushroom cultivation.
               Each program includes both theoretical knowledge and hands-on practical experience.
             </p>
           </div>
@@ -216,15 +206,17 @@ const TrainingPrograms = () => {
                       </div>
                     </div>
                     <div className="text-left sm:text-right">
-                      {program.hasEarlyBirdOffer && (
+                      {isEarlyBirdValid(program) && (
                         <div className="mb-2">
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800 border border-red-200">
                             🎟️ Early Bird Offer
                           </span>
                         </div>
                       )}
-                      
-                      {program.hasEarlyBirdOffer && program.originalPrice && program.earlyBirdPrice ? (
+
+                      {isEarlyBirdValid(program) &&
+                        program.originalPrice &&
+                        program.earlyBirdPrice ? (
                         <div className="flex flex-col sm:items-end">
                           {/* Strikethrough Original Price */}
                           <div className="text-lg md:text-xl text-gray-400 line-through">
@@ -236,15 +228,21 @@ const TrainingPrograms = () => {
                           </div>
                           {/* Savings Badge */}
                           <div className="text-sm font-medium text-red-600">
-                            SAVE ₹{(program.originalPrice - program.earlyBirdPrice).toLocaleString()}
+                            SAVE ₹{
+                              (
+                                program.originalPrice - program.earlyBirdPrice
+                              ).toLocaleString()
+                            }
                           </div>
                         </div>
                       ) : (
                         <div className="text-2xl md:text-3xl font-bold text-green-600">
-                          ₹{program.price.toLocaleString()}
+                          ₹{(program.originalPrice || program.price).toLocaleString()}
                         </div>
                       )}
-                      <div className="text-sm text-gray-500">per participant</div>
+                      <div className="text-sm text-gray-500">
+                        per participant
+                      </div>
                     </div>
                   </div>
 
@@ -266,25 +264,23 @@ const TrainingPrograms = () => {
                   <div className="flex flex-col sm:flex-row gap-3">
                     <button
                       onClick={() => handleCheckScheduleClick(program)}
-                      className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-colors duration-200 border-2 ${
-                        program.type === "OYSTER" ? "bg-white text-blue-600 border-blue-200 hover:bg-blue-50" :
+                      className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-colors duration-200 border-2 ${program.type === "OYSTER" ? "bg-white text-blue-600 border-blue-200 hover:bg-blue-50" :
                         program.type === "BUTTON" ? "bg-white text-green-600 border-green-200 hover:bg-green-50" :
-                        program.type === "SHIITAKE" ? "bg-white text-purple-600 border-purple-200 hover:bg-purple-50" :
-                        program.type === "GANODERMA" ? "bg-white text-orange-600 border-orange-200 hover:bg-orange-50" :
-                        "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
-                      }`}
+                          program.type === "SHIITAKE" ? "bg-white text-purple-600 border-purple-200 hover:bg-purple-50" :
+                            program.type === "GANODERMA" ? "bg-white text-orange-600 border-orange-200 hover:bg-orange-50" :
+                              "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                        }`}
                     >
                       Check Schedule
                     </button>
                     <button
                       onClick={() => handleRegisterNowClick(program)}
-                      className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-colors duration-200 border-2 ${
-                        program.type === "OYSTER" ? "bg-white text-blue-600 border-blue-200 hover:bg-blue-50" :
+                      className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-colors duration-200 border-2 ${program.type === "OYSTER" ? "bg-white text-blue-600 border-blue-200 hover:bg-blue-50" :
                         program.type === "BUTTON" ? "bg-white text-green-600 border-green-200 hover:bg-green-50" :
-                        program.type === "SHIITAKE" ? "bg-white text-purple-600 border-purple-200 hover:bg-purple-50" :
-                        program.type === "GANODERMA" ? "bg-white text-orange-600 border-orange-200 hover:bg-orange-50" :
-                        "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
-                      }`}
+                          program.type === "SHIITAKE" ? "bg-white text-purple-600 border-purple-200 hover:bg-purple-50" :
+                            program.type === "GANODERMA" ? "bg-white text-orange-600 border-orange-200 hover:bg-orange-50" :
+                              "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                        }`}
                     >
                       Enroll Now
                     </button>
@@ -377,12 +373,12 @@ const RegistrationModal = ({
       if (response.ok) {
         const registration = await response.json();
         toast.success(`Registration successful! Your registration number is ${registration.registrationNumber}`);
-        
+
         // Show payment modal after successful registration
         onRegistrationComplete(registration);
       } else {
         const error = await response.json();
-        
+
         // Handle duplicate registration error specifically
         if (response.status === 409 && error.existingRegistration) {
           const { existingRegistration } = error;
@@ -425,7 +421,11 @@ const RegistrationModal = ({
               <div>
                 <h3 className="font-semibold">{program.name}</h3>
                 <p className="text-sm text-gray-600">
-                  {program.duration} days • {program.dailyHours} • ₹{program.price.toLocaleString()}
+                  {program.duration} days • {program.dailyHours} • ₹
+                  {(isEarlyBirdValid(program)
+                    ? program.earlyBirdPrice
+                    : program.originalPrice || program.price
+                  )?.toLocaleString()}
                 </p>
               </div>
             </div>

@@ -66,7 +66,7 @@ describe('Checkout Flow Integration Tests', () => {
       const { rerender } = render(
         <>
           <BillingNew onAddressChange={billingAddressChange} />
-          <ShippingNew 
+          <ShippingNew
             billingAddress={null}
             onAddressChange={shippingAddressChange}
           />
@@ -89,7 +89,7 @@ describe('Checkout Flow Integration Tests', () => {
       rerender(
         <>
           <BillingNew onAddressChange={billingAddressChange} />
-          <ShippingNew 
+          <ShippingNew
             billingAddress={mockAddresses[0]}
             onAddressChange={shippingAddressChange}
           />
@@ -109,7 +109,7 @@ describe('Checkout Flow Integration Tests', () => {
       const { rerender } = render(
         <>
           <BillingNew onAddressChange={billingAddressChange} />
-          <ShippingNew 
+          <ShippingNew
             billingAddress={null}
             onAddressChange={shippingAddressChange}
           />
@@ -132,7 +132,7 @@ describe('Checkout Flow Integration Tests', () => {
       rerender(
         <>
           <BillingNew onAddressChange={billingAddressChange} />
-          <ShippingNew 
+          <ShippingNew
             billingAddress={mockAddresses[0]}
             onAddressChange={shippingAddressChange}
           />
@@ -141,12 +141,12 @@ describe('Checkout Flow Integration Tests', () => {
 
       // Wait for shipping addresses to show
       await waitFor(() => {
-        expect(screen.getByText('456 Park Ave')).toBeInTheDocument();
+        expect(screen.getAllByText('456 Park Ave')[0]).toBeInTheDocument();
       });
 
       // Select different shipping address
       const radioButtons = screen.getAllByRole('radio');
-      const shippingAddressRadio = radioButtons.find(radio => 
+      const shippingAddressRadio = radioButtons.find(radio =>
         (radio as HTMLInputElement).value === 'addr-2'
       );
 
@@ -167,8 +167,8 @@ describe('Checkout Flow Integration Tests', () => {
         })
         .mockResolvedValueOnce({
           ok: true,
-          json: async () => ({ 
-            success: true, 
+          json: async () => ({
+            success: true,
             address: {
               id: 'new-addr',
               street: '789 New St',
@@ -183,7 +183,7 @@ describe('Checkout Flow Integration Tests', () => {
         })
         .mockResolvedValueOnce({
           ok: true,
-          json: async () => ({ 
+          json: async () => ({
             addresses: [{
               id: 'new-addr',
               street: '789 New St',
@@ -236,7 +236,7 @@ describe('Checkout Flow Integration Tests', () => {
       const { rerender } = render(
         <>
           <BillingNew onAddressChange={billingAddressChange} />
-          <ShippingNew 
+          <ShippingNew
             billingAddress={null}
             onAddressChange={shippingAddressChange}
           />
@@ -270,7 +270,7 @@ describe('Checkout Flow Integration Tests', () => {
       render(
         <>
           <BillingNew onAddressChange={billingAddressChange} />
-          <ShippingNew 
+          <ShippingNew
             billingAddress={null}
             onAddressChange={shippingAddressChange}
           />
@@ -397,7 +397,7 @@ describe('Checkout Flow Integration Tests', () => {
         })
         .mockResolvedValueOnce({
           ok: true,
-          json: async () => ({ 
+          json: async () => ({
             success: true,
             address: {
               id: 'new-addr',
@@ -413,7 +413,7 @@ describe('Checkout Flow Integration Tests', () => {
         })
         .mockResolvedValueOnce({
           ok: true,
-          json: async () => ({ 
+          json: async () => ({
             addresses: [
               ...mockAddresses,
               {
@@ -438,7 +438,7 @@ describe('Checkout Flow Integration Tests', () => {
       });
 
       // Click add new address button
-      const addButton = screen.getByText('Add New Address');
+      const addButton = screen.getByRole('button', { name: /Add New Address/i });
       fireEvent.click(addButton);
 
       // Modal should open

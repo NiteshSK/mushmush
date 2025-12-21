@@ -1,0 +1,1158 @@
+
+> next-commerce-community@0.1.0 test
+> jest
+
+PASS src/app/api/news/route.test.ts
+  ● Console
+
+    console.error
+      Error fetching news: Error: DB Error
+          at Object.<anonymous> (/Users/kataria/projects/mushmush-website/src/app/api/news/route.test.ts:78:63)
+          at Promise.then.completed (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/utils.js:298:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/utils.js:231:10)
+          at _callCircusTest (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:316:40)
+          at processTicksAndRejections (node:internal/process/task_queues:95:5)
+          at _runTest (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:252:3)
+          at _runTestsForDescribeBlock (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:126:9)
+          at _runTestsForDescribeBlock (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:121:9)
+          at run (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:71:3)
+          at runAndTransformResultsToJestFormat (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+          at jestAdapter (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+          at runTestInternal (/Users/kataria/projects/mushmush-website/node_modules/jest-runner/build/runTest.js:367:16)
+          at runTest (/Users/kataria/projects/mushmush-website/node_modules/jest-runner/build/runTest.js:444:34)
+          at Object.worker (/Users/kataria/projects/mushmush-website/node_modules/jest-runner/build/testWorker.js:106:12)
+
+      55 |     })
+      56 |   } catch (error) {
+    > 57 |     console.error('Error fetching news:', error)
+         |             ^
+      58 |     return NextResponse.json(
+      59 |       { error: 'Failed to fetch news' },
+      60 |       { status: 500 }
+
+      at error (src/app/api/news/route.ts:57:13)
+      at Object.<anonymous> (src/app/api/news/route.test.ts:81:21)
+
+FAIL src/lib/utils.test.ts
+  ● Utils › generateSlug › should trim leading and trailing hyphens
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "hello-world"
+    Received: "-hello-world-"
+
+      20 |
+      21 |         it('should trim leading and trailing hyphens', () => {
+    > 22 |             expect(generateSlug('-hello world-')).toBe('hello-world');
+         |                                                   ^
+      23 |         });
+      24 |     });
+      25 |
+
+      at Object.toBe (src/lib/utils.test.ts:22:51)
+
+PASS src/components/Home/index.test.tsx
+FAIL tests/order-invoice-flow.test.ts
+  ● Test suite failed to run
+
+    ReferenceError: TextEncoder is not defined
+
+      30 |  * Generate invoice number in format: INV-YYYYMMDD-XXXXX
+      31 |  */
+    > 32 | export function generateInvoiceNumber(): string {
+         |                                                  ^
+      33 |   const date = new Date();
+      34 |   const year = date.getFullYear();
+      35 |   const month = String(date.getMonth() + 1).padStart(2, '0');
+
+      at Object.<anonymous> (node_modules/iobuffer/src/text.ts:6:17)
+      at Object.<anonymous> (node_modules/iobuffer/src/IOBuffer.ts:1:1)
+      at Object.<anonymous> (node_modules/fast-png/src/PngDecoder.ts:1:1)
+      at Object.<anonymous> (node_modules/fast-png/src/index.ts:1:1)
+      at Object.<anonymous> (node_modules/jspdf/dist/jspdf.node.min.js:51:82)
+      at Object.<anonymous> (src/lib/invoice.ts:32:55)
+      at Object.<anonymous> (tests/order-invoice-flow.test.ts:15:18)
+
+FAIL src/components/Checkout/__tests__/ShippingNew.test.tsx
+  ● Console
+
+    console.error
+      Error fetching addresses: Error: Network error
+          at Object.<anonymous> (/Users/kataria/projects/mushmush-website/src/components/Checkout/__tests__/ShippingNew.test.tsx:443:53)
+          at Promise.then.completed (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/utils.js:298:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/utils.js:231:10)
+          at _callCircusTest (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:316:40)
+          at runNextTicks (node:internal/process/task_queues:60:5)
+          at listOnTimeout (node:internal/timers:545:9)
+          at processTimers (node:internal/timers:519:7)
+          at _runTest (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:252:3)
+          at _runTestsForDescribeBlock (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:126:9)
+          at _runTestsForDescribeBlock (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:121:9)
+          at _runTestsForDescribeBlock (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:121:9)
+          at run (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:71:3)
+          at runAndTransformResultsToJestFormat (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+          at jestAdapter (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+          at runTestInternal (/Users/kataria/projects/mushmush-website/node_modules/jest-runner/build/runTest.js:367:16)
+          at runTest (/Users/kataria/projects/mushmush-website/node_modules/jest-runner/build/runTest.js:444:34)
+          at Object.worker (/Users/kataria/projects/mushmush-website/node_modules/jest-runner/build/testWorker.js:106:12)
+
+      64 |       }
+      65 |     } catch (error) {
+    > 66 |       console.error("Error fetching addresses:", error);
+         |               ^
+      67 |     } finally {
+      68 |       setLoading(false);
+      69 |     }
+
+      at error (src/components/Checkout/ShippingNew.tsx:66:15)
+
+    console.error
+      Warning: An update to ShippingNew inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+          at billingAddress (/Users/kataria/projects/mushmush-website/src/components/Checkout/ShippingNew.tsx:33:52)
+
+      61 |         const data = await response.json();
+      62 |         const userAddresses = data.addresses || [];
+    > 63 |         setAddresses(userAddresses);
+         |         ^
+      64 |       }
+      65 |     } catch (error) {
+      66 |       console.error("Error fetching addresses:", error);
+
+      at printWarning (node_modules/react-dom/cjs/react-dom.development.js:86:30)
+      at error (node_modules/react-dom/cjs/react-dom.development.js:60:7)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom.development.js:27628:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom.development.js:25547:5)
+      at dispatchSetState (node_modules/react-dom/cjs/react-dom.development.js:16708:7)
+      at setAddresses (src/components/Checkout/ShippingNew.tsx:63:9)
+
+    console.error
+      Warning: An update to ShippingNew inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+          at billingAddress (/Users/kataria/projects/mushmush-website/src/components/Checkout/ShippingNew.tsx:33:52)
+
+      66 |       console.error("Error fetching addresses:", error);
+      67 |     } finally {
+    > 68 |       setLoading(false);
+         |       ^
+      69 |     }
+      70 |   };
+      71 |
+
+      at printWarning (node_modules/react-dom/cjs/react-dom.development.js:86:30)
+      at error (node_modules/react-dom/cjs/react-dom.development.js:60:7)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom.development.js:27628:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom.development.js:25547:5)
+      at dispatchSetState (node_modules/react-dom/cjs/react-dom.development.js:16708:7)
+      at setLoading (src/components/Checkout/ShippingNew.tsx:68:7)
+
+  ● ShippingNew › Edge Cases › should handle loading state
+
+    TestingLibraryElementError: Unable to find an element with the text: Shipping Address. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"bg-white shadow-1 rounded-[10px] mt-7.5 p-4 sm:p-8.5 animate-pulse"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"h-4 bg-gray-200 rounded w-1/4 mb-4"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"h-20 bg-gray-200 rounded"[39m
+          [36m/>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</body>[39m
+
+      709 |
+      710 |       // Should show loading skeleton
+    > 711 |       expect(screen.getByText('Shipping Address')).toBeInTheDocument();
+          |                     ^
+      712 |     });
+      713 |   });
+      714 | });
+
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.getByText (src/components/Checkout/__tests__/ShippingNew.test.tsx:711:21)
+
+PASS src/components/Checkout/__tests__/AddressFormModal.test.tsx
+  ● Console
+
+    console.log
+      Street changed: 123 Main St
+
+      at log (src/components/Checkout/AddressFormModal.tsx:134:25)
+
+    console.log
+      State changed: Maharashtra
+
+      at log (src/components/Checkout/AddressFormModal.tsx:166:27)
+
+    console.log
+      Street changed: Test Street
+
+      at log (src/components/Checkout/AddressFormModal.tsx:134:25)
+
+    console.log
+      Street changed: 123 Main St
+
+      at log (src/components/Checkout/AddressFormModal.tsx:134:25)
+
+    console.log
+      State changed: Maharashtra
+
+      at log (src/components/Checkout/AddressFormModal.tsx:166:27)
+
+    console.log
+      Street changed: 123 Main St
+
+      at log (src/components/Checkout/AddressFormModal.tsx:134:25)
+
+    console.log
+      State changed: Maharashtra
+
+      at log (src/components/Checkout/AddressFormModal.tsx:166:27)
+
+    console.log
+      Street changed: 123 Main St
+
+      at log (src/components/Checkout/AddressFormModal.tsx:134:25)
+
+    console.log
+      State changed: Maharashtra
+
+      at log (src/components/Checkout/AddressFormModal.tsx:166:27)
+
+    console.log
+      Street changed: 123 Main St
+
+      at log (src/components/Checkout/AddressFormModal.tsx:134:25)
+
+    console.log
+      State changed: Maharashtra
+
+      at log (src/components/Checkout/AddressFormModal.tsx:166:27)
+
+    console.error
+      Error adding address: Error: Network error
+          at Object.<anonymous> (/Users/kataria/projects/mushmush-website/src/components/Checkout/__tests__/AddressFormModal.test.tsx:377:57)
+          at Promise.then.completed (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/utils.js:298:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/utils.js:231:10)
+          at _callCircusTest (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:316:40)
+          at _runTest (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:252:3)
+          at _runTestsForDescribeBlock (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:126:9)
+          at _runTestsForDescribeBlock (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:121:9)
+          at _runTestsForDescribeBlock (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:121:9)
+          at run (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:71:3)
+          at runAndTransformResultsToJestFormat (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+          at jestAdapter (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+          at runTestInternal (/Users/kataria/projects/mushmush-website/node_modules/jest-runner/build/runTest.js:367:16)
+          at runTest (/Users/kataria/projects/mushmush-website/node_modules/jest-runner/build/runTest.js:444:34)
+          at Object.worker (/Users/kataria/projects/mushmush-website/node_modules/jest-runner/build/testWorker.js:106:12)
+
+       96 |       }
+       97 |     } catch (error) {
+    >  98 |       console.error("Error adding address:", error);
+          |               ^
+       99 |       toast.error("Failed to add address");
+      100 |     } finally {
+      101 |       setLoading(false);
+
+      at error (src/components/Checkout/AddressFormModal.tsx:98:15)
+
+    console.log
+      Street changed: 123 Main St
+
+      at log (src/components/Checkout/AddressFormModal.tsx:134:25)
+
+    console.log
+      State changed: Maharashtra
+
+      at log (src/components/Checkout/AddressFormModal.tsx:166:27)
+
+    console.log
+      Street changed: 123 Main St
+
+      at log (src/components/Checkout/AddressFormModal.tsx:134:25)
+
+    console.log
+      State changed: Maharashtra
+
+      at log (src/components/Checkout/AddressFormModal.tsx:166:27)
+
+    console.log
+      Street changed: 123 Main St
+
+      at log (src/components/Checkout/AddressFormModal.tsx:134:25)
+
+    console.log
+      State changed: Maharashtra
+
+      at log (src/components/Checkout/AddressFormModal.tsx:166:27)
+
+FAIL src/components/Checkout/__tests__/CheckoutFlow.integration.test.tsx
+  ● Console
+
+    console.log
+      Street changed: 9
+
+      at log (src/components/Checkout/AddressFormModal.tsx:134:25)
+
+    console.log
+      Street changed: 99
+
+      at log (src/components/Checkout/AddressFormModal.tsx:134:25)
+
+    console.log
+      Street changed: 999
+
+      at log (src/components/Checkout/AddressFormModal.tsx:134:25)
+
+    console.log
+      Street changed: 999
+
+      at log (src/components/Checkout/AddressFormModal.tsx:134:25)
+
+    console.log
+      Street changed: 999 M
+
+      at log (src/components/Checkout/AddressFormModal.tsx:134:25)
+
+    console.log
+      Street changed: 999 Mo
+
+      at log (src/components/Checkout/AddressFormModal.tsx:134:25)
+
+    console.log
+      Street changed: 999 Mod
+
+      at log (src/components/Checkout/AddressFormModal.tsx:134:25)
+
+    console.log
+      Street changed: 999 Moda
+
+      at log (src/components/Checkout/AddressFormModal.tsx:134:25)
+
+    console.log
+      Street changed: 999 Modal
+
+      at log (src/components/Checkout/AddressFormModal.tsx:134:25)
+
+    console.log
+      Street changed: 999 Modal
+
+      at log (src/components/Checkout/AddressFormModal.tsx:134:25)
+
+    console.log
+      Street changed: 999 Modal S
+
+      at log (src/components/Checkout/AddressFormModal.tsx:134:25)
+
+    console.log
+      Street changed: 999 Modal St
+
+      at log (src/components/Checkout/AddressFormModal.tsx:134:25)
+
+  ● Checkout Flow Integration Tests › Complete Checkout Flow - Logged-in User › should complete checkout with different billing and shipping addresses
+
+    Found multiple elements with the text: 456 Park Ave
+
+    Here are the matching elements:
+
+    Ignored nodes: comments, script, style
+    [36m<span[39m
+      [33mclass[39m=[32m"font-medium text-gray-900"[39m
+    [36m>[39m
+      [0m456 Park Ave[0m
+    [36m</span>[39m
+
+    Ignored nodes: comments, script, style
+    [36m<span[39m
+      [33mclass[39m=[32m"font-medium text-gray-900"[39m
+    [36m>[39m
+      [0m456 Park Ave[0m
+    [36m</span>[39m
+
+    (If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"mt-9"[39m
+        [36m>[39m
+          [36m<h2[39m
+            [33mclass[39m=[32m"font-medium text-dark text-xl sm:text-2xl mb-5.5"[39m
+          [36m>[39m
+            [0mBilling Details[0m
+          [36m</h2>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"bg-white shadow-1 rounded-[10px] p-4 sm:p-8.5"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"mb-6 pb-6 border-b border-gray-200"[39m
+            [36m>[39m
+              [36m<h3[39m
+                [33mclass[39m=[32m"font-medium text-lg mb-4"[39m
+              [36m>[39m
+                [0mContact Information[0m
+              [36m</h3>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"w-full"[39m
+                [36m>[39m
+                  [36m<label[39m
+                    [33mclass[39m=[32m"block mb-2.5"[39m
+                    [33mfor[39m=[32m"firstName"[39m
+                  [36m>[39m
+                    [0mFirst Name [0m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"text-red"[39m
+                    [36m>[39m
+                      [0m*[0m
+                    [36m</span>[39m
+                  [36m</label>[39m
+                  [36m<input[39m
+                    [33mclass[39m=[32m"rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"[39m
+                    [33mid[39m=[32m"firstName"[39m
+                    [33mname[39m=[32m"firstName"[39m
+                    [33mplaceholder[39m=[32m"Your first name"[39m
+                    [33mrequired[39m=[32m""[39m
+                    [33mtype[39m=[32m"text"[39m
+                  [36m/>[39m
+                [36m</div>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"w-full"[39m
+                [36m>[39m
+                  [36m<label[39m
+                    [33mclass[39m=[32m"block mb-2.5"[39m
+                    [33mfor[39m=[32m"lastName"[39m
+                  [36m>[39m
+                    [0mLast Name [0m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"text-red"[39m
+                    [36m>[39m
+                      [0m*[0m
+                    [36m</span>[39m
+                  [36m</label>[39m
+                  [36m<input[39m
+                    [33mclass[39m=[32m"rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"[39m
+                    [33mid[39m=[32m"lastName"[39m
+                    [33mname[39m=[32m"lastName"[39m
+                    [33mplaceholder[39m=[32m"Your last name"[39m
+                    [33mrequired[39m=[32m""[39m
+                    [33mtype[39m=[32m"text"[39m
+                  [36m/>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col lg:flex-row gap-5 sm:gap-8"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"w-full"[39m
+                [36m>[39m
+                  [36m<label[39m
+                    [33mclass[39m=[32m"block mb-2.5"[39m
+                    [33mfor[39m=[32m"email"[39m
+                  [36m>[39m
+                    [0mEmail Address [0m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"text-red"[39m
+                    [36m>[39m
+                      [0m*[0m
+                    [36m</span>[39m
+                  [36m</label>[39m
+                  [36m<input[39m
+                    [33mclass[39m=[32m"rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"[39m
+                    [33mid[39m=[32m"email"[39m
+                    [33mname[39m=[32m"email"[39m
+                    [33mplaceholder[39m=[32m"your.email@example.com"[39m
+                    [33mrequired[39m=[32m""[39m
+                    [33mtype[39m=[32m"email"[39m
+                  [36m/>[39m
+                [36m</div>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"w-full"[39m
+                [36m>[39m
+                  [36m<label[39m
+                    [33mclass[39m=[32m"block mb-2.5"[39m
+                    [33mfor[39m=[32m"phone"[39m
+                  [36m>[39m
+                    [0mPhone [0m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"text-red"[39m
+                    [36m>[39m
+                      [0m*[0m
+                    [36m</span>[39m
+                  [36m</label>[39m
+                  [36m<input[39m
+                    [33mclass[39m=[32m"rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"[39m
+                    [33mid[39m=[32m"phone"[39m
+                    [33mmaxlength[39m=[32m"10"[39m
+                    [33mname[39m=[32m"phone"[39m
+                    [33mpattern[39m=[32m"[6-9]\\d{9}"[39m
+                    [33mplaceholder[39m=[32m"10-digit mobile number"[39m
+                    [33mrequired[39m=[32m""[39m
+                    [33mtype[39m=[32m"tel"[39m
+                  [36m/>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center justify-between mb-4"[39m
+              [36m>[39m
+                [36m<h3[39m
+                  [33mclass[39m=[32m"font-medium text-lg"[39m
+                [36m>[39m
+                  [0mBilling Address[0m
+                [36m</h3>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"space-y-3 mb-4"[39m
+              [36m>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"block p-4 border-2 rounded-lg cursor-pointer transition-all border-blue-500 bg-blue-50"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"flex items-start"[39m
+                  [36m>[39m
+                    [36m<input[39m
+                      [33mchecked[39m=[32m""[39m
+                      [33mclass[39m=[32m"mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"[39m
+                      [33mname[39m=[32m"billingAddress"[39m
+                      [33mtype[39m=[32m"radio"[39m
+                      [33mvalue[39m=[32m"addr-1"[39m
+                    [36m/>[39m
+                    [36m<div[39m
+                      [33mclass[39m=[32m"ml-3 flex-1"[39m
+                    [36m>[39m
+                      [36m<div[39m
+                        [33mclass[39m=[32m"flex items-center"[39m
+                      [36m>[39m
+                        [36m<span[39m
+                          [33mclass[39m=[32m"font-medium text-gray-900"[39m
+                        [36m>[39m
+                          [0m123 Main St[0m
+                        [36m</span>[39m
+                        [36m<span[39m
+                          [33mclass[39m=[32m"ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800"[39m
+                        [36m>[39m
+                          [0mDefault[0m
+                        [36m</span>[39m
+                      [36m</div>[39m
+                      [36m<p[39m
+                        [33mclass[39m=[32m"text-sm text-gray-600 mt-1"[39m
+                      [36m>[39m
+                        [0mMumbai[0m
+                        [0m, [0m
+                        [0mMaharashtra[0m
+                        [0m - [0m
+                        [0m400001[0m
+                      [36m</p>[39m
+                    [36m</div>[39m
+                  [36m</div>[39m
+                [36m</label>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"block p-4 border-2 rounded-lg cursor-pointer transition-all border-gray-200 hover:border-gray-300"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"flex items-start"[39m
+                  [36m>[39m
+                    [36m<input[39m
+                      [33mclass[39m=[32m"mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"[39m
+                      [33mname[39m=[32m"billingAddress"[39m
+                      [33mtype[39m=[32m"radio"[39m
+                      [33mvalue[39m=[32m"addr-2"[39m
+                    [36m/>[39m
+                    [36m<div[39m
+                      [33mclass[39m=[32m"ml-3 flex-1"[39m
+                    [36m>[39m
+                      [36m<div[39m
+                        [33mclass[39m=[32m"flex items-center"[39m
+                      [36m>[39m
+                        [36m<span[39m
+                          [33mclass[39m=[32m"font-medium text-gray-900"[39m
+                        [36m>[39m
+                          [0m456 Park Ave[0m
+                        [36m</span>[39m
+                      [36m</div>[39m
+                      [36m<p[39m
+                        [33mclass[39m=[32m"text-sm text-gray-600 mt-1"[39m
+                      [36m>[39m
+                        [0mDelhi[0m
+                        [0m, [0m
+                        [0mDelhi[0m
+                        [0m - [0m
+                        [0m110001[0m
+                      [36m</p>[39m
+                    [36m</div>[39m
+                  [36m</div>[39m
+                [36m</label>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"block p-4 border-2 rounded-lg cursor-pointer transition-all border-gray-200 hover:border-gray-300"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"flex items-start"[39m
+                  [36m>[39m
+                    [36m<input[39m
+                      [33mclass[39m=[32m"mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"[39m
+                      [33mname[39m=[32m"billingAddress"[39m
+                      [33mtype[39m=[32m"radio"[39m
+                      [33mvalue[39m=[32m"new"[39m
+                    [36m/>[39m
+                    [36m<div[39m
+                      [33mclass[39m=[32m"ml-3"[39m
+                    [36m>[39m
+                      [36m<span[39m
+                        [33mclass[39m=[32m"font-medium text-gray-900"[39m
+                      [36m>[39m
+                        [0mUse a different address[0m
+                      [36m</span>[39m
+                      [36m<p[39m
+                        [33mclass[39m=[32m"text-sm text-gray-600 mt-1"[39m
+                      [36m>[39m
+                        [0mEnter a new billing address[0m
+                      [36m</p>[39m
+                    [36m</div>[39m
+                  [36m</div>[39m
+                [36m</label>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"w-full p-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-500 hover:text-blue-600 transition-colors flex items-center justify-center gap-2"[39m
+                  [33mtype[39m=[32m"button"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33mclass[39m=[32m"w-5 h-5"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M12 4v16m8-8H4"[39m
+                      [33mstroke-linecap[39m=[32m"round"[39m
+                      [33mstroke-linejoin[39m=[32m"round"[39m
+                      [33mstroke-width[39m=[32m"2"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [0mAdd New Address[0m
+                [36m</button>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"bg-white shadow-1 rounded-[10px] mt-7.5"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"p-4 sm:p-8.5"[39m
+          [36m>[39m
+            [36m<h3[39m
+              [33mclass[39m=[32m"font-medium text-lg mb-4"[39m
+            [36m>[39m
+              [0mShipping Address[0m
+            [36m</h3>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg"[39m
+            [36m>[39m
+              [36m<label[39m
+                [33mclass[39m=[32m"flex items-start cursor-pointer"[39m
+              [36m>[39m
+                [36m<input[39m
+                  [33mchecked[39m=[32m""[39m
+                  [33mclass[39m=[32m"mt-0.5 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"[39m
+                  [33mname[39m=[32m"sameAsBilling"[39m
+                  [33mtype[39m=[32m"checkbox"[39m
+                [36m/>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"ml-3"[39m
+                [36m>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"font-medium text-gray-900"[39m
+                  [36m>[39m
+                    [0mShip to billing address[0m
+                  [36m</span>[39m
+                  [36m<p[39m
+                    [33mclass[39m=[32m"text-sm text-gray-600 mt-1"[39m
+                  [36m>[39m
+                    [0mUse the same address for shipping[0m
+                  [36m</p>[39m
+                [36m</div>[39m
+              [36m</label>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"space-y-3 mb-4"[39m
+            [36m>[39m
+              [36m<label[39m
+                [33mclass[39m=[32m"block p-4 border-2 rounded-lg cursor-pointer transition-all border-blue-500 bg-blue-50"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex items-start"[39m
+                [36m>[39m
+                  [36m<input[39m
+                    [33mchecked[39m=[32m""[39m
+                    [33mclass[39m=[32m"mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"[39m
+                    [33mname[39m=[32m"shippingAddress"[39m
+                    [33mtype[39m=[32m"radio"[39m
+                    [33mvalue[39m=[32m"addr-1"[39m
+                  [36m/>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"ml-3 flex-1"[39m
+                  [36m>[39m
+                    [36m<div[39m
+                      [33mclass[39m=[32m"flex items-center"[39m
+                    [36m>[39m
+                      [36m<span[39m
+                        [33mclass[39m=[32m"font-medium text-gray-900"[39m
+                      [36m>[39m
+                        [0m123 Main St[0m
+                      [36m</span>[39m
+                      [36m<span[39m
+                        [33mclass[39m=[32m"ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800"[39m
+                      [36m>[39m
+                        [0mDefault[0m
+                      [36m</span>[39m
+                    [36m</div>[39m
+                    [36m<p[39m
+                      [33mclass[39m=[32m"text-sm text-gray-600 mt-1"[39m
+                    [36m>[39m
+                      [0mMumbai[0m
+                      [0m, [0m
+                      [0mMaharashtra[0m
+                      [0m - [0m
+                      [0m400001[0m
+                    [36m</p>[39m
+                  [36m</div>[39m
+                [36m</div>[39m
+              [36m</label>[39m
+              [36m<label[39m
+                [33mclass[39m=[32m"block p-4 border-2 rounded-lg cursor-pointer transition-all border-gray-200 hover:border-gray-300"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex items-start"[39m
+                [36m>[39m
+                  [36m<input[39m
+                    [33mclass[39m=[32m"mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"[39m
+                    [33mname[39m=[32m"shippingAddress"[39m
+                    [33mtype[39m=[32m"radio"[39m
+                    [33mvalue[39m=[32m"addr-2"[39m
+                  [36m/>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"ml-3 flex-1"[39m
+                  [36m>[39m
+                    [36m<div[39m
+                      [33mclass[39m=[32m"flex items-center"[39m
+                    [36m>[39m
+                      [36m<span[39m
+                        [33mclass[39m=[32m"font-medium text-gray-900"[39m
+                      [36m>[39m
+                        [0m456 Park Ave[0m
+                      [36m</span>[39m
+                    [36m</div>[39m
+                    [36m<p[39m
+                      [33mclass[39m=[32m"text-sm text-gray-600 mt-1"[39m
+                    [36m>[39m
+                      [0mDelhi[0m
+                      [0m, [0m
+                      [0mDelhi[0m
+                      [0m - [0m
+                      [0m110001[0m
+                    [36m</p>[39m
+                  [36m</div>[39m
+                [36m</div>[39m
+              [36m</label>[39m
+              [36m<label[39m
+                [33mclass[39m=[32m"block p-4 border-2 rounded-lg cursor-pointer transition-all border-gray-200 hover:border-gray-300"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex items-start"[39m
+                [36m>[39m
+                  [36m<input[39m
+                    [33mclass[39m=[32m"mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"[39m
+                    [33mname[39m=[32m"shippingAddress"[39m
+                    [33mtype[39m=[32m"radio"[39m
+                    [33mvalue[39m=[32m"new"[39m
+                  [36m/>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"ml-3"[39m
+                  [36m>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"font-medium text-gray-900"[39m
+                    [36m>[39m
+                      [0mUse a different address[0m
+                    [36m</span>[39m
+                    [36m<p[39m
+                      [33mclass[39m=[32m"text-sm text-gray-600 mt-1"[39m
+                    [36m>[39m
+                      [0mEnter a new shipping address[0m
+                    [36m</p>[39m
+                  [36m</div>[39m
+                [36m</div>[39m
+              [36m</label>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"w-full p-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-500 hover:text-blue-600 transition-colors flex items-center justify-center gap-2"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"w-5 h-5"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 4v16m8-8H4"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+                [0mAdd New Address[0m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</body>[39m
+
+      141 |
+      142 |       // Wait for shipping addresses to show
+    > 143 |       await waitFor(() => {
+          |                    ^
+      144 |         expect(screen.getByText('456 Park Ave')).toBeInTheDocument();
+      145 |       });
+      146 |
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at Object.<anonymous> (src/components/Checkout/__tests__/CheckoutFlow.integration.test.tsx:143:20)
+
+  ● Checkout Flow Integration Tests › Address Management During Checkout › should allow adding address via modal and refresh list
+
+    TypeError: Cannot read properties of undefined (reading 'disabled')
+
+      449 |       // Fill modal form
+      450 |       await userEvent.type(screen.getByPlaceholderText(/House no, Building name/i), '999 Modal St');
+    > 451 |       await userEvent.type(screen.getAllByLabelText(/City/i)[1], 'Chennai');
+          |                       ^
+      452 |       await userEvent.selectOptions(screen.getAllByLabelText(/State/i)[1], 'Tamil Nadu');
+      453 |       await userEvent.type(screen.getAllByPlaceholderText(/6-digit PIN code/i)[1], '600001');
+      454 |
+
+      at Object.type (node_modules/@testing-library/user-event/dist/cjs/utility/type.js:10:17)
+      at node_modules/@testing-library/user-event/dist/cjs/setup/setup.js:85:45
+      at Object.asyncWrapper (node_modules/@testing-library/react/dist/pure.js:88:28)
+      at Object.wrapAsync (node_modules/@testing-library/user-event/dist/cjs/setup/wrapAsync.js:8:28)
+      at Object.method [as type] (node_modules/@testing-library/user-event/dist/cjs/setup/setup.js:85:26)
+      at Object.type (node_modules/@testing-library/user-event/dist/cjs/setup/directApi.js:44:52)
+      at Object.type (src/components/Checkout/__tests__/CheckoutFlow.integration.test.tsx:451:23)
+
+  ● Checkout Flow Integration Tests › Responsive Behavior › should render properly on desktop viewport
+
+    TestingLibraryElementError: Unable to find an element with the text: Contact Information. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"mt-9"[39m
+        [36m>[39m
+          [36m<h2[39m
+            [33mclass[39m=[32m"font-medium text-dark text-xl sm:text-2xl mb-5.5"[39m
+          [36m>[39m
+            [0mBilling Details[0m
+          [36m</h2>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"bg-white shadow-1 rounded-[10px] p-4 sm:p-8.5 animate-pulse"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"h-4 bg-gray-200 rounded w-1/4 mb-4"[39m
+            [36m/>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"h-20 bg-gray-200 rounded"[39m
+            [36m/>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</body>[39m
+
+      538 |
+      539 |       // All elements should still be accessible
+    > 540 |       expect(screen.getByText('Contact Information')).toBeInTheDocument();
+          |                     ^
+      541 |       expect(screen.getByText('Billing Address')).toBeInTheDocument();
+      542 |     });
+      543 |   });
+
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.getByText (src/components/Checkout/__tests__/CheckoutFlow.integration.test.tsx:540:21)
+
+FAIL src/components/Checkout/__tests__/BillingNew.test.tsx
+  ● Console
+
+    console.error
+      Error fetching addresses: Error: Network error
+          at Object.<anonymous> (/Users/kataria/projects/mushmush-website/src/components/Checkout/__tests__/BillingNew.test.tsx:351:53)
+          at Promise.then.completed (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/utils.js:298:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/utils.js:231:10)
+          at _callCircusTest (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:316:40)
+          at _runTest (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:252:3)
+          at _runTestsForDescribeBlock (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:126:9)
+          at _runTestsForDescribeBlock (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:121:9)
+          at _runTestsForDescribeBlock (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:121:9)
+          at run (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/run.js:71:3)
+          at runAndTransformResultsToJestFormat (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+          at jestAdapter (/Users/kataria/projects/mushmush-website/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+          at runTestInternal (/Users/kataria/projects/mushmush-website/node_modules/jest-runner/build/runTest.js:367:16)
+          at runTest (/Users/kataria/projects/mushmush-website/node_modules/jest-runner/build/runTest.js:444:34)
+          at Object.worker (/Users/kataria/projects/mushmush-website/node_modules/jest-runner/build/testWorker.js:106:12)
+
+      67 |       }
+      68 |     } catch (error) {
+    > 69 |       console.error("Error fetching addresses:", error);
+         |               ^
+      70 |     } finally {
+      71 |       setLoading(false);
+      72 |     }
+
+      at error (src/components/Checkout/BillingNew.tsx:69:15)
+
+  ● BillingNew › Unit Tests - Logged-in User with Addresses › should open modal when "Add New Address" is clicked
+
+    Found multiple elements with the text: Add New Address
+
+    Here are the matching elements:
+
+    Ignored nodes: comments, script, style
+    [36m<button[39m
+      [33mclass[39m=[32m"w-full p-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-500 hover:text-blue-600 transition-colors flex items-center justify-center gap-2"[39m
+      [33mtype[39m=[32m"button"[39m
+    [36m>[39m
+      [36m<svg[39m
+        [33mclass[39m=[32m"w-5 h-5"[39m
+        [33mfill[39m=[32m"none"[39m
+        [33mstroke[39m=[32m"currentColor"[39m
+        [33mviewBox[39m=[32m"0 0 24 24"[39m
+      [36m>[39m
+        [36m<path[39m
+          [33md[39m=[32m"M12 4v16m8-8H4"[39m
+          [33mstroke-linecap[39m=[32m"round"[39m
+          [33mstroke-linejoin[39m=[32m"round"[39m
+          [33mstroke-width[39m=[32m"2"[39m
+        [36m/>[39m
+      [36m</svg>[39m
+      [0mAdd New Address[0m
+    [36m</button>[39m
+
+    Ignored nodes: comments, script, style
+    [36m<h2[39m
+      [33mclass[39m=[32m"text-xl font-bold text-gray-900"[39m
+    [36m>[39m
+      [0mAdd New Address[0m
+    [36m</h2>[39m
+
+    (If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"mt-9"[39m
+        [36m>[39m
+          [36m<h2[39m
+            [33mclass[39m=[32m"font-medium text-dark text-xl sm:text-2xl mb-5.5"[39m
+          [36m>[39m
+            [0mBilling Details[0m
+          [36m</h2>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"bg-white shadow-1 rounded-[10px] p-4 sm:p-8.5"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"mb-6 pb-6 border-b border-gray-200"[39m
+            [36m>[39m
+              [36m<h3[39m
+                [33mclass[39m=[32m"font-medium text-lg mb-4"[39m
+              [36m>[39m
+                [0mContact Information[0m
+              [36m</h3>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"w-full"[39m
+                [36m>[39m
+                  [36m<label[39m
+                    [33mclass[39m=[32m"block mb-2.5"[39m
+                    [33mfor[39m=[32m"firstName"[39m
+                  [36m>[39m
+                    [0mFirst Name [0m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"text-red"[39m
+                    [36m>[39m
+                      [0m*[0m
+                    [36m</span>[39m
+                  [36m</label>[39m
+                  [36m<input[39m
+                    [33mclass[39m=[32m"rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"[39m
+                    [33mid[39m=[32m"firstName"[39m
+                    [33mname[39m=[32m"firstName"[39m
+                    [33mplaceholder[39m=[32m"Your first name"[39m
+                    [33mrequired[39m=[32m""[39m
+                    [33mtype[39m=[32m"text"[39m
+                  [36m/>[39m
+                [36m</div>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"w-full"[39m
+                [36m>[39m
+                  [36m<label[39m
+                    [33mclass[39m=[32m"block mb-2.5"[39m
+                    [33mfor[39m=[32m"lastName"[39m
+                  [36m>[39m
+                    [0mLast Name [0m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"text-red"[39m
+                    [36m>[39m
+                      [0m*[0m
+                    [36m</span>[39m
+                  [36m</label>[39m
+                  [36m<input[39m
+                    [33mclass[39m=[32m"rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"[39m
+                    [33mid[39m=[32m"lastName"[39m
+                    [33mname[39m=[32m"lastName"[39m
+                    [33mplaceholder[39m=[32m"Your last name"[39m
+                    [33mrequired[39m=[32m""[39m
+                    [33mtype[39m=[32m"text"[39m
+                  [36m/>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col lg:flex-row gap-5 sm:gap-8"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"w-full"[39m
+                [36m>[39m
+                  [36m<label[39m
+                    [33mclass[39m=[32m"block mb-2.5"[39m
+                    [33mfor[39m=[32m"email"[39m
+                  [36m>[39m
+                    [0mEmail Address [0m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"text-red"[39m
+                    [36m>[39m
+                      [0m*[0m
+                    [36m</span>[39m
+                  [36m</label>[39m
+                  [36m<input[39m
+                    [33mclass[39m=[32m"rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"[39m
+                    [33mid[39m=[32m"email"[39m
+                    [33mname[39m=[32m"email"[39m
+                    [33mplaceholder[39m=[32m"your.email@example.com"[39m
+                    [33mrequired[39m=[32m""[39m
+                    [33mtype[39m=[32m"email"[39m
+                  [36m/>[39m
+                [36m</div>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"w-full"[39m
+                [36m>[39m
+                  [36m<label[39m
+                    [33mclass[39m=[32m"block mb-2.5"[39m
+                    [33mfor[39m=[32m"phone"[39m
+                  [36m>[39m
+                    [0mPhone [0m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"text-red"[39m
+                    [36m>[39m
+                      [0m*[0m
+                    [36m</span>[39m
+                  [36m</label>[39m
+                  [36m<input[39m
+                    [33mclass[39m=[32m"rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"[39m
+                    [33mid[39m=[32m"phone"[39m
+                    [33mmaxlength[39m=[32m"10"[39m
+                    [33mname[39m=[32m"phone"[39m
+                    [33mpattern[39m=[32m"[6-9]\\d{9}"[39m
+                    [33mplaceholder[39m=[32m"10-digit mobile number"[39m
+                    [33mrequired[39m=[32m""[39m
+                    [33mtype[39m=[32m"tel"[39m
+                  [36m/>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center justify-between mb-4"[39m
+              [36m>[39m
+                [36m<h3[39m
+                  [33mclass[39m=[32m"font-medium text-lg"[39m
+                [36m>[39m
+                  [0mBilling Address[0m
+                [36m</h3>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"space-y-3 mb-4"[39m
+              [36m>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"block p-4 border-2 rounded-lg cursor-pointer transition-all border-blue-500 bg-blue-50"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"flex items-start"[39m
+                  [36m>[39m
+                    [36m<input[39m
+                      [33mchecked[39m=[32m""[39m
+                      [33mclass[39m=[32m"mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"[39m
+                      [33mname[39m=[32m"billingAddress"[39m
+                      [33mtype[39m=[32m"radio"[39m
+                      [33mvalue[39m=[32m"addr-1"[39m
+                    [36m/>[39m
+                    [36m<div[39m
+                      [33mclass[39m=[32m"ml-3 flex-1"[39m
+                    [36m>[39m
+                      [36m<div[39m
+                        [33mclass[39m=[32m"flex items-center"[39m
+                      [36m>[39m
+                        [36m<span[39m
+                          [33mclass[39m=[32m"font-medium text-gr...
+
+      252 |
+      253 |       // Modal should open (check for modal title)
+    > 254 |       await waitFor(() => {
+          |                    ^
+      255 |         expect(screen.getByText('Add New Address')).toBeInTheDocument();
+      256 |       });
+      257 |     });
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at Object.<anonymous> (src/components/Checkout/__tests__/BillingNew.test.tsx:254:20)
+
+Test Suites: 5 failed, 3 passed, 8 total
+Tests:       6 failed, 112 passed, 118 total
+Snapshots:   0 total
+Time:        5.14 s
+Ran all test suites.

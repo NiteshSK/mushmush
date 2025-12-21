@@ -38,7 +38,7 @@ const ShippingNew: React.FC<ShippingNewProps> = ({ billingAddress, onAddressChan
   const [useNewAddress, setUseNewAddress] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     if (session?.user) {
@@ -120,6 +120,7 @@ const ShippingNew: React.FC<ShippingNewProps> = ({ billingAddress, onAddressChan
   if (loading) {
     return (
       <div className="bg-white shadow-1 rounded-[10px] mt-7.5 p-4 sm:p-8.5 animate-pulse">
+        <h3 className="font-medium text-lg mb-4">Shipping Address</h3>
         <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
         <div className="h-20 bg-gray-200 rounded"></div>
       </div>
@@ -160,11 +161,10 @@ const ShippingNew: React.FC<ShippingNewProps> = ({ billingAddress, onAddressChan
                   {addresses.map((address) => (
                     <label
                       key={address.id}
-                      className={`block p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                        selectedAddressId === address.id
+                      className={`block p-4 border-2 rounded-lg cursor-pointer transition-all ${selectedAddressId === address.id
                           ? "border-blue-500 bg-blue-50"
                           : "border-gray-200 hover:border-gray-300"
-                      }`}
+                        }`}
                     >
                       <div className="flex items-start">
                         <input
@@ -194,11 +194,10 @@ const ShippingNew: React.FC<ShippingNewProps> = ({ billingAddress, onAddressChan
 
                   {/* Use New Address Option */}
                   <label
-                    className={`block p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                      useNewAddress
+                    className={`block p-4 border-2 rounded-lg cursor-pointer transition-all ${useNewAddress
                         ? "border-blue-500 bg-blue-50"
                         : "border-gray-200 hover:border-gray-300"
-                    }`}
+                      }`}
                   >
                     <div className="flex items-start">
                       <input

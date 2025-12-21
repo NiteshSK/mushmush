@@ -20,9 +20,8 @@ const AddressModal = ({ isOpen, closeModal }) => {
 
   return (
     <div
-      className={`fixed top-0 left-0 overflow-y-auto no-scrollbar w-full h-screen sm:py-20 xl:py-25 2xl:py-[230px] bg-dark/70 sm:px-8 px-4 py-5 ${
-        isOpen ? "block z-99999" : "hidden"
-      }`}
+      className={`fixed top-0 left-0 overflow-y-auto no-scrollbar w-full h-screen sm:py-20 xl:py-25 2xl:py-[230px] bg-dark/70 sm:px-8 px-4 py-5 ${isOpen ? "block z-99999" : "hidden"
+        }`}
     >
       <div className="flex items-center justify-center ">
         <div
@@ -103,7 +102,7 @@ const AddressModal = ({ isOpen, closeModal }) => {
                   <input
                     type="text"
                     name="address"
-                    value="Block A, Samridhi Enclave, Kargi Chowk, Dehradun, 248001"
+                    value="NH 507, Herbertpur, Dehradun, 248142"
                     className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                   />
                 </div>

@@ -32,7 +32,7 @@ const Footer = () => {
                     />
                   </svg>
                 </span>
-                Block A, Samridhi Enclave, Kargi Chowk, Dehradun, 248001
+                NH 507, Herbertpur, Dehradun, 248142
               </li>
 
               <li>
