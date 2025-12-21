@@ -111,7 +111,7 @@ Our main offerings:
 Answer concisely and helpfully.`;
 
         const result = streamText({
-            model: google("gemini-2.0-flash"),
+            model: google("gemini-1.5-flash"),
             system: systemPrompt,
             messages: convertToCoreMessages(messages),
         });
