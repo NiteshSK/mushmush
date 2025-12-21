@@ -2,18 +2,21 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, User, Bot, Loader2, Sparkles } from "lucide-react";
-import { useChat } from "ai/react";
+import { useChat } from "@ai-sdk/react";
 
 const ChatBot = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const [input, setInput] = useState("");
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat({
+    const { messages, append, status, error } = useChat({
         api: "/api/ai-chat",
         initialMessages: [
             { id: "welcome", role: "assistant", content: "Hi! I'm Mushy, your AI guide. How can I help you today?" }
         ],
     });
+
+    const isLoading = status === "submitted" || status === "streaming";
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -24,6 +27,15 @@ const ChatBot = () => {
             scrollToBottom();
         }
     }, [messages, isOpen]);
+
+    const handleFormSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!input.trim() || isLoading) return;
+
+        const content = input;
+        setInput(""); // Clear input early for UX
+        await append({ role: "user", content });
+    };
 
     return (
         <div className="fixed bottom-6 right-6 z-[9999]">
@@ -119,13 +131,13 @@ const ChatBot = () => {
 
                     {/* Input */}
                     <form
-                        onSubmit={handleSubmit}
+                        onSubmit={handleFormSubmit}
                         className="p-4 bg-white border-t border-gray-100 flex gap-2 items-center"
                     >
                         <input
                             type="text"
                             value={input}
-                            onChange={handleInputChange}
+                            onChange={(e) => setInput(e.target.value)}
                             placeholder="Ask about training, products..."
                             className="flex-1 text-sm border-none focus:ring-0 focus:outline-none placeholder:text-gray-400"
                             disabled={isLoading}
