@@ -1,9 +1,14 @@
 import { streamText, convertToCoreMessages } from "ai";
-import { google } from "@ai-sdk/google";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { prisma } from "@/lib/prisma";
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
+
+// Initialize Google AI with support for both naming conventions
+const google = createGoogleGenerativeAI({
+    apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY,
+});
 
 export async function POST(req: Request) {
     try {
@@ -13,8 +18,8 @@ export async function POST(req: Request) {
             return new Response("Invalid messages", { status: 400 });
         }
 
-        if (!process.env.GEMINI_API_KEY) {
-            console.error("DEBUG: GEMINI_API_KEY is missing from environment variables");
+        if (!process.env.GEMINI_API_KEY && !process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+            console.error("DEBUG: AI API key is missing from environment variables");
             return new Response("AI key not configured", { status: 500 });
         }
 
