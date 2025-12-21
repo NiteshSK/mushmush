@@ -3,16 +3,21 @@
 import React, { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, User, Bot, Loader2, Sparkles } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 
 const ChatBot = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [input, setInput] = useState("");
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    const { messages, append, status, error } = useChat({
-        api: "/api/ai-chat",
-        initialMessages: [
-            { id: "welcome", role: "assistant", content: "Hi! I'm Mushy, your AI guide. How can I help you today?" }
+    const { messages, sendMessage, status, error } = useChat({
+        transport: new DefaultChatTransport({ api: "/api/ai-chat" }),
+        messages: [
+            {
+                id: "welcome",
+                role: "assistant",
+                parts: [{ type: 'text', text: "Hi! I'm Mushy, your AI guide. How can I help you today?" }]
+            } as any
         ],
     });
 
@@ -34,7 +39,7 @@ const ChatBot = () => {
 
         const content = input;
         setInput(""); // Clear input early for UX
-        await append({ role: "user", content });
+        await sendMessage({ text: content });
     };
 
     return (
@@ -82,6 +87,21 @@ const ChatBot = () => {
 
                     {/* Messages */}
                     <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50">
+                        {messages.length === 0 && (
+                            <div className="flex justify-start">
+                                <div className="max-w-[85%] p-3 rounded-2xl text-sm bg-white border border-gray-100 shadow-sm rounded-tl-none text-gray-800">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <div className="w-5 h-5 bg-blue/10 rounded-full flex items-center justify-center text-blue">
+                                            <Bot size={12} />
+                                        </div>
+                                        <span className="text-[10px] font-semibold opacity-60">Mushy</span>
+                                    </div>
+                                    <div className="whitespace-pre-wrap leading-relaxed">
+                                        Hi! I'm Mushy, your AI guide. How can I help you today?
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                         {messages.map((msg) => (
                             <div
                                 key={msg.id}
@@ -108,7 +128,9 @@ const ChatBot = () => {
                                         </span>
                                     </div>
                                     <div className="whitespace-pre-wrap leading-relaxed">
-                                        {msg.content}
+                                        {msg.parts.map((part: any, i: number) =>
+                                            part.type === 'text' ? part.text : null
+                                        )}
                                     </div>
                                 </div>
                             </div>

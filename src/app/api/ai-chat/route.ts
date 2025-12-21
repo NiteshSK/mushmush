@@ -103,7 +103,7 @@ Answer concisely and helpfully.`;
             messages,
         });
 
-        return result.toDataStreamResponse();
+        return result.toUIMessageStreamResponse();
     } catch (error: any) {
         console.error("AI Chat Error:", error);
         return new Response("Failed to generate response", { status: 500 });
