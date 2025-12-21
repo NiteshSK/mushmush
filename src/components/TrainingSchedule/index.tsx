@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import PaymentModal from "@/components/Training/PaymentModal";
 import RegistrationModal from "@/components/Training/RegistrationModal";
+import { getTrainingProgramPrice, isEarlyBirdOfferValid } from "@/lib/utils";
 
 interface TrainingProgram {
   id: number;
@@ -20,7 +21,7 @@ interface TrainingProgram {
   hasEarlyBirdOffer: boolean;
   earlyBirdPrice?: number;
   originalPrice?: number;
-  earlyBirdEndDate?: Date;
+  earlyBirdEndDate?: string | Date;
   isActive: boolean;
 }
 
@@ -65,7 +66,7 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [pendingRegistration, setPendingRegistration] = useState<any>(null);
   const [expandedDays, setExpandedDays] = useState<Set<number>>(new Set());
-  const [expandedSections, setExpandedSections] = useState<{[key: string]: boolean}>({});
+  const [expandedSections, setExpandedSections] = useState<{ [key: string]: boolean }>({});
 
   useEffect(() => {
     const fetchProgramAndSchedule = async () => {
@@ -141,31 +142,8 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
     }
   };
 
-  const getProgramPrice = () => {
-    if (program.hasEarlyBirdOffer && 
-        program.earlyBirdPrice && 
-        program.originalPrice && 
-        program.earlyBirdEndDate) {
-      const now = new Date();
-      const endDate = new Date(program.earlyBirdEndDate);
-      if (now <= endDate) {
-        return program.earlyBirdPrice;
-      }
-    }
-    return program.originalPrice || program.price;
-  };
-
-  const isEarlyBirdValid = () => {
-    if (!program.hasEarlyBirdOffer || 
-        !program.earlyBirdPrice || 
-        !program.originalPrice || 
-        !program.earlyBirdEndDate) {
-      return false;
-    }
-    const now = new Date();
-    const endDate = new Date(program.earlyBirdEndDate);
-    return now <= endDate;
-  };
+  const currentPrice = getTrainingProgramPrice(program);
+  const earlyBirdValid = isEarlyBirdOfferValid(program);
 
   if (loading) {
     return (
@@ -187,8 +165,6 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
     );
   }
 
-  const currentPrice = getProgramPrice();
-  const earlyBirdValid = isEarlyBirdValid();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-green-50 py-40">
@@ -242,11 +218,10 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
             <button
               onClick={handleRegisterClick}
               disabled={schedules.length === 0}
-              className={`px-8 py-3 text-lg font-bold rounded-lg transition-all duration-300 whitespace-nowrap ${
-                schedules.length === 0
+              className={`px-8 py-3 text-lg font-bold rounded-lg transition-all duration-300 whitespace-nowrap ${schedules.length === 0
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-blue hover:bg-blue-dark text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
-              }`}
+                }`}
             >
               {schedules.length === 0 ? "Schedule Not Available" : "🚀 Enroll Now"}
             </button>
@@ -262,13 +237,13 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
             </h2>
             <p className="text-gray-600 text-lg">Click on any day to view detailed information</p>
           </div>
-          
+
           {schedules.length === 0 ? (
             <div className="bg-yellow-50 border-2 border-yellow-300 rounded-2xl p-8 text-center shadow-lg">
               <span className="text-6xl mb-4 block">⚠️</span>
               <h3 className="text-2xl font-bold text-yellow-800 mb-2">Schedule Not Available</h3>
               <p className="text-yellow-700 text-lg">
-                The detailed schedule for this training program is not yet available. 
+                The detailed schedule for this training program is not yet available.
                 Please check back later or contact us for more information.
               </p>
             </div>
@@ -279,18 +254,17 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
                 const topicsKey = `${schedule.id}-topics`;
                 const materialsKey = `${schedule.id}-materials`;
                 const objectivesKey = `${schedule.id}-objectives`;
-                
+
                 return (
-                  <div 
-                    key={schedule.id} 
-                    className={`bg-white rounded-2xl shadow-lg border-2 overflow-hidden transition-all duration-300 ${
-                      isExpanded 
-                        ? 'border-blue-500 shadow-2xl' 
+                  <div
+                    key={schedule.id}
+                    className={`bg-white rounded-2xl shadow-lg border-2 overflow-hidden transition-all duration-300 ${isExpanded
+                        ? 'border-blue-500 shadow-2xl'
                         : 'border-gray-200 hover:border-blue-300 hover:shadow-xl'
-                    }`}
+                      }`}
                   >
                     {/* Day Header */}
-                    <div 
+                    <div
                       className="cursor-pointer"
                       onClick={() => toggleDay(schedule.id)}
                     >
@@ -303,15 +277,15 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
                                 <span className="text-xs uppercase">Day</span>
                                 <span className="text-3xl">{schedule.dayNumber}</span>
                               </div>
-                              
+
                               <div>
                                 <h3 className="text-2xl font-bold mb-2">{schedule.title}</h3>
                                 <div className="flex items-center space-x-4 text-sm">
                                   <span className="flex items-center">
                                     <span className="mr-2">📅</span>
-                                    {new Date(schedule.date).toLocaleDateString('en-US', { 
-                                      month: 'long', 
-                                      day: 'numeric', 
+                                    {new Date(schedule.date).toLocaleDateString('en-US', {
+                                      month: 'long',
+                                      day: 'numeric',
                                       year: 'numeric',
                                       weekday: 'long'
                                     })}
@@ -323,7 +297,7 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
                                 </div>
                               </div>
                             </div>
-                            
+
                             <div className="flex items-center space-x-6">
                               <div className="text-right">
                                 <div className="text-xs uppercase opacity-75 mb-1">Instructor</div>
@@ -332,7 +306,7 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
                                   <span className="font-bold text-lg">{schedule.instructor?.name || 'TBA'}</span>
                                 </div>
                               </div>
-                              
+
                               <div className="flex space-x-4">
                                 <div className="bg-green-500 rounded-xl px-4 py-2 text-center shadow-lg">
                                   <div className="text-2xl font-bold">{schedule.practicalSessions?.length || 0}</div>
@@ -343,7 +317,7 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
                                   <div className="text-xs uppercase">Theory</div>
                                 </div>
                               </div>
-                              
+
                               <div className={`transform transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
                                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
@@ -353,7 +327,7 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* Mobile Layout */}
                       <div className="md:hidden bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-black p-6">
                         <div className="flex items-start justify-between mb-4">
@@ -365,8 +339,8 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
                             <div>
                               <h3 className="text-xl font-bold mb-1">{schedule.title}</h3>
                               <div className="text-sm opacity-90">
-                                {new Date(schedule.date).toLocaleDateString('en-US', { 
-                                  month: 'short', 
+                                {new Date(schedule.date).toLocaleDateString('en-US', {
+                                  month: 'short',
                                   day: 'numeric'
                                 })}
                               </div>
@@ -378,7 +352,7 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
                             </svg>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center justify-between text-sm mb-4">
                           <span className="flex items-center">
                             <span className="mr-1">🕐</span>
@@ -389,7 +363,7 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
                             {schedule.instructor?.name || 'TBA'}
                           </span>
                         </div>
-                        
+
                         <div className="flex space-x-3">
                           <div className="bg-green-500 rounded-lg px-3 py-2 text-center flex-1 shadow-lg">
                             <div className="text-xl font-bold">{schedule.practicalSessions?.length || 0}</div>
@@ -402,7 +376,7 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* Expandable Details */}
                     {isExpanded && (
                       <div className="p-6 bg-gradient-to-br from-gray-50 to-blue-50 border-t-4 border-indigo-500">
@@ -415,12 +389,12 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
                             <p className="text-gray-700 text-base leading-relaxed">{schedule.description}</p>
                           </div>
                         )}
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                           {/* Topics */}
                           {schedule.topics && schedule.topics.length > 0 && (
                             <div className="bg-white rounded-xl shadow-lg border-2 border-indigo-300 overflow-hidden hover:shadow-xl transition-shadow">
-                              <div 
+                              <div
                                 className="bg-gradient-to-r from-indigo-500 to-purple-500 text-black p-4 cursor-pointer flex items-center justify-between"
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -431,10 +405,10 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
                                   <span className="text-2xl mr-2">📋</span>
                                   Key Topics ({schedule.topics.length})
                                 </h4>
-                                <svg 
+                                <svg
                                   className={`w-5 h-5 transform transition-transform ${expandedSections[topicsKey] ? 'rotate-180' : ''}`}
-                                  fill="none" 
-                                  stroke="currentColor" 
+                                  fill="none"
+                                  stroke="currentColor"
                                   viewBox="0 0 24 24"
                                 >
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -477,11 +451,11 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
                               </div>
                             </div>
                           )}
-                          
+
                           {/* Materials */}
                           {schedule.materials && schedule.materials.length > 0 && (
                             <div className="bg-white rounded-xl shadow-lg border-2 border-green-300 overflow-hidden hover:shadow-xl transition-shadow">
-                              <div 
+                              <div
                                 className="bg-gradient-to-r from-green-500 to-emerald-500 text-black p-4 cursor-pointer flex items-center justify-between"
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -492,10 +466,10 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
                                   <span className="text-2xl mr-2">🛠️</span>
                                   Materials ({schedule.materials.length})
                                 </h4>
-                                <svg 
+                                <svg
                                   className={`w-5 h-5 transform transition-transform ${expandedSections[materialsKey] ? 'rotate-180' : ''}`}
-                                  fill="none" 
-                                  stroke="currentColor" 
+                                  fill="none"
+                                  stroke="currentColor"
                                   viewBox="0 0 24 24"
                                 >
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -538,11 +512,11 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
                               </div>
                             </div>
                           )}
-                          
+
                           {/* Learning Objectives */}
                           {schedule.learningObjectives && schedule.learningObjectives.length > 0 && (
                             <div className="bg-white rounded-xl shadow-lg border-2 border-purple-300 overflow-hidden hover:shadow-xl transition-shadow">
-                              <div 
+                              <div
                                 className="bg-gradient-to-r from-purple-500 to-pink-500 text-black p-4 cursor-pointer flex items-center justify-between"
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -553,10 +527,10 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
                                   <span className="text-2xl mr-2">🎯</span>
                                   Learning Goals ({schedule.learningObjectives.length})
                                 </h4>
-                                <svg 
+                                <svg
                                   className={`w-5 h-5 transform transition-transform ${expandedSections[objectivesKey] ? 'rotate-180' : ''}`}
-                                  fill="none" 
-                                  stroke="currentColor" 
+                                  fill="none"
+                                  stroke="currentColor"
                                   viewBox="0 0 24 24"
                                 >
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -649,14 +623,13 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
                 </div>
               </div>
             </div>
-<button
+            <button
               onClick={handleRegisterClick}
               disabled={schedules.length === 0}
-              className={`px-8 py-3 text-lg font-bold rounded-lg transition-all duration-300 whitespace-nowrap ${
-                schedules.length === 0
+              className={`px-8 py-3 text-lg font-bold rounded-lg transition-all duration-300 whitespace-nowrap ${schedules.length === 0
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-blue hover:bg-blue-dark text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
-              }`}
+                }`}
             >
               {schedules.length === 0 ? "Schedule Not Available" : "🚀 🚀 Enroll Now - Start Your Journey"}
             </button>
