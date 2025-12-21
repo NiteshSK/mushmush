@@ -367,13 +367,53 @@ async function main() {
         { label: "Odor", value: "Mild, woody, and earthy aroma" }
       ],
       categories: ['tinctures', 'medicinal']
+    },
+    {
+      title: "Turkey Tail",
+      slug: "turkey-tail",
+      description: "<strong>Turkey Tail</strong> (<i>Trametes versicolor</i>) is one of the most researched medicinal mushrooms in the world, renowned for its powerful immune-supporting properties. Named for its striking resemblance to a wild turkey's tail feathers, this mushroom displays beautiful concentric zones of various colors including brown, tan, gray, and blue. It has been used in traditional Chinese medicine for centuries and is now widely studied for its health benefits.",
+      price: 899,
+      measurementValue: 100,
+      measurementType: "gm",
+      inStock: true,
+      featured: true,
+      imgs: {
+        thumbnails: [
+          "/images/products/turkey_tail.png",
+        ],
+        previews: [
+          "/images/products/turkey_tail.png",
+        ]
+      },
+      specifications: [
+        "<strong>Appearance</strong>: Turkey Tail mushrooms grow in overlapping shelf-like formations on dead or dying hardwood trees. The caps display distinctive multicolored concentric zones that resemble the tail feathers of a wild turkey. The underside is white to cream-colored with tiny pores.",
+        "<strong>Active Compounds</strong>: Rich in polysaccharide-K (PSK) and polysaccharide-peptide (PSP), which are among the most extensively researched immune-supporting compounds. Also contains beta-glucans, antioxidants, and prebiotics.",
+        "<strong>Nutritional Value</strong>: Excellent source of antioxidants, B vitamins, and minerals. Contains unique bioactive compounds that support gut health and immune function."
+      ],
+      howToConsume: [
+        "<strong>As a Tea</strong>: Simmer dried Turkey Tail slices or powder in water for 30-60 minutes to create a medicinal tea. The longer you simmer, the more compounds are extracted. Add honey or lemon to taste.",
+        "<strong>In Powder Form</strong>: Mix Turkey Tail powder into smoothies, coffee, or other beverages. Start with 1-2 grams per day and adjust as needed.",
+        "<strong>Capsules</strong>: For convenience, take Turkey Tail in capsule form as a daily supplement. Follow dosage instructions on the product label.",
+        "<strong>Tincture</strong>: Alcohol-based tinctures provide concentrated extracts. Take sublingually or add to beverages.",
+        "<strong>In Soups and Broths</strong>: Add dried Turkey Tail to bone broths or vegetable stocks for both flavor and health benefits. Strain before consuming."
+      ],
+      additionalInfo: [
+        { label: "Product Name", value: "Organic Turkey Tail Mushroom Powder" },
+        { label: "Botanical Name", value: "Trametes versicolor" },
+        { label: "Common Names", value: "Turkey Tail, Yun Zhi, Kawaratake" },
+        { label: "Part Used", value: "100% Fruiting Body" },
+        { label: "Appearance", value: "Fine, light brown to tan powder" },
+        { label: "Taste", value: "Mild, slightly earthy" },
+        { label: "Odor", value: "Subtle, earthy aroma" }
+      ],
+      categories: ['medicinal', 'powders']
     }
     // Add more products as needed...
   ]
 
   for (const productData of products) {
     const { categories: categoryNames, ...productInfo } = productData
-    
+
     const product = await prisma.product.upsert({
       where: { slug: productInfo.slug },
       // Update existing products so new fields (like imgs) are applied

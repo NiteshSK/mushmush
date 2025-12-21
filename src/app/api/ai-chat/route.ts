@@ -33,13 +33,25 @@ export async function POST(req: Request) {
                 .join(" ") || "";
         }
 
+        // Extract meaningful keywords from the query
+        // Remove common words and punctuation to improve search accuracy
+        const stopWords = ['what', 'is', 'the', 'a', 'an', 'of', 'for', 'in', 'on', 'at', 'to', 'price', '?', '!', '.'];
+        const keywords = lastUserMessage
+            .toLowerCase()
+            .split(/\s+/)
+            .filter(word => word.length > 2 && !stopWords.includes(word))
+            .join(' ');
+
+        // Use both the full message and extracted keywords for better matching
+        const searchTerms = keywords || lastUserMessage;
+
         // Search for relevant context in the DB
         const [products, programs, blogs, featured, banners] = await Promise.all([
             prisma.product.findMany({
                 where: {
                     OR: [
-                        { title: { contains: lastUserMessage, mode: "insensitive" } },
-                        { description: { contains: lastUserMessage, mode: "insensitive" } },
+                        { title: { contains: searchTerms, mode: "insensitive" } },
+                        { description: { contains: searchTerms, mode: "insensitive" } },
                     ],
                 },
                 take: 3,
@@ -47,8 +59,8 @@ export async function POST(req: Request) {
             prisma.trainingProgram.findMany({
                 where: {
                     OR: [
-                        { name: { contains: lastUserMessage, mode: "insensitive" } },
-                        { description: { contains: lastUserMessage, mode: "insensitive" } },
+                        { name: { contains: searchTerms, mode: "insensitive" } },
+                        { description: { contains: searchTerms, mode: "insensitive" } },
                     ],
                 },
                 take: 2,
@@ -56,8 +68,8 @@ export async function POST(req: Request) {
             prisma.blogPost.findMany({
                 where: {
                     OR: [
-                        { title: { contains: lastUserMessage, mode: "insensitive" } },
-                        { content: { contains: lastUserMessage, mode: "insensitive" } },
+                        { title: { contains: searchTerms, mode: "insensitive" } },
+                        { content: { contains: searchTerms, mode: "insensitive" } },
                     ],
                     published: true,
                 },
