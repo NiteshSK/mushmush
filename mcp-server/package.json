@@ -1,0 +1,21 @@
+{
+    "name": "mushmush-mcp-server",
+    "version": "1.0.0",
+    "description": "Mushmush Knowledge Hub MCP Server",
+    "main": "build/index.js",
+    "type": "module",
+    "scripts": {
+        "build": "tsc",
+        "start": "node build/index.js",
+        "dev": "tsc -w"
+    },
+    "dependencies": {
+        "@modelcontextprotocol/sdk": "^1.0.3",
+        "@prisma/client": "6.15.0"
+    },
+    "devDependencies": {
+        "@types/node": "^20.11.24",
+        "prisma": "6.15.0",
+        "typescript": "^5.3.3"
+    }
+}

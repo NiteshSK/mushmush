@@ -8,6 +8,7 @@ import AuthSessionProvider from "@/components/Providers/SessionProvider";
 import { WishlistProvider } from "@/app/context/WishlistContext";
 import { PreviewSliderProvider } from "@/app/context/PreviewSliderContext";
 import { PreviewSliderModal } from "./PreviewSliderModal";
+import ChatBot from "./AI/ChatBot";
 
 
 interface ClientRootLayoutProps {
@@ -31,6 +32,7 @@ export default function ClientRootLayout({ children }: ClientRootLayoutProps) {
                 {children}
               </div>
               <PreviewSliderModal />
+              <ChatBot />
             </PreviewSliderProvider>
           </WishlistProvider>
         </AuthSessionProvider>
