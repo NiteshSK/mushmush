@@ -1,4 +1,4 @@
-import { streamText } from "ai";
+import { streamText, convertToCoreMessages } from "ai";
 import { google } from "@ai-sdk/google";
 import { prisma } from "@/lib/prisma";
 
@@ -19,9 +19,15 @@ export async function POST(req: Request) {
         }
 
         // Get the last user message for RAG context
-        const lastUserMessage = messages
-            .filter((m: any) => m.role === "user")
-            .pop()?.content || "";
+        const lastMessage = messages[messages.length - 1];
+        let lastUserMessage = "";
+        if (lastMessage && lastMessage.role === "user") {
+            // In v5, messages use 'parts' instead of 'content'
+            lastUserMessage = lastMessage.parts
+                ?.filter((p: any) => p.type === "text")
+                .map((p: any) => p.text)
+                .join(" ") || "";
+        }
 
         // Search for relevant context in the DB
         const [products, programs, blogs, featured, banners] = await Promise.all([
@@ -100,7 +106,7 @@ Answer concisely and helpfully.`;
         const result = streamText({
             model: google("gemini-2.0-flash"),
             system: systemPrompt,
-            messages,
+            messages: convertToCoreMessages(messages),
         });
 
         return result.toUIMessageStreamResponse();
