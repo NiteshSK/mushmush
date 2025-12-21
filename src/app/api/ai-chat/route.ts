@@ -1,13 +1,12 @@
-import { streamText, convertToCoreMessages } from "ai";
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { streamText, convertToCoreMessages, createGateway } from "ai";
 import { prisma } from "@/lib/prisma";
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
-// Initialize Google AI with support for both naming conventions
-const google = createGoogleGenerativeAI({
-    apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY,
+// Initialize Vercel AI Gateway
+const gateway = createGateway({
+    apiKey: process.env.AI_GATEWAY_API_KEY,
 });
 
 export async function POST(req: Request) {
@@ -18,12 +17,10 @@ export async function POST(req: Request) {
             return new Response("Invalid messages", { status: 400 });
         }
 
-        if (!process.env.GEMINI_API_KEY && !process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-            console.error("DEBUG: AI API key is missing from environment variables");
-            return new Response("AI key not configured", { status: 500 });
+        if (!process.env.AI_GATEWAY_API_KEY) {
+            console.error("DEBUG: AI_GATEWAY_API_KEY is missing from environment variables");
+            return new Response("AI Gateway not configured", { status: 500 });
         }
-
-        console.log("DEBUG: AI Key Source:", process.env.GOOGLE_GENERATIVE_AI_API_KEY ? "GOOGLE_GENERATIVE_AI_API_KEY" : "GEMINI_API_KEY");
 
         // Get the last user message for RAG context
         const lastMessage = messages[messages.length - 1];
@@ -111,7 +108,7 @@ Our main offerings:
 Answer concisely and helpfully.`;
 
         const result = streamText({
-            model: google("gemini-1.5-flash"),
+            model: gateway("google/gemini-1.5-flash"),
             system: systemPrompt,
             messages: convertToCoreMessages(messages),
         });
