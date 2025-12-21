@@ -1,12 +1,17 @@
-import { streamText, convertToCoreMessages, createGateway } from "ai";
+import { streamText, convertToCoreMessages } from "ai";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { prisma } from "@/lib/prisma";
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
-// Initialize Vercel AI Gateway
-const gateway = createGateway({
-    apiKey: process.env.AI_GATEWAY_API_KEY,
+// Initialize Google AI routed through Vercel AI Gateway
+const google = createGoogleGenerativeAI({
+    baseURL: "https://ai-gateway.vercel.sh/v1/ai/google",
+    apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY,
+    headers: {
+        "Authorization": `Bearer ${process.env.AI_GATEWAY_API_KEY}`,
+    },
 });
 
 export async function POST(req: Request) {
@@ -108,7 +113,7 @@ Our main offerings:
 Answer concisely and helpfully.`;
 
         const result = streamText({
-            model: gateway("google/gemini-1.5-flash-latest"),
+            model: google("gemini-1.5-flash"),
             system: systemPrompt,
             messages: convertToCoreMessages(messages),
         });
