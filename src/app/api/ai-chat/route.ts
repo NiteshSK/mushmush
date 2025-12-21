@@ -108,7 +108,7 @@ Our main offerings:
 Answer concisely and helpfully.`;
 
         const result = streamText({
-            model: gateway("google/gemini-1.5-flash"),
+            model: gateway("google/gemini-2.0-flash"),
             system: systemPrompt,
             messages: convertToCoreMessages(messages),
         });
