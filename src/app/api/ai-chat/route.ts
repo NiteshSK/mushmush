@@ -46,7 +46,7 @@ export async function POST(req: Request) {
         const searchTerms = keywords || lastUserMessage;
 
         // Search for relevant context in the DB
-        const [products, programs, blogs, featured, banners] = await Promise.all([
+        const [products, programs, blogs, news, featured, banners] = await Promise.all([
             prisma.product.findMany({
                 where: {
                     OR: [
@@ -66,6 +66,16 @@ export async function POST(req: Request) {
                 take: 2,
             }),
             prisma.blogPost.findMany({
+                where: {
+                    OR: [
+                        { title: { contains: searchTerms, mode: "insensitive" } },
+                        { content: { contains: searchTerms, mode: "insensitive" } },
+                    ],
+                    published: true,
+                },
+                take: 2,
+            }),
+            prisma.news.findMany({
                 where: {
                     OR: [
                         { title: { contains: searchTerms, mode: "insensitive" } },
@@ -101,6 +111,9 @@ ${programs.map(p => `- ${p.name}: ${p.description.substring(0, 100)}...`).join("
 
 Relevant Articles:
 ${blogs.map(b => `- ${b.title}: ${b.excerpt || b.content.substring(0, 100)}...`).join("\n")}
+
+Relevant News:
+${news.map(n => `- ${n.title}: ${n.excerpt || n.content.substring(0, 100)}...`).join("\n")}
 `;
 
         const systemPrompt = `You are "Mushy", the official AI guide for Mushmush, a premier mushroom cultivation and wellness company.
@@ -119,14 +132,38 @@ COMPANY INFORMATION:
   * Monday - Saturday: 9:00 AM - 6:00 PM
   * Sunday: 9:00 AM - 3:00 PM
 
-When users ask about our location, contact information, or business hours, provide the above details directly.
+ABOUT MUSHMUSH:
+- Founded by: Bhartendu, Pravesh & Vikrant (left conventional jobs to pursue mushroom cultivation full-time)
+- Philosophy: "Cultivating Purity, From Our Farm to Your Fork" - Zero chemicals, 100% organic cultivation
+- Certification: Certified by Department of Mushroom, Uttarakhand, Dehradun
+- Production Capacity:
+  * 25+ kg daily fresh mushroom production
+  * 5+ premium mushroom varieties
+  * 2+ kg daily spawn distribution
+
+MUSHROOM VARIETIES WE GROW:
+- Oyster Mushrooms (fresh, dried)
+- Shiitake
+- Ganoderma (Reishi) - medicinal mushroom extract powders
+- Button Mushrooms
+- King Oyster
+
+TRAINING PROGRAMS:
+- Comprehensive training for aspiring entrepreneurs and hobbyists
+- Covers basic to advanced cultivation techniques
+- Weekend batches available
+- Hands-on experience with expert guidance
+- Training programs for: Oyster, Button, Shiitake, and Ganoderma mushrooms
+
+FUTURE PRODUCTS (Coming Soon):
+- Mushroom Pickles
+- Mushroom Cookies
+- Health Tinctures
+- Dry Mushroom Powders
+
+When users ask about our company, founders, story, certifications, production capacity, or training programs, use the above information to provide detailed and accurate responses.
 
 If you don't know the answer or the context doesn't provide it, answer based on your general mushroom knowledge but clarify that for Mushmush-specific details (like exact training dates or shipping), the user should check the relevant pages or contact us.
-
-Our main offerings:
-1. Training Programs: We offer cultivation training for Oyster, Button, Shiitake, and Ganoderma mushrooms.
-2. Wellness Products: We sell extract powders and dried mushrooms.
-3. Expertise: We are pioneers in mushroom farming.
 
 Answer concisely and helpfully.`;
 
