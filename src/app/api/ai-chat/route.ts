@@ -80,8 +80,6 @@ Relevant Articles:
 ${blogs.map(b => `- ${b.title}: ${b.excerpt || b.content.substring(0, 100)}...`).join("\n")}
 `;
 
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
         const systemPrompt = `You are "Mushy", the official AI guide for Mushmush, a premier mushroom cultivation and wellness company.
 Your goal is to help users with their questions about mushrooms, cultivation training, and our health products.
 Be friendly, professional, and slightly enthusiastic about mushrooms!
@@ -98,10 +96,33 @@ Our main offerings:
 
 Answer concisely and helpfully.`;
 
-        const result = await model.generateContent([
-            systemPrompt,
-            ...messages.map((m: any) => `${m.role === "user" ? "User" : "Mushy"}: ${m.content}`),
-        ]);
+        let result;
+        try {
+            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            result = await model.generateContent([
+                systemPrompt,
+                ...messages.map((m: any) => `${m.role === "user" ? "User" : "Mushy"}: ${m.content}`),
+            ]);
+        } catch (modelError: any) {
+            console.error("DEBUG: Primary model (gemini-1.5-flash) failed. Checking available models...");
+
+            // diagnostic: list models to see what is available
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${process.env.GEMINI_API_KEY}`);
+                const data = await response.json();
+                console.log("DEBUG: Available Models for this API Key:", JSON.stringify(data, null, 2));
+
+                // Try fallback to gemini-pro if available
+                console.log("DEBUG: Attempting fallback to gemini-pro...");
+                const fallbackModel = genAI.getGenerativeModel({ model: "gemini-pro" });
+                result = await fallbackModel.generateContent([
+                    systemPrompt,
+                    ...messages.map((m: any) => `${m.role === "user" ? "User" : "Mushy"}: ${m.content}`),
+                ]);
+            } catch (innerError: any) {
+                throw new Error(`Both primary and fallback models failed. ${modelError.message}`);
+            }
+        }
 
         const response = await result.response;
         const text = response.text();
@@ -114,7 +135,7 @@ Answer concisely and helpfully.`;
             cause: error.cause
         });
         return NextResponse.json(
-            { error: "Failed to generate response. Check server logs for details." },
+            { error: `Gemini Error: ${error.message}. Check server logs for available models.` },
             { status: 500 }
         );
     }
