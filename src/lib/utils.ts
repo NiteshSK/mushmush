@@ -23,7 +23,12 @@ export const getTrainingProgramPrice = (program: {
   originalPrice?: number;
   earlyBirdEndDate?: Date | string;
   price: number;
-}): number => {
+} | null | undefined): number => {
+  // Handle null or undefined program
+  if (!program) {
+    return 0;
+  }
+
   // Check if Early Bird offer is available and valid
   if (program.hasEarlyBirdOffer &&
     program.earlyBirdPrice &&
@@ -55,7 +60,12 @@ export const isEarlyBirdOfferValid = (program: {
   earlyBirdPrice?: number;
   originalPrice?: number;
   earlyBirdEndDate?: Date | string;
-}): boolean => {
+} | null | undefined): boolean => {
+  // Handle null or undefined program
+  if (!program) {
+    return false;
+  }
+
   if (!program.hasEarlyBirdOffer ||
     !program.earlyBirdPrice ||
     !program.originalPrice ||
