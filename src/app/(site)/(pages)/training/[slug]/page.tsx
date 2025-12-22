@@ -1,10 +1,13 @@
 import { redirect } from 'next/navigation';
+import { Metadata } from 'next';
 
-export default function TrainingProgramPage({
+export default async function TrainingProgramPage({
     params
 }: {
-    params: { slug: string }
+    params: Promise<{ slug: string }>
 }) {
+    // Wait for params to resolve
+    const { slug } = await params;
     // Redirect to schedule page
-    redirect(`/training/${params.slug}/schedule`);
+    redirect(`/training/${slug}/schedule`);
 }
