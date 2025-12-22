@@ -158,10 +158,12 @@ function createEnhancedContent(title: string, description: string, sourceUrl: st
 export async function POST(request: NextRequest) {
   let savedArticles = 0;
   let totalArticles = 0;
+  const newArticles: any[] = [];
 
   try {
     console.log('🔍 Starting news scraping...');
 
+    // First, collect all potential articles
     for (const source of RSS_SOURCES) {
       const response = await axios.get(source.url, {
         headers: { 'User-Agent': 'Mozilla/5.0' },
@@ -186,36 +188,63 @@ export async function POST(request: NextRequest) {
         if (!isMushroomRelated) continue;
 
         totalArticles++;
-
-        const existingNews = await prisma.news.findFirst({
-          where: {
-            OR: [
-              { slug: generateSlug(title) },
-              { title: title }
-            ]
-          }
-        });
-
-        if (existingNews) continue;
-
+        
+        const slug = generateSlug(title);
         const { content, excerpt } = createEnhancedContent(title, description, link);
         const img = await fetchArticleImage(link);
 
-        await prisma.news.create({
-            data: {
-              title: title.substring(0, 200),
-              slug: generateSlug(title),
-              content,
-              excerpt,
-              img,
-              sourceUrl: link,
-              source: 'scraped', // Add this line
-              published: true,
-              createdAt: pubDate ? new Date(pubDate) : new Date(),
-            }
-          });
+        newArticles.push({
+          title: title.substring(0, 200),
+          slug,
+          content,
+          excerpt,
+          img,
+          sourceUrl: link,
+          source: 'scraped',
+          published: true,
+          createdAt: pubDate ? new Date(pubDate) : new Date(),
+          updatedAt: new Date()
+        });
+      }
+    }
 
-        savedArticles++;
+    // Process articles in batches to avoid timeouts
+    const BATCH_SIZE = 5;
+    for (let i = 0; i < newArticles.length; i += BATCH_SIZE) {
+      const batch = newArticles.slice(i, i + BATCH_SIZE);
+      
+      // Check for existing articles in this batch
+      const existingSlugs = await prisma.news.findMany({
+        where: {
+          OR: [
+            { slug: { in: batch.map(a => a.slug) } },
+            { title: { in: batch.map(a => a.title) } }
+          ]
+        },
+        select: { slug: true, title: true }
+      });
+
+      const existingSlugsSet = new Set(existingSlugs.map(a => a.slug));
+      const existingTitlesSet = new Set(existingSlugs.map(a => a.title));
+
+      // Filter out duplicates
+      const uniqueNewArticles = batch.filter(article => 
+        !existingSlugsSet.has(article.slug) && !existingTitlesSet.has(article.title)
+      );
+
+      if (uniqueNewArticles.length > 0) {
+        // Use createMany with skipDuplicates for atomic operations
+        await prisma.$transaction(
+          uniqueNewArticles.map(article => 
+            prisma.news.upsert({
+              where: { slug: article.slug },
+              update: {}, // Don't update if exists
+              create: article
+            })
+          )
+        );
+        
+        savedArticles += uniqueNewArticles.length;
       }
     }
 
