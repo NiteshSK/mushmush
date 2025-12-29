@@ -113,9 +113,9 @@ export default function ContactPage() {
                         href="https://www.google.com/maps/place/MushMush+by+MushAgroProducts/@30.4387517,77.7345287,17z/data=!3m1!4b1!4m6!3m5!1s0x390f25e799aa9c71:0xc1d016cb5b5c812a!8m2!3d30.4387517!4d77.7345287!16s%2Fg%2F11mf3z0l90?entry=ttu&g_ep=EgoyMDI1MTIwOS4wIKXMDSoKLDEwMDc5MjA2OUgBUAM%3D"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="hover:text-blue transition-colors duration-200"
+                        className="text-blue hover:text-blue/80 transition-colors duration-200 underline font-medium"
                       >
-                        MushMush by Mush Agro Products<br />Herbertpur, Dehradun <br />Uttarakhand, India
+                        Mush Agro Products<br />Herbertpur, Dehradun <br />Uttarakhand, India
                       </a>
                     </p>
                   </div>
@@ -238,12 +238,42 @@ export default function ContactPage() {
         </div>
       </div>
 
-      {/* Google Maps Section */}
+      {/* Visit Our Farm Section */}
       <section className="py-20 bg-white">
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
-          <div className="mx-auto w-full max-w-[1170px]">
-            <h2 className="mb-6 text-2xl font-bold text-dark">Find Us Here</h2>
-            <div className="relative h-[400px] w-full overflow-hidden rounded-xl shadow-1">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="order-2 lg:order-1">
+              <h2 className="font-bold text-3xl sm:text-4xl text-dark mb-6">
+                Visit Our Farm
+              </h2>
+              <div className="space-y-4 text-gray-700">
+                <p className="text-lg leading-relaxed">
+                  We love having visitors! Come see how we cultivate our mushrooms with care and precision.
+                  Experience the farm environment firsthand and learn more about our organic processes.
+                </p>
+                <div className="mt-6">
+                  <h3 className="font-semibold text-xl text-dark mb-2">Location</h3>
+                  <p className="text-lg text-gray-600 mb-4">
+                    MushMush by MushAgroProducts<br />
+                    NH 507, Herbertpur, Dehradun, 248142
+                  </p>
+                  <a
+                    href="https://www.google.com/maps/place/MushMush+by+MushAgroProducts/@30.4387517,77.7345287,17z/data=!3m1!4b1!4m6!3m5!1s0x390f25e799aa9c71:0xc1d016cb5b5c812a!8m2!3d30.4387517!4d77.7345287!16s%2Fg%2F11mf3z0l90?entry=ttu&g_ep=EgoyMDI1MTIwOS4wIKXMDSoKLDEwMDc5MjA2OUgBUAM%3D"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center font-semibold text-white bg-green py-3 px-6 rounded-lg shadow-md hover:bg-green-700 transition-colors duration-200 gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    View on Google Maps
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div className="order-1 lg:order-2 h-[400px] w-full rounded-2xl overflow-hidden shadow-lg">
               <iframe
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3438.487844685148!2d77.7345287!3d30.4387517!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390f25e799aa9c71%3A0xc1d016cb5b5c812a!2sMushMush%20by%20MushAgroProducts!5e0!3m2!1sen!2sin!4v1709123456789!5m2!1sen!2sin"
                 width="100%"
@@ -253,6 +283,7 @@ export default function ContactPage() {
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
                 title="MushMush Farm Location"
+                className="grayscale hover:grayscale-0 transition-all duration-500"
               ></iframe>
             </div>
           </div>
