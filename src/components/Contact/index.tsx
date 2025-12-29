@@ -80,7 +80,14 @@ const Contact = () => {
                         fill="#3C50E0"
                       />
                     </svg>
-                    Address: NH 507, Herbertpur, Dehradun, 248142
+                    <a
+                      href="https://www.google.com/maps/place/MushMush+by+MushAgroProducts/@30.4387517,77.7345287,17z/data=!3m1!4b1!4m6!3m5!1s0x390f25e799aa9c71:0xc1d016cb5b5c812a!8m2!3d30.4387517!4d77.7345287!16s%2Fg%2F11mf3z0l90?entry=ttu&g_ep=EgoyMDI1MTIwOS4wIKXMDSoKLDEwMDc5MjA2OUgBUAM%3D"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-blue transition-colors duration-200"
+                    >
+                      Address: NH 507, Herbertpur, Dehradun, 248142
+                    </a>
                   </p>
                 </div>
               </div>
