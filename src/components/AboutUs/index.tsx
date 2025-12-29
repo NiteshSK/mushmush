@@ -398,7 +398,7 @@ const AboutUs = () => {
                     href="https://www.google.com/maps/place/MushMush+by+MushAgroProducts/@30.4387517,77.7345287,17z/data=!3m1!4b1!4m6!3m5!1s0x390f25e799aa9c71:0xc1d016cb5b5c812a!8m2!3d30.4387517!4d77.7345287!16s%2Fg%2F11mf3z0l90?entry=ttu&g_ep=EgoyMDI1MTIwOS4wIKXMDSoKLDEwMDc5MjA2OUgBUAM%3D"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center font-semibold text-white bg-green-600 py-3 px-6 rounded-lg shadow-md hover:bg-green-700 transition-colors duration-200 gap-2"
+                    className="inline-flex items-center justify-center font-semibold text-white bg-green py-3 px-6 rounded-lg shadow-md hover:bg-green-700 transition-colors duration-200 gap-2"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>

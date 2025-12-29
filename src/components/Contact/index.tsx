@@ -91,6 +91,19 @@ const Contact = () => {
                   </p>
                 </div>
               </div>
+
+              <div className="mt-8 rounded-xl overflow-hidden shadow-1 h-[300px] w-full">
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3438.487844685148!2d77.7345287!3d30.4387517!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390f25e799aa9c71%3A0xc1d016cb5b5c812a!2sMushMush%20by%20MushAgroProducts!5e0!3m2!1sen!2sin!4v1709123456789!5m2!1sen!2sin"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen={true}
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="MushMush Farm Location"
+                ></iframe>
+              </div>
             </div>
 
             <div className="xl:max-w-[770px] w-full bg-white rounded-xl shadow-1 p-4 sm:p-7.5 xl:p-10">
@@ -176,6 +189,27 @@ const Contact = () => {
                   Send Message
                 </button>
               </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Google Maps Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
+          <div className="mx-auto w-full max-w-[1170px]">
+            <h2 className="mb-6 text-2xl font-bold text-dark">Find Us Here</h2>
+            <div className="relative h-[400px] w-full overflow-hidden rounded-xl shadow-1">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3438.487844685148!2d77.7345287!3d30.4387517!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390f25e799aa9c71%3A0xc1d016cb5b5c812a!2sMushMush%20by%20MushAgroProducts!5e0!3m2!1sen!2sin!4v1709123456789!5m2!1sen!2sin"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen={true}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="MushMush Farm Location"
+              ></iframe>
             </div>
           </div>
         </div>

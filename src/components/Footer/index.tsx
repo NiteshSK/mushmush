@@ -36,7 +36,7 @@ const Footer = () => {
                   href="https://www.google.com/maps/place/MushMush+by+MushAgroProducts/@30.4387517,77.7345287,17z/data=!3m1!4b1!4m6!3m5!1s0x390f25e799aa9c71:0xc1d016cb5b5c812a!8m2!3d30.4387517!4d77.7345287!16s%2Fg%2F11mf3z0l90?entry=ttu&g_ep=EgoyMDI1MTIwOS4wIKXMDSoKLDEwMDc5MjA2OUgBUAM%3D"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-blue transition-colors duration-200"
+                  className="hover:text-blue text-green transition-colors duration-200"
                 >
                   NH 507, Herbertpur, Dehradun, 248142
                 </a>
@@ -73,13 +73,7 @@ const Footer = () => {
               </li>
 
               <li>
-                <a
-                  href="https://www.facebook.com/profile.php?id=61580744744948"
-                  aria-label="Facebook Social Link"
-                  className="flex ease-out duration-200 hover:text-blue"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <a href="#" className="flex items-center gap-4.5">
                   <svg
                     width="24"
                     height="24"
@@ -346,7 +340,7 @@ const Footer = () => {
         </div>
       </div>
       {/* <!-- footer bottom end --> */}
-    </footer>
+    </footer >
   );
 };
 
