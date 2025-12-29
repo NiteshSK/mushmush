@@ -24,16 +24,16 @@ export const menuData: Menu[] = [
     title: "Blogs",
     newTab: false,
     path: "/blogs/blog-grid",
-},
+  },
   {
     id: 73,
     title: "News",
     newTab: false,
     path: "/news",
-},
+  },
   {
     id: 3,
-    title: "Contact",
+    title: "Contact Us",
     newTab: false,
     path: "/contact",
   },
@@ -43,24 +43,4 @@ export const menuData: Menu[] = [
     newTab: false,
     path: "/about-us",
   },
-  // {
-  //   id: 7,
-  //   title: "blogs",
-  //   newTab: false,
-  //   path: "/",
-  //   submenu: [
-  //     {
-  //       id: 72,
-  //       title: "Blog Grid",
-  //       newTab: false,
-  //       path: "/blogs/blog-grid",
-  //     },
-  //     {
-  //       id: 74,
-  //       title: "Blog details",
-  //       newTab: false,
-  //       path: "/blogs/blog-details",
-  //     },
-  //   ],
-  // },
 ];
