@@ -43,7 +43,7 @@ const Footer = () => {
               </li>
 
               <li>
-                <a href="#" className="flex items-center gap-4.5">
+                <a href="https://wa.me/917618362662" className="flex items-center gap-4.5">
                   <svg
                     width="24"
                     height="24"
