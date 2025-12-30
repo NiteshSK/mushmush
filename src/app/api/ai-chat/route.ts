@@ -127,12 +127,12 @@ export async function POST(req: Request) {
 Relevant Mushmush Products:
 ${products.map(p => `- ${p.title} (₹${p.price}): ${p.description.substring(0, 100)}...
   Link: ${baseUrl}/shop-details/${p.slug}
-  Status: ${p.inStock ? 'Available' : 'Out of Stock'}`).join("\n")}
+  Status: ${p.inStock ? '✅ Available' : '❌ Out of Stock'}`).join("\n")}
 
 Featured/Trending Products:
 ${featured.map(p => `- ${p.title}: ${p.description.substring(0, 60)}...
   Link: ${baseUrl}/shop-details/${p.slug}
-  Status: ${p.inStock ? 'Available' : 'Out of Stock'}`).join("\n")}
+  Status: ${p.inStock ? '✅ Available' : '❌ Out of Stock'}`).join("\n")}
 
 Active Promotions:
 ${banners.map(b => `- ${b.title}: ${b.discount || b.subtitle}`).join("\n")}
@@ -194,7 +194,7 @@ FUTURE PRODUCTS (Coming Soon):
 
 When users ask about our company, founders, story, certifications, production capacity, or training programs, use the above information to provide detailed and accurate responses.
 
-If the user asks for a product or its price, ALWAYS provide the direct link to the product page and mention its availability status (Available or Out of Stock).
+If the user asks for a product or its price, ALWAYS provide the direct link to the product page and mention its availability status prominently using **BOLD** text and emojis (e.g., **✅ Available** or **❌ Out of Stock**).
 
 To order products, instruct the user to contact us via WhatsApp at https://wa.me/917618362662 with their information.
 
