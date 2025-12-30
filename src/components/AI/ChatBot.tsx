@@ -4,6 +4,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, User, Bot, Loader2, Sparkles } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 const ChatBot = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -127,9 +129,21 @@ const ChatBot = () => {
                                             {msg.role === "user" ? "You" : "Mushy"}
                                         </span>
                                     </div>
-                                    <div className="whitespace-pre-wrap leading-relaxed">
+                                    <div className="whitespace-pre-wrap leading-relaxed markdown-content">
                                         {msg.parts.map((part: any, i: number) =>
-                                            part.type === 'text' ? part.text : null
+                                            part.type === 'text' ? (
+                                                <ReactMarkdown
+                                                    key={i}
+                                                    remarkPlugins={[remarkGfm]}
+                                                    components={{
+                                                        a: ({ node, ...props }) => (
+                                                            <a {...props} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800 break-all" />
+                                                        )
+                                                    }}
+                                                >
+                                                    {part.text}
+                                                </ReactMarkdown>
+                                            ) : null
                                         )}
                                     </div>
                                 </div>
