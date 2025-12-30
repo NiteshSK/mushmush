@@ -96,15 +96,17 @@ export async function POST(req: Request) {
             }),
         ]);
 
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.mushmush.in";
+
         const context = `
 Relevant Mushmush Products:
 ${products.map(p => `- ${p.title} (₹${p.price}): ${p.description.substring(0, 100)}...
-  Link: /shop-details/${p.slug}
+  Link: ${baseUrl}/shop-details/${p.slug}
   Status: ${p.inStock ? 'Available' : 'Out of Stock'}`).join("\n")}
 
 Featured/Trending Products:
 ${featured.map(p => `- ${p.title}: ${p.description.substring(0, 60)}...
-  Link: /shop-details/${p.slug}
+  Link: ${baseUrl}/shop-details/${p.slug}
   Status: ${p.inStock ? 'Available' : 'Out of Stock'}`).join("\n")}
 
 Active Promotions:
@@ -128,7 +130,7 @@ Use the following context from our database to provide accurate information if a
 ${context}
 
 COMPANY INFORMATION:
-- Location: MushMush by Mush Agro Products, Herbetpur, Dehradun, Uttarakhand, India
+- Location: MushMush by Mush Agro Products, Herbertpur, Dehradun, Uttarakhand, India
 - Training Center: MushMush Training Center (located at the same address)
 - Email: mushagroprod@gmail.com
 - Phone: +91-7618362662
