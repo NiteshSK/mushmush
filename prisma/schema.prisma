@@ -526,3 +526,16 @@ model OTP {
   @@index([expiresAt])
   @@map("otps")
 }
+
+model SiteSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  type      String   @default("text") // text, longtext, boolean, image
+  group     String   @default("general") // general, social, contact
+  label     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("site_settings")
+}

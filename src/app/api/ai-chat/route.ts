@@ -46,7 +46,7 @@ export async function POST(req: Request) {
         const searchTerms = keywords || lastUserMessage;
 
         // Search for relevant context in the DB
-        const [products, programs, blogs, news, featured, banners] = await Promise.all([
+        const [products, programs, blogs, news, featured, banners, settings] = await Promise.all([
             prisma.product.findMany({
                 where: {
                     OR: [
@@ -94,7 +94,24 @@ export async function POST(req: Request) {
                 orderBy: { priority: "desc" },
                 take: 2,
             }),
+            prisma.siteSetting.findMany({}),
         ]);
+
+        // Convert settings array to object for easier access
+        const settingsMap = settings.reduce((acc, curr) => {
+            acc[curr.key] = curr.value;
+            return acc;
+        }, {} as Record<string, string>);
+
+        // Default values if settings are not present
+        const companyInfo = {
+            name: settingsMap.company_name || "MushMush by Mush Agro Products",
+            address: settingsMap.company_address || "Mush Agro Products, Herbetpur, Dehradun, Uttarakhand, India",
+            mapLink: settingsMap.google_maps_link || "https://www.google.com/maps/search/Mush+Agro+Products+Herbertpur",
+            email: settingsMap.contact_email || "mushagroprod@gmail.com",
+            phone: settingsMap.contact_phone || "+91-7618362662",
+            hours: settingsMap.business_hours || "Monday - Saturday: 9:00 AM - 6:00 PM\n  * Sunday: 9:00 AM - 3:00 PM",
+        };
 
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.mushmush.in";
 
@@ -130,13 +147,13 @@ Use the following context from our database to provide accurate information if a
 ${context}
 
 COMPANY INFORMATION:
-- Location: MushMush by Mush Agro Products, Herbertpur, Dehradun, Uttarakhand, India
+- Name: ${companyInfo.name}
+- Location: ${companyInfo.address} (Map: ${companyInfo.mapLink})
 - Training Center: MushMush Training Center (located at the same address)
-- Email: mushagroprod@gmail.com
-- Phone: +91-7618362662
+- Email: ${companyInfo.email}
+- Phone: ${companyInfo.phone}
 - Business Hours:
-  * Monday - Saturday: 9:00 AM - 6:00 PM
-  * Sunday: 9:00 AM - 3:00 PM
+  * ${companyInfo.hours}
 
 ABOUT MUSHMUSH:
 - Founded by: Bhartendu, Pravesh & Vikrant (left conventional jobs to pursue mushroom cultivation full-time)
