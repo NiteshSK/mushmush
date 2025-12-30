@@ -527,7 +527,7 @@ model OTP {
   @@map("otps")
 }
 
-model SiteSetting {
+model GlobalConfig {
   id        String   @id @default(cuid())
   key       String   @unique
   value     String
@@ -537,5 +537,5 @@ model SiteSetting {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@map("site_settings")
+  @@map("global_configs")
 }

@@ -46,7 +46,7 @@ export async function POST(req: Request) {
         const searchTerms = keywords || lastUserMessage;
 
         // Search for relevant context in the DB
-        const [products, programs, blogs, news, featured, banners, settings] = await Promise.all([
+        const [products, programs, blogs, news, featured, banners] = await Promise.all([
             prisma.product.findMany({
                 where: {
                     OR: [
@@ -94,8 +94,16 @@ export async function POST(req: Request) {
                 orderBy: { priority: "desc" },
                 take: 2,
             }),
-            prisma.siteSetting.findMany({}),
         ]);
+
+        // Fetch settings separately to handle potential DB schema mismatches (e.g. pending migrations)
+        let settings: any[] = [];
+        try {
+            settings = await prisma.globalConfig.findMany({});
+        } catch (error) {
+            console.warn("Could not fetch site settings (using defaults):", error);
+            // Fallback to empty array, defaults will be used below
+        }
 
         // Convert settings array to object for easier access
         const settingsMap = settings.reduce((acc, curr) => {

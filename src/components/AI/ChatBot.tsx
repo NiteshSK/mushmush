@@ -158,8 +158,9 @@ const ChatBot = () => {
                             </div>
                         )}
                         {error && (
-                            <div className="p-2 bg-red-50 text-red-500 text-xs rounded-lg border border-red-100">
-                                Connection lost. Please try again or check your API key.
+                            <div className="p-3 bg-red-50 text-red-600 text-xs rounded-lg border border-red-100 flex items-center gap-2 animate-pulse">
+                                <span className="text-lg">🍄</span>
+                                <span>Oops! My mycelium network disconnected. Please check your connection or try again!</span>
                             </div>
                         )}
                         <div ref={messagesEndRef} />

@@ -19,7 +19,7 @@ export async function GET() {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const settings = await prisma.siteSetting.findMany({
+        const settings = await prisma.globalConfig.findMany({
             orderBy: { key: "asc" },
         });
 
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
         for (const setting of settings) {
             const { key, value, label, type, group } = setting;
 
-            const updated = await prisma.siteSetting.upsert({
+            const updated = await prisma.globalConfig.upsert({
                 where: { key },
                 update: { value, label, type, group },
                 create: { key, value, label, type, group },
