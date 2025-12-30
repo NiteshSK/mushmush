@@ -196,6 +196,8 @@ When users ask about our company, founders, story, certifications, production ca
 
 If the user asks for a product or its price, ALWAYS provide the direct link to the product page and mention its availability status (Available or Out of Stock).
 
+To order products, instruct the user to contact us via WhatsApp at https://wa.me/917618362662 with their information.
+
 If you don't know the answer or the context doesn't provide it, answer based on your general mushroom knowledge but clarify that for Mushmush-specific details (like exact training dates or shipping), the user should check the relevant pages or contact us.
 
 Answer concisely and helpfully.`;
