@@ -33,7 +33,7 @@ const Contact = () => {
                         fill="#3C50E0"
                       />
                     </svg>
-                    Name: Mush Agro Products
+                    Name: MushMush by Mush Agro Products
                   </p>
 
                   <p className="flex items-center gap-4">

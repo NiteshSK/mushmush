@@ -128,7 +128,7 @@ Use the following context from our database to provide accurate information if a
 ${context}
 
 COMPANY INFORMATION:
-- Location: Mush Agro Products, Herbetpur, Dehradun, Uttarakhand, India
+- Location: MushMush by Mush Agro Products, Herbetpur, Dehradun, Uttarakhand, India
 - Training Center: MushMush Training Center (located at the same address)
 - Email: mushagroprod@gmail.com
 - Phone: +91-7618362662

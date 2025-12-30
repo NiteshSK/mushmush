@@ -115,7 +115,7 @@ export default function ContactPage() {
                         rel="noopener noreferrer"
                         className="text-blue hover:text-blue/80 transition-colors duration-200 font-medium"
                       >
-                        Mush Agro Products<br />Herbertpur, Dehradun <br />Uttarakhand, India
+                        MushMush by Mush Agro Products<br />Herbertpur, Dehradun <br />Uttarakhand, India
                       </a>
                     </p>
                   </div>

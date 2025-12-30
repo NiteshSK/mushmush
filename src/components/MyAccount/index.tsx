@@ -39,9 +39,9 @@ const MyAccount = () => {
 
                   <div>
                     <p className="font-medium text-dark mb-0.5">
-                      Mush Agro Products
+                      MushMush by Mush Agro Products
                     </p>
-                    <p className="text-custom-xs">Member Since Sep 2020</p>
+                    <p className="text-custom-xs">Member Since Sep 2025</p>
                   </div>
                 </div>
 
@@ -347,7 +347,7 @@ const MyAccount = () => {
                           fill=""
                         />
                       </svg>
-                      Name: Mush Agro Products
+                      Name: MushMush by Mush Agro Products
                     </p>
 
                     <p className="flex items-center gap-2.5 text-custom-sm">
@@ -479,7 +479,7 @@ const MyAccount = () => {
                           fill=""
                         />
                       </svg>
-                      Name: Mush Agro Products
+                      Name: MushMush by Mush Agro Products
                     </p>
 
                     <p className="flex items-center gap-2.5 text-custom-sm">

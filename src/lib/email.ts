@@ -608,7 +608,7 @@ export interface OrderInvoiceEmailData {
 export function generateOrderInvoiceEmail(data: OrderInvoiceEmailData): string {
   // Check if invoicePdfUrl is already an absolute URL
   let invoiceDownloadUrl = data.invoicePdfUrl;
-  
+
   if (!invoiceDownloadUrl.startsWith('http://') && !invoiceDownloadUrl.startsWith('https://')) {
     // It's a relative path, prepend the base URL
     let baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
@@ -617,7 +617,7 @@ export function generateOrderInvoiceEmail(data: OrderInvoiceEmailData): string {
     }
     invoiceDownloadUrl = `${baseUrl}${data.invoicePdfUrl}`;
   }
-  
+
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
       <!-- Header -->
@@ -649,11 +649,11 @@ export function generateOrderInvoiceEmail(data: OrderInvoiceEmailData): string {
           </tr>
           <tr>
             <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Order Date:</td>
-            <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">${new Date(data.orderDate).toLocaleDateString('en-IN', { 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            })}</td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">${new Date(data.orderDate).toLocaleDateString('en-IN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })}</td>
           </tr>
         </table>
       </div>
@@ -743,7 +743,7 @@ export function generateOrderInvoiceEmail(data: OrderInvoiceEmailData): string {
           📞 <a href="tel:+917618362662" style="color: #2d5016; text-decoration: none;">+91-7618362662</a>
         </p>
         <p style="color: #666; font-size: 12px; margin-top: 20px;">
-          &copy; ${new Date().getFullYear()} Mush Agro Products. All rights reserved.
+          &copy; ${new Date().getFullYear()} MushMush by Mush Agro Products. All rights reserved.
         </p>
       </div>
     </div>
@@ -763,7 +763,7 @@ export async function sendOrderInvoiceEmail(data: OrderInvoiceEmailData): Promis
     };
 
     const result = await sendEmail(emailData);
-    
+
     if (result.success) {
       console.log('✅ Order invoice email sent successfully to:', data.customerEmail);
     } else {
@@ -856,7 +856,7 @@ export async function sendOTPEmail(email: string, otp: string, customerName: str
     };
 
     const result = await sendEmail(emailData);
-    
+
     if (result.success) {
       console.log('✅ OTP email sent successfully to:', email);
       return { success: true, messageId: result.messageId };
