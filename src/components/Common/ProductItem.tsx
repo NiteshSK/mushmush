@@ -119,8 +119,8 @@ const ProductItem = ({ item }: { item: Product }) => {
             aria-label={isInWishlist(item.id) ? "Remove from wishlist" : "Add to wishlist"}
             id="favOne"
             className={`flex items-center justify-center w-9 h-9 rounded-[5px] shadow-1 ease-out duration-200 transform transition-all ${isInWishlist(item.id)
-                ? "text-white bg-red hover:bg-red-dark"
-                : "text-dark bg-white hover:text-blue"
+              ? "text-white bg-red hover:bg-red-dark"
+              : "text-dark bg-white hover:text-blue"
               } ${isWishlistLoading ? "opacity-50" : ""} ${isAnimating ? "scale-125 animate-bounce" : "scale-100"
               }`}
           >
@@ -146,7 +146,7 @@ const ProductItem = ({ item }: { item: Product }) => {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Contact via WhatsApp"
-            className="flex items-center justify-center w-9 h-9 rounded-[5px] shadow-1 ease-out duration-200 text-dark bg-white hover:text-green-500 hover:bg-green-50"
+            className="flex items-center justify-center w-9 h-9 rounded-[5px] shadow-1 ease-out duration-200 text-[#25D366] bg-white hover:text-green-600 hover:bg-green-50"
           >
             <svg
               className="fill-current"

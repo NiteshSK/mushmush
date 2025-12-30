@@ -12,6 +12,7 @@ import { useRouter, useParams } from "next/navigation";
 import { addItemToCart } from "@/redux/features/cart-slice";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { useWishlist } from "@/app/context/WishlistContext";
+import Link from "next/link";
 import toast from "react-hot-toast";
 import MushroomBenefitsIcon from "../Shop/MushroomBenefitsIcon";
 
@@ -64,7 +65,7 @@ const ShopDetails = () => {
   const { addToRecentlyViewed } = useRecentlyViewed();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const [isWishlistLoading, setIsWishlistLoading] = useState(false);
-  
+
   // NotifyMe modal state
   const [notifyModalOpen, setNotifyModalOpen] = useState(false);
 
@@ -87,14 +88,14 @@ const ShopDetails = () => {
         imgs: displayProduct.imgs,
       })
     );
-    
+
     // Navigate to the checkout page
     router.push("/checkout");
   };
 
   const handleWishlistToggle = async () => {
     if (!displayProduct?.id) return;
-    
+
     setIsWishlistLoading(true);
     try {
       if (isInWishlist(displayProduct.id)) {
@@ -138,16 +139,16 @@ const ShopDetails = () => {
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [productLoading, setProductLoading] = useState(false);
-  
+
   const productFromStorage = useAppSelector(
     (state) => state.productDetailsReducer.value
   );
 
   useEffect(() => {
     setIsClient(true);
-    
+
     console.log('ShopDetails: useEffect triggered with slug:', slug);
-    
+
     // Fetch product by slug from URL
     if (slug) {
       console.log('ShopDetails: Fetching product by slug:', slug);
@@ -161,12 +162,12 @@ const ShopDetails = () => {
         productFromStorage && productFromStorage.title
           ? productFromStorage
           : alreadyExist
-          ? JSON.parse(alreadyExist)
-          : {};
-      
+            ? JSON.parse(alreadyExist)
+            : {};
+
       console.log('ShopDetails: Resolved product from fallback:', resolvedProduct.title || 'No title');
       setProduct(resolvedProduct);
-      
+
       if (resolvedProduct.id) {
         fetchProductWithDiscounts(resolvedProduct.id);
       }
@@ -181,7 +182,7 @@ const ShopDetails = () => {
 
     // Listen for route changes
     window.addEventListener('popstate', handleRouteChange);
-    
+
     return () => {
       window.removeEventListener('popstate', handleRouteChange);
     };
@@ -189,24 +190,24 @@ const ShopDetails = () => {
 
   const fetchProductBySlug = async (productSlug: string) => {
     console.log('ShopDetails: fetchProductBySlug called with slug:', productSlug);
-    
+
     try {
       setProductLoading(true);
       console.log('ShopDetails: Making API call to /api/products?slug=', productSlug);
-      
+
       const response = await fetch(`/api/products?slug=${productSlug}`);
-      
+
       if (!response.ok) {
         console.log('ShopDetails: API call failed, status:', response.status);
         throw new Error('Failed to fetch product by slug');
       }
-      
+
       const data = await response.json();
       console.log('ShopDetails: API response data:', data);
-      
+
       // Find the specific product from the response
       const productBySlug = data.products?.find((p: any) => p.slug === productSlug);
-      
+
       if (productBySlug) {
         console.log('ShopDetails: Found product in API response:', productBySlug.title);
         // Set the product data
@@ -222,7 +223,7 @@ const ShopDetails = () => {
             type: productBySlug.measurementType
           } : productBySlug.measurement
         };
-        
+
         console.log('ShopDetails: Setting product data:', updatedProduct.title);
         setProduct(updatedProduct);
         localStorage.setItem("productDetails", JSON.stringify(updatedProduct));
@@ -253,16 +254,16 @@ const ShopDetails = () => {
     try {
       setProductLoading(true);
       const response = await fetch(`/api/products?id=${productId}`);
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch product');
       }
-      
+
       const data = await response.json();
-      
+
       // Find the specific product from the response
       const productWithDiscounts = data.products?.find((p: any) => p.id === productId);
-      
+
       if (productWithDiscounts) {
         // Merge the fresh data with existing product data, preserving structure
         const updatedProduct = {
@@ -277,7 +278,7 @@ const ShopDetails = () => {
             type: productWithDiscounts.measurementType
           } : product.measurement
         };
-        
+
         setProduct(updatedProduct);
         localStorage.setItem("productDetails", JSON.stringify(updatedProduct));
       }
@@ -297,15 +298,15 @@ const ShopDetails = () => {
 
   const fetchReviews = async () => {
     if (!product || !product.id) return;
-    
+
     try {
       setReviewsLoading(true);
       const response = await fetch(`/api/reviews?productId=${product.id}`);
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch reviews');
       }
-      
+
       const data = await response.json();
       setReviews(data.reviews);
       setReviewStats({
@@ -321,17 +322,17 @@ const ShopDetails = () => {
 
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!product.id) {
       alert('Product not found');
       return;
     }
-    
+
     if (!comment.trim()) {
       alert('Please add a comment to your review');
       return;
     }
-    
+
     try {
       setIsSubmittingReview(true);
       console.log('Submitting review:', {
@@ -354,7 +355,7 @@ const ShopDetails = () => {
 
       console.log('Response status:', response.status);
       console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-      
+
       if (!response.ok) {
         // Handle non-JSON error responses
         let errorMessage = 'Failed to submit review';
@@ -367,9 +368,9 @@ const ShopDetails = () => {
         }
         throw new Error(errorMessage);
       }
-      
+
       const responseData = await response.json();
-      
+
       // Reset form and refresh reviews
       setRating(5);
       setComment('');
@@ -387,21 +388,21 @@ const ShopDetails = () => {
 
   useEffect(() => {
     if (product && product.title) {
-        localStorage.setItem("productDetails", JSON.stringify(product));
-        // Track product view in recently viewed with debounce
-        if (product.id) {
-          const timeoutId = setTimeout(() => {
-            addToRecentlyViewed(product.id);
-          }, 500);
-          return () => clearTimeout(timeoutId);
-        }
+      localStorage.setItem("productDetails", JSON.stringify(product));
+      // Track product view in recently viewed with debounce
+      if (product.id) {
+        const timeoutId = setTimeout(() => {
+          addToRecentlyViewed(product.id);
+        }, 500);
+        return () => clearTimeout(timeoutId);
+      }
     }
   }, [product?.id, product?.title, addToRecentlyViewed]);
 
   const handlePreviewSlider = () => {
     console.log("1. Preview button clicked. Checking product data...");
     console.log("Product to preview:", displayProduct);
-    
+
     if (displayProduct && displayProduct.imgs && displayProduct.imgs.previews) {
       console.log("2. Product data is valid. Calling openPreviewModal with:", displayProduct.imgs.previews);
       openPreviewModal({
@@ -418,7 +419,7 @@ const ShopDetails = () => {
 
       {!displayProduct || !displayProduct.title ? (
         <div className="flex items-center justify-center py-20">
-            <p className="text-lg text-dark">Please select a product to view details.</p>
+          <p className="text-lg text-dark">Please select a product to view details.</p>
         </div>
       ) : (
         <>
@@ -449,8 +450,8 @@ const ShopDetails = () => {
                         height={400}
                       />
                       <div className="absolute bottom-4 left-4 z-10">
-  <MushroomBenefitsIcon product={displayProduct} />
-</div>
+                        <MushroomBenefitsIcon product={displayProduct} />
+                      </div>
                     </div>
                   </div>
                   <div className="flex flex-wrap sm:flex-nowrap gap-4.5 mt-6">
@@ -458,9 +459,8 @@ const ShopDetails = () => {
                       <button
                         onClick={() => setPreviewImg(key)}
                         key={key}
-                        className={`flex items-center justify-center w-15 sm:w-25 h-15 sm:h-25 overflow-hidden rounded-lg bg-gray-2 shadow-1 ease-out duration-200 border-2 hover:border-blue ${
-                          key === previewImg ? "border-blue" : "border-transparent"
-                        }`}
+                        className={`flex items-center justify-center w-15 sm:w-25 h-15 sm:h-25 overflow-hidden rounded-lg bg-gray-2 shadow-1 ease-out duration-200 border-2 hover:border-blue ${key === previewImg ? "border-blue" : "border-transparent"
+                          }`}
                       >
                         <Image
                           className={!displayProduct.inStock ? "grayscale" : ""}
@@ -488,13 +488,13 @@ const ShopDetails = () => {
                     <div className="flex items-center gap-2.5">
                       <div className="flex items-center gap-1">
                         {[...Array(5)].map((_, i) => (
-                          <svg 
-                            key={i} 
-                            className={`fill-current ${i < Math.round(reviewStats.averageRating || 0) ? "fill-[#FFA645]" : "fill-gray-3"}`} 
-                            width="18" 
-                            height="18" 
-                            viewBox="0 0 18 18" 
-                            fill="none" 
+                          <svg
+                            key={i}
+                            className={`fill-current ${i < Math.round(reviewStats.averageRating || 0) ? "fill-[#FFA645]" : "fill-gray-3"}`}
+                            width="18"
+                            height="18"
+                            viewBox="0 0 18 18"
+                            fill="none"
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <path d="M16.7906 6.72187L11.7 5.93438L9.39377 1.09688C9.22502 0.759375 8.77502 0.759375 8.60627 1.09688L6.30002 5.9625L1.23752 6.72187C0.871891 6.77812 0.731266 7.25625 1.01252 7.50938L4.69689 11.3063L3.82502 16.6219C3.76877 16.9875 4.13439 17.2969 4.47189 17.0719L9.05627 14.5687L13.6125 17.0719C13.9219 17.2406 14.3156 16.9594 14.2313 16.6219L13.3594 11.3063L17.0438 7.50938C17.2688 7.25625 17.1563 6.77812 16.7906 6.72187ZM2.29199 10C2.29199 5.74283 5.74313 2.29169 10.0003 2.29169C14.2575 2.29169 17.7087 5.74283 17.7087 10C17.7087 14.2572 14.2575 17.7084 10.0003 17.7084C5.74313 17.7084 2.29199 14.2572 2.29199 10ZM12 4.45885C9.68795 2.39027 7.09896 2.1009 5.00076 3.05999C2.78471 4.07296 1.25 6.42506 1.25 9.13713C1.25 11.8027 2.3605 13.8361 3.81672 15.4758C4.98287 16.789 6.41022 17.888 7.67083 18.8586C7.95659 19.0786 8.23378 19.2921 8.49742 19.4999C9.00965 19.9037 9.55954 20.3343 10.1168 20.66C10.6739 20.9855 11.3096 21.25 12 21.25C12.6904 21.25 13.3261 20.9855 13.8832 20.66C14.4405 20.3343 14.9903 19.9037 15.5026 19.4999C15.7662 19.2921 16.0434 19.0786 16.3292 18.8586C17.5898 17.888 19.0171 16.789 20.1833 15.4758C21.6395 13.8361 22.75 11.8027 22.75 9.13713C22.75 6.42506 21.2153 4.07296 18.9992 3.05999C16.901 2.1009 14.3121 2.39027 12 4.45885Z" />
@@ -534,7 +534,7 @@ const ShopDetails = () => {
                       )}
                     </div>
                   </div>
-                  
+
                   <ul className="flex flex-col gap-2 mb-6">
                     <li className="flex items-center gap-2.5">
                       <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -575,37 +575,51 @@ const ShopDetails = () => {
                               <svg className="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.33301 10C3.33301 9.5398 3.7061 9.16671 4.16634 9.16671H15.833C16.2932 9.16671 16.6663 9.5398 16.6663 10C16.6663 10.4603 16.2932 10.8334 15.833 10.8334H4.16634C3.7061 10.8334 3.33301 10.4603 3.33301 10Z" /><path d="M9.99967 16.6667C9.53944 16.6667 9.16634 16.2936 9.16634 15.8334L9.16634 4.16671C9.16634 3.70647 9.53944 3.33337 9.99967 3.33337C10.4599 3.33337 10.833 3.70647 10.833 4.16671L10.833 15.8334C10.833 16.2936 10.4599 16.6667 9.99967 16.6667Z" /></svg>
                             </button>
                           </div>
-                            <button
-                              type="button"
-                              onClick={handlePurchaseNow}
-                              className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark"
-                            >
-                              Purchase Now
-                            </button>
-                          <button 
+                          <button
+                            type="button"
+                            onClick={handlePurchaseNow}
+                            className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark"
+                          >
+                            Purchase Now
+                          </button>
+                          <button
                             onClick={handleWishlistToggle}
                             disabled={isWishlistLoading}
-                            className={`flex items-center justify-center w-12 h-12 rounded-md border ease-out duration-200 ${
-                              isInWishlist(displayProduct.id || 0) 
-                                ? "bg-red text-white border-red hover:bg-red-dark" 
-                                : "border-gray-3 hover:text-white hover:bg-dark hover:border-transparent"
-                            } ${isWishlistLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                            className={`flex items-center justify-center w-12 h-12 rounded-md border ease-out duration-200 ${isInWishlist(displayProduct.id || 0)
+                              ? "bg-red text-white border-red hover:bg-red-dark"
+                              : "border-gray-3 hover:text-white hover:bg-dark hover:border-transparent"
+                              } ${isWishlistLoading ? "opacity-50 cursor-not-allowed" : ""}`}
                             aria-label={isInWishlist(displayProduct.id || 0) ? "Remove from wishlist" : "Add to wishlist"}
                           >
                             <svg className="fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                               <path fillRule="evenodd" clipRule="evenodd" d="M5.62436 4.42423C3.96537 5.18256 2.75 6.98626 2.75 9.13713C2.75 11.3345 3.64922 13.0283 4.93829 14.4798C6.00072 15.6761 7.28684 16.6677 8.54113 17.6346C8.83904 17.8643 9.13515 18.0926 9.42605 18.3219C9.95208 18.7366 10.4213 19.1006 10.8736 19.3649C11.3261 19.6293 11.6904 19.75 12 19.75C12.3096 19.75 12.6739 19.6293 13.1264 19.3649C13.5787 19.1006 14.0479 18.7366 14.574 18.3219C14.8649 18.0926 15.161 17.8643 15.4589 17.6346C16.7132 16.6677 17.9993 15.6761 19.0617 14.4798C20.3508 13.0283 21.25 11.3345 21.25 9.13713C21.25 6.98626 20.0346 5.18256 18.3756 4.42423C16.7639 3.68751 14.5983 3.88261 12.5404 6.02077C12.399 6.16766 12.2039 6.25067 12 6.25067C11.7961 6.25067 11.601 6.16766 11.4596 6.02077C9.40166 3.88261 7.23607 3.68751 5.62436 4.42423ZM12 4.45885C9.68795 2.39027 7.09896 2.1009 5.00076 3.05999C2.78471 4.07296 1.25 6.42506 1.25 9.13713C1.25 11.8027 2.3605 13.8361 3.81672 15.4758C4.98287 16.789 6.41022 17.888 7.67083 18.8586C7.95659 19.0786 8.23378 19.2921 8.49742 19.4999C9.00965 19.9037 9.55954 20.3343 10.1168 20.66C10.6739 20.9855 11.3096 21.25 12 21.25C12.6904 21.25 13.3261 20.9855 13.8832 20.66C14.4405 20.3343 14.9903 19.9037 15.5026 19.4999C15.7662 19.2921 16.0434 19.0786 16.3292 18.8586C17.5898 17.888 19.0171 16.789 20.1833 15.4758C21.6395 13.8361 22.75 11.8027 22.75 9.13713C22.75 6.42506 21.2153 4.07296 18.9992 3.05999C16.901 2.1009 14.3121 2.39027 12 4.45885Z" />
                             </svg>
                           </button>
+
+                          <Link
+                            href="https://wa.me/917618362662"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="Contact via WhatsApp"
+                            className="flex items-center justify-center w-12 h-12 rounded-md border border-gray-3 ease-out duration-200 text-[#25D366] hover:text-green-600 hover:bg-green-50 hover:border-green-500"
+                          >
+                            <svg className="fill-current" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                              <path
+                                d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"
+                                fillRule="evenodd"
+                              />
+                            </svg>
+                          </Link>
                         </>
                       )}
-                      
+
                       {!displayProduct.inStock && (
-                          <button
-                            onClick={handleNotifyMe}
-                            className="inline-flex font-medium text-white bg-dark py-3 px-7 rounded-md ease-out duration-200 hover:bg-opacity-90"
-                          >
-                            Notify Me
-                          </button>
+                        <button
+                          onClick={handleNotifyMe}
+                          className="inline-flex font-medium text-white bg-dark py-3 px-7 rounded-md ease-out duration-200 hover:bg-opacity-90"
+                        >
+                          Notify Me
+                        </button>
                       )}
                     </div>
                   </form>
@@ -616,186 +630,185 @@ const ShopDetails = () => {
 
           <section className="overflow-hidden bg-gray-2 py-20 pb-20 pt-5 lg:pt-20 xl:pt-5">
             <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
-                <div className="flex flex-wrap items-center bg-white rounded-[10px] shadow-1 gap-5 xl:gap-12.5 py-4.5 px-4 sm:px-6">
-                    {tabs.map((item, key) => (
-                        <button
-                            key={key}
-                            onClick={() => setActiveTab(item.id)}
-                            className={`font-medium lg:text-lg ease-out duration-200 hover:text-blue relative before:h-0.5 before:bg-blue before:absolute before:left-0 before:bottom-0 before:ease-out before:duration-200 hover:before:w-full ${
-                                activeTab === item.id ? "text-blue before:w-full" : "text-dark before:w-0"
-                            }`}
-                        >
-                            {item.title}
-                        </button>
-                    ))}
-                </div>
+              <div className="flex flex-wrap items-center bg-white rounded-[10px] shadow-1 gap-5 xl:gap-12.5 py-4.5 px-4 sm:px-6">
+                {tabs.map((item, key) => (
+                  <button
+                    key={key}
+                    onClick={() => setActiveTab(item.id)}
+                    className={`font-medium lg:text-lg ease-out duration-200 hover:text-blue relative before:h-0.5 before:bg-blue before:absolute before:left-0 before:bottom-0 before:ease-out before:duration-200 hover:before:w-full ${activeTab === item.id ? "text-blue before:w-full" : "text-dark before:w-0"
+                      }`}
+                  >
+                    {item.title}
+                  </button>
+                ))}
+              </div>
 
-                <div className={`flex-col sm:flex-row gap-7.5 xl:gap-12.5 mt-12.5 ${activeTab === "tabOne" ? "flex" : "hidden"}`}>
-                    <div className="max-w-[670px] w-full">
-                        <h2 className="font-medium text-2xl text-dark mb-7">Specifications:</h2>
-                        {displayProduct.description || displayProduct.specifications ? (
-                            <div className="space-y-4">
-                                {displayProduct.description && <p className="mb-4" dangerouslySetInnerHTML={{ __html: displayProduct.description }} />}
-                                {Array.isArray(displayProduct.specifications) && (
-                                    <div>
-                                        <h3 className="text-lg font-semibold mb-2">Processing & Potency</h3>
-                                        <ul className="list-disc list-inside space-y-1">
-                                            {displayProduct.specifications.map((spec, idx) => (
-                                                <li key={idx} dangerouslySetInnerHTML={{ __html: spec }} />
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
-                            </div>
-                        ) : (
-                            <div className="space-y-4">
-                                <p className="mb-4">No specifications available for this product.</p>
-                            </div>
-                        )}
+              <div className={`flex-col sm:flex-row gap-7.5 xl:gap-12.5 mt-12.5 ${activeTab === "tabOne" ? "flex" : "hidden"}`}>
+                <div className="max-w-[670px] w-full">
+                  <h2 className="font-medium text-2xl text-dark mb-7">Specifications:</h2>
+                  {displayProduct.description || displayProduct.specifications ? (
+                    <div className="space-y-4">
+                      {displayProduct.description && <p className="mb-4" dangerouslySetInnerHTML={{ __html: displayProduct.description }} />}
+                      {Array.isArray(displayProduct.specifications) && (
+                        <div>
+                          <h3 className="text-lg font-semibold mb-2">Processing & Potency</h3>
+                          <ul className="list-disc list-inside space-y-1">
+                            {displayProduct.specifications.map((spec, idx) => (
+                              <li key={idx} dangerouslySetInnerHTML={{ __html: spec }} />
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
-                    <div className="max-w-[447px] w-full">
-                        <h2 className="font-medium text-2xl text-dark mb-7">How to consume?</h2>
-                        <ul className="list-disc list-inside mb-6 space-y-2">
-                            {displayProduct.howToConsume?.length ? (
-                                displayProduct.howToConsume.map((step, i) => (
-                                    <li key={i} dangerouslySetInnerHTML={{ __html: step }} />
-                                ))
-                            ) : (
-                                <li>No usage instructions available.</li>
-                            )}
-                        </ul>
+                  ) : (
+                    <div className="space-y-4">
+                      <p className="mb-4">No specifications available for this product.</p>
                     </div>
+                  )}
                 </div>
+                <div className="max-w-[447px] w-full">
+                  <h2 className="font-medium text-2xl text-dark mb-7">How to consume?</h2>
+                  <ul className="list-disc list-inside mb-6 space-y-2">
+                    {displayProduct.howToConsume?.length ? (
+                      displayProduct.howToConsume.map((step, i) => (
+                        <li key={i} dangerouslySetInnerHTML={{ __html: step }} />
+                      ))
+                    ) : (
+                      <li>No usage instructions available.</li>
+                    )}
+                  </ul>
+                </div>
+              </div>
 
-                <div>
-                    <div className={`rounded-xl bg-white shadow-1 p-4 sm:p-6 mt-10 ${activeTab === "tabTwo" ? "block" : "hidden"}`}>
-                        {Array.isArray(displayProduct.additionalInfo) && displayProduct.additionalInfo.length ? (
-                            displayProduct.additionalInfo.map((info, idx) => (
-                                <div key={idx} className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
-                                    <div className="max-w-[450px] min-w-[140px] w-full">
-                                        <p className="text-sm sm:text-base text-dark">{info.label}</p>
-                                    </div>
-                                    <div className="w-full">
-                                        <p className="text-sm sm:text-base text-dark">{info.value}</p>
-                                    </div>
+              <div>
+                <div className={`rounded-xl bg-white shadow-1 p-4 sm:p-6 mt-10 ${activeTab === "tabTwo" ? "block" : "hidden"}`}>
+                  {Array.isArray(displayProduct.additionalInfo) && displayProduct.additionalInfo.length ? (
+                    displayProduct.additionalInfo.map((info, idx) => (
+                      <div key={idx} className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
+                        <div className="max-w-[450px] min-w-[140px] w-full">
+                          <p className="text-sm sm:text-base text-dark">{info.label}</p>
+                        </div>
+                        <div className="w-full">
+                          <p className="text-sm sm:text-base text-dark">{info.value}</p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="space-y-4">
+                      <p className="mb-4">No additional information available for this product.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <div className={`flex-col sm:flex-row gap-7.5 xl:gap-12.5 mt-12.5 ${activeTab === "tabThree" ? "flex" : "hidden"}`}>
+                  <div className="max-w-[570px] w-full">
+                    <h2 className="font-medium text-2xl text-dark mb-9">
+                      {reviewStats.totalReviews} Review{reviewStats.totalReviews !== 1 ? "s" : ""} for this product
+                      {reviewStats.averageRating > 0 && (
+                        <span className="text-lg text-gray-600 ml-2">
+                          (Average: {reviewStats.averageRating}/5)
+                        </span>
+                      )}
+                    </h2>
+                    <div className="flex flex-col gap-6">
+                      {reviewsLoading ? (
+                        <div className="rounded-xl bg-white shadow-1 p-4 sm:p-6">
+                          <p>Loading reviews...</p>
+                        </div>
+                      ) : reviews && reviews.length ? (
+                        reviews.map((review, idx) => (
+                          <div key={idx} className="rounded-xl bg-white shadow-1 p-4 sm:p-6">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-4">
+                                <div className="w-12.5 h-12.5 rounded-full overflow-hidden bg-gray-2 flex items-center justify-center">
+                                  <span className="text-lg font-medium text-dark">
+                                    {review.user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                                  </span>
                                 </div>
-                            ))
-                        ) : (
-                            <div className="space-y-4">
-                                <p className="mb-4">No additional information available for this product.</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                <div>
-                    <div className={`flex-col sm:flex-row gap-7.5 xl:gap-12.5 mt-12.5 ${activeTab === "tabThree" ? "flex" : "hidden"}`}>
-                        <div className="max-w-[570px] w-full">
-                            <h2 className="font-medium text-2xl text-dark mb-9">
-                                {reviewStats.totalReviews} Review{reviewStats.totalReviews !== 1 ? "s" : ""} for this product
-                                {reviewStats.averageRating > 0 && (
-                                    <span className="text-lg text-gray-600 ml-2">
-                                        (Average: {reviewStats.averageRating}/5)
+                                <div>
+                                  <h3 className="font-medium text-dark">{review.user?.name || 'Anonymous'}</h3>
+                                  <p className="text-custom-sm text-gray-500">
+                                    {new Date(review.createdAt).toLocaleDateString()}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                {Array.from({ length: 5 }).map((_, i) => {
+                                  const ratingValue = typeof review.rating === 'number' && review.rating >= 1 && review.rating <= 5 ? review.rating : 0;
+                                  return (
+                                    <span key={i} className={i < ratingValue ? "cursor-pointer text-[#FBB040]" : "cursor-pointer text-gray-5"}>
+                                      <svg className="fill-current" width="15" height="16" viewBox="0 0 15 16" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M14.6604 5.90785L9.97461 5.18335L7.85178 0.732874C7.69645 0.422375 7.28224 0.422375 7.12691 0.732874L5.00407 5.20923L0.344191 5.90785C0.0076444 5.9596 -0.121797 6.39947 0.137085 6.63235L3.52844 10.1255L2.72591 15.0158C2.67413 15.3522 3.01068 15.6368 3.32134 15.4298L7.54112 13.1269L11.735 15.4298C12.0198 15.5851 12.3822 15.3263 12.3046 15.0158L11.502 10.1255L14.8934 6.63235C15.1005 6.39947 14.9969 5.9596 14.6604 5.90785Z" />
+                                      </svg>
                                     </span>
-                                )}
-                            </h2>
-                            <div className="flex flex-col gap-6">
-                                {reviewsLoading ? (
-                                    <div className="rounded-xl bg-white shadow-1 p-4 sm:p-6">
-                                        <p>Loading reviews...</p>
-                                    </div>
-                                ) : reviews && reviews.length ? (
-                                    reviews.map((review, idx) => (
-                                        <div key={idx} className="rounded-xl bg-white shadow-1 p-4 sm:p-6">
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-12.5 h-12.5 rounded-full overflow-hidden bg-gray-2 flex items-center justify-center">
-                                                        <span className="text-lg font-medium text-dark">
-                                                            {review.user?.name?.charAt(0)?.toUpperCase() || 'U'}
-                                                        </span>
-                                                    </div>
-                                                    <div>
-                                                        <h3 className="font-medium text-dark">{review.user?.name || 'Anonymous'}</h3>
-                                                        <p className="text-custom-sm text-gray-500">
-                                                            {new Date(review.createdAt).toLocaleDateString()}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-1">
-                                                    {Array.from({ length: 5 }).map((_, i) => {
-                                                        const ratingValue = typeof review.rating === 'number' && review.rating >= 1 && review.rating <= 5 ? review.rating : 0;
-                                                        return (
-                                                            <span key={i} className={i < ratingValue ? "cursor-pointer text-[#FBB040]" : "cursor-pointer text-gray-5"}>
-                                                                <svg className="fill-current" width="15" height="16" viewBox="0 0 15 16" xmlns="http://www.w3.org/2000/svg">
-                                                                    <path d="M14.6604 5.90785L9.97461 5.18335L7.85178 0.732874C7.69645 0.422375 7.28224 0.422375 7.12691 0.732874L5.00407 5.20923L0.344191 5.90785C0.0076444 5.9596 -0.121797 6.39947 0.137085 6.63235L3.52844 10.1255L2.72591 15.0158C2.67413 15.3522 3.01068 15.6368 3.32134 15.4298L7.54112 13.1269L11.735 15.4298C12.0198 15.5851 12.3822 15.3263 12.3046 15.0158L11.502 10.1255L14.8934 6.63235C15.1005 6.39947 14.9969 5.9596 14.6604 5.90785Z" />
-                                                                </svg>
-                                                            </span>
-                                                        );
-                                                    })}
-                                                </div>
-                                            </div>
-                                            {review.comment && (
-                                                <p className="text-dark mt-6">{review.comment}</p>
-                                            )}
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div className="rounded-xl bg-white shadow-1 p-4 sm:p-6">
-                                        <p>No reviews yet for this product.</p>
-                                    </div>
-                                )}
+                                  );
+                                })}
+                              </div>
                             </div>
+                            {review.comment && (
+                              <p className="text-dark mt-6">{review.comment}</p>
+                            )}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="rounded-xl bg-white shadow-1 p-4 sm:p-6">
+                          <p>No reviews yet for this product.</p>
                         </div>
-                        <div className="max-w-[550px] w-full">
-                            <form onSubmit={handleReviewSubmit}>
-                                <h2 className="font-medium text-2xl text-dark mb-3.5">Add a Review</h2>
-                                <p className="mb-6">Please sign in to submit a review. Required fields are marked *</p>
-                                <div className="flex items-center gap-3 mb-7.5">
-                                    <span>Your Rating*</span>
-                                    <div className="flex items-center gap-1">
-                                        {[...Array(5)].map((_, i) => (
-                                            <button
-                                                key={i}
-                                                type="button"
-                                                onClick={() => setRating(i + 1)}
-                                                className={`cursor-pointer ${i < rating ? "text-[#FBB040]" : "text-gray-5"}`}
-                                            >
-                                                <svg className="fill-current" width="15" height="16" viewBox="0 0 15 16" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M14.6604 5.90785L9.97461 5.18335L7.85178 0.732874C7.69645 0.422375 7.28224 0.422375 7.12691 0.732874L5.00407 5.20923L0.344191 5.90785C0.0076444 5.9596 -0.121797 6.39947 0.137085 6.63235L3.52844 10.1255L2.72591 15.0158C2.67413 15.3522 3.01068 15.6368 3.32134 15.4298L7.54112 13.1269L11.735 15.4298C12.0198 15.5851 12.3822 15.3263 12.3046 15.0158L11.502 10.1255L14.8934 6.63235C15.1005 6.39947 14.9969 5.9596 14.6604 5.90785Z" />
-                                                </svg>
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div className="rounded-xl bg-white shadow-1 p-4 sm:p-6">
-                                    <div className="mb-5">
-                                        <label htmlFor="comments" className="block mb-2.5">Comments</label>
-                                        <textarea 
-                                            name="comments" 
-                                            id="comments" 
-                                            rows={5} 
-                                            placeholder="Your comments" 
-                                            value={comment}
-                                            onChange={(e) => setComment(e.target.value)}
-                                            className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full p-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
-                                        />
-                                        <span className="flex items-center justify-between mt-2.5">
-                                            <span className="text-custom-sm text-dark-4">Maximum 250 characters</span>
-                                            <span className="text-custom-sm text-dark-4">{comment.length}/250</span>
-                                        </span>
-                                    </div>
-                                    <button 
-                                        type="submit" 
-                                        disabled={isSubmittingReview}
-                                        className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        {isSubmittingReview ? "Submitting..." : "Submit Review"}
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
+                      )}
                     </div>
+                  </div>
+                  <div className="max-w-[550px] w-full">
+                    <form onSubmit={handleReviewSubmit}>
+                      <h2 className="font-medium text-2xl text-dark mb-3.5">Add a Review</h2>
+                      <p className="mb-6">Please sign in to submit a review. Required fields are marked *</p>
+                      <div className="flex items-center gap-3 mb-7.5">
+                        <span>Your Rating*</span>
+                        <div className="flex items-center gap-1">
+                          {[...Array(5)].map((_, i) => (
+                            <button
+                              key={i}
+                              type="button"
+                              onClick={() => setRating(i + 1)}
+                              className={`cursor-pointer ${i < rating ? "text-[#FBB040]" : "text-gray-5"}`}
+                            >
+                              <svg className="fill-current" width="15" height="16" viewBox="0 0 15 16" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14.6604 5.90785L9.97461 5.18335L7.85178 0.732874C7.69645 0.422375 7.28224 0.422375 7.12691 0.732874L5.00407 5.20923L0.344191 5.90785C0.0076444 5.9596 -0.121797 6.39947 0.137085 6.63235L3.52844 10.1255L2.72591 15.0158C2.67413 15.3522 3.01068 15.6368 3.32134 15.4298L7.54112 13.1269L11.735 15.4298C12.0198 15.5851 12.3822 15.3263 12.3046 15.0158L11.502 10.1255L14.8934 6.63235C15.1005 6.39947 14.9969 5.9596 14.6604 5.90785Z" />
+                              </svg>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="rounded-xl bg-white shadow-1 p-4 sm:p-6">
+                        <div className="mb-5">
+                          <label htmlFor="comments" className="block mb-2.5">Comments</label>
+                          <textarea
+                            name="comments"
+                            id="comments"
+                            rows={5}
+                            placeholder="Your comments"
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value)}
+                            className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full p-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                          />
+                          <span className="flex items-center justify-between mt-2.5">
+                            <span className="text-custom-sm text-dark-4">Maximum 250 characters</span>
+                            <span className="text-custom-sm text-dark-4">{comment.length}/250</span>
+                          </span>
+                        </div>
+                        <button
+                          type="submit"
+                          disabled={isSubmittingReview}
+                          className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {isSubmittingReview ? "Submitting..." : "Submit Review"}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
                 </div>
+              </div>
             </div>
           </section>
 
