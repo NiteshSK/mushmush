@@ -98,10 +98,14 @@ export async function POST(req: Request) {
 
         const context = `
 Relevant Mushmush Products:
-${products.map(p => `- ${p.title} (₹${p.price}): ${p.description.substring(0, 100)}...`).join("\n")}
+${products.map(p => `- ${p.title} (₹${p.price}): ${p.description.substring(0, 100)}...
+  Link: /shop-details/${p.slug}
+  Status: ${p.inStock ? 'Available' : 'Out of Stock'}`).join("\n")}
 
 Featured/Trending Products:
-${featured.map(p => `- ${p.title}: ${p.description.substring(0, 60)}...`).join("\n")}
+${featured.map(p => `- ${p.title}: ${p.description.substring(0, 60)}...
+  Link: /shop-details/${p.slug}
+  Status: ${p.inStock ? 'Available' : 'Out of Stock'}`).join("\n")}
 
 Active Promotions:
 ${banners.map(b => `- ${b.title}: ${b.discount || b.subtitle}`).join("\n")}
@@ -162,6 +166,8 @@ FUTURE PRODUCTS (Coming Soon):
 - Dry Mushroom Powders
 
 When users ask about our company, founders, story, certifications, production capacity, or training programs, use the above information to provide detailed and accurate responses.
+
+If the user asks for a product or its price, ALWAYS provide the direct link to the product page and mention its availability status (Available or Out of Stock).
 
 If you don't know the answer or the context doesn't provide it, answer based on your general mushroom knowledge but clarify that for Mushmush-specific details (like exact training dates or shipping), the user should check the relevant pages or contact us.
 

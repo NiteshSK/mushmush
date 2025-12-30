@@ -44,7 +44,7 @@ export function generateInvoiceNumber(): string {
  */
 export async function generateInvoicePDF(data: InvoiceData, userId?: string): Promise<string> {
   const doc = new jsPDF();
-  
+
   // Add logo
   try {
     const logoPath = path.join(process.cwd(), 'public', 'images', 'logo', 'logo.png');
@@ -56,36 +56,36 @@ export async function generateInvoicePDF(data: InvoiceData, userId?: string): Pr
   } catch (error) {
     console.log('Logo not found, continuing without logo');
   }
-  
+
   // Company Header with updated branding
   doc.setFontSize(22);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(45, 80, 22); // MushMush green color
   doc.text('MushMush', 105, 20, { align: 'center' });
-  
+
   doc.setFontSize(11);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(100, 100, 100);
-  doc.text('by Mush Agro Products', 105, 27, { align: 'center' });
-  
+  doc.text('by MushMush by Mush Agro Products', 105, 27, { align: 'center' });
+
   doc.setFontSize(9);
   doc.setTextColor(80, 80, 80);
   doc.text('Fresh Edible and Medicinal Mushrooms', 105, 33, { align: 'center' });
   doc.text('Email: mushagroprod@gmail.com | Phone: +91-7618362662', 105, 38, { align: 'center' });
-  
+
   // Invoice Title
   doc.setFontSize(16);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(0, 0, 0);
   doc.text('INVOICE', 105, 52, { align: 'center' });
-  
+
   // Invoice Details
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   const invoiceNumber = generateInvoiceNumber();
   doc.text(`Invoice Number: ${invoiceNumber}`, 20, 65);
   doc.text(`Order Number: ${data.orderNumber}`, 20, 71);
-  
+
   // Format date with timestamp
   const orderDate = new Date(data.orderDate);
   const formattedDate = orderDate.toLocaleString('en-IN', {
@@ -98,13 +98,13 @@ export async function generateInvoicePDF(data: InvoiceData, userId?: string): Pr
     hour12: true
   });
   doc.text(`Date: ${formattedDate}`, 20, 77);
-  
+
   // Billing Information (Left Side)
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(10);
   doc.setTextColor(45, 80, 22);
   doc.text('Bill To:', 20, 90);
-  
+
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
   doc.setTextColor(0, 0, 0);
@@ -113,7 +113,7 @@ export async function generateInvoicePDF(data: InvoiceData, userId?: string): Pr
   if (data.customerPhone) {
     doc.text(data.customerPhone, 20, 106);
   }
-  
+
   // Billing Address
   const billingAddr = data.billingAddress;
   let billYPos = data.customerPhone ? 111 : 106;
@@ -122,18 +122,18 @@ export async function generateInvoicePDF(data: InvoiceData, userId?: string): Pr
   doc.text(`${billingAddr.city || ''}, ${billingAddr.state || ''} ${billingAddr.zipCode || billingAddr.zip || ''}`, 20, billYPos);
   billYPos += 5;
   doc.text(`${billingAddr.country || 'India'}`, 20, billYPos);
-  
+
   // Shipping Address (Right Side)
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(10);
   doc.setTextColor(45, 80, 22);
   doc.text('Ship To:', 110, 90);
-  
+
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
   doc.setTextColor(0, 0, 0);
   doc.text(data.customerName, 110, 96);
-  
+
   // Shipping Address Details
   const shippingAddr = data.shippingAddress;
   let shipYPos = 101;
@@ -142,10 +142,10 @@ export async function generateInvoicePDF(data: InvoiceData, userId?: string): Pr
   doc.text(`${shippingAddr.city || ''}, ${shippingAddr.state || ''} ${shippingAddr.zipCode || shippingAddr.zip || ''}`, 110, shipYPos);
   shipYPos += 5;
   doc.text(`${shippingAddr.country || 'India'}`, 110, shipYPos);
-  
+
   // Items Table - start after both addresses
   const tableStartY = Math.max(billYPos, shipYPos) + 15;
-  
+
   autoTable(doc, {
     startY: tableStartY,
     head: [['Item', 'Quantity', 'Price', 'Total']],
@@ -175,65 +175,65 @@ export async function generateInvoicePDF(data: InvoiceData, userId?: string): Pr
       3: { cellWidth: 35, halign: 'right', fontStyle: 'normal' }
     }
   });
-  
+
   // Get the final Y position after the table
   const finalY = (doc as any).lastAutoTable.finalY || tableStartY + 50;
-  
+
   // Totals - Compact version with smaller font
   const totalsX = 135;
   let totalsY = finalY + 12;
-  
+
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(0, 0, 0);
   doc.text('Subtotal:', totalsX, totalsY);
   doc.text(`Rs ${data.subtotal.toFixed(2)}`, 185, totalsY, { align: 'right' });
-  
+
   totalsY += 5;
   doc.text('Tax:', totalsX, totalsY);
   doc.text(`Rs ${data.tax.toFixed(2)}`, 185, totalsY, { align: 'right' });
-  
+
   totalsY += 5;
   doc.text('Shipping:', totalsX, totalsY);
   doc.text(`Rs ${data.shipping.toFixed(2)}`, 185, totalsY, { align: 'right' });
-  
+
   // Total with slightly larger font and line separator
   totalsY += 2;
   doc.setDrawColor(45, 80, 22);
   doc.line(totalsX, totalsY, 185, totalsY);
-  
+
   totalsY += 6;
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(11);
   doc.setTextColor(45, 80, 22);
   doc.text('Total:', totalsX, totalsY);
   doc.text(`Rs ${data.total.toFixed(2)}`, 185, totalsY, { align: 'right' });
-  
+
   // Footer
   doc.setFontSize(9);
   doc.setFont('helvetica', 'italic');
   doc.text('Thank you for your business!', 105, 270, { align: 'center' });
   doc.text('For any queries, please contact us at mushagroprod@gmail.com', 105, 276, { align: 'center' });
-  
+
   // Generate PDF buffer
   const pdfBuffer = doc.output('arraybuffer');
   const fileName = `${invoiceNumber}.pdf`;
-  
+
   // Create structured path: userId/YYYY-MM-DD/invoiceNumber.pdf
   const date = new Date();
   const dateFolder = date.toISOString().split('T')[0]; // YYYY-MM-DD format
   const userFolder = userId || 'guest';
   const blobPath = `invoices/${userFolder}/${dateFolder}/${fileName}`;
-  
+
   console.log('📁 Uploading invoice to path:', blobPath);
-  
+
   // Upload to Vercel Blob with structured path
   try {
     const blob = await put(blobPath, Buffer.from(pdfBuffer), {
       access: 'public',
       contentType: 'application/pdf',
     });
-    
+
     console.log('✅ Invoice PDF uploaded to Vercel Blob:', blob.url);
     console.log('📊 Storage path:', blobPath);
     return blob.url;
@@ -249,7 +249,7 @@ export async function generateInvoicePDF(data: InvoiceData, userId?: string): Pr
 export async function generateInvoice(orderId: string): Promise<any> {
   try {
     console.log('🔄 Starting invoice generation for order:', orderId);
-    
+
     // Fetch order with all details
     const order = await prisma.order.findUnique({
       where: { id: orderId },
@@ -296,7 +296,7 @@ export async function generateInvoice(orderId: string): Promise<any> {
         const shippingAddr = await prisma.addresses.findUnique({
           where: { id: order.shippingAddressId }
         });
-        
+
         if (shippingAddr) {
           shippingAddressData = {
             address: shippingAddr.street,
