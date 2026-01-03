@@ -203,6 +203,12 @@ To order products or get in touch, users can contact us via:
 
 If you don't know the answer or the context doesn't provide it, answer based on your general mushroom knowledge but clarify that for Mushmush-specific details (like exact training dates or shipping), the user should check the relevant pages or contact us.
 
+IMPORTANT: Whenever you end a conversation or provide a closing message, ALWAYS include our contact information so users know how to reach us:
+"Feel free to reach out anytime:
+- 💬 WhatsApp: https://wa.me/917618362662
+- 📧 Email: mailto:mushagroprod@gmail.com
+- 📞 Phone: tel:+917618362662"
+
 Answer concisely and helpfully.`;
 
         const result = streamText({
