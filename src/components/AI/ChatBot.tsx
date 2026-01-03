@@ -18,7 +18,7 @@ const ChatBot = () => {
             {
                 id: "welcome",
                 role: "assistant",
-                parts: [{ type: 'text', text: "Hi! I'm Mushy, your AI guide. How can I help you today?" }]
+                parts: [{ type: 'text', text: "Hi there! 🍄 I'm Mushy, your guide to MushMush.\n\nI can help you with:\n• 🌱 **Mushroom Cultivation Training**\n• 🛍️ **Fresh & Dried Mushrooms**\n• 💊 **Health Supplements**\n• 📦 **Product Availability & Pricing**\n\nWhat would you like to explore today?" }]
             } as any
         ],
     });
@@ -34,6 +34,14 @@ const ChatBot = () => {
             scrollToBottom();
         }
     }, [messages, isOpen]);
+
+    // Auto-open chat on initial load
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setIsOpen(true);
+        }, 1500);
+        return () => clearTimeout(timer);
+    }, []);
 
     const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -99,7 +107,17 @@ const ChatBot = () => {
                                         <span className="text-[10px] font-semibold opacity-60">Mushy</span>
                                     </div>
                                     <div className="whitespace-pre-wrap leading-relaxed">
-                                        Hi! I'm Mushy, your AI guide. How can I help you today?
+                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                            Hi there! 🍄 I'm Mushy, your guide to MushMush.
+
+                                            I can help you with:
+                                            • 🌱 **Mushroom Cultivation Training**
+                                            • 🛍️ **Fresh & Dried Mushrooms**
+                                            • 💊 **Health Supplements**
+                                            • 📦 **Product Availability & Pricing**
+
+                                            What would you like to explore today?
+                                        </ReactMarkdown>
                                     </div>
                                 </div>
                             </div>
