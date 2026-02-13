@@ -13,11 +13,11 @@ import FAQ from "./FAQ";
 const Home = () => {
   return (
     <main>
-      
+
       <Hero />
       <PromoBanner />
-      <BestSeller />
       <Categories />
+      <BestSeller />
       <RecentlyViewed />
       <WishlistSection />
       {/* <NewArrival /> */}

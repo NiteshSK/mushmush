@@ -12,14 +12,14 @@ const BestSeller = () => {
   const { products, loading, error } = useProducts();
   const { hasBanners } = usePromotionalBanners();
   const bestSellers = products
-  .sort((a: Product, b: Product) => (b.reviewCount ?? 0) - (a.reviewCount ?? 0))
-  .sort((a: Product, b: Product) => {
-    // Prioritize in-stock products
-    if (a.inStock && !b.inStock) return -1;
-    if (!a.inStock && b.inStock) return 1;
-    return 0;
-  })
-  .slice(0, 3);
+    .sort((a: Product, b: Product) => (b.reviewCount ?? 0) - (a.reviewCount ?? 0))
+    .sort((a: Product, b: Product) => {
+      // Prioritize in-stock products
+      if (a.inStock && !b.inStock) return -1;
+      if (!a.inStock && b.inStock) return 1;
+      return 0;
+    })
+    .slice(0, 3);
 
   // NotifyMe modal state
   const [notifyModalOpen, setNotifyModalOpen] = useState(false);
@@ -38,10 +38,10 @@ const BestSeller = () => {
 
   return (
     <section className={`overflow-hidden ${hasBanners ? 'pt-20' : ''}`}>
-      <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
+      <div className="max-w-[1170px] w-full mx-auto px-40 sm:px-80 xl:px-0">
         <div className="mb-10 flex items-center justify-between">
           <div>
-            <span className="flex items-center gap-2.5 font-medium text-dark mb-1.5">
+            <span className="flex items-center gap-4.5 font-medium text-dark mb-1.5">
               <Image
                 src="/images/icons/icon-07.svg"
                 alt="icon"

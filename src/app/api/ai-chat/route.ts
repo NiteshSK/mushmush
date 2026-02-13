@@ -1,13 +1,9 @@
-import { streamText, convertToCoreMessages, createGateway } from "ai";
+import { streamText, convertToCoreMessages } from "ai";
+import { google } from "@ai-sdk/google";
 import { prisma } from "@/lib/prisma";
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
-
-// Initialize Vercel AI Gateway
-const gateway = createGateway({
-    apiKey: process.env.AI_GATEWAY_API_KEY,
-});
 
 export async function POST(req: Request) {
     try {
@@ -17,9 +13,9 @@ export async function POST(req: Request) {
             return new Response("Invalid messages", { status: 400 });
         }
 
-        if (!process.env.AI_GATEWAY_API_KEY) {
-            console.error("DEBUG: AI_GATEWAY_API_KEY is missing from environment variables");
-            return new Response("AI Gateway not configured", { status: 500 });
+        if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+            console.error("DEBUG: GOOGLE_GENERATIVE_AI_API_KEY is missing from environment variables");
+            return new Response("Google AI API Key not configured", { status: 500 });
         }
 
         // Get the last user message for RAG context
@@ -212,7 +208,7 @@ IMPORTANT: Whenever you end a conversation or provide a closing message, ALWAYS 
 Answer concisely and helpfully.`;
 
         const result = streamText({
-            model: gateway("google/gemini-2.0-flash"),
+            model: google("gemini-1.5-flash"),
             system: systemPrompt,
             messages: convertToCoreMessages(messages),
         });
