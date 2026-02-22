@@ -2,9 +2,9 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 
-const Dropdown = ({ menuItem, stickyMenu, setNavigationOpen }: { 
-  menuItem: any; 
-  stickyMenu: any; 
+const Dropdown = ({ menuItem, stickyMenu, setNavigationOpen }: {
+  menuItem: any;
+  stickyMenu: any;
   setNavigationOpen: (value: boolean) => void;
 }) => {
   const [dropdownToggler, setDropdownToggler] = useState(false);
@@ -13,21 +13,18 @@ const Dropdown = ({ menuItem, stickyMenu, setNavigationOpen }: {
   return (
     <li
       onClick={() => setDropdownToggler(!dropdownToggler)}
-      className={`group relative before:w-0 before:h-[3px] before:bg-blue before:absolute before:left-0 before:top-0 before:rounded-b-[3px] before:ease-out before:duration-200 hover:before:w-full ${
-        pathUrl.includes(menuItem.title) && "before:!w-full"
-      }`}
+      className="group relative"
     >
       <a
         href="#"
-        className={`hover:text-blue text-custom-sm font-medium text-dark flex items-center gap-1.5 capitalize ${
-          stickyMenu ? "xl:py-4" : "xl:py-6"
-        } ${pathUrl.includes(menuItem.title) && "!text-blue"}`}
+        className={`hover:text-blue text-custom-sm font-medium text-[#333] flex items-center gap-1 capitalize transition-colors duration-200 ${stickyMenu ? "xl:py-4" : "xl:py-5"
+          } ${pathUrl.includes(menuItem.title) && "!text-blue"}`}
       >
         {menuItem.title}
         <svg
-          className="fill-current cursor-pointer"
-          width="16"
-          height="16"
+          className="fill-current cursor-pointer opacity-60"
+          width="14"
+          height="14"
           viewBox="0 0 16 16"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -43,20 +40,18 @@ const Dropdown = ({ menuItem, stickyMenu, setNavigationOpen }: {
 
       {/* <!-- Dropdown Start --> */}
       <ul
-        className={`dropdown ${dropdownToggler && "flex"} ${
-          stickyMenu
-            ? "xl:group-hover:translate-y-0"
-            : "xl:group-hover:translate-y-0"
-        }`}
+        className={`dropdown ${dropdownToggler && "flex"} ${stickyMenu
+          ? "xl:group-hover:translate-y-0"
+          : "xl:group-hover:translate-y-0"
+          }`}
       >
         {menuItem.submenu.map((item, i) => (
           <li key={i}>
             <Link
               href={item.path}
               onClick={() => setNavigationOpen(false)}
-              className={`flex text-custom-sm hover:text-blue hover:bg-gray-1 py-[7px] px-4.5 ${
-                pathUrl === item.path && "text-blue bg-gray-1"
-              } `}
+              className={`flex text-custom-sm text-[#444] hover:text-blue hover:bg-gray-50 py-[7px] px-4.5 transition-colors duration-150 ${pathUrl === item.path && "!text-blue bg-gray-50"
+                } `}
             >
               {item.title}
             </Link>

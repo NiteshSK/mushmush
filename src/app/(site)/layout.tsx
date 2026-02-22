@@ -14,6 +14,7 @@ import QuickViewModal from "@/components/Common/QuickViewModal";
 import CartSidebarModal from "@/components/Common/CartSidebarModal";
 import ScrollToTop from "@/components/Common/ScrollToTop";
 import PreLoader from "@/components/Common/PreLoader";
+import TopBanner from "@/components/TopBanner";
 
 export default function SiteLayout({
   children,
@@ -33,7 +34,7 @@ export default function SiteLayout({
           <CartModalProvider>
             <PreviewSliderProvider>
               <LoadingProvider>
-                <Toaster 
+                <Toaster
                   position="top-center"
                   reverseOrder={false}
                   gutter={8}
@@ -61,8 +62,11 @@ export default function SiteLayout({
                   }}
                 />
                 {loading && <PreLoader />}
+                <TopBanner />
                 <Header />
-                {children}
+                <div className="pt-[120px]">
+                  {children}
+                </div>
                 <Footer />
                 <ScrollToTop />
                 <PreviewSliderModal />

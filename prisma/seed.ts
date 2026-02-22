@@ -86,6 +86,38 @@ async function main() {
         path: '/shop?category=spat-spawn',
         description: 'Mushroom spawn and spore cultures for cultivation'
       }
+    }),
+    prisma.category.upsert({
+      where: { slug: 'nuts' },
+      update: {
+        title: 'Nuts',
+        img: '/images/categories/nuts.png',
+        path: '/shop?category=nuts',
+        description: 'Premium nuts and dry fruits'
+      },
+      create: {
+        title: 'Nuts',
+        slug: 'nuts',
+        img: '/images/categories/nuts.png',
+        path: '/shop?category=nuts',
+        description: 'Premium nuts and dry fruits'
+      }
+    }),
+    prisma.category.upsert({
+      where: { slug: 'seeds' },
+      update: {
+        title: 'Seeds',
+        img: '/images/categories/seeds.png',
+        path: '/shop?category=seeds',
+        description: 'Premium seeds for health and nutrition'
+      },
+      create: {
+        title: 'Seeds',
+        slug: 'seeds',
+        img: '/images/categories/seeds.png',
+        path: '/shop?category=seeds',
+        description: 'Premium seeds for health and nutrition'
+      }
     })
   ])
 

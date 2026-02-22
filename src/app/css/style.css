@@ -190,6 +190,38 @@ input[type='search']::-webkit-search-results-decoration {
   @apply !bottom-8;
 }
 
+/* ============================================================
+   CLASSIC HERO — Full-width split layout
+   ============================================================ */
+
+.hero-section .hero-slide-wrapper {
+  min-height: calc(75vh - 110px);
+}
+
+/* Text overlay — constrains text block to ~42% width */
+.hero-section .hero-text-col {
+  max-width: 42%;
+}
+
+/* Fluid headline: scales from 42px → 80px */
+.hero-section .hero-headline {
+  font-size: clamp(2.6rem, 4.5vw, 5rem);
+  letter-spacing: -0.02em;
+}
+
+/* Mobile */
+@media (max-width: 1023px) {
+  .hero-section .hero-text-col {
+    max-width: 100%;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  .hero-section .hero-headline {
+    font-size: clamp(2rem, 8vw, 3rem);
+  }
+}
+
 .common-carousel .swiper-button-next:after,
 .common-carousel .swiper-button-prev:after {
   @apply hidden;

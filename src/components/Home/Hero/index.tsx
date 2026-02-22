@@ -3,142 +3,145 @@ import React, { useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, Navigation } from "swiper/modules";
 import Link from "next/link";
-import HeroFeature from "./HeroFeature";
 import Image from "next/image";
+import HeroFeature from "./HeroFeature";
 
-// Import Swiper styles
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
+
+// ─── Hero Slides Config ────────────────────────────────────────────────────
+// Add new slides here. Each slide needs an `image` (path relative to /public).
+// The first slide `image` is used as the default for all slides without one.
+const slides = [
+  {
+    image: "/images/hero/hero_mushrooms.png",
+    label: "✦ Premium Quality Mushrooms",
+    title: "Nature's Finest.\nDelivered Fresh.",
+    subtitle: "Rare superfoods & medicinal mushrooms sourced from the world's finest forests.",
+    cta: "Shop Now",
+    ctaHref: "/shop",
+  },
+  {
+    image: "/images/hero/hero_mushrooms_1.png",
+    label: "✦ Handcrafted Gift Baskets",
+    title: "The Art of\nNourishment.",
+    subtitle: "Curated mushroom baskets and superfood bundles for everyday vitality.",
+    cta: "Explore Gifts",
+    ctaHref: "/shop",
+  },
+];
 
 const Hero = () => {
   const [prevEl, setPrevEl] = useState<HTMLElement | null>(null);
   const [nextEl, setNextEl] = useState<HTMLElement | null>(null);
   const [paginationEl, setPaginationEl] = useState<HTMLElement | null>(null);
 
-  const slides = [
-    {
-      title: "Fresh.\nOrganic.\nDelivered.",
-      image: "/images/categories/hero_mushrooms_2.png",
-      bgColor: "bg-[#F0EFED]",
-    },
-    {
-      title: "Premium\nMushrooms\nDelivered.",
-      image: "/images/categories/hero_mushrooms_3.png",
-      bgColor: "bg-[#E8F5F0]",
-    },
-    {
-      title: "Natural.\nHealthy.\nFresh.",
-      image: "/images/categories/hero_mushrooms_4.png",
-      bgColor: "bg-[#F0E8F5]",
-    },
-  ];
-
   return (
     <>
-      <section className="mt-32 relative mb-24" style={{ marginTop: '200px' }}>
+      <section className="hero-section relative" style={{ marginTop: "80px" }}>
         <Swiper
           spaceBetween={0}
           centeredSlides={true}
-          autoplay={{
-            delay: 3500,
-            disableOnInteraction: false,
-          }}
-          pagination={{
-            clickable: true,
-            el: paginationEl,
-          }}
-          navigation={{
-            prevEl,
-            nextEl,
-          }}
+          autoplay={{ delay: 4500, disableOnInteraction: false }}
+          pagination={{ clickable: true, el: paginationEl }}
+          navigation={{ prevEl, nextEl }}
           modules={[Autoplay, Pagination, Navigation]}
-          className="hero-carousel"
+          className="hero-carousel w-full"
           onBeforeInit={(swiper) => {
-            if (typeof swiper.params.navigation !== 'boolean') {
+            if (typeof swiper.params.navigation !== "boolean") {
               swiper.params.navigation!.prevEl = prevEl;
               swiper.params.navigation!.nextEl = nextEl;
             }
-            if (typeof swiper.params.pagination !== 'boolean') {
+            if (typeof swiper.params.pagination !== "boolean") {
               swiper.params.pagination!.el = paginationEl;
             }
           }}
         >
           {slides.map((slide, index) => (
             <SwiperSlide key={index}>
-              <div className={`relative ${slide.bgColor} overflow-hidden rounded-3xl mx-4 sm:mx-8 xl:mx-0`}>
-                <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-12 xl:px-12">
-                  <div className="flex flex-col lg:flex-row items-center min-h-[500px] lg:min-h-[600px] py-12 lg:py-0">
-                    {/* Left Content */}
-                    <div className="lg:w-1/2 z-10">
-                      {/* Star Rating */}
+              {/*
+                TRUE single-image hero:
+                - hero_mushrooms.png is 1376×768 landscape (user-provided, natural composition)
+                - Left area of image is clean sage-green (for text readability)
+                - Right area has the mushrooms
+                - object-cover scales the image to fill the hero
+                - object-left anchors image from the left edge so mushrooms on the right stay visible
+                - Text is overlaid on top of the left empty area
+              */}
+              <div className="relative w-full overflow-hidden hero-slide-wrapper">
 
-                      {/* Heading */}
-                      <h1 className="text-2xl lg:text-3xl xl:text-4xl font-normal text-dark mb-6 leading-tight whitespace-pre-line">
-                        {slide.title}
-                      </h1>
+                {/* Single full-width image */}
+                <Image
+                  src={slide.image}
+                  alt={slide.label}
+                  fill
+                  className="object-cover object-left hero-image"
+                  priority={index === 0}
+                  sizes="100vw"
+                  quality={100}
+                  unoptimized
+                />
 
-                      {/* CTA Button */}
+                {/* Text overlay — left side of the image is clean so text reads clearly */}
+                <div className="relative z-10 h-full flex items-center hero-slide-wrapper">
+                  <div className="px-8 sm:px-14 xl:px-20 hero-text-col">
+                    <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#2a4026] mb-6">
+                      {slide.label}
+                    </p>
+                    <h1 className="font-light text-[#1a1a1a] whitespace-pre-line leading-[1.1] mb-6 hero-headline">
+                      {slide.title}
+                    </h1>
+                    <p className="text-[#2d3d28] text-sm sm:text-base leading-relaxed max-w-xs mb-10 font-light">
+                      {slide.subtitle}
+                    </p>
+                    <div className="flex items-center gap-6">
                       <Link
-                        href="/shop"
-                        className="inline-block bg-dark text-white font-medium text-xs uppercase tracking-widest py-3 px-8 rounded-full hover:opacity-90 transition-all duration-300 shadow-sm"
+                        href={slide.ctaHref}
+                        className="inline-flex items-center gap-2 bg-[#1a1a1a] text-white text-xs font-medium tracking-[0.15em] uppercase py-4 px-10 rounded-full hover:bg-[#3a5a2a] transition-all duration-500"
                       >
-                        Shop Now
+                        {slide.cta}
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
                       </Link>
-                    </div>
-
-                    {/* Right Image with Geometric Shape */}
-                    <div className="lg:w-1/2 relative flex items-center justify-center mt-8 lg:mt-0">
-                      {/* Green Geometric Shape */}
-                      <div className="absolute inset-0 flex items-center justify-end">
-                        <div
-                          className="w-[500px] h-[500px] lg:w-[600px] lg:h-[600px] rounded-full"
-                          style={{
-                            background: "linear-gradient(135deg)",
-                            clipPath: "polygon(0 0, 100% 0, 100% 100%, 40% 100%)",
-                            transform: "translateX(20%)",
-                          }}
-                        />
-                      </div>
-
-                      {/* Product Image */}
-                      <div className="relative z-10">
-                        <Image
-                          src={slide.image}
-                          alt="Fresh Organic Products"
-                          width={600}
-                          height={600}
-                          className="object-contain drop-shadow-2xl"
-                          priority={index === 0}
-                        />
-                      </div>
+                      <Link
+                        href="/about"
+                        className="text-xs font-medium tracking-[0.15em] uppercase text-[#2d3d28] border-b border-[#2d3d28] pb-0.5 hover:text-[#1a2a16] hover:border-[#1a2a16] transition-all duration-300"
+                      >
+                        Our Story
+                      </Link>
                     </div>
                   </div>
                 </div>
+
               </div>
             </SwiperSlide>
           ))}
         </Swiper>
 
-        {/* Custom Navigation Controls */}
-        <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 z-20 flex items-center gap-4">
-          <button ref={setPrevEl} className="custom-prev w-10 h-10 flex items-center justify-center rounded-full border border-transparent hover:border-[#222] hover:bg-transparent transition-all text-[#222] hover:text-black disabled:opacity-30">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        {/* Navigation Controls */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex items-center gap-4">
+          <button
+            ref={setPrevEl}
+            className="custom-prev w-9 h-9 flex items-center justify-center rounded-full border border-[#6a8a65] bg-white/20 backdrop-blur-sm hover:bg-white/40 transition-all text-[#1a1a1a] disabled:opacity-30"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M15 18l-6-6 6-6" />
             </svg>
           </button>
-
-          <div ref={setPaginationEl} className="custom-pagination !static !w-auto !transform-none flex gap-2 items-center"></div>
-
-          <button ref={setNextEl} className="custom-next w-10 h-10 flex items-center justify-center rounded-full border border-transparent hover:border-[#222] hover:bg-transparent transition-all text-[#222] hover:text-black disabled:opacity-30">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <div ref={setPaginationEl} className="custom-pagination !static !w-auto !transform-none flex gap-2 items-center" />
+          <button
+            ref={setNextEl}
+            className="custom-next w-9 h-9 flex items-center justify-center rounded-full border border-[#6a8a65] bg-white/20 backdrop-blur-sm hover:bg-white/40 transition-all text-[#1a1a1a] disabled:opacity-30"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 18l6-6-6-6" />
             </svg>
           </button>
         </div>
       </section>
 
-      {/* Features Section */}
       <HeroFeature />
     </>
   );
