@@ -258,11 +258,11 @@ const Header = () => {
                       >
                         <Link
                           href={menuItem.path}
-                          className={`group/link relative hover:text-[#4B6BFB] text-custom-sm font-medium text-[#333] flex transition-colors duration-200 ${stickyMenu ? "xl:py-4" : "xl:py-5"
+                          className={`group/link relative hover:text-[#5a8a3a] text-custom-sm font-medium text-[#333] flex transition-colors duration-200 ${stickyMenu ? "xl:py-4" : "xl:py-5"
                             }`}
                           onClick={() => setNavigationOpen(false)}
                         >
-                          <span className="absolute top-0 left-0 w-full h-[3px] bg-[#4B6BFB] scale-x-0 group-hover/link:scale-x-100 transition-transform duration-300 origin-center"></span>
+                          <span className="absolute top-0 left-0 w-full h-[3px] rounded-b-[2px] bg-[#5a8a3a] scale-x-0 group-hover/link:scale-x-100 transition-transform duration-300 origin-center"></span>
                           {menuItem.title}
                         </Link>
                       </li>
@@ -333,7 +333,7 @@ const Header = () => {
           </div>
         </div>
       </div>
-    </header >
+    </header>
   );
 };
 

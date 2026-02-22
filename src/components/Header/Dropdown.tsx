@@ -17,10 +17,10 @@ const Dropdown = ({ menuItem, stickyMenu, setNavigationOpen }: {
     >
       <a
         href="#"
-        className={`group/link relative hover:text-[#4B6BFB] text-custom-sm font-medium text-[#333] flex items-center gap-1 capitalize transition-colors duration-200 ${stickyMenu ? "xl:py-4" : "xl:py-5"
-          } ${pathUrl.includes(menuItem.title) && "!text-[#4B6BFB]"}`}
+        className={`group/link relative hover:text-[#5a8a3a] text-custom-sm font-medium text-[#333] flex items-center gap-1 capitalize transition-colors duration-200 ${stickyMenu ? "xl:py-4" : "xl:py-5"
+          } ${pathUrl.includes(menuItem.title) && "!text-[#5a8a3a]"}`}
       >
-        <span className={`absolute top-0 left-0 w-full h-[3px] bg-[#4B6BFB] transition-transform duration-300 origin-center ${pathUrl.includes(menuItem.title) ? 'scale-x-100' : 'scale-x-0 group-hover/link:scale-x-100'}`}></span>
+        <span className={`absolute top-0 left-0 w-full h-[3px] rounded-b-[2px] bg-[#5a8a3a] transition-transform duration-300 origin-center ${pathUrl.includes(menuItem.title) ? 'scale-x-100' : 'scale-x-0 group-hover/link:scale-x-100'}`}></span>
         {menuItem.title}
         <svg
           className="fill-current cursor-pointer opacity-60"
