@@ -17,7 +17,7 @@ const slides = [
   {
     image: "/images/hero/hero_mushrooms.png",
     label: "✦ Premium Natural Products",
-    title: "Nature's Finest.\nDelivered Fresh.",
+    title: "Nature's\nFinest.\nDelivered\nFresh.",
     subtitle: "Premium mushrooms, dry fruits, seeds & spices — sourced from the finest origins.",
     cta: "Shop Now",
     ctaHref: "/shop",
@@ -25,7 +25,7 @@ const slides = [
   {
     image: "/images/hero/hero_mushrooms_1.png",
     label: "✦ Handcrafted Gift Baskets",
-    title: "The Art of\nNourishment.",
+    title: "The Art\nof\nNourishment.",
     subtitle: "Curated gift baskets and superfood bundles for everyday vitality.",
     cta: "Explore Gifts",
     ctaHref: "/shop",
