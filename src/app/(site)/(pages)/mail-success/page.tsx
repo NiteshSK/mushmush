@@ -3,8 +3,8 @@ import MailSuccess from "@/components/MailSuccess";
 
 import { Metadata } from "next";
 export const metadata: Metadata = {
-  title: "Mail Success Page | MushMush",
-  description: "This is Mail Success Page for MushMush",
+  title: "Mail Success Page | Kosvana",
+  description: "This is Mail Success Page for Kosvana",
   // other metadata
 };
 

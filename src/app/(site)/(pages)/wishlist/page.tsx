@@ -6,8 +6,8 @@ import { Metadata } from "next";
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: "Wishlist Page | MushMush",
-  description: "This is Wishlist Page for MushMush",
+  title: "Wishlist Page | Kosvana",
+  description: "This is Wishlist Page for Kosvana",
 };
 
 const WishlistPage = () => {

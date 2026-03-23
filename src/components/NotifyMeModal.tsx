@@ -87,11 +87,11 @@ const NotifyMeModal: React.FC<NotifyMeModalProps> = ({
   // Show loading state while checking authentication
   if (status === 'loading') {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-lg max-w-md w-full p-6 relative">
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-2xl max-w-[420px] w-full p-8 relative">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading...</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-forest border-t-transparent mx-auto mb-4"></div>
+            <p className="text-sm text-gray-400">Loading...</p>
           </div>
         </div>
       </div>
@@ -99,77 +99,81 @@ const NotifyMeModal: React.FC<NotifyMeModalProps> = ({
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-md w-full p-6 relative">
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
-          disabled={isLoading}
-        >
-          <X size={24} />
-        </button>
-
-        {/* Header */}
-        <div className="mb-6">
-          <h2 className="text-2xl font-semibold text-dark mb-2">
-            Get Notified
-          </h2>
-          {session?.user?.email ? (
-            <p className="text-gray-600">
-              We'll notify <strong>{session.user.email}</strong> when <strong>{productTitle}</strong> is back in stock.
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl max-w-[420px] w-full relative overflow-hidden">
+        {/* Green header bar */}
+        <div className="bg-forest/5 border-b border-forest/10 px-6 py-5 flex items-start justify-between">
+          <div>
+            <div className="flex items-center gap-2 mb-1.5">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-forest">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+              <h2 className="font-medium text-lg text-dark">
+                Get Notified
+              </h2>
+            </div>
+            <p className="text-sm text-gray-500 leading-relaxed">
+              {session?.user?.email ? (
+                <>We'll email <span className="text-dark font-medium">{session.user.email}</span> when <span className="text-dark font-medium">{productTitle}</span> is back in stock.</>
+              ) : (
+                <>Enter your email to be notified when <span className="text-dark font-medium">{productTitle}</span> is back.</>
+              )}
             </p>
-          ) : (
-            <p className="text-gray-600">
-              Enter your email to be notified when <strong>{productTitle}</strong> is back in stock.
-            </p>
-          )}
+          </div>
+          <button
+            onClick={onClose}
+            className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-dark hover:bg-gray-100 transition-colors -mt-1 -mr-1"
+            disabled={isLoading}
+          >
+            <X size={18} />
+          </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Only show email input if user is not authenticated */}
-          {!session?.user?.email && (
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-dark mb-2">
-                Email Address
-              </label>
-              <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email address"
-                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
+        {/* Body */}
+        <div className="px-6 py-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {!session?.user?.email && (
+              <div>
+                <label htmlFor="email" className="block text-xs font-medium uppercase tracking-wider text-gray-400 mb-2">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="w-full bg-white border border-forest/15 rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:border-forest focus:ring-1 focus:ring-forest/20 transition-colors"
+                  disabled={isLoading}
+                  required
+                />
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 px-4 py-3 border border-gray-200 text-dark text-sm font-medium rounded-full hover:bg-gray-50 transition-colors"
                 disabled={isLoading}
-                required
-              />
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="flex-1 px-4 py-3 bg-forest text-white text-sm font-medium rounded-full hover:bg-dark transition-colors duration-300 disabled:opacity-50"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Subscribing...' : (session?.user?.email ? 'Notify Me' : 'Sign In & Notify')}
+              </button>
             </div>
-          )}
+          </form>
 
-          <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
-              disabled={isLoading}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="flex-1 px-4 py-3 bg-blue text-white rounded-md hover:bg-blue-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={isLoading}
-            >
-              {isLoading ? 'Subscribing...' : (session?.user?.email ? 'Notify Me' : 'Sign In & Notify')}
-            </button>
-          </div>
-        </form>
-
-        {/* Privacy note */}
-        <p className="text-xs text-gray-500 mt-4 text-center">
-          We'll only use your email to notify you about this product. You can unsubscribe at any time.
-        </p>
+          <p className="text-[11px] text-gray-400 mt-4 text-center">
+            We'll only email you about this product. Unsubscribe anytime.
+          </p>
+        </div>
       </div>
     </div>
   );

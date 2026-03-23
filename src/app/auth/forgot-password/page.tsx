@@ -41,81 +41,70 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center">
-          <Link href="/">
+    <div className="min-h-screen flex items-center justify-center bg-white px-4 py-20">
+      <div className="max-w-[420px] w-full">
+        {/* Header */}
+        <div className="text-center mb-10">
+          <Link href="/" className="inline-block mb-6">
             <Image
               src="/images/logo/logo.png"
-              alt="MushMush"
+              alt="Kosvana"
               width={120}
               height={40}
-              className="h-10 w-auto"
+              className="h-10 w-auto mx-auto"
             />
           </Link>
+          <h1 className="font-medium text-2xl text-dark mb-2">Forgot your password?</h1>
+          <p className="text-sm text-gray-400">Enter your email and we&apos;ll send you a reset link</p>
         </div>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Forgot your password?
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          Enter your email address and we'll send you a link to reset your password.
-        </p>
-      </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        {/* Card */}
+        <div className="bg-forest/5 rounded-2xl p-8 border border-forest/15">
           {message && (
-            <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-md">
-              <p className="text-sm text-green-800">{message}</p>
+            <div className="mb-6 p-4 bg-forest/10 border border-forest/20 rounded-xl">
+              <p className="text-sm text-dark">{message}</p>
             </div>
           )}
 
           {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
-              <p className="text-sm text-red-800">{error}</p>
+            <div className="mb-6 p-4 bg-red/10 border border-red/20 rounded-xl">
+              <p className="text-sm text-red-700">{error}</p>
             </div>
           )}
 
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
+              <label htmlFor="email" className="block text-xs font-medium uppercase tracking-wider text-gray-400 mb-2">
+                Email
               </label>
-              <div className="mt-1">
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                  placeholder="Enter your email"
-                />
-              </div>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-white border border-forest/15 rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:border-forest focus:ring-1 focus:ring-forest/20 transition-colors"
+                placeholder="you@example.com"
+              />
             </div>
 
-            <div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="block w-full text-center font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark"
-              >
-                {isLoading ? 'Sending...' : 'Send Reset Link'}
-              </button>
-            </div>
-
-            <div className="text-center">
-              <Link
-                href="/auth/signin"
-                className="text-sm text-green-600 hover:text-green-500"
-              >
-                Back to Sign In
-              </Link>
-            </div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-forest text-white py-3.5 rounded-full text-sm font-medium hover:bg-dark transition-colors duration-300 disabled:opacity-50"
+            >
+              {isLoading ? 'Sending...' : 'Send Reset Link'}
+            </button>
           </form>
         </div>
+
+        <p className="text-center mt-6 text-sm text-gray-400">
+          <Link href="/auth/signin" className="text-dark hover:text-forest transition-colors font-medium">
+            Back to Sign In
+          </Link>
+        </p>
       </div>
     </div>
   );

@@ -1,91 +1,154 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Pagination, Navigation } from "swiper/modules";
 import Link from "next/link";
-import HeroFeature from "./HeroFeature";
 import Image from "next/image";
+import HeroFeature from "./HeroFeature";
+
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/navigation";
+
+// ─── Hero Slides Config ────────────────────────────────────────────────────
+// Add new slides here. Each slide needs an `image` (path relative to /public).
+// The first slide `image` is used as the default for all slides without one.
+const slides = [
+  {
+    image: "/images/hero/hero_mushrooms.png",
+    label: "✦ Premium Natural Products",
+    title: "Nature's Finest.\nDelivered Fresh.",
+    subtitle: "Premium mushrooms, dry fruits, seeds & spices — sourced from the finest origins.",
+    cta: "Shop Now",
+    ctaHref: "/shop",
+  },
+  {
+    image: "/images/hero/hero_mushrooms_1.png",
+    label: "✦ Handcrafted Gift Baskets",
+    title: "The Art of\nNourishment.",
+    subtitle: "Curated gift baskets and superfood bundles for everyday vitality.",
+    cta: "Explore Gifts",
+    ctaHref: "/shop",
+  },
+];
 
 const Hero = () => {
-  // Array of image sources
-  const images = [
-    // "/images/categories/hero_mushrooms.png",
-    // "/images/-categories/hero_mushrooms_1.png", // Add the path to your second image
-    "/images/categories/hero_mushrooms_2.png",
-    "/images/categories/hero_mushrooms_3.png", // Add the path to your third image
-    "/images/categories/hero_mushrooms_4.png",
-  ];
-
-  // State to keep track of the current image index
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
-  useEffect(() => {
-    // Set up an interval to change the image every 3 seconds (3000 milliseconds)
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) =>
-        prevIndex === images.length - 1 ? 0 : prevIndex + 1
-      );
-    }, 3000);
-
-    // Clean up the interval when the component unmounts
-    return () => clearInterval(interval);
-  }, [images.length]);
+  const [prevEl, setPrevEl] = useState<HTMLElement | null>(null);
+  const [nextEl, setNextEl] = useState<HTMLElement | null>(null);
+  const [paginationEl, setPaginationEl] = useState<HTMLElement | null>(null);
 
   return (
-    // --- UPDATED: Removed lg:pb-1 and xl:pb-2 to eliminate bottom padding ---
-    <section className="overflow-hidden pb-0 mt-32 bg-white" style={{ marginTop: '200px' }}>
-      <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
-        <div className="flex flex-col lg:flex-row gap-8 items-center mb-8">
-          {/* */}
-          <div className="lg:w-1/2">
-            <h1 className="text-4xl lg:text-5xl xl:text-4xl text-dark mb-6">
-              Discover the Power of
-              <span className="text-blue block">
-                Mushrooms
+    <>
+      <section className="hero-section relative" style={{ marginTop: "80px" }}>
+        <Swiper
+          spaceBetween={0}
+          centeredSlides={true}
+          autoplay={{ delay: 4500, disableOnInteraction: false }}
+          pagination={{ clickable: true, el: paginationEl }}
+          navigation={{ prevEl, nextEl }}
+          modules={[Autoplay, Pagination, Navigation]}
+          className="hero-carousel w-full"
+          onBeforeInit={(swiper) => {
+            if (typeof swiper.params.navigation !== "boolean") {
+              swiper.params.navigation!.prevEl = prevEl;
+              swiper.params.navigation!.nextEl = nextEl;
+            }
+            if (typeof swiper.params.pagination !== "boolean") {
+              swiper.params.pagination!.el = paginationEl;
+            }
+          }}
+        >
+          {slides.map((slide, index) => (
+            <SwiperSlide key={index}>
+              {/*
+                TRUE single-image hero:
+                - hero_mushrooms.png is 1376×768 landscape (user-provided, natural composition)
+                - Left area of image is clean sage-green (for text readability)
+                - Right area has the mushrooms
+                - object-cover scales the image to fill the hero
+                - object-left anchors image from the left edge so mushrooms on the right stay visible
+                - Text is overlaid on top of the left empty area
+              */}
+              <div className="relative w-full overflow-hidden hero-slide-wrapper">
+
+                {/* Single full-width image */}
                 <Image
-                  src="/images/categories/sticker_1.png"
-                  alt="Sticker"
-                  width={40}
-                  height={40}
-                  className="ml-2 inline-block bg-white rounded-full p-1"
+                  src={slide.image}
+                  alt={slide.label}
+                  fill
+                  className="object-cover object-right hero-image"
+                  priority={index === 0}
+                  sizes="100vw"
+                  quality={100}
+                  unoptimized
                 />
-              </span>
-            </h1>
-            <p className="text-lg text-gray-600 leading-relaxed mb-8">
-              At <strong>MushMush</strong>, we're obsessed with the incredible world of fungi. We specialize in cultivating premium edible and medicinal mushrooms, all grown to the highest organic standards. Our passion is to provide you with the purest, most potent mushrooms on the market, whether you're looking to create a culinary masterpiece or enhance your daily wellness routine. Explore our collection and discover the MushMush difference.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link
-                href="/shop"
-                className="border-2 border-blue text-blue hover:bg-blue hover:text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-300"
-              >
-                Shop Now
-              </Link>
-              <Link
-                href="blogs/blog-grid"
-                className="border-2 border-blue text-blue hover:bg-blue hover:text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-300"
-              >
-                Learn More
-              </Link>
-            </div>
-          </div>
 
-          {/* */}
-          <div className="lg:w-1/2">
-            <div>
-              <Image
-                src={images[currentImageIndex]} // Use the current image from the state
-                alt="Premium Mushrooms Collection"
-                width={500}
-                height={300}
-                className="object-contain rounded-lg opacity-1000"
-              />
-            </div>
-          </div>
+                {/* Light overlay to soften the background 2 shades lighter */}
+                <div className="absolute inset-0 bg-white/20 z-[1]" />
+
+                {/* Text overlay — left side of the image is clean so text reads clearly */}
+                <div className="relative z-10 h-full w-full flex items-center hero-slide-wrapper">
+                  <div className="max-w-[1200px] w-full mx-auto px-4 sm:px-6 xl:px-0">
+                    <div className="hero-text-col max-w-[90vw] sm:max-w-md lg:max-w-lg">
+                      <p className="text-[10px] sm:text-xs font-medium tracking-[0.2em] uppercase text-forest mb-4 sm:mb-6">
+                        {slide.label}
+                      </p>
+                      <h1 className="font-medium text-dark whitespace-pre-line leading-[1.1] mb-4 sm:mb-6 hero-headline">
+                        {slide.title}
+                      </h1>
+                      <p className="text-forest text-sm sm:text-base leading-relaxed max-w-xs mb-6 sm:mb-10 font-light">
+                        {slide.subtitle}
+                      </p>
+                      <div className="flex items-center gap-3 sm:gap-6">
+                        <Link
+                          href={slide.ctaHref}
+                          className="inline-flex items-center gap-2 bg-forest text-white text-[10px] sm:text-xs font-medium tracking-[0.15em] uppercase py-3 sm:py-4 px-6 sm:px-10 rounded-full hover:bg-dark transition-all duration-500"
+                        >
+                          {slide.cta}
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M5 12h14M12 5l7 7-7 7" />
+                          </svg>
+                        </Link>
+                        <Link
+                          href="/about"
+                          className="text-xs font-medium tracking-[0.15em] uppercase text-forest border-b border-forest pb-0.5 hover:text-forest hover:border-forest transition-all duration-300"
+                        >
+                          Our Story
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
+
+        {/* Navigation Controls */}
+        <div className="flex items-center justify-center gap-4 mt-8 pb-4">
+          <button
+            ref={setPrevEl}
+            className="custom-prev w-8 h-8 flex items-center justify-center rounded-full border border-transparent hover:border-dark hover:bg-transparent transition-all text-dark hover:text-black disabled:opacity-30"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </button>
+          <div ref={setPaginationEl} className="custom-pagination !static !w-auto !transform-none flex gap-2 items-center" />
+          <button
+            ref={setNextEl}
+            className="custom-next w-8 h-8 flex items-center justify-center rounded-full border border-transparent hover:border-dark hover:bg-transparent transition-all text-dark hover:text-black disabled:opacity-30"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </button>
         </div>
-      </div>
+      </section>
 
-      {/* */}
       <HeroFeature />
-    </section>
+    </>
   );
 };
 

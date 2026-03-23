@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "react-hot-toast";
 import Breadcrumb from "@/components/Common/Breadcrumb";
-import AutomatedPaymentModal from "./AutomatedPaymentModal";
+import UPIPaymentModal from "@/components/Payment/UPIPaymentModal";
 import RegistrationModal from "./RegistrationModal";
 import { getTrainingProgramPrice, isEarlyBirdOfferValid } from "@/lib/utils";
 
@@ -173,10 +173,10 @@ const TrainingPrograms = () => {
       <Breadcrumb title={"Training Programs"} pages={["training"]} />
 
       {/* Training Programs Section */}
-      <section className="py-20 bg-[#f3f4f6]">
-        <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
+      <section className="py-12 sm:py-16 bg-forest/5">
+        <div className="max-w-[1200px] w-full mx-auto px-4 sm:px-6 xl:px-0">
           <div className="text-center mb-12">
-            <h2 className="font-bold text-3xl sm:text-4xl text-dark mb-4">
+            <h2 className="font-medium font-bold text-3xl sm:text-4xl text-dark mb-4">
               Choose Your Training Program
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -310,8 +310,15 @@ const TrainingPrograms = () => {
       )}
 
       {showPaymentModal && pendingRegistration && (
-        <AutomatedPaymentModal
-          registration={pendingRegistration}
+        <UPIPaymentModal
+          payment={{
+            type: "training",
+            registrationId: pendingRegistration.id,
+            registrationNumber: pendingRegistration.registrationNumber,
+            participantName: pendingRegistration.participantName,
+            programName: pendingRegistration.trainingProgram.name,
+            amount: pendingRegistration.totalAmount,
+          }}
           onClose={() => {
             setShowPaymentModal(false);
             setPendingRegistration(null);

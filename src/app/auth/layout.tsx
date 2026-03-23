@@ -5,8 +5,8 @@ import "../css/euclid-circular-a-font.css";
 import "../css/style.css";
 
 export const metadata: Metadata = {
-  title: "Authentication - MushMush",
-  description: "Sign in to your MushMush account",
+  title: "Authentication - Kosvana",
+  description: "Sign in to your Kosvana account",
 };
 
 export default function AuthLayout({

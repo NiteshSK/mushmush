@@ -415,7 +415,7 @@ const ShopDetails = () => {
   };
   return (
     <>
-      <Breadcrumb title={"Shop Details"} pages={["shop details"]} />
+      <Breadcrumb title={displayProduct?.title || "Shop Details"} pages={["shop", "details"]} />
 
       {!displayProduct || !displayProduct.title ? (
         <div className="flex items-center justify-center py-20">
@@ -423,16 +423,19 @@ const ShopDetails = () => {
         </div>
       ) : (
         <>
-          <section className="overflow-hidden relative pb-20 pt-5 lg:pt-20 xl:pt-5">
-            <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
+          <section className="py-12 sm:py-16">
+            <div className="max-w-[1200px] w-full mx-auto px-4 sm:px-6 xl:px-0">
               <div className="flex flex-col lg:flex-row gap-7.5 xl:gap-17.5">
                 <div className="lg:max-w-[570px] w-full">
-                  <div className="lg:min-h-[512px] rounded-lg shadow-1 bg-blue-2 p-4 sm:p-7.5 relative flex items-center justify-center">
+                  <div className="lg:min-h-[512px] rounded-2xl bg-cream p-6 sm:p-8 relative flex items-center justify-center">
+                    {!displayProduct.inStock && (
+                      <div className="sold-out-overlay sold-out-lg"><span>Sold Out</span></div>
+                    )}
                     <div className="relative">
                       <button
                         onClick={handlePreviewSlider}
                         aria-label="button for zoom"
-                        className="gallery__Image w-11 h-11 rounded-[5px] bg-gray-1 shadow-1 flex items-center justify-center ease-out duration-200 text-dark hover:text-blue absolute top-4 lg:top-6 right-4 lg:right-6 z-50"
+                        className="gallery__Image w-11 h-11 rounded-full bg-white/80 backdrop-blur-sm shadow-sm flex items-center justify-center ease-out duration-200 text-dark hover:text-forest absolute top-4 lg:top-6 right-4 lg:right-6 z-50"
                       >
                         <svg className="fill-current" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M9.11493 1.14581L9.16665 1.14581C9.54634 1.14581 9.85415 1.45362 9.85415 1.83331C9.85415 2.21301 9.54634 2.52081 9.16665 2.52081C7.41873 2.52081 6.17695 2.52227 5.23492 2.64893C4.31268 2.77292 3.78133 3.00545 3.39339 3.39339C3.00545 3.78133 2.77292 4.31268 2.64893 5.23492C2.52227 6.17695 2.52081 7.41873 2.52081 9.16665C2.52081 9.54634 2.21301 9.85415 1.83331 9.85415C1.45362 9.85415 1.14581 9.54634 1.14581 9.16665L1.14581 9.11493C1.1458 7.43032 1.14579 6.09599 1.28619 5.05171C1.43068 3.97699 1.73512 3.10712 2.42112 2.42112C3.10712 1.73512 3.97699 1.43068 5.05171 1.28619C6.09599 1.14579 7.43032 1.1458 9.11493 1.14581ZM16.765 2.64893C15.823 2.52227 14.5812 2.52081 12.8333 2.52081C12.4536 2.52081 12.1458 2.21301 12.1458 1.83331C12.1458 1.45362 12.4536 1.14581 12.8333 1.14581L12.885 1.14581C14.5696 1.1458 15.904 1.14579 16.9483 1.28619C18.023 1.43068 18.8928 1.73512 19.5788 2.42112C20.2648 3.10712 20.5693 3.97699 20.7138 5.05171C20.8542 6.09599 20.8542 7.43032 20.8541 9.11494V9.16665C20.8541 9.54634 20.5463 9.85415 20.1666 9.85415C19.787 9.85415 19.4791 9.54634 19.4791 9.16665C19.4791 7.41873 19.4777 6.17695 19.351 5.23492C19.227 4.31268 18.9945 3.78133 18.6066 3.39339C18.2186 3.00545 17.6873 2.77292 16.765 2.64893ZM1.83331 12.1458C2.21301 12.1458 2.52081 12.4536 2.52081 12.8333C2.52081 14.5812 2.52227 15.823 2.64893 16.765C2.77292 17.6873 3.00545 18.2186 3.39339 18.6066C3.78133 18.9945 4.31268 19.227 5.23492 19.351C6.17695 19.4777 7.41873 19.4791 9.16665 19.4791C9.54634 19.4791 9.85415 19.787 9.85415 20.1666C9.85415 20.5463 9.54634 20.8541 9.16665 20.8541H9.11494C7.43032 20.8542 6.09599 20.8542 5.05171 20.7138C3.97699 20.5693 3.10712 20.2648 2.42112 19.5788C1.73512 18.8928 1.43068 18.023 1.28619 16.9483C1.14579 15.904 1.1458 14.5696 1.14581 12.885L1.14581 12.8333C1.14581 12.4536 1.45362 12.1458 1.83331 12.1458ZM20.1666 12.1458C20.5463 12.1458 20.8541 12.4536 20.8541 12.8333V12.885C20.8542 14.5696 20.8542 15.904 20.7138 16.9483C20.5693 18.023 20.2648 18.8928 19.5788 19.5788C18.8928 20.2648 18.023 20.5693 16.9483 20.7138C15.904 20.8542 14.5696 20.8542 12.885 20.8541H12.8333C12.4536 20.8541 12.1458 20.5463 12.1458 20.1666C12.1458 19.787 12.4536 19.4791 12.8333 19.4791C14.5812 19.4791 15.823 19.4777 16.765 19.351C17.6873 19.227 18.2186 18.9945 18.6066 18.6066C18.9945 18.2186 19.227 17.6873 19.351 16.765C19.4777 15.823 19.4791 14.5812 19.4791 12.8333C19.4791 12.4536 19.787 12.1458 20.1666 12.1458ZM1.83331 16.765C2.21301 16.765 2.52081 17.0744 2.52081 17.4541C2.52081 19.2023 2.52227 20.4445 2.64893 21.3867C2.77292 22.4098 3.00545 23.0407 3.39339 23.4287C3.78133 23.8167 4.31268 24.0495 5.23492 24.1736C6.17695 24.3007 7.41873 24.3021 9.16665 24.3021C9.54634 24.3021 9.85415 24.61 9.85415 24.9907C9.85415 25.3714 9.54634 25.6738 9.16665 25.6738H9.11494C7.43032 25.6739 6.09599 25.6739 5.05171 25.5338C3.97699 25.3893 3.10712 25.0848 2.42112 24.3988C1.73512 23.7128 1.43068 23.043 1.28619 21.9683C1.14579 20.924 1.1458 19.5896 1.14581 17.885L1.14581 17.8333C1.14581 17.4536 1.45362 17.1458 1.83331 17.1458ZM20.1666 17.1458C20.5463 17.1458 20.8541 17.4536 20.8541 17.8333V17.885C20.8542 19.5896 20.8542 20.924 20.7138 21.9683C20.5693 23.043 20.2648 23.7128 19.5788 24.3988C18.8928 25.0848 18.023 25.3893 16.9483 25.5338C15.904 25.6739 14.5696 25.6739 12.885 25.6738H12.8333C12.4536 25.6738 12.1458 25.3714 12.1458 24.9907C12.1458 24.61 12.4536 24.3021 12.8333 24.3021C14.5812 24.3021 15.823 24.3007 16.765 24.1736C17.6873 24.0495 18.2186 23.8167 18.6066 23.4287C18.9945 23.0407 19.227 22.4098 19.351 21.3867C19.4777 20.4445 19.4791 19.2023 19.4791 17.4541C19.4791 17.0744 19.787 16.765 20.1666 16.765ZM1.83331 16.765C2.21301 16.765 2.52081 17.0744 2.52081 17.4541C2.52081 19.2023 2.52227 20.4445 2.64893 21.3867C2.77292 22.4098 3.00545 23.0407 3.39339 23.4287C3.78133 23.8167 4.31268 24.0495 5.23492 24.1736C6.17695 24.3007 7.41873 24.3021 9.16665 24.3021C9.54634 24.3021 9.85415 24.61 9.85415 24.9907C9.85415 25.3714 9.54634 25.6738 9.16665 25.6738H9.11494C7.43032 25.6739 6.09599 25.6739 5.05171 25.5338C3.97699 25.3893 3.10712 25.0848 2.42112 24.3988C1.73512 23.7128 1.43068 23.043 1.28619 21.9683C1.14579 20.924 1.1458 19.5896 1.14581 17.885L1.14581 17.8333C1.14581 17.4536 1.45362 17.1458 1.83331 17.1458ZM20.1666 17.1458C20.5463 17.1458 20.8541 17.4536 20.8541 17.8333V17.885C20.8542 19.5896 20.8542 20.924 20.7138 21.9683C20.5693 23.043 20.2648 23.7128 19.5788 24.3988C18.8928 25.0848 18.023 25.3893 16.9483 25.5338C15.904 25.6739 14.5696 25.6739 12.885 25.6738H12.8333C12.4536 25.6738 12.1458 25.3714 12.1458 24.9907C12.1458 24.61 12.4536 24.3021 12.8333 24.3021C14.5812 24.3021 15.823 24.3007 16.765 24.1736C17.6873 24.0495 18.2186 23.8167 18.6066 23.4287C18.9945 23.0407 19.227 22.4098 19.351 21.3867C19.4777 20.4445 19.4791 19.2023 19.4791 17.4541C19.4791 17.0744 19.787 16.765 20.1666 16.765ZM1.83331 16.765C2.21301 16.765 2.52081 17.0744 2.52081 17.4541C2.52081 19.2023 2.52227 20.4445 2.64893 21.3867C2.77292 22.4098 3.00545 23.0407 3.39339 23.4287C3.78133 23.8167 4.31268 24.0495 5.23492 24.1736C6.17695 24.3007 7.41873 24.3021 9.16665 24.3021C9.54634 24.3021 9.85415 24.61 9.85415 24.9907C9.85415 25.3714 9.54634 25.6738 9.16665 25.6738H9.11494C7.43032 25.6739 6.09599 25.6739 5.05171 25.5338C3.97699 25.3893 3.10712 25.0848 2.42112 24.3988C1.73512 23.7128 1.43068 23.043 1.28619 21.9683C1.14579 20.924 1.1458 19.5896 1.14581 17.885L1.14581 17.8333C1.14581 17.4536 1.45362 17.1458 1.83331 17.1458ZM20.1666 17.1458C20.5463 17.1458 20.8541 17.4536 20.8541 17.8333V17.885C20.8542 19.5896 20.8542 20.924 20.7138 21.9683C20.5693 23.043 20.2648 23.7128 19.5788 24.3988C18.8928 25.0848 18.023 25.3893 16.9483 25.5338C15.904 25.6739 14.5696 25.6739 12.885 25.6738H12.8333C12.4536 25.6738 12.1458 25.3714 12.1458 24.9907C12.1458 24.61 12.4536 24.3021 12.8333 24.3021C14.5812 24.3021 15.823 24.3007 16.765 24.1736C17.6873 24.0495 18.2186 23.8167 18.6066 23.4287C18.9945 23.0407 19.227 22.4098 19.351 21.3867C19.4777 20.4445 19.4791 19.2023 19.4791 17.4541C19.4791 17.0744 19.787 16.765 20.1666 16.765ZM1.83331 16.765C2.21301 16.765 2.52081 17.0744 2.52081 17.4541C2.52081 19.2023 2.52227 20.4445 2.64893 21.3867C2.77292 22.4098 3.00545 23.0407 3.39339 23.4287C3.78133 23.8167 4.31268 24.0495 5.23492 24.1736C6.17695 24.3007 7.41873 24.3021 9.16665 24.3021C9.54634 24.3021 9.85415 24.61 9.85415 24.9907C9.85415 25.3714 9.54634 25.6738 9.16665 25.6738H9.11494C7.43032 25.6739 6.09599 25.6739 5.05171 25.5338C3.97699 25.3893 3.10712 25.0848 2.42112 24.3988C1.73512 23.7128 1.43068 23.043 1.28619 21.9683C1.14579 20.924 1.1458 19.5896 1.14581 17.885L1.14581 17.8333C1.14581 17.4536 1.45362 17.1458 1.83331 17.1458ZM20.1666 17.1458C20.5463 17.1458 20.8541 17.4536 20.8541 17.8333V17.885C20.8542 19.5896 20.8542 20.924 20.7138 21.9683C20.5693 23.043 20.2648 23.7128 19.5788 24.3988C18.8928 25.0848 18.023 25.3893 16.9483 25.5338C15.904 25.6739 14.5696 25.6739 12.885 25.6738H12.8333C12.4536 25.6738 12.1458 25.3714 12.1458 24.9907C12.1458 24.61 12.4536 24.3021 12.8333 24.3021C14.5812 24.3021 15.823 24.3007 16.765 24.1736C17.6873 24.0495 18.2186 23.8167 18.6066 23.4287C18.9945 23.0407 19.227 22.4098 19.351 21.3867C19.4777 20.4445 19.4791 19.2023 19.4791 17.4541C19.4791 17.0744 19.787 16.765 20.1666 16.765ZM1.83331 16.765C2.21301 16.765 2.52081 17.0744 2.52081 17.4541C2.52081 19.2023 2.52227 20.4445 2.64893 21.3867C2.77292 22.4098 3.00545 23.0407 3.39339 23.4287C3.78133 23.8167 4.31268 24.0495 5.23492 24.1736C6.17695 24.3007 7.41873 24.3021 9.16665 24.3021C9.54634 24.3021 9.85415 24.61 9.85415 24.9907C9.85415 25.3714 9.54634 25.6738 9.16665 25.6738H9.11494C7.43032 25.6739 6.09599 25.6739 5.05171 25.5338C3.97699 25.3893 3.10712 25.0848 2.42112 24.3988C1.73512 23.7128 1.43068 23.043 1.28619 21.9683C1.14579 20.924 1.1458 19.5896 1.14581 17.885L1.14581 17.8333C1.14581 17.4536 1.45362 17.1458 1.83331 17.1458ZM20.1666 17.1458C20.5463 17.1458 20.8541 17.4536 20.8541 17.8333V17.885C20.8542 19.5896 20.8542 20.924 20.7138 21.9683C20.5693 23.043 20.2648 23.7128 19.5788 24.3988C18.8928 25.0848 18.023 25.3893 16.9483 25.5338C15.904 25.6739 14.5696 25.6739 12.885 25.6738H12.8333C12.4536 25.6738 12.1458 25.3714 12.1458 24.9907C12.1458 24.61 12.4536 24.3021 12.8333 24.3021C14.5812 24.3021 15.823 24.3007 16.765 24.1736C17.6873 24.0495 18.2186 23.8167 18.6066 23.4287C18.9945 23.0407 19.227 22.4098 19.351 21.3867C19.4777 20.4445 19.4791 19.2023 19.4791 17.4541C19.4791 17.0744 19.787 16.765 20.1666 16.765Z" /></svg>
                       </button>
@@ -459,7 +462,7 @@ const ShopDetails = () => {
                       <button
                         onClick={() => setPreviewImg(key)}
                         key={key}
-                        className={`flex items-center justify-center w-15 sm:w-25 h-15 sm:h-25 overflow-hidden rounded-lg bg-gray-2 shadow-1 ease-out duration-200 border-2 hover:border-blue ${key === previewImg ? "border-blue" : "border-transparent"
+                        className={`flex items-center justify-center w-15 sm:w-25 h-15 sm:h-25 overflow-hidden rounded-xl bg-cream border-2 hover:border-forest transition-colors duration-200 ${key === previewImg ? "border-forest" : "border-transparent"
                           }`}
                       >
                         <Image
@@ -475,11 +478,11 @@ const ShopDetails = () => {
                 </div>
                 <div className="max-w-[539px] w-full">
                   <div className="flex items-center justify-between mb-3">
-                    <h2 className="font-semibold text-xl sm:text-2xl xl:text-custom-3 text-dark">
+                    <h2 className="font-medium text-2xl sm:text-3xl text-dark">
                       {displayProduct.title}
                     </h2>
                     {displayProduct.hasDiscount && displayProduct.discountPercentage && (
-                      <div className="inline-flex font-medium text-custom-sm text-white bg-blue rounded py-0.5 px-2.5">
+                      <div className="inline-flex font-medium text-[10px] font-medium uppercase tracking-wider text-white bg-forest rounded-full py-1 px-3">
                         {displayProduct.discountPercentage}% OFF
                       </div>
                     )}
@@ -538,16 +541,16 @@ const ShopDetails = () => {
                   <ul className="flex flex-col gap-2 mb-6">
                     <li className="flex items-center gap-2.5">
                       <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M13.3589 8.35863C13.603 8.11455 13.603 7.71882 13.3589 7.47475C13.1149 7.23067 12.7191 7.23067 12.4751 7.47475L8.75033 11.1995L7.5256 9.97474C7.28152 9.73067 6.8858 9.73067 6.64172 9.97474C6.39764 10.2188 6.39764 10.6146 6.64172 10.8586L8.30838 12.5253C8.55246 12.7694 8.94819 12.7694 9.19227 12.5253L13.3589 8.35863Z" fill="#3C50E0" />
-                        <path fillRule="evenodd" clipRule="evenodd" d="M10.0003 1.04169C5.05277 1.04169 1.04199 5.05247 1.04199 10C1.04199 14.9476 5.05277 18.9584 10.0003 18.9584C14.9479 18.9584 18.9587 14.9476 18.9587 10C18.9587 5.05247 14.9479 1.04169 10.0003 1.04169ZM2.29199 10C2.29199 5.74283 5.74313 2.29169 10.0003 2.29169C14.2575 2.29169 17.7087 5.74283 17.7087 10C17.7087 14.2572 14.2575 17.7084 10.0003 17.7084C5.74313 17.7084 2.29199 14.2572 2.29199 10Z" fill="#3C50E0" />
+                        <path d="M13.3589 8.35863C13.603 8.11455 13.603 7.71882 13.3589 7.47475C13.1149 7.23067 12.7191 7.23067 12.4751 7.47475L8.75033 11.1995L7.5256 9.97474C7.28152 9.73067 6.8858 9.73067 6.64172 9.97474C6.39764 10.2188 6.39764 10.6146 6.64172 10.8586L8.30838 12.5253C8.55246 12.7694 8.94819 12.7694 9.19227 12.5253L13.3589 8.35863Z" fill="#5c8e61" />
+                        <path fillRule="evenodd" clipRule="evenodd" d="M10.0003 1.04169C5.05277 1.04169 1.04199 5.05247 1.04199 10C1.04199 14.9476 5.05277 18.9584 10.0003 18.9584C14.9479 18.9584 18.9587 14.9476 18.9587 10C18.9587 5.05247 14.9479 1.04169 10.0003 1.04169ZM2.29199 10C2.29199 5.74283 5.74313 2.29169 10.0003 2.29169C14.2575 2.29169 17.7087 5.74283 17.7087 10C17.7087 14.2572 14.2575 17.7084 10.0003 17.7084C5.74313 17.7084 2.29199 14.2572 2.29199 10Z" fill="#5c8e61" />
                       </svg>
                       Free delivery available (on order above 699)
                     </li>
                     {displayProduct.measurement && (
                       <li className="flex items-center gap-2.5">
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M13.3589 8.35863C13.603 8.11455 13.603 7.71882 13.3589 7.47475C13.1149 7.23067 12.7191 7.23067 12.4751 7.47475L8.75033 11.1995L7.5256 9.97474C7.28152 9.73067 6.8858 9.73067 6.64172 9.97474C6.39764 10.2188 6.39764 10.6146 6.64172 10.8586L8.30838 12.5253C8.55246 12.7694 8.94819 12.7694 9.19227 12.5253L13.3589 8.35863Z" fill="#3C50E0" />
-                          <path fillRule="evenodd" clipRule="evenodd" d="M10.0003 1.04169C5.05277 1.04169 1.04199 5.05247 1.04199 10C1.04199 14.9476 5.05277 18.9584 10.0003 18.9584C14.9479 18.9584 18.9587 14.9476 18.9587 10C18.9587 5.05247 14.9479 1.04169 10.0003 1.04169ZM2.29199 10C2.29199 5.74283 5.74313 2.29169 10.0003 2.29169C14.2575 2.29169 17.7087 5.74283 17.7087 10C17.7087 14.2572 14.2575 17.7084 10.0003 17.7084C5.74313 17.7084 2.29199 14.2572 2.29199 10Z" fill="#3C50E0" />
+                          <path d="M13.3589 8.35863C13.603 8.11455 13.603 7.71882 13.3589 7.47475C13.1149 7.23067 12.7191 7.23067 12.4751 7.47475L8.75033 11.1995L7.5256 9.97474C7.28152 9.73067 6.8858 9.73067 6.64172 9.97474C6.39764 10.2188 6.39764 10.6146 6.64172 10.8586L8.30838 12.5253C8.55246 12.7694 8.94819 12.7694 9.19227 12.5253L13.3589 8.35863Z" fill="#5c8e61" />
+                          <path fillRule="evenodd" clipRule="evenodd" d="M10.0003 1.04169C5.05277 1.04169 1.04199 5.05247 1.04199 10C1.04199 14.9476 5.05277 18.9584 10.0003 18.9584C14.9479 18.9584 18.9587 14.9476 18.9587 10C18.9587 5.05247 14.9479 1.04169 10.0003 1.04169ZM2.29199 10C2.29199 5.74283 5.74313 2.29169 10.0003 2.29169C14.2575 2.29169 17.7087 5.74283 17.7087 10C17.7087 14.2572 14.2575 17.7084 10.0003 17.7084C5.74313 17.7084 2.29199 14.2572 2.29199 10Z" fill="#5c8e61" />
                         </svg>
                         Weight : {displayProduct.measurement.value}{displayProduct.measurement.type}
                       </li>
@@ -566,28 +569,28 @@ const ShopDetails = () => {
                     <div className="flex flex-wrap items-center gap-4.5">
                       {displayProduct.inStock && (
                         <>
-                          <div className="flex items-center rounded-md border border-gray-3">
-                            <button aria-label="button for remove product" className="flex items-center justify-center w-12 h-12 ease-out duration-200 hover:text-blue" onClick={() => quantity > 1 && setQuantity(quantity - 1)}>
+                          <div className="flex items-center rounded-full border border-gray-200">
+                            <button aria-label="button for remove product" className="flex items-center justify-center w-12 h-12 ease-out duration-200 hover:text-forest" onClick={() => quantity > 1 && setQuantity(quantity - 1)}>
                               <svg className="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.33301 10C3.33301 9.53984 3.7061 9.16675 4.16634 9.16675H15.833C16.2932 9.16675 16.6663 9.53984 16.6663 10.0001C16.6663 10.4603 16.2932 10.8334 15.833 10.8334H4.16634C3.7061 10.8334 3.33301 10.4603 3.33301 10.0001Z" /></svg>
                             </button>
-                            <span className="flex items-center justify-center w-16 h-12 border-x border-gray-4">{quantity}</span>
-                            <button onClick={() => setQuantity(quantity + 1)} aria-label="button for add product" className="flex items-center justify-center w-12 h-12 ease-out duration-200 hover:text-blue">
+                            <span className="flex items-center justify-center w-16 h-12 border-x border-gray-200">{quantity}</span>
+                            <button onClick={() => setQuantity(quantity + 1)} aria-label="button for add product" className="flex items-center justify-center w-12 h-12 ease-out duration-200 hover:text-forest">
                               <svg className="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.33301 10C3.33301 9.5398 3.7061 9.16671 4.16634 9.16671H15.833C16.2932 9.16671 16.6663 9.5398 16.6663 10C16.6663 10.4603 16.2932 10.8334 15.833 10.8334H4.16634C3.7061 10.8334 3.33301 10.4603 3.33301 10Z" /><path d="M9.99967 16.6667C9.53944 16.6667 9.16634 16.2936 9.16634 15.8334L9.16634 4.16671C9.16634 3.70647 9.53944 3.33337 9.99967 3.33337C10.4599 3.33337 10.833 3.70647 10.833 4.16671L10.833 15.8334C10.833 16.2936 10.4599 16.6667 9.99967 16.6667Z" /></svg>
                             </button>
                           </div>
                           <button
                             type="button"
                             onClick={handlePurchaseNow}
-                            className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark"
+                            className="inline-flex font-medium text-white bg-forest py-3 px-8 rounded-full transition-colors duration-300 hover:bg-dark"
                           >
                             Purchase Now
                           </button>
                           <button
                             onClick={handleWishlistToggle}
                             disabled={isWishlistLoading}
-                            className={`flex items-center justify-center w-12 h-12 rounded-md border ease-out duration-200 ${isInWishlist(displayProduct.id || 0)
+                            className={`flex items-center justify-center w-12 h-12 rounded-full border ease-out duration-200 ${isInWishlist(displayProduct.id || 0)
                               ? "bg-red text-white border-red hover:bg-red-dark"
-                              : "border-gray-3 hover:text-white hover:bg-dark hover:border-transparent"
+                              : "border-gray-3 hover:text-forest hover:border-transparent"
                               } ${isWishlistLoading ? "opacity-50 cursor-not-allowed" : ""}`}
                             aria-label={isInWishlist(displayProduct.id || 0) ? "Remove from wishlist" : "Add to wishlist"}
                           >
@@ -601,7 +604,7 @@ const ShopDetails = () => {
                             target="_blank"
                             rel="noopener noreferrer"
                             aria-label="Contact via WhatsApp"
-                            className="flex items-center justify-center w-12 h-12 rounded-md border border-gray-3 ease-out duration-200 text-[#25D366] hover:text-green-600 hover:bg-green-50 hover:border-green-500"
+                            className="flex items-center justify-center w-12 h-12 rounded-full border border-gray-200 ease-out duration-200 text-[#25D366] hover:text-green-600 hover:bg-green-50 hover:border-green-500"
                           >
                             <svg className="fill-current" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                               <path
@@ -616,7 +619,7 @@ const ShopDetails = () => {
                       {!displayProduct.inStock && (
                         <button
                           onClick={handleNotifyMe}
-                          className="inline-flex font-medium text-white bg-dark py-3 px-7 rounded-md ease-out duration-200 hover:bg-opacity-90"
+                          className="inline-flex font-medium text-white bg-forest py-3 px-7 rounded-full ease-out duration-200 hover:bg-dark"
                         >
                           Notify Me
                         </button>
@@ -628,14 +631,14 @@ const ShopDetails = () => {
             </div>
           </section>
 
-          <section className="overflow-hidden bg-gray-2 py-20 pb-20 pt-5 lg:pt-20 xl:pt-5">
-            <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
-              <div className="flex flex-wrap items-center bg-white rounded-[10px] shadow-1 gap-5 xl:gap-12.5 py-4.5 px-4 sm:px-6">
+          <section className="bg-cream py-12 sm:py-16">
+            <div className="max-w-[1200px] w-full mx-auto px-4 sm:px-6 xl:px-0">
+              <div className="flex flex-wrap items-center bg-white rounded-xl gap-5 xl:gap-12.5 py-4.5 px-4 sm:px-6">
                 {tabs.map((item, key) => (
                   <button
                     key={key}
                     onClick={() => setActiveTab(item.id)}
-                    className={`font-medium lg:text-lg ease-out duration-200 hover:text-blue relative before:h-0.5 before:bg-blue before:absolute before:left-0 before:bottom-0 before:ease-out before:duration-200 hover:before:w-full ${activeTab === item.id ? "text-blue before:w-full" : "text-dark before:w-0"
+                    className={`font-medium lg:text-lg ease-out duration-200 hover:text-forest relative before:h-0.5 before:bg-forest before:absolute before:left-0 before:bottom-0 before:ease-out before:duration-200 hover:before:w-full ${activeTab === item.id ? "text-forest before:w-full" : "text-dark before:w-0"
                       }`}
                   >
                     {item.title}
@@ -643,9 +646,9 @@ const ShopDetails = () => {
                 ))}
               </div>
 
-              <div className={`flex-col sm:flex-row gap-7.5 xl:gap-12.5 mt-12.5 ${activeTab === "tabOne" ? "flex" : "hidden"}`}>
+              <div className={`flex-col sm:flex-row gap-7.5 xl:gap-12.5 mt-8 ${activeTab === "tabOne" ? "flex" : "hidden"}`}>
                 <div className="max-w-[670px] w-full">
-                  <h2 className="font-medium text-2xl text-dark mb-7">Specifications:</h2>
+                  <h2 className="font-medium text-xl text-dark mb-7">Specifications:</h2>
                   {displayProduct.description || displayProduct.specifications ? (
                     <div className="space-y-4">
                       {displayProduct.description && <p className="mb-4" dangerouslySetInnerHTML={{ __html: displayProduct.description }} />}
@@ -667,7 +670,7 @@ const ShopDetails = () => {
                   )}
                 </div>
                 <div className="max-w-[447px] w-full">
-                  <h2 className="font-medium text-2xl text-dark mb-7">How to consume?</h2>
+                  <h2 className="font-medium text-xl text-dark mb-7">How to consume?</h2>
                   <ul className="list-disc list-inside mb-6 space-y-2">
                     {displayProduct.howToConsume?.length ? (
                       displayProduct.howToConsume.map((step, i) => (
@@ -680,8 +683,8 @@ const ShopDetails = () => {
                 </div>
               </div>
 
-              <div>
-                <div className={`rounded-xl bg-white shadow-1 p-4 sm:p-6 mt-10 ${activeTab === "tabTwo" ? "block" : "hidden"}`}>
+              <div className={`${activeTab === "tabTwo" ? "block" : "hidden"}`}>
+                <div className="rounded-xl bg-white p-4 sm:p-6 mt-8">
                   {Array.isArray(displayProduct.additionalInfo) && displayProduct.additionalInfo.length ? (
                     displayProduct.additionalInfo.map((info, idx) => (
                       <div key={idx} className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
@@ -701,10 +704,10 @@ const ShopDetails = () => {
                 </div>
               </div>
 
-              <div>
-                <div className={`flex-col sm:flex-row gap-7.5 xl:gap-12.5 mt-12.5 ${activeTab === "tabThree" ? "flex" : "hidden"}`}>
+              <div className={`${activeTab === "tabThree" ? "block" : "hidden"}`}>
+                <div className="flex flex-col sm:flex-row gap-7.5 xl:gap-12.5 mt-8">
                   <div className="max-w-[570px] w-full">
-                    <h2 className="font-medium text-2xl text-dark mb-9">
+                    <h2 className="font-medium text-xl text-dark mb-9">
                       {reviewStats.totalReviews} Review{reviewStats.totalReviews !== 1 ? "s" : ""} for this product
                       {reviewStats.averageRating > 0 && (
                         <span className="text-lg text-gray-600 ml-2">
@@ -714,12 +717,12 @@ const ShopDetails = () => {
                     </h2>
                     <div className="flex flex-col gap-6">
                       {reviewsLoading ? (
-                        <div className="rounded-xl bg-white shadow-1 p-4 sm:p-6">
+                        <div className="rounded-xl bg-white border border-gray-100 p-4 sm:p-6">
                           <p>Loading reviews...</p>
                         </div>
                       ) : reviews && reviews.length ? (
                         reviews.map((review, idx) => (
-                          <div key={idx} className="rounded-xl bg-white shadow-1 p-4 sm:p-6">
+                          <div key={idx} className="rounded-xl bg-white border border-gray-100 p-4 sm:p-6">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-4">
                                 <div className="w-12.5 h-12.5 rounded-full overflow-hidden bg-gray-2 flex items-center justify-center">
@@ -753,7 +756,7 @@ const ShopDetails = () => {
                           </div>
                         ))
                       ) : (
-                        <div className="rounded-xl bg-white shadow-1 p-4 sm:p-6">
+                        <div className="rounded-xl bg-white border border-gray-100 p-4 sm:p-6">
                           <p>No reviews yet for this product.</p>
                         </div>
                       )}
@@ -761,7 +764,7 @@ const ShopDetails = () => {
                   </div>
                   <div className="max-w-[550px] w-full">
                     <form onSubmit={handleReviewSubmit}>
-                      <h2 className="font-medium text-2xl text-dark mb-3.5">Add a Review</h2>
+                      <h2 className="font-medium text-xl text-dark mb-3.5">Add a Review</h2>
                       <p className="mb-6">Please sign in to submit a review. Required fields are marked *</p>
                       <div className="flex items-center gap-3 mb-7.5">
                         <span>Your Rating*</span>
@@ -780,7 +783,7 @@ const ShopDetails = () => {
                           ))}
                         </div>
                       </div>
-                      <div className="rounded-xl bg-white shadow-1 p-4 sm:p-6">
+                      <div className="rounded-xl bg-white border border-gray-100 p-4 sm:p-6">
                         <div className="mb-5">
                           <label htmlFor="comments" className="block mb-2.5">Comments</label>
                           <textarea
@@ -790,7 +793,7 @@ const ShopDetails = () => {
                             placeholder="Your comments"
                             value={comment}
                             onChange={(e) => setComment(e.target.value)}
-                            className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full p-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                            className="rounded-xl border border-gray-200 bg-white placeholder:text-gray-400 w-full p-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20 focus:border-forest"
                           />
                           <span className="flex items-center justify-between mt-2.5">
                             <span className="text-custom-sm text-dark-4">Maximum 250 characters</span>
@@ -800,7 +803,7 @@ const ShopDetails = () => {
                         <button
                           type="submit"
                           disabled={isSubmittingReview}
-                          className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="inline-flex font-medium text-white bg-forest py-3 px-8 rounded-full transition-colors duration-300 hover:bg-dark disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {isSubmittingReview ? "Submitting..." : "Submit Review"}
                         </button>

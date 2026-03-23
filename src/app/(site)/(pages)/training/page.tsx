@@ -2,8 +2,8 @@ import { Suspense } from "react";
 import TrainingPrograms from "@/components/Training";
 
 export const metadata = {
-  title: "Mushroom Cultivation Training Programs | MushMush",
-  description: "Learn mushroom cultivation with our comprehensive training programs. Expert-led courses in Oyster, Button, Shiitake, and Ganoderma mushroom cultivation.",
+  title: "Cultivation Training Programs | Kosvana",
+  description: "Learn mushroom cultivation with our comprehensive training programs. Expert-led courses in Oyster, Button, Shiitake, and Ganoderma cultivation.",
 };
 
 export default function TrainingPage() {

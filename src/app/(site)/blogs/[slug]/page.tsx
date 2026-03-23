@@ -19,20 +19,20 @@ export async function generateMetadata({ params }: BlogDetailsPageProps): Promis
 
     if (!blogPost) {
       return {
-        title: 'Blog Not Found | MushMush',
+        title: 'Blog Not Found | Kosvana',
         description: 'The requested blog post could not be found.'
       }
     }
 
     return {
-      title: `${blogPost.title} | MushMush`,
-      description: blogPost.excerpt || 'Read this blog post on MushMush',
+      title: `${blogPost.title} | Kosvana`,
+      description: blogPost.excerpt || 'Read this blog post on Kosvana',
       // other metadata
     }
   } catch (error) {
     return {
-      title: 'Blog Details | MushMush',
-      description: 'Read our latest blog posts on MushMush'
+      title: 'Blog Details | Kosvana',
+      description: 'Read our latest blog posts on Kosvana'
     }
   }
 }

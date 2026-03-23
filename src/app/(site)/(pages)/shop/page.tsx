@@ -3,8 +3,8 @@ import Shop from "@/components/Shop";
 
 import { Metadata } from "next";
 export const metadata: Metadata = {
-  title: "Shop | MushMush",
-  description: "Browse our complete mushroom collection with advanced filters",
+  title: "Shop | Kosvana",
+  description: "Browse our complete collection of premium mushrooms, dry fruits, seeds & spices with advanced filters",
   // other metadata
 };
 

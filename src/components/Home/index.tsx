@@ -1,26 +1,22 @@
 import React from "react";
 import Hero from "./Hero";
 import Categories from "./Categories";
-import NewArrival from "./NewArrivals";
 import PromoBanner from "./PromoBanner";
 import BestSeller from "./BestSeller";
-import CounDown from "./Countdown";
 import Newsletter from "../Common/Newsletter";
-import RecentlyViewed from "./RecentlyViewed";
-import WishlistSection from "./WishlistSection";
 import FAQ from "./FAQ";
+import BrandStory from "./BrandStory";
+import Testimonials from "./Testimonials";
 
 const Home = () => {
   return (
     <main>
-      
       <Hero />
-      <PromoBanner />
-      <BestSeller />
+      <BrandStory />
       <Categories />
-      <RecentlyViewed />
-      <WishlistSection />
-      {/* <NewArrival /> */}
+      <BestSeller />
+      <PromoBanner />
+      <Testimonials />
       <FAQ />
       <Newsletter />
     </main>

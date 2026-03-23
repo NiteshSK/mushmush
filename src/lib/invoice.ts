@@ -60,17 +60,17 @@ export async function generateInvoicePDF(data: InvoiceData, userId?: string): Pr
   // Company Header with updated branding
   doc.setFontSize(22);
   doc.setFont('helvetica', 'bold');
-  doc.setTextColor(45, 80, 22); // MushMush green color
-  doc.text('MushMush', 105, 20, { align: 'center' });
+  doc.setTextColor(92, 142, 97); // Kosvana forest green
+  doc.text('Kosvana', 105, 20, { align: 'center' });
 
   doc.setFontSize(11);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(100, 100, 100);
-  doc.text('by MushMush by Mush Agro Products', 105, 27, { align: 'center' });
+  doc.text('by Mush Agro Products', 105, 27, { align: 'center' });
 
   doc.setFontSize(9);
   doc.setTextColor(80, 80, 80);
-  doc.text('Fresh Edible and Medicinal Mushrooms', 105, 33, { align: 'center' });
+  doc.text('Premium Mushrooms, Dry Fruits, Seeds & Spices', 105, 33, { align: 'center' });
   doc.text('Email: mushagroprod@gmail.com | Phone: +91-7618362662', 105, 38, { align: 'center' });
 
   // Invoice Title
@@ -157,7 +157,7 @@ export async function generateInvoicePDF(data: InvoiceData, userId?: string): Pr
     ]),
     theme: 'grid',
     headStyles: {
-      fillColor: [45, 80, 22], // MushMush green color
+      fillColor: [92, 142, 97], // Kosvana forest green
       textColor: [255, 255, 255],
       fontStyle: 'bold',
       fontSize: 10

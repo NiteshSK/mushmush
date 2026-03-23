@@ -56,6 +56,30 @@ export const authOptions: NextAuthOptions = {
   providers,
   secret: process.env.NEXTAUTH_SECRET || "fallback-secret-for-development",
   debug: process.env.NODE_ENV !== "production",
+  events: {
+    createUser: async ({ user }) => {
+      try {
+        const adminEmail = process.env.ADMIN_EMAIL;
+        if (adminEmail && user.email) {
+          const { sendEmail, emailTemplates } = await import('./email');
+          const notification = emailTemplates.newUserSignup(
+            user.name || 'Google User',
+            user.email,
+            new Date()
+          );
+          await sendEmail({
+            to: adminEmail,
+            subject: notification.subject,
+            html: notification.html,
+            text: notification.text,
+          });
+          console.log(`Admin notification sent for OAuth signup: ${user.email}`);
+        }
+      } catch (error) {
+        console.error('Failed to send admin notification for OAuth signup:', error);
+      }
+    },
+  },
   callbacks: {
     async signIn({ user, account, profile, email, credentials }) {
       if (user?.id) {

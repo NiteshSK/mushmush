@@ -245,7 +245,7 @@ class UPIGateway {
 
 // Create singleton instance
 export const upiGateway = new UPIGateway({
-  merchantId: process.env.UPI_MERCHANT_ID || 'mushmush@ybl',
+  merchantId: process.env.NEXT_PUBLIC_UPI_VPA || process.env.UPI_MERCHANT_ID || 'pravesh.rawat340-2@oksbi',
   merchantKey: process.env.UPI_MERCHANT_KEY || 'sandbox_key',
   environment: (process.env.NODE_ENV === 'production' ? 'production' : 'sandbox') as 'sandbox' | 'production',
   webhookUrl: process.env.NEXT_PUBLIC_BASE_URL ? 

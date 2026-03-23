@@ -175,7 +175,7 @@ const SingleItem = ({ item }: { item: Product }) => {
                   console.log('Current modal state:', isNotifyModalOpen);
                   setIsNotifyModalOpen(true);
                 }}
-                className="inline-flex font-medium text-sm text-white bg-dark py-2 px-4 rounded-md ease-out duration-200 hover:bg-opacity-90"
+                className="inline-flex font-medium text-sm text-white bg-forest py-2 px-4 rounded-full ease-out duration-200 hover:bg-dark"
               >
                 Notify Me
               </button>

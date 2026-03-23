@@ -3,8 +3,8 @@ import SearchResults from "@/components/Search/SearchResults";
 
 import { Metadata } from "next";
 export const metadata: Metadata = {
-  title: "Search Results | MushMush",
-  description: "Search results for MushMush products",
+  title: "Search Results | Kosvana",
+  description: "Search results for Kosvana products",
 };
 
 const SearchPage = () => {

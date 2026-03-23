@@ -46,7 +46,7 @@ const handleExternalLinkClick = async (e: React.MouseEvent) => {
 };
   
   return (
-    <div className="shadow-1 bg-white rounded-xl px-4 sm:px-5 pt-5 pb-4">
+    <div className="bg-white border border-gray-100 rounded-xl px-4 sm:px-5 pt-5 pb-4">
       <Link 
         href={readMoreLink} 
         className="rounded-md overflow-hidden block" 
@@ -68,7 +68,7 @@ const handleExternalLinkClick = async (e: React.MouseEvent) => {
         <span className="flex items-center gap-3 mb-2.5">
           <a
             href="#"
-            className="text-custom-sm ease-out duration-200 hover:text-blue"
+            className="text-custom-sm ease-out duration-200 hover:text-forest"
           >
             {news.date}
           </a>
@@ -77,13 +77,13 @@ const handleExternalLinkClick = async (e: React.MouseEvent) => {
 
           <a
             href="#"
-            className="text-custom-sm ease-out duration-200 hover:text-blue"
+            className="text-custom-sm ease-out duration-200 hover:text-forest"
           >
             {news.views} Views
           </a>
         </span>
 
-        <h2 className="font-medium text-dark text-lg sm:text-xl ease-out duration-200 mb-4 hover:text-blue">
+        <h2 className="font-medium text-dark text-lg sm:text-xl ease-out duration-200 mb-4 hover:text-forest">
           <Link 
             href={readMoreLink} 
             target={isExternalLink ? "_blank" : undefined} 
@@ -98,7 +98,7 @@ const handleExternalLinkClick = async (e: React.MouseEvent) => {
           href={readMoreLink}
           target={isExternalLink ? "_blank" : undefined}
           rel={isExternalLink ? "noopener noreferrer" : undefined}
-          className="text-custom-sm inline-flex items-center gap-2 py-2 ease-out duration-200 hover:text-blue"
+          className="text-custom-sm inline-flex items-center gap-2 py-2 ease-out duration-200 hover:text-forest"
           onClick={handleExternalLinkClick}
         >
           {isExternalLink ? "Read Full Article" : "Read More"}

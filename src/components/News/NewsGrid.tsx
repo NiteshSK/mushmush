@@ -104,8 +104,8 @@ const NewsGrid = () => {
     return (
       <>
         <Breadcrumb title={"News"} pages={["news"]} />
-        <section className="overflow-hidden py-20 bg-gray-2">
-          <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
+        <section className="py-12 sm:py-16 bg-forest/5">
+          <div className="max-w-[1200px] w-full mx-auto px-4 sm:px-6 xl:px-0">
             <div className="text-center">
               <div className="text-xl">Loading news articles...</div>
             </div>
@@ -119,8 +119,8 @@ const NewsGrid = () => {
     return (
       <>
         <Breadcrumb title={"News"} pages={["news"]} />
-        <section className="overflow-hidden py-20 bg-gray-2">
-          <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
+        <section className="py-12 sm:py-16 bg-forest/5">
+          <div className="max-w-[1200px] w-full mx-auto px-4 sm:px-6 xl:px-0">
             <div className="text-center">
               <div className="text-xl text-red-500">Error loading news articles</div>
               <div className="text-sm mt-2">{error}</div>
@@ -134,8 +134,8 @@ const NewsGrid = () => {
   return (
     <>
       <Breadcrumb title={"News"} pages={["news"]} />
-      <section className="overflow-hidden py-20 bg-gray-2">
-        <div className="max-w-[1170px] w-full mx-auto px-2 sm:px-8 xl:px-0">
+      <section className="py-12 sm:py-16 bg-forest/5">
+        <div className="max-w-[1200px] w-full mx-auto px-4 sm:px-6 xl:px-0">
           <div className="text-center mb-10">
             <h1 className="font-bold text-dark text-3xl sm:text-4xl xl:text-[45px] xl:leading-[55px] mb-4">
               Latest News

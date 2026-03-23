@@ -21,7 +21,7 @@ export interface EmailOptions {
 export async function sendEmail({ to, subject, html, text }: EmailOptions) {
   try {
     const info = await transporter.sendMail({
-      from: `"MushMush" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
+      from: `"Kosvana" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
       to,
       subject,
       html,
@@ -39,24 +39,24 @@ export async function sendEmail({ to, subject, html, text }: EmailOptions) {
 // Email templates
 export const emailTemplates = {
   welcome: (name: string) => ({
-    subject: 'Welcome to MushMush! 🍄',
+    subject: 'Welcome to Kosvana! 🌿',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #2d5016; margin: 0;">Welcome to MushMush!</h1>
-          <p style="color: #666; font-size: 16px;">Fresh Edible and Medicinal Mushrooms</p>
+          <h1 style="color: #5c8e61; margin: 0;">Welcome to Kosvana!</h1>
+          <p style="color: #666; font-size: 16px;">Premium Mushrooms, Dry Fruits, Seeds & Spices</p>
         </div>
-        
+
         <div style="background: #f8f9fa; padding: 30px; border-radius: 10px; margin-bottom: 30px;">
-          <h2 style="color: #2d5016; margin-top: 0;">Hello ${name}! 👋</h2>
+          <h2 style="color: #5c8e61; margin-top: 0;">Hello ${name}! 👋</h2>
           <p style="color: #333; line-height: 1.6; margin-bottom: 20px;">
-            Thank you for registering with MushMush! We're excited to have you join our community of mushroom enthusiasts.
+            Thank you for registering with Kosvana! We're excited to have you join our community of natural product enthusiasts.
           </p>
           <p style="color: #333; line-height: 1.6; margin-bottom: 20px;">
             Your account has been successfully created and you can now:
           </p>
           <ul style="color: #333; line-height: 1.8; margin-left: 20px;">
-            <li>Browse our premium collection of fresh mushrooms</li>
+            <li>Browse our premium collection of mushrooms, dry fruits, seeds & spices</li>
             <li>Add items to your wishlist</li>
             <li>Track your order history</li>
             <li>Get personalized recommendations</li>
@@ -65,7 +65,7 @@ export const emailTemplates = {
         
         <div style="text-align: center; margin-bottom: 30px;">
           <a href="${process.env.NEXTAUTH_URL || 'http://localhost:3000'}" 
-             style="background: #2d5016; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+             style="background: #5c8e61; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
             Start Shopping
           </a>
         </div>
@@ -73,26 +73,26 @@ export const emailTemplates = {
         <div style="border-top: 1px solid #eee; padding-top: 20px; text-align: center;">
           <p style="color: #666; font-size: 14px; margin: 0;">
             If you have any questions, feel free to contact us at 
-            <a href="mailto:support@mushmush.in" style="color: #2d5016;">support@mushmush.in</a>
+            <a href="mailto:mushagroprod@gmail.com" style="color: #5c8e61;">mushagroprod@gmail.com</a>
           </p>
           <p style="color: #666; font-size: 12px; margin-top: 10px;">
-            &copy; 2024 MushMush. All rights reserved.
+            &copy; ${new Date().getFullYear()} Kosvana by Mush Agro Products. All rights reserved.
           </p>
         </div>
       </div>
     `,
     text: `
-      Welcome to MushMush, ${name}!
+      Welcome to Kosvana, ${name}!
       
       Thank you for registering with us. Your account has been successfully created.
       
-      You can now browse our premium collection of fresh mushrooms, add items to your wishlist, and track your orders.
+      You can now browse our premium collection of mushrooms, dry fruits, seeds & spices, add items to your wishlist, and track your orders.
       
       Visit us at: ${process.env.NEXTAUTH_URL || 'http://localhost:3000'}
       
-      If you have any questions, contact us at support@mushmush.in
+      If you have any questions, contact us at mushagroprod@gmail.com
       
-      &copy; 2024 MushMush. All rights reserved.
+      &copy; ${new Date().getFullYear()} Kosvana by Mush Agro Products. All rights reserved.
     `
   }),
 
@@ -101,14 +101,14 @@ export const emailTemplates = {
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="text-align: center; margin-bottom: 24px;">
-          <h2 style="color: #2d5016; margin: 0;">Subscription Confirmed</h2>
+          <h2 style="color: #5c8e61; margin: 0;">Subscription Confirmed</h2>
           <p style="color: #555;">We'll email you when this product is back in stock.</p>
         </div>
         <div style="background:#f8f9fa; padding: 20px; border-radius: 8px;">
           <p style="margin:0; color:#333;">Product: <strong>${productTitle}</strong></p>
         </div>
         <div style="text-align:center; margin: 24px 0;">
-          <a href="${productUrl}" style="background:#2d5016; color:#fff; padding:12px 24px; border-radius:6px; text-decoration:none;">View Product</a>
+          <a href="${productUrl}" style="background:#5c8e61; color:#fff; padding:12px 24px; border-radius:6px; text-decoration:none;">View Product</a>
         </div>
         <p style="color:#666; font-size:12px; text-align:center;">You can unsubscribe by clicking "Notify Me" again on the product page.</p>
       </div>
@@ -121,14 +121,14 @@ export const emailTemplates = {
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="text-align: center; margin-bottom: 24px;">
-          <h2 style="color: #2d5016; margin: 0;">Back in Stock! 🍄</h2>
+          <h2 style="color: #5c8e61; margin: 0;">Back in Stock! 🍄</h2>
           <p style="color: #555;">The product you've been waiting for is now available.</p>
         </div>
         <div style="background:#f8f9fa; padding: 20px; border-radius: 8px;">
           <p style="margin:0; color:#333;">Product: <strong>${productTitle}</strong></p>
         </div>
         <div style="text-align:center; margin: 24px 0;">
-          <a href="${productUrl}" style="background:#2d5016; color:#fff; padding:12px 24px; border-radius:6px; text-decoration:none; font-weight:bold;">Shop Now</a>
+          <a href="${productUrl}" style="background:#5c8e61; color:#fff; padding:12px 24px; border-radius:6px; text-decoration:none; font-weight:bold;">Shop Now</a>
         </div>
         <p style="color:#666; font-size:12px; text-align:center;">You received this email because you subscribed to restock alerts for this product.</p>
       </div>
@@ -137,18 +137,18 @@ export const emailTemplates = {
   }),
 
   resetPassword: (name: string, resetToken: string) => ({
-    subject: 'Reset Your MushMush Password',
+    subject: 'Reset Your Kosvana Password',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #2d5016; margin: 0;">Password Reset Request</h1>
-          <p style="color: #666; font-size: 16px;">MushMush Account Security</p>
+          <h1 style="color: #5c8e61; margin: 0;">Password Reset Request</h1>
+          <p style="color: #666; font-size: 16px;">Kosvana Account Security</p>
         </div>
         
         <div style="background: #f8f9fa; padding: 30px; border-radius: 10px; margin-bottom: 30px;">
-          <h2 style="color: #2d5016; margin-top: 0;">Hello ${name}!</h2>
+          <h2 style="color: #5c8e61; margin-top: 0;">Hello ${name}!</h2>
           <p style="color: #333; line-height: 1.6; margin-bottom: 20px;">
-            We received a request to reset your password for your MushMush account.
+            We received a request to reset your password for your Kosvana account.
           </p>
           <p style="color: #333; line-height: 1.6; margin-bottom: 20px;">
             Click the button below to reset your password. This link will expire in 1 hour for security reasons.
@@ -171,20 +171,20 @@ export const emailTemplates = {
         <div style="border-top: 1px solid #eee; padding-top: 20px; text-align: center;">
           <p style="color: #666; font-size: 14px; margin: 0;">
             Need help? Contact us at 
-            <a href="mailto:support@mushmush.in" style="color: #2d5016;">support@mushmush.in</a>
+            <a href="mailto:mushagroprod@gmail.com" style="color: #5c8e61;">mushagroprod@gmail.com</a>
           </p>
           <p style="color: #666; font-size: 12px; margin-top: 10px;">
-            &copy; 2024 MushMush. All rights reserved.
+            &copy; ${new Date().getFullYear()} Kosvana by Mush Agro Products. All rights reserved.
           </p>
         </div>
       </div>
     `,
     text: `
-      Password Reset Request - MushMush
+      Password Reset Request - Kosvana
       
       Hello ${name}!
       
-      We received a request to reset your password for your MushMush account.
+      We received a request to reset your password for your Kosvana account.
       
       Reset your password by visiting this link:
       ${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/auth/reset-password?token=${resetToken}
@@ -193,10 +193,55 @@ export const emailTemplates = {
       
       If you didn't request this password reset, please ignore this email.
       
-      Need help? Contact us at support@mushmush.in
+      Need help? Contact us at mushagroprod@gmail.com
       
-      &copy; 2024 MushMush. All rights reserved.
+      &copy; ${new Date().getFullYear()} Kosvana by Mush Agro Products. All rights reserved.
     `
+  }),
+
+  newUserSignup: (userName: string, userEmail: string, signupDate: Date) => ({
+    subject: `New Signup: ${userName} (${userEmail})`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h1 style="color: #5c8e61; margin: 0;">New User Signup</h1>
+          <p style="color: #666; font-size: 16px;">Someone just joined Kosvana</p>
+        </div>
+
+        <div style="background: #f8f9fa; padding: 30px; border-radius: 10px; margin-bottom: 30px;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 10px 0; color: #666; font-size: 14px; border-bottom: 1px solid #eee;">Name</td>
+              <td style="padding: 10px 0; color: #333; font-size: 14px; font-weight: bold; text-align: right; border-bottom: 1px solid #eee;">${userName}</td>
+            </tr>
+            <tr>
+              <td style="padding: 10px 0; color: #666; font-size: 14px; border-bottom: 1px solid #eee;">Email</td>
+              <td style="padding: 10px 0; color: #333; font-size: 14px; font-weight: bold; text-align: right; border-bottom: 1px solid #eee;">
+                <a href="mailto:${userEmail}" style="color: #5c8e61; text-decoration: none;">${userEmail}</a>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 10px 0; color: #666; font-size: 14px;">Signed up at</td>
+              <td style="padding: 10px 0; color: #333; font-size: 14px; font-weight: bold; text-align: right;">${signupDate.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' })}</td>
+            </tr>
+          </table>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 30px;">
+          <a href="${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/admin/users"
+             style="background: #5c8e61; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+            View in Admin Panel
+          </a>
+        </div>
+
+        <div style="border-top: 1px solid #eee; padding-top: 20px; text-align: center;">
+          <p style="color: #666; font-size: 12px; margin: 0;">
+            This is an automated notification from Kosvana.
+          </p>
+        </div>
+      </div>
+    `,
+    text: `New User Signup\n\nName: ${userName}\nEmail: ${userEmail}\nSigned up at: ${signupDate.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}\n\nView in admin panel: ${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/admin/users`
   }),
 
   restockNotification: (productTitle: string, productUrl: string, productImage: string) => ({
@@ -204,7 +249,7 @@ export const emailTemplates = {
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #2d5016; margin: 0;">Great News!</h1>
+          <h1 style="color: #5c8e61; margin: 0;">Great News!</h1>
           <p style="color: #666; font-size: 16px;">Your requested product is back in stock</p>
         </div>
         
@@ -212,22 +257,22 @@ export const emailTemplates = {
           <div style="text-align: center; margin-bottom: 20px;">
             <img src="${productImage}" alt="${productTitle}" style="max-width: 200px; height: auto; border-radius: 8px;">
           </div>
-          <h2 style="color: #2d5016; margin-top: 0; text-align: center;">${productTitle}</h2>
+          <h2 style="color: #5c8e61; margin-top: 0; text-align: center;">${productTitle}</h2>
           <p style="color: #333; line-height: 1.6; margin-bottom: 20px; text-align: center;">
             The product you requested to be notified about is now available! 
-            Don't wait too long - our fresh mushrooms sell out quickly.
+            Don't wait too long - our products sell out quickly.
           </p>
         </div>
-        
+
         <div style="text-align: center; margin-bottom: 30px;">
           <a href="${productUrl}" 
-             style="background: #2d5016; color: white; padding: 15px 40px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; font-size: 16px;">
+             style="background: #5c8e61; color: white; padding: 15px 40px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; font-size: 16px;">
             Shop Now
           </a>
         </div>
         
         <div style="background: #e8f5e8; border: 1px solid #c3e6c3; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
-          <p style="color: #2d5016; margin: 0; font-size: 14px; text-align: center;">
+          <p style="color: #5c8e61; margin: 0; font-size: 14px; text-align: center;">
             <strong>Limited Stock:</strong> Get yours before it's gone again!
           </p>
         </div>
@@ -237,7 +282,7 @@ export const emailTemplates = {
             You're receiving this because you requested to be notified when this product is restocked.
           </p>
           <p style="color: #666; font-size: 12px; margin-top: 10px;">
-            &copy; 2024 MushMush. All rights reserved.
+            &copy; ${new Date().getFullYear()} Kosvana by Mush Agro Products. All rights reserved.
           </p>
         </div>
       </div>
@@ -249,11 +294,11 @@ export const emailTemplates = {
       
       Shop now: ${productUrl}
       
-      Don't wait too long - our fresh mushrooms sell out quickly!
+      Don't wait too long - our products sell out quickly!
       
       You're receiving this because you requested to be notified when this product is restocked.
       
-      &copy; 2024 MushMush. All rights reserved.
+      &copy; ${new Date().getFullYear()} Kosvana by Mush Agro Products. All rights reserved.
     `
   })
 };
@@ -297,21 +342,21 @@ export function generateRegistrationConfirmationEmail(data: RegistrationEmailDat
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #2d5016; margin: 0;">MushMush Training Registration</h1>
-        <p style="color: #666; font-size: 16px;">Professional Mushroom Cultivation Training</p>
+        <h1 style="color: #5c8e61; margin: 0;">Kosvana Training Registration</h1>
+        <p style="color: #666; font-size: 16px;">Professional Cultivation Training</p>
       </div>
       
-      <div style="background: #f8f9fa; padding: 30px; border-radius: 10px; margin-bottom: 30px; border-left: 4px solid #2d5016;">
-        <h2 style="color: #2d5016; margin-top: 0;">Registration Confirmed! 🎉</h2>
+      <div style="background: #f8f9fa; padding: 30px; border-radius: 10px; margin-bottom: 30px; border-left: 4px solid #5c8e61;">
+        <h2 style="color: #5c8e61; margin-top: 0;">Registration Confirmed! 🎉</h2>
         <p style="color: #333; line-height: 1.6; margin-bottom: 20px;">
           Dear <strong>${data.participantName}</strong>,
         </p>
         <p style="color: #333; line-height: 1.6; margin-bottom: 20px;">
-          Your registration for <strong>${data.programName}</strong> has been successfully confirmed. We're excited to have you join our comprehensive mushroom cultivation training program!
+          Your registration for <strong>${data.programName}</strong> has been successfully confirmed. We're excited to have you join our comprehensive cultivation training program!
         </p>
         
         <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #e0e0e0;">
-          <h3 style="color: #2d5016; margin-top: 0; border-bottom: 2px solid #2d5016; padding-bottom: 10px;">📋 Registration Details</h3>
+          <h3 style="color: #5c8e61; margin-top: 0; border-bottom: 2px solid #5c8e61; padding-bottom: 10px;">📋 Registration Details</h3>
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
               <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Registration Number:</td>
@@ -350,7 +395,7 @@ export function generateRegistrationConfirmationEmail(data: RegistrationEmailDat
       
       <div style="text-align: center; margin-bottom: 30px;">
         <a href="${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/training" 
-           style="background: #2d5016; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+           style="background: #5c8e61; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
           View Training Programs
         </a>
       </div>
@@ -359,12 +404,12 @@ export function generateRegistrationConfirmationEmail(data: RegistrationEmailDat
         <p style="color: #666; font-size: 14px; margin: 0;">
           For any questions or assistance, please contact us:
         </p>
-        <p style="color: #2d5016; font-size: 14px; margin: 5px 0;">
-          📧 <a href="mailto:training@mushmush.in" style="color: #2d5016;">training@mushmush.in</a><br>
-          📞 <a href="tel:+919876543210" style="color: #2d5016;">+91 98765 43210</a>
+        <p style="color: #5c8e61; font-size: 14px; margin: 5px 0;">
+          📧 <a href="mailto:mushagroprod@gmail.com" style="color: #5c8e61;">mushagroprod@gmail.com</a><br>
+          📞 <a href="tel:+919876543210" style="color: #5c8e61;">+91 98765 43210</a>
         </p>
         <p style="color: #666; font-size: 12px; margin-top: 10px;">
-          &copy; 2024 MushMush. All rights reserved.
+          &copy; ${new Date().getFullYear()} Kosvana by Mush Agro Products. All rights reserved.
         </p>
       </div>
     </div>
@@ -376,8 +421,8 @@ export function generatePaymentConfirmationEmail(data: PaymentEmailData): string
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #2d5016; margin: 0;">Payment Confirmed! 🎉</h1>
-        <p style="color: #666; font-size: 16px;">MushMush Training Registration</p>
+        <h1 style="color: #5c8e61; margin: 0;">Payment Confirmed! 🎉</h1>
+        <p style="color: #666; font-size: 16px;">Kosvana Training Registration</p>
       </div>
       
       <div style="background: #f8f9fa; padding: 30px; border-radius: 10px; margin-bottom: 30px; border-left: 4px solid #28a745;">
@@ -386,15 +431,15 @@ export function generatePaymentConfirmationEmail(data: PaymentEmailData): string
           Dear <strong>${data.participantName}</strong>,
         </p>
         <p style="color: #333; line-height: 1.6; margin-bottom: 20px;">
-          Great news! Your payment for <strong>${data.programName}</strong> has been successfully processed. Your training registration is now fully confirmed and you're all set to begin your mushroom cultivation journey!
+          Great news! Your payment for <strong>${data.programName}</strong> has been successfully processed. Your training registration is now fully confirmed and you're all set to begin your cultivation journey!
         </p>
         
         <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #e0e0e0;">
-          <h3 style="color: #2d5016; margin-top: 0; border-bottom: 2px solid #2d5016; padding-bottom: 10px;">Payment Details</h3>
+          <h3 style="color: #5c8e61; margin-top: 0; border-bottom: 2px solid #5c8e61; padding-bottom: 10px;">Payment Details</h3>
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
               <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Registration Number:</td>
-              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; color: #2d5016; font-weight: bold;">${data.registrationNumber}</td>
+              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; color: #5c8e61; font-weight: bold;">${data.registrationNumber}</td>
             </tr>
             <tr>
               <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Training Program:</td>
@@ -426,7 +471,7 @@ export function generatePaymentConfirmationEmail(data: PaymentEmailData): string
         </div>
         
         <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #e0e0e0;">
-          <h3 style="color: #2d5016; margin-top: 0; border-bottom: 2px solid #2d5016; padding-bottom: 10px;">📅 Training Timetable</h3>
+          <h3 style="color: #5c8e61; margin-top: 0; border-bottom: 2px solid #5c8e61; padding-bottom: 10px;">📅 Training Timetable</h3>
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
               <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Program Duration:</td>
@@ -471,16 +516,16 @@ export function generatePaymentConfirmationEmail(data: PaymentEmailData): string
         <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
           <h4 style="color: #856404; margin-top: 0;">📋 Training Highlights</h4>
           <ul style="color: #856404; line-height: 1.6; margin-left: 20px;">
-            <li>Hands-on practical training with live mushroom cultures</li>
+            <li>Hands-on practical training with live cultures</li>
             <li>Comprehensive study materials and resources provided</li>
-            <li>Expert guidance from experienced mushroom cultivators</li>
+            <li>Expert guidance from experienced cultivators</li>
             <li>Certificate of completion upon successful program finish</li>
             <li>Post-training support and consultation available</li>
           </ul>
         </div>
         
         <p style="color: #333; line-height: 1.6; margin-bottom: 20px;">
-          We're incredibly excited to have you join our mushroom cultivation community! If you have any questions before the training begins, please don't hesitate to reach out to us.
+          We're incredibly excited to have you join our cultivation community! If you have any questions before the training begins, please don't hesitate to reach out to us.
         </p>
       </div>
       
@@ -495,12 +540,12 @@ export function generatePaymentConfirmationEmail(data: PaymentEmailData): string
         <p style="color: #666; font-size: 14px; margin: 0;">
           For any questions or assistance, please contact us:
         </p>
-        <p style="color: #2d5016; font-size: 14px; margin: 5px 0;">
-          📧 <a href="mailto:training@mushmush.in" style="color: #2d5016;">training@mushmush.in</a><br>
-          📞 <a href="tel:+919876543210" style="color: #2d5016;">+91 98765 43210</a>
+        <p style="color: #5c8e61; font-size: 14px; margin: 5px 0;">
+          📧 <a href="mailto:mushagroprod@gmail.com" style="color: #5c8e61;">mushagroprod@gmail.com</a><br>
+          📞 <a href="tel:+919876543210" style="color: #5c8e61;">+91 98765 43210</a>
         </p>
         <p style="color: #666; font-size: 12px; margin-top: 10px;">
-          &copy; 2024 MushMush. All rights reserved.
+          &copy; ${new Date().getFullYear()} Kosvana by Mush Agro Products. All rights reserved.
         </p>
       </div>
     </div>
@@ -621,14 +666,14 @@ export function generateOrderInvoiceEmail(data: OrderInvoiceEmailData): string {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
       <!-- Header -->
-      <div style="text-align: center; margin-bottom: 30px; background: linear-gradient(135deg, #2d5016 0%, #4a7c2c 100%); padding: 30px; border-radius: 10px;">
+      <div style="text-align: center; margin-bottom: 30px; background: linear-gradient(135deg, #5c8e61 0%, #4a7a4f 100%); padding: 30px; border-radius: 10px;">
         <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Order Completed! 🎉</h1>
         <p style="color: #e8f5e8; font-size: 16px; margin-top: 10px;">Thank you for your purchase</p>
       </div>
       
       <!-- Order Details -->
       <div style="background: white; padding: 30px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h2 style="color: #2d5016; margin-top: 0; border-bottom: 2px solid #2d5016; padding-bottom: 10px;">Order Details</h2>
+        <h2 style="color: #5c8e61; margin-top: 0; border-bottom: 2px solid #5c8e61; padding-bottom: 10px;">Order Details</h2>
         
         <p style="color: #333; line-height: 1.6; margin-bottom: 20px;">
           Dear <strong>${data.customerName}</strong>,
@@ -641,11 +686,11 @@ export function generateOrderInvoiceEmail(data: OrderInvoiceEmailData): string {
         <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
           <tr>
             <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Order Number:</td>
-            <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; color: #2d5016; font-weight: bold;">${data.orderNumber}</td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; color: #5c8e61; font-weight: bold;">${data.orderNumber}</td>
           </tr>
           <tr>
             <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Invoice Number:</td>
-            <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; color: #2d5016; font-weight: bold;">${data.invoiceNumber}</td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; color: #5c8e61; font-weight: bold;">${data.invoiceNumber}</td>
           </tr>
           <tr>
             <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Order Date:</td>
@@ -660,15 +705,15 @@ export function generateOrderInvoiceEmail(data: OrderInvoiceEmailData): string {
       
       <!-- Order Items -->
       <div style="background: white; padding: 30px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h3 style="color: #2d5016; margin-top: 0; border-bottom: 2px solid #2d5016; padding-bottom: 10px;">Order Items</h3>
+        <h3 style="color: #5c8e61; margin-top: 0; border-bottom: 2px solid #5c8e61; padding-bottom: 10px;">Order Items</h3>
         
         <table style="width: 100%; border-collapse: collapse; margin: 15px 0;">
           <thead>
             <tr style="background-color: #f5f5f5;">
-              <th style="padding: 12px; text-align: left; border-bottom: 2px solid #2d5016; color: #2d5016;">Item</th>
-              <th style="padding: 12px; text-align: center; border-bottom: 2px solid #2d5016; color: #2d5016;">Qty</th>
-              <th style="padding: 12px; text-align: right; border-bottom: 2px solid #2d5016; color: #2d5016;">Price</th>
-              <th style="padding: 12px; text-align: right; border-bottom: 2px solid #2d5016; color: #2d5016;">Total</th>
+              <th style="padding: 12px; text-align: left; border-bottom: 2px solid #5c8e61; color: #5c8e61;">Item</th>
+              <th style="padding: 12px; text-align: center; border-bottom: 2px solid #5c8e61; color: #5c8e61;">Qty</th>
+              <th style="padding: 12px; text-align: right; border-bottom: 2px solid #5c8e61; color: #5c8e61;">Price</th>
+              <th style="padding: 12px; text-align: right; border-bottom: 2px solid #5c8e61; color: #5c8e61;">Total</th>
             </tr>
           </thead>
           <tbody>
@@ -697,16 +742,16 @@ export function generateOrderInvoiceEmail(data: OrderInvoiceEmailData): string {
             <td style="padding: 8px 0; text-align: right; color: #555;">Shipping:</td>
             <td style="padding: 8px 0; text-align: right; font-weight: bold;">₹${data.shipping.toFixed(2)}</td>
           </tr>
-          <tr style="border-top: 2px solid #2d5016;">
-            <td style="padding: 12px 0; text-align: right; color: #2d5016; font-size: 18px; font-weight: bold;">Total:</td>
-            <td style="padding: 12px 0; text-align: right; color: #2d5016; font-size: 18px; font-weight: bold;">₹${data.total.toFixed(2)}</td>
+          <tr style="border-top: 2px solid #5c8e61;">
+            <td style="padding: 12px 0; text-align: right; color: #5c8e61; font-size: 18px; font-weight: bold;">Total:</td>
+            <td style="padding: 12px 0; text-align: right; color: #5c8e61; font-size: 18px; font-weight: bold;">₹${data.total.toFixed(2)}</td>
           </tr>
         </table>
       </div>
       
       <!-- Shipping Address -->
       <div style="background: white; padding: 30px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h3 style="color: #2d5016; margin-top: 0; border-bottom: 2px solid #2d5016; padding-bottom: 10px;">Shipping Address</h3>
+        <h3 style="color: #5c8e61; margin-top: 0; border-bottom: 2px solid #5c8e61; padding-bottom: 10px;">Shipping Address</h3>
         <p style="color: #333; line-height: 1.6; margin: 0;">
           ${data.shippingAddress.address || ''}<br>
           ${data.shippingAddress.city || ''}, ${data.shippingAddress.state || ''} ${data.shippingAddress.zipCode || ''}<br>
@@ -717,15 +762,15 @@ export function generateOrderInvoiceEmail(data: OrderInvoiceEmailData): string {
       <!-- Download Invoice Button -->
       <div style="text-align: center; margin: 30px 0;">
         <a href="${invoiceDownloadUrl}" 
-           style="background: #2d5016; color: white; padding: 15px 40px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; font-size: 16px;">
+           style="background: #5c8e61; color: white; padding: 15px 40px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; font-size: 16px;">
           📄 Download Invoice
         </a>
       </div>
       
       <!-- What's Next -->
-      <div style="background: #e8f5e8; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #2d5016;">
-        <h4 style="color: #2d5016; margin-top: 0;">📦 What's Next?</h4>
-        <ul style="color: #2d5016; line-height: 1.8; margin-left: 20px;">
+      <div style="background: #e8f5e8; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #5c8e61;">
+        <h4 style="color: #5c8e61; margin-top: 0;">📦 What's Next?</h4>
+        <ul style="color: #5c8e61; line-height: 1.8; margin-left: 20px;">
           <li>Your order is being prepared for shipment</li>
           <li>You'll receive a tracking number once shipped</li>
           <li>Estimated delivery: 3-5 business days</li>
@@ -738,12 +783,12 @@ export function generateOrderInvoiceEmail(data: OrderInvoiceEmailData): string {
         <p style="color: #666; font-size: 14px; margin: 0;">
           Need help with your order?
         </p>
-        <p style="color: #2d5016; font-size: 14px; margin: 5px 0;">
-          📧 <a href="mailto:mushagroprod@gmail.com" style="color: #2d5016; text-decoration: none;">mushagroprod@gmail.com</a><br>
-          📞 <a href="tel:+917618362662" style="color: #2d5016; text-decoration: none;">+91-7618362662</a>
+        <p style="color: #5c8e61; font-size: 14px; margin: 5px 0;">
+          📧 <a href="mailto:mushagroprod@gmail.com" style="color: #5c8e61; text-decoration: none;">mushagroprod@gmail.com</a><br>
+          📞 <a href="tel:+917618362662" style="color: #5c8e61; text-decoration: none;">+91-7618362662</a>
         </p>
         <p style="color: #666; font-size: 12px; margin-top: 20px;">
-          &copy; ${new Date().getFullYear()} MushMush by Mush Agro Products. All rights reserved.
+          &copy; ${new Date().getFullYear()} Kosvana by Mush Agro Products. All rights reserved.
         </p>
       </div>
     </div>
@@ -793,9 +838,9 @@ export function generateOTPEmail(otp: string, customerName: string): string {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
       <!-- Header -->
-      <div style="text-align: center; margin-bottom: 30px; background: linear-gradient(135deg, #2d5016 0%, #4a7c2c 100%); padding: 30px; border-radius: 10px;">
+      <div style="text-align: center; margin-bottom: 30px; background: linear-gradient(135deg, #5c8e61 0%, #4a7a4f 100%); padding: 30px; border-radius: 10px;">
         <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Verify Your Order</h1>
-        <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 16px;">MushMush - Fresh Mushrooms</p>
+        <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 16px;">Kosvana - Premium Natural Products</p>
       </div>
 
       <!-- Content -->
@@ -809,9 +854,9 @@ export function generateOTPEmail(otp: string, customerName: string): string {
         </p>
 
         <!-- OTP Box -->
-        <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 2px dashed #2d5016; border-radius: 10px; padding: 30px; text-align: center; margin: 30px 0;">
+        <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 2px dashed #5c8e61; border-radius: 10px; padding: 30px; text-align: center; margin: 30px 0;">
           <p style="font-size: 14px; color: #666; margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 1px;">Your OTP Code</p>
-          <p style="font-size: 42px; font-weight: bold; color: #2d5016; margin: 0; letter-spacing: 8px; font-family: 'Courier New', monospace;">
+          <p style="font-size: 42px; font-weight: bold; color: #5c8e61; margin: 0; letter-spacing: 8px; font-family: 'Courier New', monospace;">
             ${otp}
           </p>
         </div>
@@ -830,13 +875,13 @@ export function generateOTPEmail(otp: string, customerName: string): string {
       <!-- Footer -->
       <div style="text-align: center; margin-top: 30px; padding: 20px; color: #666; font-size: 12px;">
         <p style="margin: 0 0 10px 0;">
-          <strong>MushMush - Fresh Edible and Medicinal Mushrooms</strong>
+          <strong>Kosvana - Premium Mushrooms, Dry Fruits, Seeds & Spices</strong>
         </p>
         <p style="margin: 0 0 5px 0;">
           📧 Email: mushagroprod@gmail.com | 📞 Phone: +91-7618362662
         </p>
         <p style="margin: 10px 0 0 0; color: #999;">
-          © ${new Date().getFullYear()} MushMush. All rights reserved.
+          © ${new Date().getFullYear()} Kosvana by Mush Agro Products. All rights reserved.
         </p>
       </div>
     </div>
