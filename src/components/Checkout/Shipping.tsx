@@ -11,7 +11,7 @@ const INDIAN_STATES = [
   "Delhi", "Jammu and Kashmir", "Ladakh", "Lakshadweep", "Puducherry"
 ];
 
-const Shipping = () => {
+const Shipping = ({ onPincodeChange }: { onPincodeChange?: (pincode: string) => void }) => {
   const [dropdown, setDropdown] = useState(false);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
 
@@ -50,6 +50,9 @@ const Shipping = () => {
     e.target.value = value;
     const error = validateZip(value);
     setErrors(prev => ({ ...prev, shippingZip: error }));
+    if (value.length === 6 && !error && onPincodeChange) {
+      onPincodeChange(value);
+    }
   };
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {

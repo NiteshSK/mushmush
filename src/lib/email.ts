@@ -735,7 +735,7 @@ export function generateOrderInvoiceEmail(data: OrderInvoiceEmailData): string {
             <td style="padding: 8px 0; text-align: right; width: 100px; font-weight: bold;">₹${data.subtotal.toFixed(2)}</td>
           </tr>
           <tr>
-            <td style="padding: 8px 0; text-align: right; color: #555;">Tax:</td>
+            <td style="padding: 8px 0; text-align: right; color: #555;">Convenience Fee:</td>
             <td style="padding: 8px 0; text-align: right; font-weight: bold;">₹${data.tax.toFixed(2)}</td>
           </tr>
           <tr>

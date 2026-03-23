@@ -21,6 +21,7 @@ export async function POST(request: NextRequest) {
       cartItems,
       subtotal,
       shippingFee,
+      convenienceFee,
       total,
       paymentMethod,
       notes
@@ -197,7 +198,7 @@ export async function POST(request: NextRequest) {
         customerEmail: email,
         customerPhone: customerPhone || '',
         subtotal,
-        tax: 0, // Add tax calculation if needed
+        tax: convenienceFee || 12, // Convenience fee stored in tax field
         shipping: shippingFee,
         total,
         status: 'CONFIRMED', // COD orders are confirmed immediately

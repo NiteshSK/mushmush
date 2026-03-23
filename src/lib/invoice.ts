@@ -14,7 +14,7 @@ export interface InvoiceData {
   billingAddress: any;
   shippingAddress: any;
   subtotal: number;
-  tax: number;
+  tax: number; // Used as convenience fee
   shipping: number;
   total: number;
   orderItems: Array<{
@@ -190,7 +190,7 @@ export async function generateInvoicePDF(data: InvoiceData, userId?: string): Pr
   doc.text(`Rs ${data.subtotal.toFixed(2)}`, 185, totalsY, { align: 'right' });
 
   totalsY += 5;
-  doc.text('Tax:', totalsX, totalsY);
+  doc.text('Convenience Fee:', totalsX, totalsY);
   doc.text(`Rs ${data.tax.toFixed(2)}`, 185, totalsY, { align: 'right' });
 
   totalsY += 5;

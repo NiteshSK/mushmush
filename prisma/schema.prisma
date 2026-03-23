@@ -540,6 +540,23 @@ model GlobalConfig {
   @@map("global_configs")
 }
 
+model ShippingZone {
+  id           Int      @id @default(autoincrement())
+  name         String   // e.g. "Local Dehradun", "Uttarakhand", "North India"
+  pincodeFrom  String   // Start of pincode range (inclusive)
+  pincodeTo    String   // End of pincode range (inclusive)
+  baseFee      Float    // Shipping fee in INR
+  freeAbove    Float?   // Free shipping if subtotal >= this value (null = never free)
+  estimatedDays String? // e.g. "2-3 days", "5-7 days"
+  isActive     Boolean  @default(true)
+  priority     Int      @default(0) // Higher priority zone matched first (for overlapping ranges)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([pincodeFrom, pincodeTo])
+  @@map("shipping_zones")
+}
+
 model NewsletterSubscriber {
   id           String    @id @default(cuid())
   email        String    @unique
