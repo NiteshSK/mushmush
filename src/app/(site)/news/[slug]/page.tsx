@@ -10,8 +10,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // For now, return static metadata to avoid API issues during SSR
   // TODO: Implement dynamic metadata once the API is stable
   return {
-    title: "News Article | MushMush",
-    description: "Read the latest news from MushMush",
+    title: "News Article | Kosvana",
+    description: "Read the latest news from Kosvana",
   };
 }
 

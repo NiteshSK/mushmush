@@ -7,8 +7,8 @@ import { Metadata } from "next";
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: "Checkout Page | MushMush",
-  description: "This is Checkout Page for MushMush",
+  title: "Checkout Page | Kosvana",
+  description: "This is Checkout Page for Kosvana",
 };
 
 const CheckoutPage = () => {

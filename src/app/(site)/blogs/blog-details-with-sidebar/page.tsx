@@ -3,8 +3,8 @@ import BlogDetailsWithSidebar from "@/components/BlogDetailsWithSidebar";
 
 import { Metadata } from "next";
 export const metadata: Metadata = {
-  title: "Blog Details Page | MushMush",
-  description: "This is Blog Details Page for MushMush",
+  title: "Blog Details Page | Kosvana",
+  description: "This is Blog Details Page for Kosvana",
   // other metadata
 };
 

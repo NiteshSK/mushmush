@@ -2,8 +2,8 @@ import Home from "@/components/Home";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "MushMush | Fresh Edible and Medicinal Mushrooms",
-  description: "MushMush is a platform for buying and selling fresh edible and medicinal mushrooms in Dehradun",
+  title: "Kosvana | Premium Mushrooms, Dry Fruits, Seeds & Spices",
+  description: "Kosvana brings you premium mushrooms, dry fruits, seeds and spices — naturally grown and sourced from Dehradun, India",
   // other metadata
 };
 

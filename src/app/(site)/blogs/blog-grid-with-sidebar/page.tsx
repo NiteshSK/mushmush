@@ -3,8 +3,8 @@ import BlogGridWithSidebar from "@/components/BlogGridWithSidebar";
 
 import { Metadata } from "next";
 export const metadata: Metadata = {
-  title: "Blog Grid Page | MushMush",
-  description: "This is Blog Grid Page for MushMush",
+  title: "Blog Grid Page | Kosvana",
+  description: "This is Blog Grid Page for Kosvana",
   // other metadata
 };
 

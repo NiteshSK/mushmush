@@ -70,21 +70,19 @@ const SingleItem = ({
     : "";
 
   return (
-    <div className="flex flex-col h-full bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-300">
+    <div className="flex flex-col h-full bg-white rounded-xl overflow-hidden hover:shadow-md transition-shadow duration-300">
       {/* Image area */}
-      <div className="relative bg-[#f8f8f6] flex items-center justify-center" style={{ height: 220 }}>
+      <div className="relative bg-white flex items-center justify-center rounded-xl" style={{ height: 260 }}>
         {/* Badge */}
         {item.hasDiscount && item.discountPercentage ? (
-          <span className="absolute top-3 right-3 bg-red-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded z-10">
-            UP TO -{item.discountPercentage}%
+          <span className="absolute top-3 right-3 text-[10px] font-medium uppercase tracking-wider text-red border border-red-light-3 bg-white px-2.5 py-1 rounded-full z-10">
+            -{item.discountPercentage}%
           </span>
         ) : !item.inStock ? (
-          <span className="absolute top-3 right-3 bg-gray-700 text-white text-[10px] font-semibold px-2 py-0.5 rounded z-10">
-            OUT OF STOCK
-          </span>
+          <div className="sold-out-overlay"><span>Sold Out</span></div>
         ) : item.featured ? (
-          <span className="absolute top-3 right-3 bg-green-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded z-10">
-            NEW
+          <span className="absolute top-3 right-3 text-[10px] font-medium uppercase tracking-wider text-blue border border-blue-light-4 bg-white px-2.5 py-1 rounded-full z-10">
+            New
           </span>
         ) : null}
 
@@ -93,13 +91,13 @@ const SingleItem = ({
             <Image
               src={item.imgs.previews[0]}
               alt={item.title}
-              width={180}
-              height={180}
-              className={`object-contain max-h-[180px] ${!item.inStock ? "grayscale opacity-60" : ""}`}
+              width={200}
+              height={200}
+              className={`object-contain max-h-[200px] ${!item.inStock ? "grayscale opacity-60" : ""}`}
             />
           </Link>
         ) : (
-          <div className="w-[180px] h-[180px] flex items-center justify-center text-gray-300">
+          <div className="w-[200px] h-[200px] flex items-center justify-center text-gray-300">
             <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
@@ -108,19 +106,7 @@ const SingleItem = ({
       </div>
 
       {/* Info area */}
-      <div className="flex flex-col flex-1 px-4 pt-4 pb-5 gap-1.5">
-        {/* Price */}
-        <div className="flex items-baseline gap-2">
-          {item.hasDiscount && item.discountedPrice ? (
-            <>
-              <span className="text-sm font-semibold text-dark">₹{item.discountedPrice}</span>
-              <span className="text-xs text-gray-400 line-through">₹{item.price}</span>
-            </>
-          ) : (
-            <span className="text-sm font-semibold text-dark">₹{item.price}</span>
-          )}
-        </div>
-
+      <div className="flex flex-col flex-1 px-4 pt-5 pb-5 gap-1.5">
         {/* Title */}
         <h3 className="font-medium text-dark ease-out duration-200 hover:text-blue">
           <Link
@@ -131,31 +117,43 @@ const SingleItem = ({
           </Link>
         </h3>
 
-        {/* Stars */}
-        <StarRating rating={item.averageRating ?? 5} count={item.reviewCount ?? 0} />
-
         {/* Short description */}
         {shortDescription && (
-          <p className="text-[11px] text-gray-400 leading-relaxed mt-0.5 line-clamp-1">
+          <p className="text-[11px] text-gray-5 leading-relaxed line-clamp-1">
             {shortDescription}
           </p>
         )}
+
+        {/* Stars */}
+        <StarRating rating={item.averageRating ?? 5} count={item.reviewCount ?? 0} />
+
+        {/* Price */}
+        <div className="flex items-baseline gap-2 mt-1">
+          {item.hasDiscount && item.discountedPrice ? (
+            <>
+              <span className="text-sm font-semibold text-dark">₹{item.discountedPrice}</span>
+              <span className="text-xs text-gray-5 line-through">₹{item.price}</span>
+            </>
+          ) : (
+            <span className="text-sm font-semibold text-dark">₹{item.price}</span>
+          )}
+        </div>
 
         {/* CTA */}
         <div className="mt-auto pt-3">
           {item.inStock ? (
             <button
               onClick={handleAddToCart}
-              className="w-full border border-gray-300 rounded-full py-2.5 text-custom-sm font-medium text-dark hover:bg-dark hover:text-white hover:border-dark transition-all duration-200"
+              className="w-full bg-forest text-white rounded-full py-2.5 text-custom-sm font-medium hover:bg-dark transition-all duration-200"
             >
-              Buy now
+              Add to Cart
             </button>
           ) : (
             <button
               onClick={() => onNotifyMe?.(item)}
-              className="w-full border border-gray-300 rounded-full py-2.5 text-custom-sm font-medium text-dark-4 hover:bg-gray-1 transition-all duration-200"
+              className="w-full bg-forest text-white rounded-full py-2.5 text-custom-sm font-medium hover:bg-dark transition-all duration-200"
             >
-              Notify me
+              Notify Me
             </button>
           )}
         </div>

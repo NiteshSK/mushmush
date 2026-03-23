@@ -1,8 +1,6 @@
 "use client";
 import React from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { PromotionalBanner } from "@/types/promotional-banner";
 import { usePromotionalBanners } from "@/hooks/usePromotionalBanners";
 
 const PromoBanner = () => {
@@ -17,10 +15,10 @@ const PromoBanner = () => {
 
   if (loading) {
     return (
-      <section className="overflow-hidden py-16 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="mb-12 h-16 bg-gray-200 rounded-lg w-1/2 mx-auto animate-pulse"></div>
-          <div className="relative h-[400px] rounded-2xl bg-gray-200 animate-pulse"></div>
+      <section className="py-12 sm:py-16 bg-cream">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 xl:px-0">
+          <div className="mb-10 h-10 bg-sand rounded-lg w-1/3 mx-auto animate-pulse"></div>
+          <div className="h-[360px] rounded-2xl bg-sand animate-pulse"></div>
         </div>
       </section>
     );
@@ -33,173 +31,56 @@ const PromoBanner = () => {
   const currentBanner = banners[currentBannerIndex];
 
   return (
-    // Section now includes relative positioning for full-section effects
-    <section className="relative py-16 sm:py-24 bg-gradient-to-b from-[#E9E6F4] to-white overflow-hidden">
-      {/* Full section festive background elements - z-index below content */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        {/* Effect 1: Sparkle Dots across the whole section */}
-        {[...Array(50)].map((_, i) => (
-          <div
-            key={`section-sparkle-dots-${i}`}
-            className="absolute w-2 h-2 rounded-full bg-red-400 animate-section-sparkle"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${3 + Math.random() * 4}s`,
-              backgroundColor: ['#f87171', '#fbbf24', '#a78bfa', '#60a5fa'][Math.floor(Math.random() * 4)],
-            }}
-          />
-        ))}
-        {/* Soft pulse overlay for the entire section */}
-        <div className="absolute inset-0 bg-purple-200/10 animate-pulse-soft"></div>
-
-        {/* Om and Diya Symbols scattered across the section */}
-        {[...Array(15)].map((_, i) => (
-          <div
-            key={`om-diya-${i}`}
-            className="absolute text-3xl animate-float-gentle opacity-70"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 6}s`,
-              animationDuration: `${6 + Math.random() * 6}s`,
-              color: ['#ff8c00', '#ffd700', '#ff6347', '#ffdab9'][Math.floor(Math.random() * 4)], // Warm festive colors
-            }}
-          >
-            {i % 2 === 0 ? '🕉️' : '🪔'} {/* Om or Diya */}
-          </div>
-        ))}
-
-        {/* Firecracker Explosion Animation in the section background */}
-        {[...Array(8)].map((_, i) => (
-          <div
-            key={`firecracker-${i}`}
-            className="absolute w-1 h-1 bg-transparent animate-firecracker"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 10}s`, // Random delay for staggered explosions
-              animationDuration: `1.5s`, // Quick explosion
-              transform: `scale(0)`, // Start small
-            }}
-          ></div>
-        ))}
-
-        {/* Effect 2: Traditional Confetti falling for the entire section */}
-        {[...Array(30)].map((_, i) => (
-          <div
-            key={`section-confetti-fall-${i}`}
-            className="absolute w-2 h-6 animate-confetti-fall z-0"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `-${Math.random() * 20}%`, // Start above the section
-              animationDelay: `${Math.random() * 6}s`,
-              animationDuration: `${8 + Math.random() * 6}s`,
-              backgroundColor: ['#ff6b6b', '#ffa500', '#32cd32', '#1e90ff', '#9370db', '#ff69b4'][Math.floor(Math.random() * 6)],
-              transform: `rotate(${Math.random() * 360}deg)`,
-            }}
-          />
-        ))}
-
-        {/* Effect 3: Mushroom "Confetti" falling for the entire section */}
-        {[...Array(40)].map((_, i) => (
-          <div
-            key={`falling-mushroom-${i}`}
-            className="absolute text-2xl animate-mushroom-fall z-0" // Ensure z-0 to stay behind banner
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `-${Math.random() * 30}%`, // Start higher above the section
-              animationDelay: `${Math.random() * 7}s`,
-              animationDuration: `${10 + Math.random() * 8}s`, // Longer duration for full section fall
-              transform: `rotate(${Math.random() * 360}deg) scale(${0.8 + Math.random() * 0.4})`, // Varied rotation and size
-              opacity: 0.7 + Math.random() * 0.3, // Varied opacity
-            }}
-          >
-            🍄
-          </div>
-        ))}
-
-      </div>
-
-      <div className="max-w-6xl mx-auto px-4 relative z-10"> {/* Ensure content is above section effects */}
-        <div className="mb-12 text-center">
-          <h2 className="text-3xl lg:text-4xl xl:text-5xl font-bold mb-4 text-gray-800">
-          💥🎊🎉 Special Festive Sale! 🎊🎉💥
+    <section className="py-12 sm:py-16 bg-cream">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 xl:px-0">
+        <div className="mb-10 text-center">
+          <h2 className="font-medium text-2xl sm:text-3xl lg:text-4xl xl:text-5xl text-bark mb-3">
+            Featured
           </h2>
-          <p className="text-gray-600 text-lg">🍄 Exclusive deals just for you! 🍄</p>
+          <p className="text-gray-5 text-base">Exclusive offers on our finest selection</p>
         </div>
 
-        {/* Festive Promotional Banner */}
-        <div className="relative overflow-hidden rounded-2xl shadow-xl mb-8 border-2 animate-rainbow-border-fancy">
-          {/* Animated effects *inside* the banner - ensure these are z-index higher than content bg */}
-          <div className="absolute inset-0 pointer-events-none z-20">
-            {/* Glitter Sparkles - more visible */}
-            {[...Array(50)].map((_, i) => (
-              <div
-                key={`banner-glitter-${i}`}
-                className="absolute w-2 h-2 bg-yellow-300 rounded-full animate-glitter-sparkle-strong"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                  animationDelay: `${Math.random() * 3}s`,
-                  animationDuration: `${1 + Math.random() * 2}s`,
-                  opacity: 0.8 + Math.random() * 0.2, // Make them a bit brighter
-                }}
-              />
-            ))}
-            
-            {/* Corner Emojis - more prominent */}
-            <div className="absolute top-4 left-4 text-6xl animate-bounce-super drop-shadow-lg text-red-500">🎉</div>
-            <div className="absolute top-4 right-4 text-6xl animate-bounce-super drop-shadow-lg text-yellow-500" style={{ animationDelay: '0.3s' }}>🎊</div>
-            <div className="absolute bottom-4 left-4 text-5xl animate-pulse-super drop-shadow-lg text-green-500" style={{ animationDelay: '0.6s' }}>✨</div>
-            <div className="absolute bottom-4 right-4 text-5xl animate-pulse-super drop-shadow-lg text-blue-500" style={{ animationDelay: '0.9s' }}>🌟</div>
-          </div>
-          
-          {/* Main Content Area - z-index higher than fixed bg, lower than animations */}
-          <div className="relative p-8 lg:p-12 z-10 bg-white rounded-2xl"> {/* Added rounded-2xl to match parent */}
+        <div className="relative overflow-hidden rounded-2xl bg-white shadow-2 border border-gray-3">
+          <div className="relative p-4 sm:p-6 md:p-8 lg:p-12">
             <div className="lg:grid lg:grid-cols-2 lg:gap-12 items-center">
-              {/* Left Column: Promotional Content */}
+              {/* Left Column: Content */}
               <div className="mb-8 lg:mb-0 text-center lg:text-left">
                 {currentBanner.subtitle && (
-                  <div className="inline-block bg-gradient-to-r from-red-100 to-yellow-100 border border-yellow-300 rounded-full px-4 py-2 mb-4 animate-scale-pulse">
-                    <span className="text-red-700 text-sm font-medium animate-text-glow">
-                      {currentBanner.subtitle}
-                    </span>
-                  </div>
+                  <span className="inline-block text-xs font-medium uppercase tracking-[0.15em] text-blue mb-4">
+                    {currentBanner.subtitle}
+                  </span>
                 )}
 
-                <h2 className="text-4xl lg:text-5xl xl:text-6xl mb-6 leading-tight font-bold text-gray-900 animate-text-breathe">
+                <h3 className="font-medium text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl mb-4 sm:mb-6 leading-tight text-dark">
                   {currentBanner.discount || currentBanner.title}
-                </h2>
+                </h3>
 
                 {currentBanner.description && (
-                  <p className="text-lg lg:text-xl mb-6 leading-relaxed text-gray-700">
+                  <p className="text-base lg:text-lg mb-8 leading-relaxed text-gray-6">
                     {currentBanner.description}
                   </p>
                 )}
 
                 <Link
                   href={generateBannerLink(currentBanner)}
-                  className="inline-flex items-center gap-3 text-base text-black bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 py-3 px-8 rounded-full shadow-lg transform transition-all duration-300 hover:scale-105 font-semibold animate-button-pop"
+                  className="inline-flex items-center gap-2 bg-forest text-white py-3 sm:py-3.5 px-6 sm:px-10 rounded-full text-xs font-medium uppercase tracking-[0.15em] transition-all duration-300 hover:bg-dark"
                 >
-                  <span>{currentBanner.buttonText}</span>
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <span>{currentBanner.buttonText || "Shop Now"}</span>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
                 </Link>
               </div>
 
               {/* Right Column: Image */}
-              <div className="relative flex justify-center items-center">
-                <div className="relative w-full max-w-md aspect-square">
-                  {/* Image background is now more festive */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-red-100 to-yellow-100 rounded-full transform scale-105 animate-spin-slow-fade"></div>
-                  <div className="relative z-10 w-full h-full p-4">
+              <div className="flex justify-center items-center">
+                <div className="relative w-full max-w-xs sm:max-w-sm md:max-w-md aspect-square">
+                  <div className="absolute inset-0 bg-sand rounded-2xl"></div>
+                  <div className="relative z-1 w-full h-full p-6">
                     <img
                       src={currentBanner.imageUrl || "/images/placeholder-mushroom.png"}
                       alt={currentBanner.title || "Special promotional offer"}
-                      className="rounded-lg shadow-xl w-full h-full object-cover"
+                      className="rounded-xl w-full h-full object-cover"
                     />
                   </div>
                 </div>
@@ -208,30 +89,28 @@ const PromoBanner = () => {
           </div>
         </div>
 
-        {/* Enhanced Banner Pagination */}
+        {/* Banner Pagination */}
         {banners.length > 1 && (
-          <div className="flex flex-col items-center gap-2 mt-4"> {/* Added margin-top for spacing */}
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setCurrentBannerIndex((prev) => (prev === 0 ? banners.length - 1 : prev - 1))}
-                className="p-2 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all"
-                aria-label="Previous banner"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-              </button>
+          <div className="flex items-center justify-center gap-4 mt-6">
+            <button
+              onClick={() => setCurrentBannerIndex((prev) => (prev === 0 ? banners.length - 1 : prev - 1))}
+              className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-3 text-gray-5 hover:text-dark hover:border-gray-4 transition-all duration-200"
+              aria-label="Previous banner"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+            </button>
 
-              <div className="text-sm text-gray-600 font-medium">
-                {currentBannerIndex + 1} of {banners.length}
-              </div>
+            <span className="text-sm text-gray-5 font-medium tabular-nums">
+              {currentBannerIndex + 1} / {banners.length}
+            </span>
 
-              <button
-                onClick={() => setCurrentBannerIndex((prev) => (prev === banners.length - 1 ? 0 : prev + 1))}
-                className="p-2 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all"
-                aria-label="Next banner"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-              </button>
-            </div>
+            <button
+              onClick={() => setCurrentBannerIndex((prev) => (prev === banners.length - 1 ? 0 : prev + 1))}
+              className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-3 text-gray-5 hover:text-dark hover:border-gray-4 transition-all duration-200"
+              aria-label="Next banner"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+            </button>
           </div>
         )}
       </div>

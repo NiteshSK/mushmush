@@ -8,17 +8,17 @@
   }
 
   body {
-    @apply font-euclid-circular-a font-normal text-base text-dark-3 relative z-1;
+    @apply font-sans font-normal text-base text-dark-3 relative z-1;
   }
 
-  /* Ensure all typography elements use the correct font family */
+  /* Ensure all typography elements use DM Sans */
   h1,
   h2,
   h3,
   h4,
   h5,
   h6 {
-    @apply font-euclid-circular-a;
+    @apply font-sans;
   }
 
   p,
@@ -29,15 +29,15 @@
   input,
   textarea,
   select {
-    @apply font-euclid-circular-a;
+    @apply font-sans;
   }
 
-  /* Override prose classes to use Euclid Circular A */
+  /* Override prose classes to use DM Sans */
   .prose,
   .prose-lg,
   .prose-xl,
   .prose-2xl {
-    font-family: 'Euclid Circular A', sans-serif !important;
+    font-family: 'DM Sans', system-ui, sans-serif !important;
   }
 
   .prose h1,
@@ -46,7 +46,7 @@
   .prose h4,
   .prose h5,
   .prose h6 {
-    font-family: 'Euclid Circular A', sans-serif !important;
+    font-family: 'DM Sans', system-ui, sans-serif !important;
   }
 
   .prose p,
@@ -55,7 +55,7 @@
   .prose a,
   .prose li,
   .prose blockquote {
-    font-family: 'Euclid Circular A', sans-serif !important;
+    font-family: 'DM Sans', system-ui, sans-serif !important;
   }
 
   .prose code,

@@ -68,7 +68,7 @@ const BlogDetails = ({ slug }: BlogDetailsProps) => {
     <>
       <Breadcrumb title="Blog Details" pages={["Blog"]} />
       <section className="overflow-hidden relative pb-20 pt-5 lg:pt-20 xl:pt-5">
-        <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
+        <div className="max-w-[1200px] w-full mx-auto px-4 sm:px-6 xl:px-0">
           <div className="flex flex-col lg:flex-row gap-7.5 xl:gap-17.5">
             <div className="w-full lg:w-full">
               <div className="blog-details-content">
@@ -147,7 +147,7 @@ const BlogDetails = ({ slug }: BlogDetailsProps) => {
                           />
                         </div>
                         <div>
-                          <h4 className="text-dark text-custom-sm">MushMush Team</h4>
+                          <h4 className="text-dark text-custom-sm">Kosvana Team</h4>
                           <p className="text-custom-xs">Mushroom Experts</p>
                         </div>
                       </div>

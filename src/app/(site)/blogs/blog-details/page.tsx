@@ -2,8 +2,8 @@ import { redirect } from 'next/navigation'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Blogs | MushMush',
-  description: 'Read our latest blog posts on MushMush',
+  title: 'Blogs | Kosvana',
+  description: 'Read our latest blog posts on Kosvana',
 }
 
 export default function BlogDetailsRedirectPage() {

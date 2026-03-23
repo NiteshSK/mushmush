@@ -3,8 +3,8 @@ import BlogGrid from "@/components/BlogGrid";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Blog | MushMush",
-  description: "Read our latest blog posts about mushroom cultivation, recipes, and more",
+  title: "Blog | Kosvana",
+  description: "Read our latest blog posts about mushroom cultivation, natural products, recipes, and wellness tips",
 };
 
 const BlogsPage = () => {

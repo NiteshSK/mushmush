@@ -1,50 +1,89 @@
-import React from "react";
-import Image from "next/image";
+"use client";
+
+import React, { useState } from "react";
 
 const Newsletter = () => {
-  return (
-    <section className="overflow-hidden">
-      <div className="max-w-[1170px] mx-auto px-4 sm:px-8 xl:px-0">
-        <div className="relative z-1 overflow-hidden rounded-xl">
-          {/* <!-- bg shapes --> */}
-          <Image
-            src="/images/shapes/newsletter-bg.jpg"
-            alt="background illustration"
-            className="absolute -z-1 w-full h-full left-0 top-0 rounded-xl"
-            width={1170}
-            height={200}
-          />
-          <div className="absolute -z-1 max-w-[523px] max-h-[243px] w-full h-full right-0 top-0 bg-gradient-1"></div>
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [message, setMessage] = useState("");
 
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8 px-4 sm:px-7.5 xl:pl-12.5 xl:pr-14 py-11">
-            <div className="max-w-[491px] w-full">
-              <h2 className="max-w-[399px] text-white font-bold text-lg sm:text-xl xl:text-heading-4 mb-3">
-                Don&apos;t Miss Out Latest Trends & Offers
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+
+    setStatus("loading");
+    try {
+      const res = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setStatus("success");
+        setMessage("You're in! Check your inbox for a welcome email.");
+        setEmail("");
+      } else {
+        setStatus("error");
+        setMessage(data.error || "Something went wrong.");
+      }
+    } catch {
+      setStatus("error");
+      setMessage("Something went wrong. Please try again.");
+    }
+  };
+
+  return (
+    <section className="py-16 sm:py-24">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 xl:px-0">
+        <div className="bg-forest rounded-2xl px-6 sm:px-12 xl:px-16 py-14">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+            <div className="max-w-md">
+              <h2 className="font-medium text-2xl sm:text-3xl text-white mb-3">
+                Join the Kosvana Community
               </h2>
-              <p className="text-white">
-                Register to receive news about the latest offers & discount
-                codes
+              <p className="text-white/70 text-sm leading-relaxed">
+                Get fresh recipes, growing tips, and exclusive offers delivered to your inbox.
               </p>
             </div>
 
-            <div className="max-w-[477px] w-full">
-              <form>
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <input
-                    type="email"
-                    name="email"
-                    id="email"
-                    placeholder="Enter your email"
-                    className="w-full bg-gray-1 border border-gray-3 outline-none rounded-md placeholder:text-dark-4 py-3 px-5"
-                  />
-                  <button
-                    type="submit"
-                    className="inline-flex justify-center py-3 px-7 text-white bg-blue font-medium rounded-md ease-out duration-200 hover:bg-blue-dark"
-                  >
-                    Subscribe
-                  </button>
+            <div className="max-w-md w-full">
+              {status === "success" ? (
+                <div className="flex items-center gap-3 bg-white/10 border border-white/20 rounded-full py-3.5 px-6">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 6L9 17l-5-5" />
+                  </svg>
+                  <span className="text-white text-sm">{message}</span>
                 </div>
-              </form>
+              ) : (
+                <form onSubmit={handleSubmit}>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        if (status === "error") setStatus("idle");
+                      }}
+                      placeholder="Enter your email"
+                      required
+                      className="w-full bg-white/10 border border-white/20 text-white placeholder:text-white/40 outline-none rounded-full py-3.5 px-6 text-sm focus:border-white/40 transition-colors"
+                    />
+                    <button
+                      type="submit"
+                      disabled={status === "loading"}
+                      className="inline-flex justify-center py-3.5 px-8 text-forest bg-white font-medium text-sm rounded-full ease-out duration-200 hover:bg-white/90 whitespace-nowrap disabled:opacity-60"
+                    >
+                      {status === "loading" ? "Subscribing..." : "Subscribe"}
+                    </button>
+                  </div>
+                  {status === "error" && (
+                    <p className="text-white/70 text-xs mt-2 pl-6">{message}</p>
+                  )}
+                </form>
+              )}
             </div>
           </div>
         </div>

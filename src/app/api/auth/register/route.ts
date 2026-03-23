@@ -6,7 +6,7 @@ import { validatePasswordPolicy } from '@/lib/validation';
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, password } = await request.json();
+    const { name, email, password, phone } = await request.json();
 
     // Validate input
     if (!name || !email || !password) {
@@ -43,6 +43,7 @@ export async function POST(request: NextRequest) {
         name,
         email,
         password: hashedPassword,
+        ...(phone && { phone }),
       },
       select: {
         id: true,
@@ -65,6 +66,23 @@ export async function POST(request: NextRequest) {
     } catch (emailError) {
       console.error('Failed to send welcome email:', emailError);
       // Don't fail registration if email fails
+    }
+
+    // Send admin notification
+    try {
+      const adminEmail = process.env.ADMIN_EMAIL;
+      if (adminEmail) {
+        const adminNotification = emailTemplates.newUserSignup(name, email, user.createdAt);
+        await sendEmail({
+          to: adminEmail,
+          subject: adminNotification.subject,
+          html: adminNotification.html,
+          text: adminNotification.text,
+        });
+        console.log(`Admin notification sent for new user: ${email}`);
+      }
+    } catch (adminEmailError) {
+      console.error('Failed to send admin notification:', adminEmailError);
     }
 
     return NextResponse.json(

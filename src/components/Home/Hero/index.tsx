@@ -16,9 +16,9 @@ import "swiper/css/navigation";
 const slides = [
   {
     image: "/images/hero/hero_mushrooms.png",
-    label: "✦ Premium Quality Mushrooms",
+    label: "✦ Premium Natural Products",
     title: "Nature's Finest.\nDelivered Fresh.",
-    subtitle: "Rare superfoods & medicinal mushrooms sourced from the world's finest forests.",
+    subtitle: "Premium mushrooms, dry fruits, seeds & spices — sourced from the finest origins.",
     cta: "Shop Now",
     ctaHref: "/shop",
   },
@@ -26,7 +26,7 @@ const slides = [
     image: "/images/hero/hero_mushrooms_1.png",
     label: "✦ Handcrafted Gift Baskets",
     title: "The Art of\nNourishment.",
-    subtitle: "Curated mushroom baskets and superfood bundles for everyday vitality.",
+    subtitle: "Curated gift baskets and superfood bundles for everyday vitality.",
     cta: "Explore Gifts",
     ctaHref: "/shop",
   },
@@ -76,41 +76,46 @@ const Hero = () => {
                   src={slide.image}
                   alt={slide.label}
                   fill
-                  className="object-cover object-left hero-image"
+                  className="object-cover object-right hero-image"
                   priority={index === 0}
                   sizes="100vw"
                   quality={100}
                   unoptimized
                 />
 
+                {/* Light overlay to soften the background 2 shades lighter */}
+                <div className="absolute inset-0 bg-white/20 z-[1]" />
+
                 {/* Text overlay — left side of the image is clean so text reads clearly */}
-                <div className="relative z-10 h-full flex items-center hero-slide-wrapper">
-                  <div className="px-8 sm:px-14 xl:px-20 hero-text-col">
-                    <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#2a4026] mb-6">
-                      {slide.label}
-                    </p>
-                    <h1 className="font-light text-[#1a1a1a] whitespace-pre-line leading-[1.1] mb-6 hero-headline">
-                      {slide.title}
-                    </h1>
-                    <p className="text-[#2d3d28] text-sm sm:text-base leading-relaxed max-w-xs mb-10 font-light">
-                      {slide.subtitle}
-                    </p>
-                    <div className="flex items-center gap-6">
-                      <Link
-                        href={slide.ctaHref}
-                        className="inline-flex items-center gap-2 bg-[#1a1a1a] text-white text-xs font-medium tracking-[0.15em] uppercase py-4 px-10 rounded-full hover:bg-[#3a5a2a] transition-all duration-500"
-                      >
-                        {slide.cta}
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M5 12h14M12 5l7 7-7 7" />
-                        </svg>
-                      </Link>
-                      <Link
-                        href="/about"
-                        className="text-xs font-medium tracking-[0.15em] uppercase text-[#2d3d28] border-b border-[#2d3d28] pb-0.5 hover:text-[#1a2a16] hover:border-[#1a2a16] transition-all duration-300"
-                      >
-                        Our Story
-                      </Link>
+                <div className="relative z-10 h-full w-full flex items-center hero-slide-wrapper">
+                  <div className="max-w-[1200px] w-full mx-auto px-4 sm:px-6 xl:px-0">
+                    <div className="hero-text-col max-w-[90vw] sm:max-w-md lg:max-w-lg">
+                      <p className="text-[10px] sm:text-xs font-medium tracking-[0.2em] uppercase text-forest mb-4 sm:mb-6">
+                        {slide.label}
+                      </p>
+                      <h1 className="font-medium text-dark whitespace-pre-line leading-[1.1] mb-4 sm:mb-6 hero-headline">
+                        {slide.title}
+                      </h1>
+                      <p className="text-forest text-sm sm:text-base leading-relaxed max-w-xs mb-6 sm:mb-10 font-light">
+                        {slide.subtitle}
+                      </p>
+                      <div className="flex items-center gap-3 sm:gap-6">
+                        <Link
+                          href={slide.ctaHref}
+                          className="inline-flex items-center gap-2 bg-forest text-white text-[10px] sm:text-xs font-medium tracking-[0.15em] uppercase py-3 sm:py-4 px-6 sm:px-10 rounded-full hover:bg-dark transition-all duration-500"
+                        >
+                          {slide.cta}
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M5 12h14M12 5l7 7-7 7" />
+                          </svg>
+                        </Link>
+                        <Link
+                          href="/about"
+                          className="text-xs font-medium tracking-[0.15em] uppercase text-forest border-b border-forest pb-0.5 hover:text-forest hover:border-forest transition-all duration-300"
+                        >
+                          Our Story
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -121,21 +126,21 @@ const Hero = () => {
         </Swiper>
 
         {/* Navigation Controls */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex items-center gap-4">
+        <div className="flex items-center justify-center gap-4 mt-8 pb-4">
           <button
             ref={setPrevEl}
-            className="custom-prev w-9 h-9 flex items-center justify-center rounded-full border border-[#6a8a65] bg-white/20 backdrop-blur-sm hover:bg-white/40 transition-all text-[#1a1a1a] disabled:opacity-30"
+            className="custom-prev w-8 h-8 flex items-center justify-center rounded-full border border-transparent hover:border-dark hover:bg-transparent transition-all text-dark hover:text-black disabled:opacity-30"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M15 18l-6-6 6-6" />
             </svg>
           </button>
           <div ref={setPaginationEl} className="custom-pagination !static !w-auto !transform-none flex gap-2 items-center" />
           <button
             ref={setNextEl}
-            className="custom-next w-9 h-9 flex items-center justify-center rounded-full border border-[#6a8a65] bg-white/20 backdrop-blur-sm hover:bg-white/40 transition-all text-[#1a1a1a] disabled:opacity-30"
+            className="custom-next w-8 h-8 flex items-center justify-center rounded-full border border-transparent hover:border-dark hover:bg-transparent transition-all text-dark hover:text-black disabled:opacity-30"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 18l6-6-6-6" />
             </svg>
           </button>

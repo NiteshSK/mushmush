@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import PaymentModal from "@/components/Training/PaymentModal";
+import UPIPaymentModal from "@/components/Payment/UPIPaymentModal";
 import RegistrationModal from "@/components/Training/RegistrationModal";
 import { getTrainingProgramPrice, isEarlyBirdOfferValid } from "@/lib/utils";
 
@@ -657,8 +657,15 @@ const TrainingSchedule: React.FC<TrainingScheduleProps> = ({ programSlug }) => {
       )}
 
       {showPaymentModal && pendingRegistration && (
-        <PaymentModal
-          registration={pendingRegistration}
+        <UPIPaymentModal
+          payment={{
+            type: "training",
+            registrationId: pendingRegistration.id,
+            registrationNumber: pendingRegistration.registrationNumber,
+            participantName: pendingRegistration.participantName,
+            programName: pendingRegistration.trainingProgram.name,
+            amount: pendingRegistration.totalAmount,
+          }}
           onClose={() => {
             setShowPaymentModal(false);
             setPendingRegistration(null);

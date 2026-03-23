@@ -11,7 +11,9 @@ const config: Config = {
   darkMode: "class",
   theme: {
     fontFamily: {
-      "euclid-circular-a": ["Euclid Circular A"],
+      sans: ["DM Sans", "system-ui", "sans-serif"],
+      "euclid-circular-a": ["DM Sans", "system-ui", "sans-serif"],
+      serif: ["DM Serif Display", "Georgia", "serif"],
     },
     container: {
       center: true,
@@ -34,9 +36,9 @@ const config: Config = {
         5: "#BBBEC9",
       },
       dark: {
-        DEFAULT: "#1C274C",
-        2: "#495270",
-        3: "#606882",
+        DEFAULT: "#1d1d1d",
+        2: "#3a3a3a",
+        3: "#555555",
         4: "#8D93A5",
         5: "#BBBEC9",
       },
@@ -51,13 +53,13 @@ const config: Config = {
         7: "#374151",
       },
       blue: {
-        DEFAULT: "#5a8a3a",
-        dark: "#3a5a2a",
-        light: "#72a84e",
-        "light-2": "#8ab872",
-        "light-3": "#a8cc96",
-        "light-4": "#c6e0b8",
-        "light-5": "#e2f0d9",
+        DEFAULT: "#5c8e61",
+        dark: "#4a7a4f",
+        light: "#72a876",
+        "light-2": "#8abb8e",
+        "light-3": "#a8cca9",
+        "light-4": "#c6e0c7",
+        "light-5": "#e2f0e3",
       },
       red: {
         DEFAULT: "#F23030",
@@ -96,6 +98,10 @@ const config: Config = {
         DEFAULT: "#F27430",
         dark: "#E1580E",
       },
+      cream: "#ffffff",
+      sand: "#f5f0eb",
+      forest: "#5c8e61",
+      bark: "#3a2a1a",
     },
     screens: {
       xsm: "375px",
@@ -104,6 +110,20 @@ const config: Config = {
       ...defaultTheme.screens,
     },
     extend: {
+      keyframes: {
+        'ping-slow': {
+          '0%': { transform: 'scale(1)', opacity: '0.6' },
+          '100%': { transform: 'scale(1.8)', opacity: '0' },
+        },
+        'bounce-gentle': {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-4px)' },
+        },
+      },
+      animation: {
+        'ping-slow': 'ping-slow 2s cubic-bezier(0, 0, 0.2, 1) infinite',
+        'bounce-gentle': 'bounce-gentle 2s ease-in-out infinite',
+      },
       fontSize: {
         "2xs": ["10px", "17px"],
         "heading-1": ["60px", "72px"],
@@ -251,7 +271,7 @@ const config: Config = {
   typography: (theme) => ({
     DEFAULT: {
       css: {
-        fontFamily: theme('fontFamily.euclid-circular-a'),
+        fontFamily: theme('fontFamily.sans'),
         color: theme('colors.gray.6'),
         maxWidth: 'none',
         '--tw-prose-body': theme('colors.gray.6'),

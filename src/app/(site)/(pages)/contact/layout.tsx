@@ -1,8 +1,8 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Contact Page | MushMush",
-  description: "Contact MushMush for inquiries about edible and medicinal mushrooms",
+  title: "Contact Page | Kosvana",
+  description: "Contact Kosvana for inquiries about our premium mushrooms, dry fruits, seeds, spices, and training programs",
 };
 
 export default function ContactLayout({

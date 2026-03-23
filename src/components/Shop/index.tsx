@@ -6,7 +6,6 @@ import { updateproductDetails } from "@/redux/features/product-details";
 import Breadcrumb from "../Common/Breadcrumb";
 import SingleGridItem from "./SingleGridItem";
 import SingleListItem from "./SingleListItem";
-import CustomSelect from "../ShopWithSidebar/CustomSelect";
 import NotifyMeModal from "../NotifyMeModal";
 import { useProducts } from "@/hooks/useProducts";
 import { Product } from "@/types/product";
@@ -18,27 +17,24 @@ interface ShopProps {
 const Shop: React.FC<ShopProps> = ({ showFilters = true }) => {
   const [productStyle, setProductStyle] = useState("grid");
   const [currentPage, setCurrentPage] = useState(1);
-  const productsPerPage = 8;
+  const productsPerPage = 12;
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  
-  // NotifyMe modal state
+
   const [notifyModalOpen, setNotifyModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   const router = useRouter();
   const dispatch = useDispatch();
-  
-  // Get initial category from URL params
+
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get("category");
-  
-  // Use API filtering for categories, client-side for price
+
   const { products, loading, error } = useProducts({
-    category: selectedCategories.length === 1 ? selectedCategories[0] : undefined
+    category: selectedCategories.length === 1 ? selectedCategories[0] : undefined,
+    limit: 100
   });
 
-  // --- PRICE FILTER STATE ---
   const maxPrice = useMemo(() => {
     if (products.length === 0) return 1700;
     return Math.ceil(Math.max(...products.map(p => p.price)) / 100) * 100;
@@ -50,14 +46,12 @@ const Shop: React.FC<ShopProps> = ({ showFilters = true }) => {
   }, [maxPrice]);
 
   const handleProductClick = (product: Product) => {
-    // Only navigate to details if product is in stock
     if (product.inStock) {
       dispatch(updateproductDetails(product));
       router.push(`/shop-details/${product.slug}`);
     }
   };
 
-  // Handle opening notify me modal
   const handleNotifyMe = (product: Product) => {
     setSelectedProduct(product);
     setNotifyModalOpen(true);
@@ -99,7 +93,6 @@ const Shop: React.FC<ShopProps> = ({ showFilters = true }) => {
 
     setSelectedCategories(newCategories);
 
-    // Update URL to reflect category filter using slug
     const singleSlug = newCategories.length === 1 ? newCategories[0] : '';
 
     if (singleSlug) {
@@ -109,215 +102,218 @@ const Shop: React.FC<ShopProps> = ({ showFilters = true }) => {
     }
   };
 
-  // --- CLIENT-SIDE PRICE FILTERING ONLY ---
-  // Category filtering is now handled by the API
   const filteredProducts: Product[] = useMemo(() => {
-    // First filter by price on client-side since category filtering is handled by API
-    const priceFilteredProducts = products.filter(product => product.price <= priceValue);
-    
-    // Then sort to prioritize in-stock products
-    return priceFilteredProducts.sort((a, b) => {
-      // In-stock products come first
-      if (a.inStock && !b.inStock) return -1;
-      if (!a.inStock && b.inStock) return 1;
-      // If both have same stock status, maintain original order
-      return 0;
-    });
+    const priceFiltered = products.filter(product => product.price <= priceValue);
+    const inStock = priceFiltered.filter(p => p.inStock);
+    const outOfStock = priceFiltered.filter(p => !p.inStock);
+
+    // Round-robin by category so all categories are interleaved
+    const spread = (items: Product[]) => {
+      const catMap: Record<string, Product[]> = {};
+      items.forEach(p => {
+        const slug = p.categories?.[0]?.category?.slug || "other";
+        if (!catMap[slug]) catMap[slug] = [];
+        catMap[slug].push(p);
+      });
+      const result: Product[] = [];
+      const keys = Object.keys(catMap);
+      let idx = 0;
+      while (keys.length > 0) {
+        const key = keys[idx % keys.length];
+        const item = catMap[key].shift();
+        if (item) result.push(item);
+        if (catMap[key].length === 0) {
+          keys.splice(idx % keys.length, 1);
+          if (keys.length === 0) break;
+        } else {
+          idx++;
+        }
+      }
+      return result;
+    };
+
+    return [...spread(inStock), ...spread(outOfStock)];
   }, [products, priceValue]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedCategories, priceValue]); // Reset page when any filter changes
+  }, [selectedCategories, priceValue]);
 
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
   const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
-  const options = [
-    { label: "Latest Products", value: "0" },
-    { label: "Best Selling", value: "1" },
-    { label: "Old Products", value: "2" },
-  ];
-
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue"></div>
-      </div>
+      <>
+        <Breadcrumb title={"Shop"} pages={["Shop"]} />
+        <div className="flex justify-center items-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-forest border-t-transparent"></div>
+        </div>
+      </>
     );
   }
 
   if (error) {
     return (
-      <div className="text-center py-20">
-        <p className="text-red-600">Error loading products: {error}</p>
-      </div>
+      <>
+        <Breadcrumb title={"Shop"} pages={["Shop"]} />
+        <div className="text-center py-20">
+          <p className="text-red-600 text-sm">Error loading products: {error}</p>
+        </div>
+      </>
     );
   }
 
   return (
     <>
-      <Breadcrumb
-        title={"Explore All Products"}
-        pages={["shop", "/", "products"]}
-      />
-      <section className="overflow-hidden relative pb-4 pt-5 lg:pt-10 xl:pt-2 bg-[#f3f4f6]">
+      <Breadcrumb title={"Shop"} pages={["Shop"]} />
+
+      <section className="py-12 sm:py-16">
         {/* Mobile sidebar overlay */}
         {filtersVisible && (
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-9998 lg:hidden"
+            className="fixed inset-0 bg-black/40 z-9998 lg:hidden"
             onClick={() => setFiltersVisible(false)}
           />
         )}
 
-        <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
-          <div className={`flex gap-7.5 ${!filtersVisible ? 'justify-center' : ''}`}>
-            
-            {/* Collapsible Sidebar */}
+        <div className="max-w-[1200px] w-full mx-auto px-4 sm:px-6 xl:px-0">
+          {/* Toolbar */}
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setFiltersVisible(!filtersVisible)}
+                className="flex items-center gap-2 text-sm font-medium text-dark hover:text-forest transition-colors"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="4" y1="21" x2="4" y2="14" /><line x1="4" y1="10" x2="4" y2="3" />
+                  <line x1="12" y1="21" x2="12" y2="12" /><line x1="12" y1="8" x2="12" y2="3" />
+                  <line x1="20" y1="21" x2="20" y2="16" /><line x1="20" y1="12" x2="20" y2="3" />
+                  <line x1="1" y1="14" x2="7" y2="14" /><line x1="9" y1="8" x2="15" y2="8" />
+                  <line x1="17" y1="16" x2="23" y2="16" />
+                </svg>
+                {filtersVisible ? 'Hide Filters' : 'Filters'}
+              </button>
+              <span className="text-sm text-gray-400">
+                {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setProductStyle("grid")}
+                className={`p-2 rounded-lg transition-colors ${productStyle === "grid" ? "bg-dark text-white" : "text-gray-400 hover:text-dark"}`}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
+                  <rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
+                </svg>
+              </button>
+              <button
+                onClick={() => setProductStyle("list")}
+                className={`p-2 rounded-lg transition-colors ${productStyle === "list" ? "bg-dark text-white" : "text-gray-400 hover:text-dark"}`}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" />
+                  <line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" />
+                  <line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div className="flex gap-6 lg:gap-8">
+            {/* Sidebar Filters */}
             {filtersVisible && (
-              <div className="sidebar-content fixed lg:z-1 z-9999 left-0 top-0 lg:translate-x-0 lg:static w-full lg:w-[270px] lg:flex-none lg:shrink-0 ease-out duration-200 translate-x-0 bg-white p-5 h-screen lg:h-auto overflow-y-auto">
+              <div className="fixed lg:static z-9999 lg:z-auto left-0 top-0 w-full lg:w-[240px] flex-shrink-0 bg-white lg:bg-transparent h-screen lg:h-auto overflow-y-auto lg:overflow-visible p-6 lg:p-0">
                 <div className="lg:hidden flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-dark">Filters</h3>
-                  <button
-                    onClick={() => setFiltersVisible(false)}
-                    className="p-2 hover:bg-gray-100 rounded"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <h3 className="font-medium text-lg text-dark">Filters</h3>
+                  <button onClick={() => setFiltersVisible(false)} className="text-gray-400 hover:text-dark">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
                     </svg>
                   </button>
                 </div>
-                
-                <div className="space-y-6">
-                  {/* Filters header card inside sidebar */}
-                  <div className="bg-gray shadow-1 rounded-lg py-4 px-5">
-                    <div className="flex items-center justify-between">
-                      <p>Filters:</p>
-                      <button
-                        onClick={() => {
-                          setSelectedCategories([]);
-                          setPriceValue(maxPrice);
-                          setCurrentPage(1);
-                          if (typeof window !== 'undefined') {
-                            router.push(window.location.pathname, { scroll: false });
-                          }
-                        }}
-                        className="text-blue"
-                      >
-                        Clean All
-                      </button>
-                    </div>
+
+                <div className="space-y-8">
+                  {/* Clear all */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium uppercase tracking-wider text-gray-400">Filters</span>
+                    <button
+                      onClick={() => {
+                        setSelectedCategories([]);
+                        setPriceValue(maxPrice);
+                        setCurrentPage(1);
+                        if (typeof window !== 'undefined') {
+                          router.push(window.location.pathname, { scroll: false });
+                        }
+                      }}
+                      className="text-xs text-forest hover:underline"
+                    >
+                      Clear all
+                    </button>
                   </div>
 
-                  {/* Category Filter */}
-                  <div className="bg-gray shadow-1 rounded-lg p-5">
-                    <h4 className="font-semibold text-lg text-dark mb-5">Category</h4>
-                    <div className="flex flex-col gap-4">
+                  {/* Categories */}
+                  <div>
+                    <h4 className="text-sm font-medium text-dark mb-4">Category</h4>
+                    <div className="flex flex-col gap-3">
                       {categoriesWithCounts.map((category) => (
-                        <div key={category.slug} className="flex items-center justify-between">
+                        <label key={category.slug} className="flex items-center justify-between cursor-pointer group">
                           <div className="flex items-center gap-3">
                             <input
                               type="checkbox"
-                              id={`category-${category.slug}`}
                               checked={selectedCategories.includes(category.slug)}
                               onChange={() => handleCategoryChange(category.slug)}
-                              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                              className="w-4 h-4 rounded border-gray-300 text-forest focus:ring-forest"
                             />
-                            <label htmlFor={`category-${category.slug}`} className="cursor-pointer text-base text-dark">
+                            <span className="text-sm text-gray-600 group-hover:text-dark transition-colors">
                               {category.name}
-                            </label>
+                            </span>
                           </div>
-                          <span className="text-sm text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                            {category.products}
-                          </span>
-                        </div>
+                          <span className="text-xs text-gray-400">{category.products}</span>
+                        </label>
                       ))}
                     </div>
                   </div>
 
-                  {/* Price Filter */}
-                  <div className="bg-gray shadow-1 rounded-lg p-5">
-                    <h4 className="font-semibold text-lg text-dark mb-4">Price</h4>
+                  {/* Price */}
+                  <div>
+                    <h4 className="text-sm font-medium text-dark mb-4">Price</h4>
                     <input
                       type="range"
                       min="0"
                       max={maxPrice}
                       value={priceValue}
                       onChange={(e) => setPriceValue(Number(e.target.value))}
-                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                      className="w-full h-1.5 rounded-full appearance-none cursor-pointer [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-gray-200 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-forest [&::-webkit-slider-thumb]:shadow-md [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-gray-200 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-forest [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:shadow-md [&::-moz-range-progress]:bg-forest [&::-moz-range-progress]:rounded-full"
+                      style={{ background: `linear-gradient(to right, #5c8e61 ${(priceValue / maxPrice) * 100}%, #e5e7eb ${(priceValue / maxPrice) * 100}%)` }}
                     />
                     <div className="flex items-center justify-between mt-2">
-                      <span className="text-sm text-dark font-medium">₹0</span>
-                      <span className="text-sm text-dark font-medium">₹{priceValue}</span>
+                      <span className="text-xs text-gray-500">₹0</span>
+                      <span className="text-xs text-gray-500">₹{priceValue}</span>
                     </div>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Main content area */}
-            <div className="w-full lg:flex-1">
-              {/* Filter Toggle Button */}
-              <button
-                onClick={() => setFiltersVisible(!filtersVisible)}
-                className="flex items-center gap-2 text-dark hover:text-blue mb-4 bg-white px-4 py-2 rounded-lg shadow-1"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                </svg>
-                {filtersVisible ? 'Hide Filters' : 'Show Filters'}
-              </button>
-
-              {/* Compact header with sort and count */}
-              <div className="rounded-lg bg-white shadow-1 pl-3 pr-2.5 py-2.5 mb-6 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <CustomSelect options={options} />
-                  <p>
-                    Showing{" "}
-                    <span className="text-dark">
-                      {currentProducts.length} of {filteredProducts.length}
-                    </span>{" "}
-                    Products
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setProductStyle("grid")}
-                    className={`p-2 rounded ${
-                      productStyle === "grid" ? "bg-blue text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                    }`}
-                  >
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => setProductStyle("list")}
-                    className={`p-2 rounded ${
-                      productStyle === "list" ? "bg-blue text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                    }`}
-                  >
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-
-              {/* Products Display */}
+            {/* Products */}
+            <div className="flex-1">
               {currentProducts.length > 0 ? (
                 <div
                   className={`${
                     productStyle === "grid"
-                      ? `grid gap-x-7.5 gap-y-9 ${filtersVisible ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'}`
-                      : "flex flex-col gap-7.5"
+                      ? `grid gap-6 ${filtersVisible ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'}`
+                      : "flex flex-col gap-6"
                   }`}
                 >
                   {currentProducts.map((item, index) => (
                     <div key={item.id} onClick={() => handleProductClick(item)} className="cursor-pointer">
                       {productStyle === "grid" ? (
-                        <SingleGridItem item={item} priority={index < 3} onNotifyMe={handleNotifyMe} />
+                        <SingleGridItem item={item} priority={index < 4} onNotifyMe={handleNotifyMe} />
                       ) : (
                         <SingleListItem item={item} priority={index < 2} onNotifyMe={handleNotifyMe} />
                       )}
@@ -325,53 +321,51 @@ const Shop: React.FC<ShopProps> = ({ showFilters = true }) => {
                   ))}
                 </div>
               ) : (
-                <div className="flex items-center justify-center h-60 bg-white rounded-lg shadow-1">
-                  <p className="text-lg font-medium text-gray-500">No Products Found</p>
+                <div className="flex flex-col items-center justify-center py-20">
+                  <p className="text-gray-400 text-sm mb-4">No products found</p>
+                  <button
+                    onClick={() => {
+                      setSelectedCategories([]);
+                      setPriceValue(maxPrice);
+                    }}
+                    className="text-sm text-forest hover:underline"
+                  >
+                    Clear filters
+                  </button>
                 </div>
               )}
 
               {/* Pagination */}
-              {totalPages > 0 && (
-                <div className="flex justify-center mt-15">
-                  <div className="bg-white shadow-1 rounded-md p-2">
-                    <ul className="flex items-center">
-                      <li>
-                        <button
-                          aria-label="button for previous page"
-                          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                          disabled={currentPage === 1}
-                          className="flex items-center justify-center w-8 h-9 ease-out duration-200 rounded-[3px] disabled:text-gray-4 disabled:cursor-not-allowed hover:text-white hover:bg-blue"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                          </svg>
-                        </button>
-                      </li>
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNumber) => (
-                        <li key={pageNumber}>
-                          <button
-                            onClick={() => setCurrentPage(pageNumber)}
-                            className={`flex py-1.5 px-3.5 duration-200 rounded-[3px] ${
-                              currentPage === pageNumber ? "bg-blue text-white" : "hover:text-white hover:bg-blue"
-                            }`}
-                          >
-                            {pageNumber}
-                          </button>
-                        </li>
-                      ))}
-                      <li>
-                        <button
-                          aria-label="button for next page"
-                          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                          disabled={currentPage === totalPages}
-                          className="flex items-center justify-center w-8 h-9 ease-out duration-200 rounded-[3px] hover:text-white hover:bg-blue disabled:text-gray-4 disabled:cursor-not-allowed"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </button>
-                      </li>
-                    </ul>
+              {totalPages > 1 && (
+                <div className="flex justify-center mt-12">
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                      className="w-9 h-9 flex items-center justify-center rounded-full text-sm text-gray-400 hover:text-dark hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6" /></svg>
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNumber) => (
+                      <button
+                        key={pageNumber}
+                        onClick={() => setCurrentPage(pageNumber)}
+                        className={`w-9 h-9 flex items-center justify-center rounded-full text-sm transition-colors ${
+                          currentPage === pageNumber
+                            ? "bg-dark text-white"
+                            : "text-gray-500 hover:text-dark hover:bg-gray-100"
+                        }`}
+                      >
+                        {pageNumber}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                      disabled={currentPage === totalPages}
+                      className="w-9 h-9 flex items-center justify-center rounded-full text-sm text-gray-400 hover:text-dark hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6" /></svg>
+                    </button>
                   </div>
                 </div>
               )}
@@ -380,7 +374,6 @@ const Shop: React.FC<ShopProps> = ({ showFilters = true }) => {
         </div>
       </section>
 
-      {/* NotifyMe Modal */}
       {selectedProduct && (
         <NotifyMeModal
           isOpen={notifyModalOpen}

@@ -64,7 +64,7 @@ export default function SiteLayout({
                 {loading && <PreLoader />}
                 <TopBanner />
                 <Header />
-                <div className="pt-[120px]">
+                <div className="pt-[100px]">
                   {children}
                 </div>
                 <Footer />

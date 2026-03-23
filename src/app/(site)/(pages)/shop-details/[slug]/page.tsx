@@ -13,8 +13,8 @@ export async function generateMetadata({ params }: ShopDetailsPageProps): Promis
   const { slug } = await params;
   
   return {
-    title: `${slug} | MushMush`,
-    description: `Product details for ${slug} at MushMush`,
+    title: `${slug} | Kosvana`,
+    description: `Product details for ${slug} at Kosvana`,
   };
 }
 

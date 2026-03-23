@@ -32,7 +32,8 @@ const ShopWithSidebar = () => {
   
   // Use API filtering for categories, client-side for price
   const { products, loading, error } = useProducts({
-    category: selectedCategories.length === 1 ? selectedCategories[0] : undefined
+    category: selectedCategories.length === 1 ? selectedCategories[0] : undefined,
+    limit: 100
   });
 
   // --- PRICE FILTER STATE ---

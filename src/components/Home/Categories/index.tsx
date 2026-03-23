@@ -18,49 +18,13 @@ const Categories = () => {
   const [paginationEl, setPaginationEl] = useState<HTMLElement | null>(null);
 
   return (
-    <section className="overflow-hidden py-8 pb-6 relative">
+    <section className="overflow-hidden py-12 sm:py-16 relative bg-white">
       <div className="max-w-[1200px] w-full mx-auto px-4 sm:px-6 xl:px-0">
-        <div className="mb-10">
-          <span className="flex items-center gap-2.5 font-medium text-dark mb-1.5">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <g clipPath="url(#clip0_834_7356)">
-                <path
-                  d="M3.94024 13.4474C2.6523 12.1595 2.00832 11.5155 1.7687 10.68C1.52908 9.84449 1.73387 8.9571 2.14343 7.18231L2.37962 6.15883C2.72419 4.66569 2.89648 3.91912 3.40771 3.40789C3.91894 2.89666 4.66551 2.72437 6.15865 2.3798L7.18213 2.14361C8.95692 1.73405 9.84431 1.52927 10.6798 1.76889C11.5153 2.00851 12.1593 2.65248 13.4472 3.94042L14.9719 5.46512C17.2128 7.70594 18.3332 8.82635 18.3332 10.2186C18.3332 11.6109 17.2128 12.7313 14.9719 14.9721C12.7311 17.2129 11.6107 18.3334 10.2184 18.3334C8.82617 18.3334 7.70576 17.2129 5.46494 14.9721L3.94024 13.4474Z"
-                  stroke="#3C50E0"
-                  strokeWidth="1.5"
-                />
-                <circle
-                  cx="7.17245"
-                  cy="7.39917"
-                  r="1.66667"
-                  transform="rotate(-45 7.17245 7.39917)"
-                  stroke="#3C50E0"
-                  strokeWidth="1.5"
-                />
-                <path
-                  d="M9.61837 15.4164L15.4342 9.6004"
-                  stroke="#3C50E0"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                />
-              </g>
-              <defs>
-                <clipPath id="clip0_834_7356">
-                  <rect width="20" height="20" fill="white" />
-                </clipPath>
-              </defs>
-            </svg>
-            Categories
-          </span>
-          <h2 className="font-semibold text-xl xl:text-heading-5 text-dark">
+        <div className="mb-10 text-center">
+          <h2 className="font-medium text-2xl xl:text-heading-5 text-dark">
             Shop by Category
           </h2>
+          <p className="text-gray-5 text-sm mt-2">Explore our curated selection</p>
         </div>
 
         <div className="relative">
@@ -98,9 +62,9 @@ const Categories = () => {
               // Loading skeleton
               Array.from({ length: 6 }).map((_, index) => (
                 <SwiperSlide key={`skeleton-${index}`}>
-                  <div className="flex flex-col items-center justify-center p-6 border border-gray-200 rounded-lg h-[320px] animate-pulse bg-gray-50">
-                    <div className="relative w-48 h-48 mb-4 bg-gray-200 rounded-full"></div>
-                    <div className="h-4 bg-gray-200 rounded w-20"></div>
+                  <div className="flex flex-col items-center justify-center p-4 rounded-[10px] animate-pulse bg-white">
+                    <div className="relative w-full aspect-square mb-4 bg-gray-100 rounded-[10px]"></div>
+                    <div className="h-4 bg-gray-100 rounded w-20"></div>
                   </div>
                 </SwiperSlide>
               ))
@@ -112,16 +76,16 @@ const Categories = () => {
               categories.map((category) => (
                 <SwiperSlide key={category.id}>
                   <Link href={category.path} className="group block h-full">
-                    <div className="flex flex-col items-center justify-center p-6 border border-gray-200 rounded-xl h-[320px] bg-white group-hover:shadow-lg group-hover:border-blue-300 transition-all duration-300">
-                      <div className="relative w-48 h-48 mb-6">
+                    <div className="flex flex-col items-center justify-center p-4 rounded-2xl border border-gray-200 shadow-sm bg-white">
+                      <div className="relative w-full aspect-square mb-4 rounded-xl overflow-hidden bg-gray-50">
                         <Image
                           src={category.img}
                           alt={category.title}
                           fill
-                          className="object-contain group-hover:scale-110 transition-transform duration-300"
+                          className="object-contain group-hover:scale-105 transition-transform duration-500"
                         />
                       </div>
-                      <h3 className="font-normal text-center text-dark text-lg group-hover:text-blue transition-colors duration-300 leading-tight">
+                      <h3 className="font-medium text-center text-dark text-sm group-hover:text-forest transition-colors duration-300">
                         {category.title}
                       </h3>
                     </div>
@@ -132,18 +96,24 @@ const Categories = () => {
           </Swiper>
         </div>
 
-        {/* Custom Navigation Controls (Matching Hero Style) */}
+        {/* Navigation Controls */}
         <div className="flex items-center justify-center gap-4 mt-8">
-          <button ref={setPrevEl} className="custom-prev w-10 h-10 flex items-center justify-center rounded-full border border-transparent hover:border-[#222] hover:bg-transparent transition-all text-[#222] hover:text-black disabled:opacity-30">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <button
+            ref={setPrevEl}
+            className="custom-prev w-8 h-8 flex items-center justify-center rounded-full border border-transparent hover:border-dark hover:bg-transparent transition-all text-dark hover:text-black disabled:opacity-30"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M15 18l-6-6 6-6" />
             </svg>
           </button>
 
-          <div ref={setPaginationEl} className="custom-pagination !static !w-auto !transform-none flex gap-2 items-center"></div>
+          <div ref={setPaginationEl} className="custom-pagination !static !w-auto !transform-none flex gap-2 items-center" />
 
-          <button ref={setNextEl} className="custom-next w-10 h-10 flex items-center justify-center rounded-full border border-transparent hover:border-[#222] hover:bg-transparent transition-all text-[#222] hover:text-black disabled:opacity-30">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <button
+            ref={setNextEl}
+            className="custom-next w-8 h-8 flex items-center justify-center rounded-full border border-transparent hover:border-dark hover:bg-transparent transition-all text-dark hover:text-black disabled:opacity-30"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 18l6-6-6-6" />
             </svg>
           </button>

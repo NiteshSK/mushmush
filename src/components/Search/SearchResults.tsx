@@ -6,21 +6,20 @@ import SingleGridItem from "../Shop/SingleGridItem";
 import NotifyMeModal from "../NotifyMeModal";
 import Breadcrumb from "../Common/Breadcrumb";
 import { Product } from "@/types/product";
+import Link from "next/link";
 
 const SearchResults = () => {
   const searchParams = useSearchParams();
   const query = searchParams.get('search') || searchParams.get('q') || '';
   const category = searchParams.get('category') || '';
-  
+
   const { data, loading, error, searchProducts } = useSearch();
   const [hasSearched, setHasSearched] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
-  // NotifyMe modal state
+
   const [notifyModalOpen, setNotifyModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  // Handle opening notify me modal
   const handleNotifyMe = (product: Product) => {
     setSelectedProduct(product);
     setNotifyModalOpen(true);
@@ -32,59 +31,45 @@ const SearchResults = () => {
   };
 
   useEffect(() => {
-    // Clear previous timeout
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
 
-    // Only search if we have query or category and haven't searched yet
     if ((query || category) && !hasSearched) {
-      // Debounce the search to prevent multiple calls
       timeoutRef.current = setTimeout(() => {
-        searchProducts({
-          query,
-          category,
-          page: 1,
-          limit: 12,
-        });
+        searchProducts({ query, category, page: 1, limit: 12 });
         setHasSearched(true);
       }, 300);
     }
 
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, [query, category, searchProducts, hasSearched]);
 
-  // Reset hasSearched when query or category changes
   useEffect(() => {
     setHasSearched(false);
   }, [query, category]);
 
   if (loading) {
     return (
-      <section className="pt-35 pb-20 lg:pt-45 lg:pb-25 xl:pt-50 xl:pb-30">
-        <div className="mx-auto max-w-c-1390 px-4 md:px-8 2xl:px-0">
-          <div className="flex justify-center items-center min-h-[400px]">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue"></div>
-          </div>
+      <>
+        <Breadcrumb title="Search" pages={["Search"]} />
+        <div className="flex justify-center items-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-forest border-t-transparent"></div>
         </div>
-      </section>
+      </>
     );
   }
 
   if (error) {
     return (
-      <section className="pt-35 pb-20 lg:pt-45 lg:pb-25 xl:pt-50 xl:pb-30">
-        <div className="mx-auto max-w-c-1390 px-4 md:px-8 2xl:px-0">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-red-600 mb-4">Search Error</h2>
-            <p className="text-gray-600">{error}</p>
-          </div>
+      <>
+        <Breadcrumb title="Search" pages={["Search"]} />
+        <div className="text-center py-20">
+          <p className="text-sm text-red-600">{error}</p>
         </div>
-      </section>
+      </>
     );
   }
 
@@ -93,70 +78,53 @@ const SearchResults = () => {
 
   return (
     <>
-      <Breadcrumb title="Search Results" pages={["Search Results"]} />
-      
-      <section className="overflow-hidden relative pb-20 pt-5 lg:pt-20 xl:pt-5 bg-[#f3f4f6]">
-        <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
-          
-          {/* Search Info Header */}
-          <div className="mb-8 bg-white shadow-1 rounded-lg p-6">
-            <h1 className="text-2xl font-bold text-dark mb-2">
-              Search Results
-            </h1>
+      <Breadcrumb title="Search" pages={["Search"]} />
+
+      <section className="py-12 sm:py-16">
+        <div className="max-w-[1200px] w-full mx-auto px-4 sm:px-6 xl:px-0">
+          {/* Search info */}
+          <div className="mb-10">
             {query && (
-              <p className="text-gray-600 mb-2">
-                Showing results for: <span className="font-semibold text-blue">"{query}"</span>
+              <p className="text-sm text-gray-500 mb-1">
+                Results for <span className="text-dark font-medium">"{query}"</span>
               </p>
             )}
-            <p className="text-gray-600">
+            <p className="text-xs text-gray-400">
               {totalResults} product{totalResults !== 1 ? 's' : ''} found
             </p>
           </div>
 
           {/* Results */}
           {products.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-7.5 gap-y-9">
-              {products.map((product) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {products.map((product: Product) => (
                 <SingleGridItem key={product.id} item={product} onNotifyMe={handleNotifyMe} />
               ))}
             </div>
           ) : (
-            <div className="bg-white shadow-1 rounded-lg p-12 text-center">
-              <div className="mb-6">
-                <svg
-                  className="mx-auto h-24 w-24 text-gray-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
+            <div className="max-w-md mx-auto text-center py-12">
+              <div className="w-20 h-20 rounded-full bg-cream flex items-center justify-center mx-auto mb-6">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-gray-400">
+                  <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-dark mb-2">
-                No products found
-              </h3>
-              <p className="text-gray-600 mb-6">
-                {query 
-                  ? `We couldn't find any products matching "${query}". Try adjusting your search terms.`
-                  : "No products match your current filters. Try adjusting your criteria."
-                }
+              <h2 className="font-medium text-xl text-dark mb-2">No results found</h2>
+              <p className="text-sm text-gray-400 mb-8">
+                {query
+                  ? `We couldn't find products matching "${query}".`
+                  : "No products match your search."}
               </p>
-              <div className="space-y-2 text-sm text-gray-500">
-                <p>• Check your spelling</p>
-                <p>• Try more general keywords</p>
-                <p>• Browse our categories instead</p>
-              </div>
+              <Link
+                href="/shop"
+                className="inline-flex items-center gap-2 bg-forest text-white text-sm font-medium py-3 px-8 rounded-full hover:bg-dark transition-colors duration-300"
+              >
+                Browse All Products
+              </Link>
             </div>
           )}
         </div>
       </section>
 
-      {/* NotifyMe Modal */}
       {selectedProduct && (
         <NotifyMeModal
           isOpen={notifyModalOpen}

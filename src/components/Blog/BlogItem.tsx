@@ -3,71 +3,45 @@ import { BlogItem } from "@/types/blogItem";
 import Image from "next/image";
 import Link from "next/link";
 
-const BlogItem = ({ blog, slug }: { blog: BlogItem; slug: string }) => {
+const BlogItemCard = ({ blog, slug }: { blog: BlogItem; slug: string }) => {
   let imgSrc = typeof blog.img === "string" && blog.img.trim() ? blog.img : "/images/blog/blog-small-01.jpg";
-  
-  // Ensure the path starts with / for Next.js Image component
+
   if (imgSrc.startsWith('public/')) {
-    imgSrc = '/' + imgSrc.substring(7); // Remove 'public/' and add leading '/'
+    imgSrc = '/' + imgSrc.substring(7);
   } else if (!imgSrc.startsWith('/') && !imgSrc.startsWith('http')) {
-    imgSrc = '/' + imgSrc; // Add leading '/' if missing
+    imgSrc = '/' + imgSrc;
   }
-  
+
   return (
-    <div className="shadow-1 bg-white rounded-xl px-4 sm:px-5 pt-5 pb-4">
-      <Link href={`/blogs/${slug}`} className="rounded-md overflow-hidden">
+    <div className="group">
+      <Link href={`/blogs/${slug}`} className="block rounded-xl overflow-hidden mb-5">
         <Image
           src={imgSrc}
-          alt="blog"
-          className="rounded-md w-full"
-          width={330}
-          height={210}
+          alt={blog.title}
+          className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-500"
+          width={400}
+          height={260}
         />
       </Link>
 
-      <div className="mt-5.5">
-        <span className="flex items-center gap-3 mb-2.5">
-          <a
-            href="#"
-            className="text-custom-sm ease-out duration-200 hover:text-blue"
-          >
-            {blog.date}
-          </a>
+      <div>
+        <div className="flex items-center gap-3 mb-3">
+          <span className="text-xs text-gray-400">{blog.date}</span>
+          <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+          <span className="text-xs text-gray-400">{blog.views} Views</span>
+        </div>
 
-          {/* <!-- divider --> */}
-          <span className="block w-px h-4 bg-gray-4"></span>
-
-          <a
-            href="#"
-            className="text-custom-sm ease-out duration-200 hover:text-blue"
-          >
-            {blog.views} Views
-          </a>
-        </span>
-
-        <h2 className="font-medium text-dark text-lg sm:text-xl ease-out duration-200 mb-4 hover:text-blue">
+        <h2 className="font-medium text-lg text-dark mb-3 group-hover:text-forest transition-colors">
           <Link href={`/blogs/${slug}`}>{blog.title}</Link>
         </h2>
 
         <Link
           href={`/blogs/${slug}`}
-          className="text-custom-sm inline-flex items-center gap-2 py-2 ease-out duration-200 hover:text-blue"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-forest hover:text-dark transition-colors"
         >
           Read More
-          <svg
-            className="fill-current"
-            width="18"
-            height="18"
-            viewBox="0 0 18 18"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              fillRule="evenodd"
-              clipRule="evenodd"
-              d="M10.1023 4.10225C10.3219 3.88258 10.6781 3.88258 10.8977 4.10225L15.3977 8.60225C15.6174 8.82192 15.6174 9.17808 15.3977 9.39775L10.8977 13.8977C10.6781 14.1174 10.3219 14.1174 10.1023 13.8977C9.88258 13.6781 9.88258 13.3219 10.1023 13.1023L13.642 9.5625H3C2.68934 9.5625 2.4375 9.31066 2.4375 9C2.4375 8.68934 2.68934 8.4375 3 8.4375H13.642L10.1023 4.89775C9.88258 4.67808 9.88258 4.32192 10.1023 4.10225Z"
-              fill=""
-            />
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M5 12h14M12 5l7 7-7 7" />
           </svg>
         </Link>
       </div>
@@ -75,4 +49,4 @@ const BlogItem = ({ blog, slug }: { blog: BlogItem; slug: string }) => {
   );
 };
 
-export default BlogItem;
+export default BlogItemCard;

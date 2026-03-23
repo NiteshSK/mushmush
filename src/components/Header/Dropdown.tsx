@@ -17,10 +17,10 @@ const Dropdown = ({ menuItem, stickyMenu, setNavigationOpen }: {
     >
       <a
         href="#"
-        className={`group/link relative hover:text-[#5a8a3a] text-custom-sm font-medium text-[#333] flex items-center gap-1 capitalize transition-colors duration-200 ${stickyMenu ? "xl:py-4" : "xl:py-5"
-          } ${pathUrl.includes(menuItem.title) && "!text-[#5a8a3a]"}`}
+        className={`group/link relative hover:text-forest text-custom-sm font-medium text-dark flex items-center gap-1 capitalize transition-colors duration-200 ${stickyMenu ? "xl:py-4" : "xl:py-5"
+          } ${pathUrl.includes(menuItem.title) && "!text-forest"}`}
       >
-        <span className={`absolute top-0 left-0 w-full h-[3px] rounded-b-[2px] bg-[#5a8a3a] transition-transform duration-300 origin-center ${pathUrl.includes(menuItem.title) ? 'scale-x-100' : 'scale-x-0 group-hover/link:scale-x-100'}`}></span>
+        <span className={`absolute top-0 left-0 w-full h-[3px] rounded-b-[2px] bg-forest transition-transform duration-300 origin-center ${pathUrl.includes(menuItem.title) ? 'scale-x-100' : 'scale-x-0 group-hover/link:scale-x-100'}`}></span>
         {menuItem.title}
         <svg
           className="fill-current cursor-pointer opacity-60"
@@ -51,7 +51,7 @@ const Dropdown = ({ menuItem, stickyMenu, setNavigationOpen }: {
             <Link
               href={item.path}
               onClick={() => setNavigationOpen(false)}
-              className={`flex text-custom-sm text-[#444] hover:text-blue hover:bg-gray-50 py-[7px] px-4.5 transition-colors duration-150 ${pathUrl === item.path && "!text-blue bg-gray-50"
+              className={`flex text-custom-sm text-dark-3 hover:text-forest hover:bg-forest/5 py-[7px] px-4.5 transition-colors duration-150 ${pathUrl === item.path && "!text-forest bg-forest/5"
                 } `}
             >
               {item.title}

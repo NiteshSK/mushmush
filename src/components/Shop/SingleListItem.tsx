@@ -67,7 +67,7 @@ const SingleListItem = ({ item, priority = false, onNotifyMe }: Props) => {
   };
 
   return (
-    <div className="group flex items-center gap-6 rounded-lg bg-white p-4 shadow-1">
+    <div className="group flex items-center gap-6 rounded-xl bg-white p-4 border border-gray-100 hover:shadow-sm transition-shadow duration-200">
       <div className="relative overflow-hidden w-1/4">
         <Link href={`/shop-details/${item.slug}`} onClick={handleNavigateToDetails}>
           <Image
@@ -76,24 +76,22 @@ const SingleListItem = ({ item, priority = false, onNotifyMe }: Props) => {
             width={200}
             height={200}
             priority={priority}
-            className={`rounded-lg transition-all duration-300 ${
+            className={`rounded-xl transition-all duration-300 ${
               !item.inStock ? "grayscale" : ""
             }`}
           />
         </Link>
         {!item.inStock ? (
-            <div className="absolute top-2 right-2 bg-dark text-white text-xs font-semibold px-3 py-1 rounded-full z-10">
-                Out of Stock
-            </div>
+          <div className="sold-out-overlay"><span>Sold Out</span></div>
         ) : item.hasDiscount && item.discountPercentage ? (
-          <div className="absolute top-2 left-2 bg-green text-white text-xs font-semibold px-3 py-1 rounded-full z-10">
+          <div className="absolute top-2 left-2 bg-forest text-white text-[10px] font-medium uppercase tracking-wider px-3 py-1 rounded-full z-10">
             {item.discountPercentage}% OFF
           </div>
         ) : null}
       </div>
 
       <div className="w-3/4">
-        <h3 className="font-medium text-dark ease-out duration-200 hover:text-blue mb-2 text-xl">
+        <h3 className="font-medium text-lg text-dark hover:text-forest transition-colors duration-200 mb-2">
           {/* --- UPDATED: Link is now always active --- */}
           <Link href={`/shop-details/${item.slug}`} onClick={handleNavigateToDetails}>
             {item.title}
@@ -110,7 +108,7 @@ const SingleListItem = ({ item, priority = false, onNotifyMe }: Props) => {
         </div>
         
         <div className="flex items-center justify-between">
-            <span className="flex items-center gap-2 font-medium text-xl">
+            <span className="flex items-center gap-2 font-medium text-lg">
                 {item.hasDiscount ? (
                   <>
                     <span className="text-dark">₹{item.discountedPrice}</span>
@@ -123,13 +121,13 @@ const SingleListItem = ({ item, priority = false, onNotifyMe }: Props) => {
             
             <div className="flex items-center gap-2">
               {item.inStock ? (
-                  <button onClick={handleAddToCart} className="inline-flex font-medium text-custom-sm py-[7px] px-5 rounded-[5px] bg-blue text-white ease-out duration-200 hover:bg-blue-dark">
+                  <button onClick={handleAddToCart} className="inline-flex font-medium text-sm py-2 px-6 rounded-full bg-forest text-white transition-colors duration-300 hover:bg-dark">
                       Add to Cart
                   </button>
               ) : (
-                  <button 
+                  <button
                       onClick={() => onNotifyMe?.(item)}
-                      className="inline-flex font-medium text-custom-sm py-[7px] px-5 rounded-[5px] bg-dark text-white ease-out duration-200 hover:bg-opacity-90"
+                      className="inline-flex font-medium text-sm py-2 px-6 rounded-full bg-forest text-white transition-colors duration-300 hover:bg-dark"
                   >
                       Notify Me
                   </button>
@@ -139,10 +137,10 @@ const SingleListItem = ({ item, priority = false, onNotifyMe }: Props) => {
                 onClick={handleItemToWishList}
                 disabled={isWishlistLoading}
                 aria-label={isInWishlist(item.id) ? "Remove from wishlist" : "Add to wishlist"}
-                className={`flex items-center justify-center w-9 h-9 rounded-[5px] shadow-1 ease-out duration-200 ${
-                  isInWishlist(item.id) 
-                    ? "text-white bg-red hover:bg-red-dark" 
-                    : "text-dark bg-white hover:text-blue"
+                className={`flex items-center justify-center w-9 h-9 rounded-full border transition-colors duration-200 ${
+                  isInWishlist(item.id)
+                    ? "text-white bg-red border-red hover:bg-red-dark"
+                    : "text-dark bg-white border-gray-200 hover:text-forest hover:border-forest"
                 } ${isWishlistLoading ? "opacity-50" : ""}`}
               >
                 <svg className="fill-current" width="16" height="16" viewBox="0 0 16 16">

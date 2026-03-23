@@ -13,7 +13,7 @@ import PaymentMethod from "./PaymentMethod";
 import Coupon from "./Coupon";
 import AddressSelector from "./AddressSelector";
 import Shipping from "./Shipping";
-import UPIPaymentModal from "./UPIPaymentModal";
+import UPIPaymentModal from "@/components/Payment/UPIPaymentModal";
 
 const INDIAN_STATES = [
   "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
@@ -509,8 +509,8 @@ const CheckoutWithOTP = () => {
   return (
     <>
       <Breadcrumb title={"Checkout"} pages={["checkout"]} />
-      <section className="overflow-hidden py-20 bg-gray-2">
-        <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
+      <section className="overflow-hidden py-20 bg-white">
+        <div className="max-w-[1200px] w-full mx-auto px-4 sm:px-8 xl:px-0">
           <form onSubmit={handleCheckout}>
             <div className="flex flex-col lg:flex-row gap-7.5 xl:gap-11">
               {/* Checkout Left Column */}
@@ -543,7 +543,7 @@ const CheckoutWithOTP = () => {
                 )}
                 
                 {/* Contact Information - Always show */}
-                <div className="bg-white shadow-1 rounded-[10px] p-4 sm:p-8.5 mb-7.5">
+                <div className="bg-white border border-gray-100 rounded-[10px] p-4 sm:p-8.5 mb-7.5">
                   <h3 className="font-medium text-lg text-dark mb-5">Contact Information</h3>
                   
                   <div className="flex flex-col lg:flex-row gap-5 mb-5">
@@ -558,7 +558,7 @@ const CheckoutWithOTP = () => {
                         required
                         defaultValue={session?.user?.name?.split(' ')[0] || ''}
                         placeholder="Your first name"
-                        className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                        className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
                       />
                     </div>
                     <div className="w-full">
@@ -572,7 +572,7 @@ const CheckoutWithOTP = () => {
                         required
                         defaultValue={session?.user?.name?.split(' ').slice(1).join(' ') || ''}
                         placeholder="Your last name"
-                        className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                        className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
                       />
                     </div>
                   </div>
@@ -588,7 +588,7 @@ const CheckoutWithOTP = () => {
                       required
                       defaultValue={session?.user?.email || ''}
                       placeholder="your.email@example.com"
-                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
                     />
                   </div>
 
@@ -605,14 +605,14 @@ const CheckoutWithOTP = () => {
                       placeholder="10-digit mobile number"
                       maxLength={10}
                       pattern="[6-9]\d{9}"
-                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
                     />
                   </div>
                 </div>
                 
                 {/* Address Selector for logged-in users */}
                 {session && (
-                  <div className="bg-white shadow-1 rounded-[10px] p-4 sm:p-8.5 mb-7.5">
+                  <div className="bg-white border border-gray-100 rounded-[10px] p-4 sm:p-8.5 mb-7.5">
                     <AddressSelector 
                       onAddressSelect={handleAddressSelect}
                       selectedAddressId={selectedAddress?.id}
@@ -622,7 +622,7 @@ const CheckoutWithOTP = () => {
                 
                 {/* Show full billing address form only if using new address or not logged in */}
                 {(useNewAddress || !session) && (
-                  <div className="bg-white shadow-1 rounded-[10px] p-4 sm:p-8.5 mb-7.5">
+                  <div className="bg-white border border-gray-100 rounded-[10px] p-4 sm:p-8.5 mb-7.5">
                     <h3 className="font-medium text-lg text-dark mb-5">Billing Address</h3>
                     
                     <div className="mb-5">
@@ -635,7 +635,7 @@ const CheckoutWithOTP = () => {
                         id="address"
                         required
                         placeholder="House number and street name"
-                        className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                        className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
                       />
                     </div>
 
@@ -649,7 +649,7 @@ const CheckoutWithOTP = () => {
                         id="town"
                         required
                         placeholder="Enter city name"
-                        className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                        className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
                       />
                     </div>
 
@@ -661,7 +661,7 @@ const CheckoutWithOTP = () => {
                         name="country"
                         id="country"
                         required
-                        className="w-full bg-gray-1 rounded-md border border-gray-3 text-dark py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                        className="w-full bg-gray-1 rounded-md border border-gray-3 text-dark py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
                       >
                         <option value="">Select State</option>
                         <option value="Andhra Pradesh">Andhra Pradesh</option>
@@ -708,14 +708,14 @@ const CheckoutWithOTP = () => {
                         placeholder="6-digit PIN code"
                         maxLength={6}
                         pattern="\d{6}"
-                        className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                        className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
                       />
                     </div>
                   </div>
                 )}
                 
                 <Shipping />
-                <div className="bg-white shadow-1 rounded-[10px] p-4 sm:p-8.5 mt-7.5">
+                <div className="bg-white border border-gray-100 rounded-[10px] p-4 sm:p-8.5 mt-7.5">
                   <label htmlFor="notes" className="block mb-2.5">Other Notes (optional)</label>
                   <textarea
                     name="notes"
@@ -724,14 +724,14 @@ const CheckoutWithOTP = () => {
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="Notes about your order, e.g. special notes for delivery."
-                    className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full p-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                    className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full p-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
                   ></textarea>
                 </div>
               </div>
 
               {/* Checkout Right Column (Your Order Summary) */}
               <div className="max-w-[455px] w-full">
-                <div className="bg-white shadow-1 rounded-[10px]">
+                <div className="bg-white border border-gray-100 rounded-[10px]">
                   <div className="border-b border-gray-3 py-5 px-4 sm:px-8.5">
                     <h3 className="font-medium text-xl text-dark">Your Order</h3>
                   </div>
@@ -789,7 +789,7 @@ const CheckoutWithOTP = () => {
                 <button
                   type="submit"
                   disabled={loading || cartItems.length === 0}
-                  className="w-full flex justify-center font-medium text-white bg-blue py-3 px-6 rounded-md ease-out duration-200 hover:bg-blue-dark mt-7.5 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  className="w-full flex justify-center font-medium text-white bg-forest py-3 px-6 rounded-full ease-out duration-200 hover:bg-dark mt-7.5 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
                   {loading ? 'Processing...' : 'Proceed to Checkout'}
                 </button>
@@ -837,7 +837,7 @@ const CheckoutWithOTP = () => {
                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                 placeholder="Enter 6-digit OTP"
                 maxLength={6}
-                className="w-full px-4 py-3 border border-gray-3 rounded-md text-center text-2xl tracking-widest mb-3 focus:border-blue focus:ring-2 focus:ring-blue/20 outline-none"
+                className="w-full px-4 py-3 border border-gray-3 rounded-md text-center text-2xl tracking-widest mb-3 focus:border-forest focus:ring-2 focus:ring-forest/20 outline-none"
                 autoFocus
               />
               
@@ -852,7 +852,7 @@ const CheckoutWithOTP = () => {
                     type="button"
                     onClick={handleResendOTP}
                     disabled={resendingOTP}
-                    className="text-sm text-blue hover:text-blue-dark font-medium disabled:text-gray-400 disabled:cursor-not-allowed"
+                    className="text-sm text-forest hover:text-forest/80 font-medium disabled:text-gray-400 disabled:cursor-not-allowed"
                   >
                     {resendingOTP ? 'Sending...' : 'Resend OTP'}
                   </button>
@@ -874,14 +874,14 @@ const CheckoutWithOTP = () => {
                     setError("");
                     setResendTimer(0);
                   }}
-                  className="flex-1 px-4 py-3 border border-gray-3 rounded-md hover:bg-gray-100 transition-colors"
+                  className="flex-1 px-4 py-3 border border-gray-200 rounded-full hover:bg-gray-100 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading || otp.length !== 6}
-                  className="flex-1 px-4 py-3 bg-blue text-white rounded-md hover:bg-blue-dark disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                  className="flex-1 px-4 py-3 bg-forest text-white rounded-full hover:bg-dark disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                 >
                   {loading ? 'Verifying...' : 'Verify & Continue to Payment'}
                 </button>
@@ -894,11 +894,12 @@ const CheckoutWithOTP = () => {
       {/* UPI Payment Modal */}
       {showUPIModal && orderCreated && checkoutData && (
         <UPIPaymentModal
-          orderData={{
+          payment={{
+            type: "order",
             orderNumber: orderCreated.orderNumber,
             customerName: checkoutData.customerName,
             email: checkoutData.email,
-            total: checkoutData.total
+            amount: checkoutData.total,
           }}
           onClose={() => {
             setShowUPIModal(false);
