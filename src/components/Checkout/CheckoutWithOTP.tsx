@@ -93,9 +93,22 @@ const CheckoutWithOTP = () => {
   const [useNewAddress, setUseNewAddress] = useState(true);
   const [otpSent, setOtpSent] = useState(false);
   const userPhone = contactInfo.phone;
-  
-  const shippingFee = 50.00;
-  const total = subtotal + shippingFee;
+
+  // Dynamic shipping fee based on pincode
+  const [shippingFee, setShippingFee] = useState<number | null>(null);
+  const [shippingInfo, setShippingInfo] = useState<{
+    deliverable: boolean;
+    zoneName?: string;
+    estimatedDays?: string;
+    freeAbove?: number | null;
+    freeShipping?: boolean;
+    message?: string;
+  } | null>(null);
+  const [shippingPincode, setShippingPincode] = useState('');
+  const [checkingShipping, setCheckingShipping] = useState(false);
+
+  const convenienceFee = 12;
+  const total = subtotal + (shippingFee ?? 0) + convenienceFee;
 
   // Fetch saved addresses and user profile on mount
   useEffect(() => {
@@ -156,6 +169,55 @@ const CheckoutWithOTP = () => {
     }
   };
 
+  // Check shipping fee by pincode
+  const checkShippingFee = async (pincode: string) => {
+    if (!/^\d{6}$/.test(pincode)) {
+      setShippingInfo(null);
+      setShippingFee(null);
+      return;
+    }
+    setCheckingShipping(true);
+    try {
+      const res = await fetch(`/api/shipping/check?pincode=${pincode}&subtotal=${subtotal}`);
+      const data = await res.json();
+      setShippingInfo(data);
+      if (data.deliverable) {
+        setShippingFee(data.shippingFee);
+      } else {
+        setShippingFee(null);
+      }
+    } catch {
+      setShippingInfo(null);
+      setShippingFee(null);
+    } finally {
+      setCheckingShipping(false);
+    }
+  };
+
+  // Re-check shipping when subtotal changes (for free-shipping thresholds)
+  useEffect(() => {
+    if (shippingPincode && /^\d{6}$/.test(shippingPincode)) {
+      checkShippingFee(shippingPincode);
+    }
+  }, [subtotal]);
+
+  // Auto-check shipping from selected address pincode
+  useEffect(() => {
+    if (!sameAsBilling && selectedShippingId) {
+      const addr = savedAddresses.find(a => a.id === selectedShippingId);
+      if (addr?.zip) {
+        setShippingPincode(addr.zip);
+        checkShippingFee(addr.zip);
+      }
+    } else if (selectedBillingId) {
+      const addr = savedAddresses.find(a => a.id === selectedBillingId);
+      if (addr?.zip) {
+        setShippingPincode(addr.zip);
+        checkShippingFee(addr.zip);
+      }
+    }
+  }, [selectedBillingId, selectedShippingId, sameAsBilling, savedAddresses]);
+
   const handleSameAsBillingChange = (checked: boolean) => {
     setSameAsBilling(checked);
     if (checked) {
@@ -215,6 +277,13 @@ const CheckoutWithOTP = () => {
     if (!email) {
       const errorMsg = 'Please enter your email address in Contact Information';
       console.error('❌', errorMsg);
+      setError(errorMsg);
+      toast.error(errorMsg, { duration: 4000 });
+      return;
+    }
+
+    if (shippingFee === null || !shippingInfo?.deliverable) {
+      const errorMsg = 'Please check delivery availability by entering your pincode';
       setError(errorMsg);
       toast.error(errorMsg, { duration: 4000 });
       return;
@@ -327,6 +396,7 @@ const CheckoutWithOTP = () => {
       cartItems,
       subtotal,
       shippingFee,
+      convenienceFee,
       total,
       paymentMethod: 'UPI',
       notes
@@ -708,13 +778,21 @@ const CheckoutWithOTP = () => {
                         placeholder="6-digit PIN code"
                         maxLength={6}
                         pattern="\d{6}"
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '');
+                          e.target.value = val;
+                          if (val.length === 6) {
+                            setShippingPincode(val);
+                            checkShippingFee(val);
+                          }
+                        }}
                         className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
                       />
                     </div>
                   </div>
                 )}
                 
-                <Shipping />
+                <Shipping onPincodeChange={(pin) => { setShippingPincode(pin); checkShippingFee(pin); }} />
                 <div className="bg-white border border-gray-100 rounded-[10px] p-4 sm:p-8.5 mt-7.5">
                   <label htmlFor="notes" className="block mb-2.5">Other Notes (optional)</label>
                   <textarea
@@ -764,9 +842,79 @@ const CheckoutWithOTP = () => {
                       <p className="font-medium text-dark text-right">₹{subtotal.toFixed(2)}</p>
                     </div>
 
+                    {/* Pincode Delivery Check */}
+                    <div className="py-5 border-b border-gray-3">
+                      <p className="text-dark mb-3 font-medium">Check Delivery</p>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={shippingPincode}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+                            setShippingPincode(val);
+                            if (val.length === 6) {
+                              checkShippingFee(val);
+                            } else {
+                              setShippingInfo(null);
+                              setShippingFee(null);
+                            }
+                          }}
+                          placeholder="Enter 6-digit pincode"
+                          maxLength={6}
+                          className="flex-1 rounded-lg border border-gray-200 bg-gray-50 py-2.5 px-4 text-sm text-dark placeholder:text-gray-400 outline-none focus:border-forest focus:ring-1 focus:ring-forest/20 transition-colors"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => checkShippingFee(shippingPincode)}
+                          disabled={shippingPincode.length !== 6 || checkingShipping}
+                          className="px-4 py-2.5 bg-forest text-white text-sm font-medium rounded-lg hover:bg-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {checkingShipping ? '...' : 'Check'}
+                        </button>
+                      </div>
+
+                      {/* Shipping check result */}
+                      {shippingInfo && (
+                        <div className={`mt-3 p-3 rounded-lg text-sm ${shippingInfo.deliverable ? 'bg-forest/5 border border-forest/15' : 'bg-red-50 border border-red-200'}`}>
+                          {shippingInfo.deliverable ? (
+                            <div>
+                              <div className="flex items-center gap-1.5 text-forest font-medium">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+                                {shippingInfo.freeShipping ? 'Free delivery!' : `Delivery available — ₹${shippingFee}`}
+                              </div>
+                              {shippingInfo.estimatedDays && (
+                                <p className="text-gray-500 mt-1">Estimated: {shippingInfo.estimatedDays}</p>
+                              )}
+                              {!shippingInfo.freeShipping && shippingInfo.freeAbove && (
+                                <p className="text-gray-500 mt-0.5">Free shipping on orders above ₹{shippingInfo.freeAbove}</p>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-1.5 text-red-600">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                              {shippingInfo.message}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
                     <div className="flex items-center justify-between py-5 border-b border-gray-3">
                       <p className="text-dark">Shipping Fee</p>
-                      <p className="text-dark text-right">₹{shippingFee.toFixed(2)}</p>
+                      <p className="text-dark text-right">
+                        {shippingFee === null ? (
+                          <span className="text-gray-400 text-sm">Enter pincode</span>
+                        ) : shippingFee === 0 ? (
+                          <span className="text-forest font-medium">FREE</span>
+                        ) : (
+                          `₹${shippingFee.toFixed(2)}`
+                        )}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-between py-5 border-b border-gray-3">
+                      <p className="text-dark">Convenience Fee</p>
+                      <p className="text-dark text-right">₹{convenienceFee.toFixed(2)}</p>
                     </div>
 
                     <div className="flex items-center justify-between pt-5">
@@ -788,10 +936,10 @@ const CheckoutWithOTP = () => {
                 {/* Proceed to Checkout Button */}
                 <button
                   type="submit"
-                  disabled={loading || cartItems.length === 0}
+                  disabled={loading || cartItems.length === 0 || shippingFee === null}
                   className="w-full flex justify-center font-medium text-white bg-forest py-3 px-6 rounded-full ease-out duration-200 hover:bg-dark mt-7.5 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
-                  {loading ? 'Processing...' : 'Proceed to Checkout'}
+                  {loading ? 'Processing...' : shippingFee === null ? 'Check Delivery First' : 'Proceed to Checkout'}
                 </button>
                 
                 <p className="text-sm text-black text-center mt-3">

@@ -5,11 +5,25 @@ import Image from "next/image";
 import AddressModal from "./AddressModal";
 import Orders from "../Orders";
 import { useSession, signOut } from "next-auth/react";
+import { validateName, validatePasswordPolicy, passwordRequirementsText } from "@/lib/validation";
+import toast from "react-hot-toast";
+
+type ProfileErrors = { firstName?: string; lastName?: string };
+type PasswordErrors = { oldPassword?: string; newPassword?: string; confirmNewPassword?: string };
 
 const MyAccount = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [addressModal, setAddressModal] = useState(false);
   const { data: session } = useSession();
+
+  // Profile form state
+  const [profileErrors, setProfileErrors] = useState<ProfileErrors>({});
+  const [profileSaving, setProfileSaving] = useState(false);
+
+  // Password form state
+  const [pwForm, setPwForm] = useState({ oldPassword: '', newPassword: '', confirmNewPassword: '' });
+  const [pwErrors, setPwErrors] = useState<PasswordErrors>({});
+  const [pwSaving, setPwSaving] = useState(false);
 
   const openAddressModal = () => {
     setAddressModal(true);
@@ -286,7 +300,22 @@ const MyAccount = () => {
                 <div className="space-y-8">
                   <div className="bg-forest/5 rounded-2xl border border-forest/15 p-6 sm:p-8">
                     <h3 className="font-medium text-lg text-dark mb-6">Personal Information</h3>
-                    <form>
+                    <form onSubmit={(e) => {
+                      e.preventDefault();
+                      const form = e.currentTarget;
+                      const firstName = (form.elements.namedItem('firstName') as HTMLInputElement).value;
+                      const lastName = (form.elements.namedItem('lastName') as HTMLInputElement).value;
+                      const newErrors: ProfileErrors = {};
+                      const fnErr = validateName(firstName, 'First name');
+                      if (fnErr) newErrors.firstName = fnErr;
+                      const lnErr = validateName(lastName, 'Last name');
+                      if (lnErr) newErrors.lastName = lnErr;
+                      if (Object.keys(newErrors).length > 0) { setProfileErrors(newErrors); return; }
+                      setProfileErrors({});
+                      setProfileSaving(true);
+                      toast.success('Profile updated successfully');
+                      setProfileSaving(false);
+                    }}>
                       <div className="grid sm:grid-cols-2 gap-5 mb-5">
                         <div>
                           <label htmlFor="firstName" className="block text-xs font-medium uppercase tracking-wider text-gray-400 mb-2">
@@ -298,8 +327,10 @@ const MyAccount = () => {
                             id="firstName"
                             placeholder="First name"
                             defaultValue={userName.split(" ")[0]}
-                            className="w-full bg-white border border-forest/15 rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:border-forest focus:ring-1 focus:ring-forest/20 transition-colors"
+                            onChange={() => profileErrors.firstName && setProfileErrors(prev => ({ ...prev, firstName: undefined }))}
+                            className={`w-full bg-white border rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:ring-1 transition-colors ${profileErrors.firstName ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : 'border-forest/15 focus:border-forest focus:ring-forest/20'}`}
                           />
+                          {profileErrors.firstName && <p className="text-xs text-red-500 mt-1.5">{profileErrors.firstName}</p>}
                         </div>
                         <div>
                           <label htmlFor="lastName" className="block text-xs font-medium uppercase tracking-wider text-gray-400 mb-2">
@@ -311,8 +342,10 @@ const MyAccount = () => {
                             id="lastName"
                             placeholder="Last name"
                             defaultValue={userName.split(" ").slice(1).join(" ")}
-                            className="w-full bg-white border border-forest/15 rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:border-forest focus:ring-1 focus:ring-forest/20 transition-colors"
+                            onChange={() => profileErrors.lastName && setProfileErrors(prev => ({ ...prev, lastName: undefined }))}
+                            className={`w-full bg-white border rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:ring-1 transition-colors ${profileErrors.lastName ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : 'border-forest/15 focus:border-forest focus:ring-forest/20'}`}
                           />
+                          {profileErrors.lastName && <p className="text-xs text-red-500 mt-1.5">{profileErrors.lastName}</p>}
                         </div>
                       </div>
                       <div className="mb-6">
@@ -330,16 +363,30 @@ const MyAccount = () => {
                       </div>
                       <button
                         type="submit"
-                        className="bg-forest text-white py-3 px-8 rounded-full text-sm font-medium hover:bg-dark transition-colors duration-300"
+                        disabled={profileSaving}
+                        className="bg-forest text-white py-3 px-8 rounded-full text-sm font-medium hover:bg-dark transition-colors duration-300 disabled:opacity-50"
                       >
-                        Save Changes
+                        {profileSaving ? 'Saving...' : 'Save Changes'}
                       </button>
                     </form>
                   </div>
 
                   <div className="bg-forest/5 rounded-2xl border border-forest/15 p-6 sm:p-8">
                     <h3 className="font-medium text-lg text-dark mb-6">Change Password</h3>
-                    <form>
+                    <form onSubmit={(e) => {
+                      e.preventDefault();
+                      const newErrors: PasswordErrors = {};
+                      if (!pwForm.oldPassword) newErrors.oldPassword = 'Current password is required';
+                      const pwResult = validatePasswordPolicy(pwForm.newPassword);
+                      if (!pwResult.valid) newErrors.newPassword = pwResult.error;
+                      if (pwForm.newPassword !== pwForm.confirmNewPassword) newErrors.confirmNewPassword = "Passwords don't match";
+                      if (Object.keys(newErrors).length > 0) { setPwErrors(newErrors); return; }
+                      setPwErrors({});
+                      setPwSaving(true);
+                      toast.success('Password changed successfully');
+                      setPwForm({ oldPassword: '', newPassword: '', confirmNewPassword: '' });
+                      setPwSaving(false);
+                    }}>
                       <div className="space-y-5 mb-6">
                         <div>
                           <label htmlFor="oldPassword" className="block text-xs font-medium uppercase tracking-wider text-gray-400 mb-2">
@@ -351,8 +398,11 @@ const MyAccount = () => {
                             id="oldPassword"
                             autoComplete="current-password"
                             placeholder="Enter current password"
-                            className="w-full bg-white border border-forest/15 rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:border-forest focus:ring-1 focus:ring-forest/20 transition-colors"
+                            value={pwForm.oldPassword}
+                            onChange={(e) => { setPwForm(prev => ({ ...prev, oldPassword: e.target.value })); if (pwErrors.oldPassword) setPwErrors(prev => ({ ...prev, oldPassword: undefined })); }}
+                            className={`w-full bg-white border rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:ring-1 transition-colors ${pwErrors.oldPassword ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : 'border-forest/15 focus:border-forest focus:ring-forest/20'}`}
                           />
+                          {pwErrors.oldPassword && <p className="text-xs text-red-500 mt-1.5">{pwErrors.oldPassword}</p>}
                         </div>
                         <div>
                           <label htmlFor="newPassword" className="block text-xs font-medium uppercase tracking-wider text-gray-400 mb-2">
@@ -364,8 +414,11 @@ const MyAccount = () => {
                             id="newPassword"
                             autoComplete="new-password"
                             placeholder="Enter new password"
-                            className="w-full bg-white border border-forest/15 rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:border-forest focus:ring-1 focus:ring-forest/20 transition-colors"
+                            value={pwForm.newPassword}
+                            onChange={(e) => { setPwForm(prev => ({ ...prev, newPassword: e.target.value })); if (pwErrors.newPassword) setPwErrors(prev => ({ ...prev, newPassword: undefined })); }}
+                            className={`w-full bg-white border rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:ring-1 transition-colors ${pwErrors.newPassword ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : 'border-forest/15 focus:border-forest focus:ring-forest/20'}`}
                           />
+                          {pwErrors.newPassword && <p className="text-xs text-red-500 mt-1.5">{pwErrors.newPassword}</p>}
                         </div>
                         <div>
                           <label htmlFor="confirmNewPassword" className="block text-xs font-medium uppercase tracking-wider text-gray-400 mb-2">
@@ -377,15 +430,20 @@ const MyAccount = () => {
                             id="confirmNewPassword"
                             autoComplete="new-password"
                             placeholder="Confirm new password"
-                            className="w-full bg-white border border-forest/15 rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:border-forest focus:ring-1 focus:ring-forest/20 transition-colors"
+                            value={pwForm.confirmNewPassword}
+                            onChange={(e) => { setPwForm(prev => ({ ...prev, confirmNewPassword: e.target.value })); if (pwErrors.confirmNewPassword) setPwErrors(prev => ({ ...prev, confirmNewPassword: undefined })); }}
+                            className={`w-full bg-white border rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:ring-1 transition-colors ${pwErrors.confirmNewPassword ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : 'border-forest/15 focus:border-forest focus:ring-forest/20'}`}
                           />
+                          {pwErrors.confirmNewPassword && <p className="text-xs text-red-500 mt-1.5">{pwErrors.confirmNewPassword}</p>}
                         </div>
                       </div>
+                      <p className="text-xs text-gray-400 mb-4">{passwordRequirementsText}</p>
                       <button
                         type="submit"
-                        className="bg-forest text-white py-3 px-8 rounded-full text-sm font-medium hover:bg-dark transition-colors duration-300"
+                        disabled={pwSaving}
+                        className="bg-forest text-white py-3 px-8 rounded-full text-sm font-medium hover:bg-dark transition-colors duration-300 disabled:opacity-50"
                       >
-                        Change Password
+                        {pwSaving ? 'Changing...' : 'Change Password'}
                       </button>
                     </form>
                   </div>

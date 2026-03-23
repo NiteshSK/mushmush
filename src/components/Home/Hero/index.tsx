@@ -83,8 +83,8 @@ const Hero = () => {
                   unoptimized
                 />
 
-                {/* Light overlay to soften the background 2 shades lighter */}
-                <div className="absolute inset-0 bg-white/20 z-[1]" />
+                {/* Subtle left-side gradient for text readability — no full overlay */}
+                <div className="absolute inset-0 bg-gradient-to-r from-white/40 via-white/10 to-transparent z-[1]" />
 
                 {/* Text overlay — left side of the image is clean so text reads clearly */}
                 <div className="relative z-10 h-full w-full flex items-center hero-slide-wrapper">

@@ -792,8 +792,9 @@ const ShopDetails = () => {
                             rows={5}
                             placeholder="Your comments"
                             value={comment}
-                            onChange={(e) => setComment(e.target.value)}
-                            className="rounded-xl border border-gray-200 bg-white placeholder:text-gray-400 w-full p-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20 focus:border-forest"
+                            onChange={(e) => { if (e.target.value.length <= 250) setComment(e.target.value); }}
+                            maxLength={250}
+                            className={`rounded-xl border bg-white placeholder:text-gray-400 w-full p-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20 focus:border-forest ${comment.length >= 250 ? 'border-amber-400' : 'border-gray-200'}`}
                           />
                           <span className="flex items-center justify-between mt-2.5">
                             <span className="text-custom-sm text-dark-4">Maximum 250 characters</span>

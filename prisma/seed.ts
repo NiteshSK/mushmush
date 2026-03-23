@@ -329,10 +329,14 @@ async function main() {
       featured: false,
       imgs: {
         thumbnails: [
-          "/images/products/lions_mane.png",
+          "/images/products/lions_mane/lions_mane.png",
+          "/images/products/lions_mane/lions_mane_2.png",
+          "/images/products/lions_mane/lions_name_1.png",
         ],
         previews: [
-          "/images/products/lions_mane.png",
+          "/images/products/lions_mane/lions_mane.png",
+          "/images/products/lions_mane/lions_mane_2.png",
+          "/images/products/lions_mane/lions_name_1.png",
         ]
       },
       specifications: [

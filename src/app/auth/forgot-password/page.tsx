@@ -2,15 +2,24 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { validateEmail } from "@/lib/validation";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [fieldError, setFieldError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const emailErr = validateEmail(email);
+    if (emailErr) {
+      setFieldError(emailErr);
+      return;
+    }
+    setFieldError('');
     setIsLoading(true);
     setMessage('');
     setError('');
@@ -82,12 +91,12 @@ export default function ForgotPassword() {
                 name="email"
                 type="email"
                 autoComplete="email"
-                required
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-white border border-forest/15 rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:border-forest focus:ring-1 focus:ring-forest/20 transition-colors"
+                onChange={(e) => { setEmail(e.target.value); if (fieldError) setFieldError(''); }}
+                className={`w-full bg-white border rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:ring-1 transition-colors ${fieldError ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : 'border-forest/15 focus:border-forest focus:ring-forest/20'}`}
                 placeholder="you@example.com"
               />
+              {fieldError && <p className="text-xs text-red-500 mt-1.5">{fieldError}</p>}
             </div>
 
             <button

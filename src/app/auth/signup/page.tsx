@@ -4,7 +4,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { passwordRequirementsText } from "@/lib/validation";
+import { validateEmail, validateName, validatePhone, validatePasswordPolicy, passwordRequirementsText } from "@/lib/validation";
+
+type FormErrors = { name?: string; email?: string; phone?: string; password?: string; confirmPassword?: string; form?: string };
 
 export default function SignUp() {
   const [isLoading, setIsLoading] = useState(false);
@@ -15,6 +17,8 @@ export default function SignUp() {
     password: '',
     confirmPassword: ''
   });
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [successMsg, setSuccessMsg] = useState('');
   const router = useRouter();
 
   useEffect(() => {
@@ -37,26 +41,39 @@ export default function SignUp() {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (errors[name as keyof FormErrors]) {
+      setErrors(prev => ({ ...prev, [name]: undefined, form: undefined }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const newErrors: FormErrors = {};
+
+    const nameErr = validateName(formData.name, 'Full Name');
+    if (nameErr) newErrors.name = nameErr;
+
+    const emailErr = validateEmail(formData.email);
+    if (emailErr) newErrors.email = emailErr;
+
+    const phoneErr = validatePhone(formData.phone);
+    if (phoneErr) newErrors.phone = phoneErr;
+
+    const pwResult = validatePasswordPolicy(formData.password);
+    if (!pwResult.valid) newErrors.password = pwResult.error;
 
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords don't match!");
+      newErrors.confirmPassword = "Passwords don't match";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
 
-    const policy = /^(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}$/;
-    if (!policy.test(formData.password)) {
-      alert(passwordRequirementsText);
-      return;
-    }
-
+    setErrors({});
     setIsLoading(true);
     try {
       const response = await fetch('/api/auth/register', {
@@ -75,14 +92,14 @@ export default function SignUp() {
       const data = await response.json();
 
       if (response.ok) {
-        alert(`Account created successfully for ${formData.email}! You can now sign in.`);
-        router.push('/auth/signin');
+        setSuccessMsg(`Account created successfully for ${formData.email}! Redirecting to sign in...`);
+        setTimeout(() => router.push('/auth/signin'), 2000);
       } else {
-        alert(`Error: ${data.error}`);
+        setErrors({ form: data.error || 'Registration failed. Please try again.' });
       }
     } catch (error) {
       console.error("Sign up error:", error);
-      alert("An error occurred during registration. Please try again.");
+      setErrors({ form: "An error occurred during registration. Please try again." });
     } finally {
       setIsLoading(false);
     }
@@ -136,6 +153,16 @@ export default function SignUp() {
           </div>
 
           {/* Email Form */}
+          {successMsg && (
+            <div className="mb-4 p-3 bg-forest/10 border border-forest/20 rounded-xl">
+              <p className="text-sm text-dark">{successMsg}</p>
+            </div>
+          )}
+          {errors.form && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl">
+              <p className="text-sm text-red-600">{errors.form}</p>
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label htmlFor="name" className="block text-xs font-medium uppercase tracking-wider text-gray-400 mb-2">
@@ -146,12 +173,12 @@ export default function SignUp() {
                 name="name"
                 type="text"
                 autoComplete="name"
-                required
                 value={formData.name}
                 onChange={handleInputChange}
-                className="w-full bg-white border border-forest/15 rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:border-forest focus:ring-1 focus:ring-forest/20 transition-colors"
+                className={`w-full bg-white border rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:ring-1 transition-colors ${errors.name ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : 'border-forest/15 focus:border-forest focus:ring-forest/20'}`}
                 placeholder="Enter your full name"
               />
+              {errors.name && <p className="text-xs text-red-500 mt-1.5">{errors.name}</p>}
             </div>
 
             <div>
@@ -163,12 +190,12 @@ export default function SignUp() {
                 name="email"
                 type="email"
                 autoComplete="email"
-                required
                 value={formData.email}
                 onChange={handleInputChange}
-                className="w-full bg-white border border-forest/15 rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:border-forest focus:ring-1 focus:ring-forest/20 transition-colors"
+                className={`w-full bg-white border rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:ring-1 transition-colors ${errors.email ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : 'border-forest/15 focus:border-forest focus:ring-forest/20'}`}
                 placeholder="you@example.com"
               />
+              {errors.email && <p className="text-xs text-red-500 mt-1.5">{errors.email}</p>}
             </div>
 
             <div>
@@ -182,9 +209,10 @@ export default function SignUp() {
                 autoComplete="tel"
                 value={formData.phone}
                 onChange={handleInputChange}
-                className="w-full bg-white border border-forest/15 rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:border-forest focus:ring-1 focus:ring-forest/20 transition-colors"
+                className={`w-full bg-white border rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:ring-1 transition-colors ${errors.phone ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : 'border-forest/15 focus:border-forest focus:ring-forest/20'}`}
                 placeholder="+91 XXXXX XXXXX"
               />
+              {errors.phone && <p className="text-xs text-red-500 mt-1.5">{errors.phone}</p>}
             </div>
 
             <div>
@@ -196,13 +224,12 @@ export default function SignUp() {
                 name="password"
                 type="password"
                 autoComplete="new-password"
-                required
                 value={formData.password}
                 onChange={handleInputChange}
-                className="w-full bg-white border border-forest/15 rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:border-forest focus:ring-1 focus:ring-forest/20 transition-colors"
+                className={`w-full bg-white border rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:ring-1 transition-colors ${errors.password ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : 'border-forest/15 focus:border-forest focus:ring-forest/20'}`}
                 placeholder="Create a password"
-                minLength={8}
               />
+              {errors.password && <p className="text-xs text-red-500 mt-1.5">{errors.password}</p>}
             </div>
 
             <div>
@@ -214,13 +241,12 @@ export default function SignUp() {
                 name="confirmPassword"
                 type="password"
                 autoComplete="new-password"
-                required
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
-                className="w-full bg-white border border-forest/15 rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:border-forest focus:ring-1 focus:ring-forest/20 transition-colors"
+                className={`w-full bg-white border rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:ring-1 transition-colors ${errors.confirmPassword ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : 'border-forest/15 focus:border-forest focus:ring-forest/20'}`}
                 placeholder="Confirm your password"
-                minLength={8}
               />
+              {errors.confirmPassword && <p className="text-xs text-red-500 mt-1.5">{errors.confirmPassword}</p>}
             </div>
 
             <p className="text-xs text-gray-400">{passwordRequirementsText}</p>
