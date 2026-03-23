@@ -1,15 +1,19 @@
 "use client";
 
 import React, { useState } from "react";
+import { validateEmail } from "@/lib/validation";
 
 const Newsletter = () => {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [fieldError, setFieldError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) return;
+    const emailErr = validateEmail(email);
+    if (emailErr) { setFieldError(emailErr); return; }
+    setFieldError("");
 
     setStatus("loading");
     try {
@@ -60,17 +64,20 @@ const Newsletter = () => {
               ) : (
                 <form onSubmit={handleSubmit}>
                   <div className="flex flex-col sm:flex-row gap-3">
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => {
-                        setEmail(e.target.value);
-                        if (status === "error") setStatus("idle");
-                      }}
-                      placeholder="Enter your email"
-                      required
-                      className="w-full bg-white/10 border border-white/20 text-white placeholder:text-white/40 outline-none rounded-full py-3.5 px-6 text-sm focus:border-white/40 transition-colors"
-                    />
+                    <div className="w-full">
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => {
+                          setEmail(e.target.value);
+                          if (status === "error") setStatus("idle");
+                          if (fieldError) setFieldError("");
+                        }}
+                        placeholder="Enter your email"
+                        className={`w-full bg-white/10 border text-white placeholder:text-white/40 outline-none rounded-full py-3.5 px-6 text-sm transition-colors ${fieldError ? 'border-red-400 focus:border-red-400' : 'border-white/20 focus:border-white/40'}`}
+                      />
+                      {fieldError && <p className="text-xs text-red-300 mt-1.5 pl-6">{fieldError}</p>}
+                    </div>
                     <button
                       type="submit"
                       disabled={status === "loading"}

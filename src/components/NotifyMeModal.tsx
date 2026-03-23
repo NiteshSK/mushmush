@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { validateEmail } from '@/lib/validation';
 
 interface NotifyMeModalProps {
   isOpen: boolean;
@@ -22,6 +23,7 @@ const NotifyMeModal: React.FC<NotifyMeModalProps> = ({
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [emailError, setEmailError] = useState('');
 
   // Set email from session when available
   useEffect(() => {
@@ -43,7 +45,16 @@ const NotifyMeModal: React.FC<NotifyMeModalProps> = ({
     
     // Use session email or fallback to manual input
     const userEmail = session?.user?.email || email.trim();
-    
+
+    if (!session?.user?.email) {
+      const emailErr = validateEmail(email);
+      if (emailErr) {
+        setEmailError(emailErr);
+        return;
+      }
+    }
+    setEmailError('');
+
     if (!userEmail) {
       toast.error('Email address is required');
       return;
@@ -142,12 +153,12 @@ const NotifyMeModal: React.FC<NotifyMeModalProps> = ({
                   type="email"
                   id="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => { setEmail(e.target.value); if (emailError) setEmailError(''); }}
                   placeholder="you@example.com"
-                  className="w-full bg-white border border-forest/15 rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:border-forest focus:ring-1 focus:ring-forest/20 transition-colors"
+                  className={`w-full bg-white border rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:ring-1 transition-colors ${emailError ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : 'border-forest/15 focus:border-forest focus:ring-forest/20'}`}
                   disabled={isLoading}
-                  required
                 />
+                {emailError && <p className="text-xs text-red-500 mt-1.5">{emailError}</p>}
               </div>
             )}
 

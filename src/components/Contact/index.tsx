@@ -1,7 +1,74 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
+import { validateName, validatePhone, validateRequired, validateMaxLength } from "@/lib/validation";
+import toast from "react-hot-toast";
+
+type ContactErrors = { firstName?: string; lastName?: string; subject?: string; phone?: string; message?: string };
 
 const Contact = () => {
+  const [formData, setFormData] = useState({ firstName: '', lastName: '', subject: '', phone: '', message: '' });
+  const [errors, setErrors] = useState<ContactErrors>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (errors[name as keyof ContactErrors]) {
+      setErrors(prev => ({ ...prev, [name]: undefined }));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const newErrors: ContactErrors = {};
+
+    const fnErr = validateName(formData.firstName, 'First name');
+    if (fnErr) newErrors.firstName = fnErr;
+
+    const lnErr = validateName(formData.lastName, 'Last name');
+    if (lnErr) newErrors.lastName = lnErr;
+
+    const phoneErr = validatePhone(formData.phone);
+    if (phoneErr) newErrors.phone = phoneErr;
+
+    const msgErr = validateRequired(formData.message, 'Message');
+    if (msgErr) newErrors.message = msgErr;
+    else {
+      const maxErr = validateMaxLength(formData.message, 1000, 'Message');
+      if (maxErr) newErrors.message = maxErr;
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      if (res.ok) {
+        toast.success('Message sent successfully! We\'ll get back to you soon.');
+        setFormData({ firstName: '', lastName: '', subject: '', phone: '', message: '' });
+      } else {
+        const data = await res.json();
+        toast.error(data.error || 'Failed to send message. Please try again.');
+      }
+    } catch {
+      toast.error('Something went wrong. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const inputClass = (field: keyof ContactErrors) =>
+    `rounded-md border ${errors[field] ? 'border-red-400 focus:ring-red-200' : 'border-forest/15 focus:ring-forest/20'} bg-forest/5 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2`;
+
   return (
     <>
       <Breadcrumb title={"Contact"} pages={["contact"]} />
@@ -109,34 +176,38 @@ const Contact = () => {
             </div>
 
             <div className="xl:max-w-[770px] w-full bg-white rounded-xl border border-gray-100 p-4 sm:p-7.5 xl:p-10">
-              <form>
+              <form onSubmit={handleSubmit}>
                 <div className="flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5">
                   <div className="w-full">
                     <label htmlFor="firstName" className="block mb-2.5">
                       First Name <span className="text-red">*</span>
                     </label>
-
                     <input
                       type="text"
                       name="firstName"
                       id="firstName"
                       placeholder="Pravesh"
-                      className="rounded-md border border-forest/15 bg-forest/5 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      className={inputClass('firstName')}
                     />
+                    {errors.firstName && <p className="text-xs text-red-500 mt-1.5">{errors.firstName}</p>}
                   </div>
 
                   <div className="w-full">
                     <label htmlFor="lastName" className="block mb-2.5">
                       Last Name <span className="text-red">*</span>
                     </label>
-
                     <input
                       type="text"
                       name="lastName"
                       id="lastName"
                       placeholder="Rawat"
-                      className="rounded-md border border-forest/15 bg-forest/5 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      className={inputClass('lastName')}
                     />
+                    {errors.lastName && <p className="text-xs text-red-500 mt-1.5">{errors.lastName}</p>}
                   </div>
                 </div>
 
@@ -145,13 +216,14 @@ const Contact = () => {
                     <label htmlFor="subject" className="block mb-2.5">
                       Subject
                     </label>
-
                     <input
                       type="text"
                       name="subject"
                       id="subject"
                       placeholder="Type your subject"
-                      className="rounded-md border border-forest/15 bg-forest/5 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
+                      value={formData.subject}
+                      onChange={handleChange}
+                      className={inputClass('subject')}
                     />
                   </div>
 
@@ -159,36 +231,41 @@ const Contact = () => {
                     <label htmlFor="phone" className="block mb-2.5">
                       Phone
                     </label>
-
                     <input
                       type="text"
                       name="phone"
                       id="phone"
                       placeholder="Enter your phone"
-                      className="rounded-md border border-forest/15 bg-forest/5 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      className={inputClass('phone')}
                     />
+                    {errors.phone && <p className="text-xs text-red-500 mt-1.5">{errors.phone}</p>}
                   </div>
                 </div>
 
                 <div className="mb-7.5">
                   <label htmlFor="message" className="block mb-2.5">
-                    Message
+                    Message <span className="text-red">*</span>
                   </label>
-
                   <textarea
                     name="message"
                     id="message"
                     rows={5}
                     placeholder="Type your message"
-                    className="rounded-md border border-forest/15 bg-forest/5 placeholder:text-dark-5 w-full p-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
+                    value={formData.message}
+                    onChange={handleChange}
+                    className={`rounded-md border ${errors.message ? 'border-red-400 focus:ring-red-200' : 'border-forest/15 focus:ring-forest/20'} bg-forest/5 placeholder:text-dark-5 w-full p-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2`}
                   ></textarea>
+                  {errors.message && <p className="text-xs text-red-500 mt-1.5">{errors.message}</p>}
                 </div>
 
                 <button
                   type="submit"
-                  className="inline-flex font-medium text-white bg-forest py-3 px-7 rounded-full ease-out duration-200 hover:bg-dark"
+                  disabled={isSubmitting}
+                  className="inline-flex font-medium text-white bg-forest py-3 px-7 rounded-full ease-out duration-200 hover:bg-dark disabled:opacity-50"
                 >
-                  Send Message
+                  {isSubmitting ? 'Sending...' : 'Send Message'}
                 </button>
               </form>
             </div>

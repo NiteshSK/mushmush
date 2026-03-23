@@ -4,10 +4,12 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { validateEmail } from "@/lib/validation";
 
 export default function SignIn() {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '' });
+  const [errors, setErrors] = useState<{ email?: string; password?: string; form?: string }>({});
   const router = useRouter();
 
   useEffect(() => {
@@ -30,6 +32,18 @@ export default function SignIn() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const newErrors: typeof errors = {};
+
+    const emailErr = validateEmail(formData.email);
+    if (emailErr) newErrors.email = emailErr;
+    if (!formData.password) newErrors.password = 'Password is required';
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
     setIsLoading(true);
 
     try {
@@ -42,21 +56,22 @@ export default function SignIn() {
       if (result?.ok) {
         window.location.href = "/";
       } else {
-        alert("Invalid email or password. Please try again.");
+        setErrors({ form: "Invalid email or password. Please try again." });
       }
     } catch (error) {
       console.error("Sign in error:", error);
-      alert("An error occurred during sign in. Please try again.");
+      setErrors({ form: "An error occurred during sign in. Please try again." });
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (errors[name as keyof typeof errors]) {
+      setErrors(prev => ({ ...prev, [name]: undefined, form: undefined }));
+    }
   };
 
   return (
@@ -101,6 +116,11 @@ export default function SignIn() {
           </div>
 
           {/* Email Form */}
+          {errors.form && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl">
+              <p className="text-sm text-red-600">{errors.form}</p>
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label htmlFor="email" className="block text-xs font-medium uppercase tracking-wider text-gray-400 mb-2">
@@ -111,12 +131,12 @@ export default function SignIn() {
                 name="email"
                 type="email"
                 autoComplete="email"
-                required
                 value={formData.email}
                 onChange={handleInputChange}
-                className="w-full bg-white border border-forest/15 rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:border-forest focus:ring-1 focus:ring-forest/20 transition-colors"
+                className={`w-full bg-white border rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:ring-1 transition-colors ${errors.email ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : 'border-forest/15 focus:border-forest focus:ring-forest/20'}`}
                 placeholder="you@example.com"
               />
+              {errors.email && <p className="text-xs text-red-500 mt-1.5">{errors.email}</p>}
             </div>
 
             <div>
@@ -128,12 +148,12 @@ export default function SignIn() {
                 name="password"
                 type="password"
                 autoComplete="current-password"
-                required
                 value={formData.password}
                 onChange={handleInputChange}
-                className="w-full bg-white border border-forest/15 rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:border-forest focus:ring-1 focus:ring-forest/20 transition-colors"
+                className={`w-full bg-white border rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:ring-1 transition-colors ${errors.password ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : 'border-forest/15 focus:border-forest focus:ring-forest/20'}`}
                 placeholder="Enter your password"
               />
+              {errors.password && <p className="text-xs text-red-500 mt-1.5">{errors.password}</p>}
             </div>
 
             <div className="flex items-center justify-between">
