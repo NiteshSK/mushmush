@@ -68,9 +68,10 @@ const Footer = () => {
             <h3 className="text-xs font-medium uppercase tracking-[0.15em] text-white/40 mb-6">Shop</h3>
             <ul className="flex flex-col gap-3">
               <li><Link href="/shop" className="text-sm text-white/60 hover:text-white transition-colors">All Products</Link></li>
-              <li><Link href="/shop?category=fresh-mushrooms" className="text-sm text-white/60 hover:text-white transition-colors">Fresh Mushrooms</Link></li>
+              <li><Link href="/shop?category=edible" className="text-sm text-white/60 hover:text-white transition-colors">Fresh Mushrooms</Link></li>
               <li><Link href="/shop?category=dry-fruits" className="text-sm text-white/60 hover:text-white transition-colors">Dry Fruits</Link></li>
-              <li><Link href="/shop?category=seeds-spices" className="text-sm text-white/60 hover:text-white transition-colors">Seeds & Spices</Link></li>
+              <li><Link href="/shop?category=seeds" className="text-sm text-white/60 hover:text-white transition-colors">Seeds</Link></li>
+              <li><Link href="/shop?category=spices" className="text-sm text-white/60 hover:text-white transition-colors">Spices</Link></li>
               <li><Link href="/training" className="text-sm text-white/60 hover:text-white transition-colors">Training Programs</Link></li>
             </ul>
           </div>

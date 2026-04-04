@@ -123,7 +123,7 @@ const AddressFormModal: React.FC<AddressFormModalProps> = ({
               onChange={(e) => {
                 setFormData({ ...formData, street: e.target.value });
               }}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest-500 focus:border-transparent"
               placeholder="House no, Building name, Street"
             />
           </div>
@@ -139,7 +139,7 @@ const AddressFormModal: React.FC<AddressFormModalProps> = ({
                 required
                 value={formData.city}
                 onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest-500 focus:border-transparent"
               />
             </div>
 
@@ -154,7 +154,7 @@ const AddressFormModal: React.FC<AddressFormModalProps> = ({
                 onChange={(e) => {
                   setFormData({ ...formData, state: e.target.value });
                 }}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest-500 focus:border-transparent"
               >
                 <option value="">Select State</option>
                 {INDIAN_STATES.map((state) => (
@@ -179,7 +179,7 @@ const AddressFormModal: React.FC<AddressFormModalProps> = ({
                 maxLength={6}
                 value={formData.zip}
                 onChange={(e) => setFormData({ ...formData, zip: e.target.value.replace(/\D/g, '') })}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest-500 focus:border-transparent"
                 placeholder="6-digit PIN code"
               />
             </div>
@@ -204,7 +204,7 @@ const AddressFormModal: React.FC<AddressFormModalProps> = ({
               id="isDefault"
               checked={formData.isDefault}
               onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-4 w-4 text-blue-600 focus:ring-forest-500 border-gray-300 rounded"
             />
             <label htmlFor="isDefault" className="ml-2 block text-sm text-gray-900">
               Set as default address

@@ -76,7 +76,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             </div>
           </div>
           <button
-            onClick={() => signOut()}
+            onClick={() => signOut({ callbackUrl: '/' })}
             className="w-full bg-red text-white text-sm font-medium py-2 px-4 rounded-lg hover:bg-red-dark transition-colors"
           >
             Sign Out

@@ -638,6 +638,8 @@ export interface OrderInvoiceEmailData {
   subtotal: number;
   tax: number;
   shipping: number;
+  couponDiscount?: number;
+  couponCode?: string | null;
   total: number;
   shippingAddress: any;
 }
@@ -737,6 +739,10 @@ export function generateOrderInvoiceEmail(data: OrderInvoiceEmailData): string {
             <td style="padding: 8px 0; text-align: right; color: #555;">Shipping:</td>
             <td style="padding: 8px 0; text-align: right; font-weight: bold;">₹${data.shipping.toFixed(2)}</td>
           </tr>
+          ${data.couponDiscount && data.couponDiscount > 0 ? `<tr>
+            <td style="padding: 8px 0; text-align: right; color: #5c8e61;">Coupon${data.couponCode ? ` (${data.couponCode})` : ''}:</td>
+            <td style="padding: 8px 0; text-align: right; font-weight: bold; color: #5c8e61;">-₹${data.couponDiscount.toFixed(2)}</td>
+          </tr>` : ''}
           <tr style="border-top: 2px solid #5c8e61;">
             <td style="padding: 12px 0; text-align: right; color: #5c8e61; font-size: 18px; font-weight: bold;">Total:</td>
             <td style="padding: 12px 0; text-align: right; color: #5c8e61; font-size: 18px; font-weight: bold;">₹${data.total.toFixed(2)}</td>
@@ -812,6 +818,237 @@ export async function sendOrderInvoiceEmail(data: OrderInvoiceEmailData): Promis
     console.error('Error sending order invoice email:', error);
     // Don't throw - email failure shouldn't break the order completion
   }
+}
+
+// ============================================
+// ORDER LIFECYCLE EMAILS
+// ============================================
+
+interface OrderNotificationData {
+  customerName: string;
+  customerEmail: string;
+  customerPhone?: string;
+  orderNumber: string;
+  orderItems: Array<{ productTitle: string; quantity: number; price: number; total: number }>;
+  subtotal: number;
+  shipping: number;
+  couponDiscount?: number;
+  total: number;
+  shippingAddress: { street?: string; city?: string; state?: string; zip?: string; address?: string };
+}
+
+function formatAddress(addr: any): string {
+  return [addr?.street || addr?.address, addr?.city, addr?.state, addr?.zip].filter(Boolean).join(', ');
+}
+
+function orderItemsTable(items: OrderNotificationData['orderItems']): string {
+  return items.map(item => `
+    <tr>
+      <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.productTitle}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">₹${item.price.toFixed(2)}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">₹${item.total.toFixed(2)}</td>
+    </tr>
+  `).join('');
+}
+
+function orderEmailWrapper(title: string, subtitle: string, color: string, body: string): string {
+  return `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #f9fafb;">
+      <div style="background: ${color}; padding: 30px; text-align: center;">
+        <h1 style="color: white; margin: 0; font-size: 22px;">${title}</h1>
+        <p style="color: rgba(255,255,255,0.85); margin: 8px 0 0; font-size: 14px;">${subtitle}</p>
+      </div>
+      <div style="padding: 30px; background: white;">
+        ${body}
+      </div>
+      <div style="padding: 20px; text-align: center; color: #9ca3af; font-size: 12px;">
+        <p>&copy; ${new Date().getFullYear()} Kosvana by Mush Agro Products</p>
+      </div>
+    </div>
+  `;
+}
+
+function orderSummaryBlock(data: OrderNotificationData): string {
+  return `
+    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+      <thead>
+        <tr style="background: #f3f4f6;">
+          <th style="padding: 10px; text-align: left; font-size: 12px; text-transform: uppercase; color: #6b7280;">Item</th>
+          <th style="padding: 10px; text-align: center; font-size: 12px; text-transform: uppercase; color: #6b7280;">Qty</th>
+          <th style="padding: 10px; text-align: right; font-size: 12px; text-transform: uppercase; color: #6b7280;">Price</th>
+          <th style="padding: 10px; text-align: right; font-size: 12px; text-transform: uppercase; color: #6b7280;">Total</th>
+        </tr>
+      </thead>
+      <tbody>${orderItemsTable(data.orderItems)}</tbody>
+    </table>
+    <div style="text-align: right; margin-top: 10px;">
+      <p style="margin: 4px 0; color: #6b7280;">Subtotal: ₹${data.subtotal.toFixed(2)}</p>
+      <p style="margin: 4px 0; color: #6b7280;">Shipping: ${data.shipping === 0 ? 'FREE' : '₹' + data.shipping.toFixed(2)}</p>
+      ${data.couponDiscount ? `<p style="margin: 4px 0; color: #059669;">Coupon Discount: -₹${data.couponDiscount.toFixed(2)}</p>` : ''}
+      <p style="margin: 8px 0 0; font-size: 18px; font-weight: bold; color: #111;">Total: ₹${data.total.toFixed(2)}</p>
+    </div>
+    <div style="margin-top: 20px; padding: 15px; background: #f9fafb; border-radius: 8px;">
+      <p style="margin: 0; font-size: 12px; text-transform: uppercase; color: #6b7280; font-weight: 600;">Delivery Address</p>
+      <p style="margin: 5px 0 0; color: #374151;">${formatAddress(data.shippingAddress)}</p>
+    </div>
+  `;
+}
+
+/** Email sent to ADMIN when a new order is placed */
+export async function sendAdminNewOrderEmail(data: OrderNotificationData): Promise<void> {
+  const adminEmail = process.env.ADMIN_EMAIL;
+  if (!adminEmail) return;
+
+  const html = orderEmailWrapper(
+    'New Order Received!',
+    `Order #${data.orderNumber}`,
+    '#1e40af',
+    `
+      <p style="color: #374151;">A new order has been placed. Details below:</p>
+      <div style="padding: 15px; background: #eff6ff; border-radius: 8px; margin: 15px 0;">
+        <p style="margin: 0;"><strong>Customer:</strong> ${data.customerName}</p>
+        <p style="margin: 5px 0 0;"><strong>Email:</strong> ${data.customerEmail}</p>
+        ${data.customerPhone ? `<p style="margin: 5px 0 0;"><strong>Phone:</strong> ${data.customerPhone}</p>` : ''}
+        <p style="margin: 5px 0 0;"><strong>Order #:</strong> ${data.orderNumber}</p>
+      </div>
+      ${orderSummaryBlock(data)}
+      <p style="margin-top: 20px; color: #6b7280; font-size: 13px;">This order is awaiting payment. You'll be notified when payment is submitted.</p>
+    `
+  );
+
+  try {
+    await sendEmail({ to: adminEmail, subject: `New Order #${data.orderNumber} — ₹${data.total.toFixed(2)}`, html });
+  } catch {}
+}
+
+/** Email sent to CUSTOMER when they place an order (before payment) */
+export async function sendOrderPlacedEmail(data: OrderNotificationData): Promise<void> {
+  const html = orderEmailWrapper(
+    'Order Placed Successfully!',
+    `Order #${data.orderNumber}`,
+    '#059669',
+    `
+      <p style="color: #374151;">Hi ${data.customerName},</p>
+      <p style="color: #374151;">Thank you for your order! Please complete the payment to confirm it.</p>
+      ${orderSummaryBlock(data)}
+      <p style="margin-top: 20px; padding: 15px; background: #fef3c7; border-radius: 8px; color: #92400e; font-size: 13px;">
+        <strong>Next step:</strong> Complete your UPI payment to confirm this order. Your order will be processed once payment is verified.
+      </p>
+    `
+  );
+
+  try {
+    await sendEmail({ to: data.customerEmail, subject: `Order Placed — #${data.orderNumber}`, html });
+  } catch {}
+}
+
+/** Email sent to CUSTOMER + ADMIN when payment is submitted */
+export async function sendPaymentReceivedEmail(data: {
+  customerName: string;
+  customerEmail: string;
+  orderNumber: string;
+  transactionId: string;
+  amount: number;
+}): Promise<void> {
+  const customerHtml = orderEmailWrapper(
+    'Payment Received!',
+    `Order #${data.orderNumber}`,
+    '#059669',
+    `
+      <p style="color: #374151;">Hi ${data.customerName},</p>
+      <p style="color: #374151;">We've received your payment of <strong>₹${data.amount.toFixed(2)}</strong>.</p>
+      <div style="padding: 15px; background: #f0fdf4; border-radius: 8px; margin: 15px 0;">
+        <p style="margin: 0;"><strong>Transaction ID:</strong> ${data.transactionId}</p>
+        <p style="margin: 5px 0 0;"><strong>Amount:</strong> ₹${data.amount.toFixed(2)}</p>
+        <p style="margin: 5px 0 0;"><strong>Status:</strong> Awaiting verification</p>
+      </div>
+      <p style="color: #6b7280; font-size: 13px;">Our team will verify your payment shortly. You'll receive a confirmation once it's verified.</p>
+    `
+  );
+
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminHtml = orderEmailWrapper(
+    'Payment Submitted — Verify Now',
+    `Order #${data.orderNumber}`,
+    '#d97706',
+    `
+      <p style="color: #374151;">A payment has been submitted for Order #${data.orderNumber}.</p>
+      <div style="padding: 15px; background: #fffbeb; border-radius: 8px; margin: 15px 0;">
+        <p style="margin: 0;"><strong>Customer:</strong> ${data.customerName} (${data.customerEmail})</p>
+        <p style="margin: 5px 0 0;"><strong>Transaction ID:</strong> ${data.transactionId}</p>
+        <p style="margin: 5px 0 0;"><strong>Amount:</strong> ₹${data.amount.toFixed(2)}</p>
+      </div>
+      <p style="color: #374151;">Please verify this payment in the admin dashboard.</p>
+    `
+  );
+
+  try {
+    await Promise.allSettled([
+      sendEmail({ to: data.customerEmail, subject: `Payment Received — Order #${data.orderNumber}`, html: customerHtml }),
+      adminEmail ? sendEmail({ to: adminEmail, subject: `Payment to Verify — Order #${data.orderNumber} — ₹${data.amount.toFixed(2)}`, html: adminHtml }) : Promise.resolve(),
+    ]);
+  } catch {}
+}
+
+/** Email sent to CUSTOMER when order status changes */
+export async function sendOrderStatusEmail(data: {
+  customerName: string;
+  customerEmail: string;
+  orderNumber: string;
+  status: string;
+  total: number;
+}): Promise<void> {
+  const statusConfig: Record<string, { title: string; message: string; color: string }> = {
+    CONFIRMED: {
+      title: 'Order Confirmed!',
+      message: 'Your payment has been verified and your order is confirmed. We\'ll start processing it shortly.',
+      color: '#059669',
+    },
+    PROCESSING: {
+      title: 'Order Being Prepared',
+      message: 'Great news! We\'re packing your order and getting it ready for shipping.',
+      color: '#2563eb',
+    },
+    SHIPPED: {
+      title: 'Order Shipped!',
+      message: 'Your order is on its way! You\'ll receive it within the estimated delivery time.',
+      color: '#7c3aed',
+    },
+    DELIVERED: {
+      title: 'Order Delivered!',
+      message: 'Your order has been delivered. We hope you enjoy your products! If you have any issues, please contact us.',
+      color: '#059669',
+    },
+    CANCELLED: {
+      title: 'Order Cancelled',
+      message: 'Your order has been cancelled. If you made a payment, it will be refunded within 5-7 business days.',
+      color: '#dc2626',
+    },
+  };
+
+  const config = statusConfig[data.status];
+  if (!config) return;
+
+  const html = orderEmailWrapper(
+    config.title,
+    `Order #${data.orderNumber}`,
+    config.color,
+    `
+      <p style="color: #374151;">Hi ${data.customerName},</p>
+      <p style="color: #374151;">${config.message}</p>
+      <div style="padding: 15px; background: #f9fafb; border-radius: 8px; margin: 15px 0;">
+        <p style="margin: 0;"><strong>Order:</strong> #${data.orderNumber}</p>
+        <p style="margin: 5px 0 0;"><strong>Status:</strong> ${data.status}</p>
+        <p style="margin: 5px 0 0;"><strong>Total:</strong> ₹${data.total.toFixed(2)}</p>
+      </div>
+      <p style="color: #6b7280; font-size: 13px;">For any questions, reply to this email or contact us at mushagroprod@gmail.com</p>
+    `
+  );
+
+  try {
+    await sendEmail({ to: data.customerEmail, subject: `${config.title} — Order #${data.orderNumber}`, html });
+  } catch {}
 }
 
 // ============================================

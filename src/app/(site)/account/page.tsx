@@ -35,6 +35,7 @@ export default function AccountPage() {
   const [loading, setLoading] = useState(true);
   const [recentOrders, setRecentOrders] = useState<Order[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
+  const [memberSince, setMemberSince] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -66,8 +67,23 @@ export default function AccountPage() {
       }
     };
 
+    const fetchProfile = async () => {
+      try {
+        const res = await fetch(`/api/user/profile?email=${encodeURIComponent(session!.user!.email!)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.createdAt) {
+            setMemberSince(new Date(data.createdAt).toLocaleDateString('en-IN', {
+              year: 'numeric', month: 'long', day: 'numeric'
+            }));
+          }
+        }
+      } catch {}
+    };
+
     if (session?.user) {
       fetchRecentOrders();
+      fetchProfile();
     }
   }, [session]);
 
@@ -101,7 +117,7 @@ export default function AccountPage() {
             {/* Left Column */}
             <div className="lg:col-span-2 space-y-7.5">
               {/* Account Info Card */}
-              <div className="bg-white shadow-1 rounded-[10px] overflow-hidden">
+              <div className="bg-white shadow-1 rounded-lg overflow-hidden">
                 <div className="border-b border-gray-3 py-5 px-4 sm:px-8.5">
                   <h2 className="font-medium text-xl text-dark">
                     Account Information
@@ -141,7 +157,7 @@ export default function AccountPage() {
                         Member Since
                       </p>
                       <p className="text-sm text-dark font-medium">
-                        {new Date().toLocaleDateString()}
+                        {memberSince || '—'}
                       </p>
                     </div>
                   </div>
@@ -149,7 +165,7 @@ export default function AccountPage() {
               </div>
 
               {/* Recent Orders Card */}
-              <div className="bg-white shadow-1 rounded-[10px] overflow-hidden">
+              <div className="bg-white shadow-1 rounded-lg overflow-hidden">
                 <div className="border-b border-gray-3 py-5 px-4 sm:px-8.5 flex items-center justify-between">
                   <h2 className="font-medium text-xl text-dark">
                     Recent Orders
@@ -172,7 +188,7 @@ export default function AccountPage() {
                         <Link
                           key={order.id}
                           href="/orders"
-                          className="block p-4 border border-gray-3 rounded-[10px] hover:border-forest/30 hover:bg-forest/5 transition-all"
+                          className="block p-4 border border-gray-3 rounded-lg hover:border-forest/30 hover:bg-forest/5 transition-all"
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex-1 min-w-0">
@@ -232,7 +248,7 @@ export default function AccountPage() {
             {/* Sidebar */}
             <div className="space-y-7.5">
               {/* Quick Actions */}
-              <div className="bg-white shadow-1 rounded-[10px] overflow-hidden">
+              <div className="bg-white shadow-1 rounded-lg overflow-hidden">
                 <div className="border-b border-gray-3 py-5 px-4 sm:px-8.5">
                   <h3 className="font-medium text-xl text-dark">
                     Quick Actions
@@ -330,7 +346,7 @@ export default function AccountPage() {
               </div>
 
               {/* Sign Out */}
-              <div className="bg-white shadow-1 rounded-[10px] overflow-hidden">
+              <div className="bg-white shadow-1 rounded-lg overflow-hidden">
                 <div className="border-b border-gray-3 py-5 px-4 sm:px-8.5">
                   <h3 className="font-medium text-xl text-dark">Account</h3>
                 </div>

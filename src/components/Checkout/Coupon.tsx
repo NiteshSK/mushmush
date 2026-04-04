@@ -21,8 +21,7 @@ const Coupon = ({ subtotal, email, onApply, onRemove, appliedCoupon }: CouponPro
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleApply = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleApply = async () => {
     if (!code.trim()) return;
 
     if (!email) {
@@ -98,7 +97,7 @@ const Coupon = ({ subtotal, email, onApply, onRemove, appliedCoupon }: CouponPro
             </button>
           </div>
         ) : (
-          <form onSubmit={handleApply}>
+          <div>
             <div className="flex gap-4">
               <input
                 type="text"
@@ -107,13 +106,20 @@ const Coupon = ({ subtotal, email, onApply, onRemove, appliedCoupon }: CouponPro
                   setCode(e.target.value.toUpperCase());
                   setError("");
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleApply();
+                  }
+                }}
                 placeholder="Enter coupon code"
-                className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 font-mono uppercase"
+                className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20 font-mono uppercase"
               />
               <button
-                type="submit"
+                type="button"
+                onClick={handleApply}
                 disabled={loading || !code.trim()}
-                className="inline-flex font-medium text-white bg-blue py-3 px-6 rounded-md ease-out duration-200 hover:bg-blue-dark disabled:bg-gray-400 disabled:cursor-not-allowed whitespace-nowrap"
+                className="inline-flex font-medium text-white bg-forest py-3 px-6 rounded-lg ease-out duration-200 hover:bg-dark disabled:bg-gray-400 disabled:cursor-not-allowed whitespace-nowrap"
               >
                 {loading ? "Checking..." : "Apply"}
               </button>
@@ -121,7 +127,7 @@ const Coupon = ({ subtotal, email, onApply, onRemove, appliedCoupon }: CouponPro
             {error && (
               <p className="text-red text-sm mt-2">{error}</p>
             )}
-          </form>
+          </div>
         )}
       </div>
     </div>

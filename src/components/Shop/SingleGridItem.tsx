@@ -81,14 +81,33 @@ const SingleGridItem = ({ item, priority = false, onNotifyMe }: Props) => {
         {!item.inStock ? (
           <div className="sold-out-overlay"><span>Sold Out</span></div>
         ) : item.hasDiscount && item.discountPercentage ? (
-          <span className="absolute top-3 left-3 text-[10px] font-medium uppercase tracking-wider text-white bg-forest px-2.5 py-1 rounded-full">
+          <span className="absolute top-3 left-3 z-20 text-[10px] font-medium uppercase tracking-wider text-white bg-forest px-2.5 py-1 rounded-full">
             -{item.discountPercentage}%
           </span>
         ) : null}
 
+        {/* Wishlist — always visible */}
+        <button
+          onClick={handleItemToWishList}
+          disabled={isWishlistLoading}
+          aria-label={isInWishlist(item.id) ? "Remove from wishlist" : "Add to wishlist"}
+          className={`absolute top-3 right-3 z-20 w-9 h-9 rounded-full bg-white shadow-md hover:shadow-lg flex items-center justify-center transition-all duration-200 ${isWishlistLoading ? "opacity-50" : ""}`}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24">
+            <path
+              d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+              fill={isInWishlist(item.id) ? "#ef4444" : "none"}
+              stroke={isInWishlist(item.id) ? "#ef4444" : "#9ca3af"}
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+
         {/* Hover actions */}
         {item.inStock ? (
-          <div className="absolute inset-0 flex items-end justify-center pb-4 gap-2 transition-opacity duration-300 opacity-0 group-hover:opacity-100">
+          <div className="absolute inset-0 flex items-end justify-center pb-4 gap-2 transition-opacity duration-300 opacity-0 group-hover:opacity-100 z-10">
             <button
               onClick={() => { openModal(); handleQuickViewUpdate(); }}
               aria-label="Quick view"
@@ -103,20 +122,6 @@ const SingleGridItem = ({ item, priority = false, onNotifyMe }: Props) => {
               className="h-9 px-5 rounded-full bg-forest text-white text-xs font-medium hover:bg-dark transition-colors shadow-md"
             >
               Add to Cart
-            </button>
-            <button
-              onClick={handleItemToWishList}
-              disabled={isWishlistLoading}
-              aria-label={isInWishlist(item.id) ? "Remove from wishlist" : "Add to wishlist"}
-              className={`w-9 h-9 rounded-full shadow-md flex items-center justify-center transition-colors ${
-                isInWishlist(item.id)
-                  ? "bg-red-500 text-white"
-                  : "bg-white text-gray-600 hover:text-forest"
-              } ${isWishlistLoading ? "opacity-50" : ""}`}
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill={isInWishlist(item.id) ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-              </svg>
             </button>
           </div>
         ) : (

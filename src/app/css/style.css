@@ -194,31 +194,47 @@ input[type='search']::-webkit-search-results-decoration {
    CLASSIC HERO — Full-width split layout
    ============================================================ */
 
+/* Desktop: image fills the background, text overlays left side */
 .hero-section .hero-slide-wrapper {
   min-height: calc(75vh - 110px);
 }
 
-/* Text overlay — constrains text block to ~42% width */
 .hero-section .hero-text-col {
   max-width: 42%;
 }
 
-/* Fluid headline: scales from 42px → 80px */
 .hero-section .hero-headline {
   font-size: clamp(2.6rem, 4.5vw, 5rem);
   letter-spacing: -0.02em;
 }
 
-/* Mobile */
-@media (max-width: 1023px) {
+/* Mobile: stacked layout — text block on top, image below */
+@media (max-width: 767px) {
+  .hero-section .hero-slide-wrapper {
+    min-height: auto;
+    flex-direction: column;
+  }
+
   .hero-section .hero-text-col {
     max-width: 100%;
+    padding: 2rem 1.25rem 1.5rem;
+  }
+
+  .hero-section .hero-headline {
+    font-size: clamp(1.75rem, 8vw, 2.5rem);
+  }
+}
+
+/* Tablet */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .hero-section .hero-text-col {
+    max-width: 55%;
     padding-left: 1.5rem;
     padding-right: 1.5rem;
   }
 
   .hero-section .hero-headline {
-    font-size: clamp(2rem, 8vw, 3rem);
+    font-size: clamp(2rem, 5vw, 3rem);
   }
 }
 

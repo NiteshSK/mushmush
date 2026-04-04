@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux";
 import Image from "next/image";
 import { usePreviewSlider } from "@/app/context/PreviewSliderContext";
 import { updateproductDetails } from "@/redux/features/product-details";
+import StarRating from "@/components/Common/StarRating";
 
 const QuickViewModal = () => {
   const { isModalOpen, closeModal } = useModalContext();
@@ -126,15 +127,8 @@ const QuickViewModal = () => {
               {product.title}
             </h3>
 
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex items-center gap-0.5">
-                {[...Array(5)].map((_, i) => (
-                  <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="none">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                  </svg>
-                ))}
-              </div>
-              <span className="text-xs text-gray-400">({product.reviews || 0} reviews)</span>
+            <div className="mb-4">
+              <StarRating rating={product.averageRating ?? 0} count={product.reviewCount ?? product.reviews ?? 0} size={14} />
             </div>
 
             {product.description && (

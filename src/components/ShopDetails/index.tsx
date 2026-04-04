@@ -13,6 +13,7 @@ import { addItemToCart } from "@/redux/features/cart-slice";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { useWishlist } from "@/app/context/WishlistContext";
 import Link from "next/link";
+import StarRating from "@/components/Common/StarRating";
 import toast from "react-hot-toast";
 import MushroomBenefitsIcon from "../Shop/MushroomBenefitsIcon";
 
@@ -460,22 +461,7 @@ const ShopDetails = () => {
                   </div>
                   <div className="flex flex-wrap items-center gap-5.5 mb-4.5">
                     <div className="flex items-center gap-2.5">
-                      <div className="flex items-center gap-1">
-                        {[...Array(5)].map((_, i) => (
-                          <svg
-                            key={i}
-                            className={`fill-current ${i < Math.round(reviewStats.averageRating || 0) ? "fill-[#FFA645]" : "fill-gray-3"}`}
-                            width="18"
-                            height="18"
-                            viewBox="0 0 18 18"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path d="M16.7906 6.72187L11.7 5.93438L9.39377 1.09688C9.22502 0.759375 8.77502 0.759375 8.60627 1.09688L6.30002 5.9625L1.23752 6.72187C0.871891 6.77812 0.731266 7.25625 1.01252 7.50938L4.69689 11.3063L3.82502 16.6219C3.76877 16.9875 4.13439 17.2969 4.47189 17.0719L9.05627 14.5687L13.6125 17.0719C13.9219 17.2406 14.3156 16.9594 14.2313 16.6219L13.3594 11.3063L17.0438 7.50938C17.2688 7.25625 17.1563 6.77812 16.7906 6.72187ZM2.29199 10C2.29199 5.74283 5.74313 2.29169 10.0003 2.29169C14.2575 2.29169 17.7087 5.74283 17.7087 10C17.7087 14.2572 14.2575 17.7084 10.0003 17.7084C5.74313 17.7084 2.29199 14.2572 2.29199 10ZM12 4.45885C9.68795 2.39027 7.09896 2.1009 5.00076 3.05999C2.78471 4.07296 1.25 6.42506 1.25 9.13713C1.25 11.8027 2.3605 13.8361 3.81672 15.4758C4.98287 16.789 6.41022 17.888 7.67083 18.8586C7.95659 19.0786 8.23378 19.2921 8.49742 19.4999C9.00965 19.9037 9.55954 20.3343 10.1168 20.66C10.6739 20.9855 11.3096 21.25 12 21.25C12.6904 21.25 13.3261 20.9855 13.8832 20.66C14.4405 20.3343 14.9903 19.9037 15.5026 19.4999C15.7662 19.2921 16.0434 19.0786 16.3292 18.8586C17.5898 17.888 19.0171 16.789 20.1833 15.4758C21.6395 13.8361 22.75 11.8027 22.75 9.13713C22.75 6.42506 21.2153 4.07296 18.9992 3.05999C16.901 2.1009 14.3121 2.39027 12 4.45885Z" />
-                          </svg>
-                        ))}
-                      </div>
-                      <span> ({reviewStats.totalReviews} customer review{reviewStats.totalReviews !== 1 ? 's' : ''}) </span>
+                      <StarRating rating={reviewStats.averageRating || 0} count={reviewStats.totalReviews} size={18} />
                     </div>
                     {displayProduct.inStock ? (
                       <div className="flex items-center gap-1.5">
@@ -562,14 +548,18 @@ const ShopDetails = () => {
                           <button
                             onClick={handleWishlistToggle}
                             disabled={isWishlistLoading}
-                            className={`flex items-center justify-center w-12 h-12 rounded-full border ease-out duration-200 ${isInWishlist(displayProduct.id || 0)
-                              ? "bg-red text-white border-red hover:bg-red-dark"
-                              : "border-gray-3 hover:text-forest hover:border-transparent"
-                              } ${isWishlistLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                            className={`flex items-center justify-center w-12 h-12 rounded-full bg-white border border-gray-3 shadow-sm hover:shadow-md ease-out duration-200 ${isWishlistLoading ? "opacity-50 cursor-not-allowed" : ""}`}
                             aria-label={isInWishlist(displayProduct.id || 0) ? "Remove from wishlist" : "Add to wishlist"}
                           >
-                            <svg className="fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path fillRule="evenodd" clipRule="evenodd" d="M5.62436 4.42423C3.96537 5.18256 2.75 6.98626 2.75 9.13713C2.75 11.3345 3.64922 13.0283 4.93829 14.4798C6.00072 15.6761 7.28684 16.6677 8.54113 17.6346C8.83904 17.8643 9.13515 18.0926 9.42605 18.3219C9.95208 18.7366 10.4213 19.1006 10.8736 19.3649C11.3261 19.6293 11.6904 19.75 12 19.75C12.3096 19.75 12.6739 19.6293 13.1264 19.3649C13.5787 19.1006 14.0479 18.7366 14.574 18.3219C14.8649 18.0926 15.161 17.8643 15.4589 17.6346C16.7132 16.6677 17.9993 15.6761 19.0617 14.4798C20.3508 13.0283 21.25 11.3345 21.25 9.13713C21.25 6.98626 20.0346 5.18256 18.3756 4.42423C16.7639 3.68751 14.5983 3.88261 12.5404 6.02077C12.399 6.16766 12.2039 6.25067 12 6.25067C11.7961 6.25067 11.601 6.16766 11.4596 6.02077C9.40166 3.88261 7.23607 3.68751 5.62436 4.42423ZM12 4.45885C9.68795 2.39027 7.09896 2.1009 5.00076 3.05999C2.78471 4.07296 1.25 6.42506 1.25 9.13713C1.25 11.8027 2.3605 13.8361 3.81672 15.4758C4.98287 16.789 6.41022 17.888 7.67083 18.8586C7.95659 19.0786 8.23378 19.2921 8.49742 19.4999C9.00965 19.9037 9.55954 20.3343 10.1168 20.66C10.6739 20.9855 11.3096 21.25 12 21.25C12.6904 21.25 13.3261 20.9855 13.8832 20.66C14.4405 20.3343 14.9903 19.9037 15.5026 19.4999C15.7662 19.2921 16.0434 19.0786 16.3292 18.8586C17.5898 17.888 19.0171 16.789 20.1833 15.4758C21.6395 13.8361 22.75 11.8027 22.75 9.13713C22.75 6.42506 21.2153 4.07296 18.9992 3.05999C16.901 2.1009 14.3121 2.39027 12 4.45885Z" />
+                            <svg width="22" height="22" viewBox="0 0 24 24">
+                              <path
+                                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+                                fill={isInWishlist(displayProduct.id || 0) ? "#ef4444" : "none"}
+                                stroke={isInWishlist(displayProduct.id || 0) ? "#ef4444" : "#9ca3af"}
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
                             </svg>
                           </button>
 
@@ -711,18 +701,7 @@ const ShopDetails = () => {
                                   </p>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-1">
-                                {Array.from({ length: 5 }).map((_, i) => {
-                                  const ratingValue = typeof review.rating === 'number' && review.rating >= 1 && review.rating <= 5 ? review.rating : 0;
-                                  return (
-                                    <span key={i} className={i < ratingValue ? "cursor-pointer text-[#FBB040]" : "cursor-pointer text-gray-5"}>
-                                      <svg className="fill-current" width="15" height="16" viewBox="0 0 15 16" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M14.6604 5.90785L9.97461 5.18335L7.85178 0.732874C7.69645 0.422375 7.28224 0.422375 7.12691 0.732874L5.00407 5.20923L0.344191 5.90785C0.0076444 5.9596 -0.121797 6.39947 0.137085 6.63235L3.52844 10.1255L2.72591 15.0158C2.67413 15.3522 3.01068 15.6368 3.32134 15.4298L7.54112 13.1269L11.735 15.4298C12.0198 15.5851 12.3822 15.3263 12.3046 15.0158L11.502 10.1255L14.8934 6.63235C15.1005 6.39947 14.9969 5.9596 14.6604 5.90785Z" />
-                                      </svg>
-                                    </span>
-                                  );
-                                })}
-                              </div>
+                              <StarRating rating={typeof review.rating === 'number' ? review.rating : 0} size={15} />
                             </div>
                             {review.comment && (
                               <p className="text-dark mt-6">{review.comment}</p>

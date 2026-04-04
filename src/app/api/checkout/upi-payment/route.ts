@@ -143,6 +143,20 @@ export async function POST(request: NextRequest) {
       data: { status: 'CONFIRMED' }
     });
 
+    // Send payment received email to customer + admin
+    try {
+      const { sendPaymentReceivedEmail } = await import('@/lib/email');
+      await sendPaymentReceivedEmail({
+        customerName: order.customerName,
+        customerEmail: order.customerEmail,
+        orderNumber: order.orderNumber,
+        transactionId: upiTransactionId,
+        amount,
+      });
+    } catch {
+      // Don't fail payment if email fails
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Payment submitted successfully! Your order is being processed and will be verified by our team shortly.',

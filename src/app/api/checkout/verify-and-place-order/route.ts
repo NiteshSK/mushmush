@@ -261,53 +261,36 @@ export async function POST(request: NextRequest) {
     }
 
     // Stock is NOT decremented here — it happens after payment confirmation
-    // to prevent stock leaks from abandoned payments.
-    // See: /api/checkout/upi-payment/route.ts
+    // Invoice is NOT sent here — it's sent after payment is verified (in order status change)
 
-    // Generate invoice and send email
+    // Send order placed email to customer + admin notification
     try {
-      const { generateInvoice, markInvoiceEmailSent } = await import('@/lib/invoice');
-      const { sendOrderInvoiceEmail } = await import('@/lib/email');
-      
-      // Generate invoice
-      const invoice = await generateInvoice(order.id);
+      const { sendOrderPlacedEmail, sendAdminNewOrderEmail } = await import('@/lib/email');
 
-      // Prepare email data
-      const emailData = {
+      const notificationData = {
         customerName: order.customerName,
         customerEmail: order.customerEmail,
+        customerPhone: customerPhone || '',
         orderNumber: order.orderNumber,
-        invoiceNumber: invoice.invoiceNumber,
-        invoicePdfUrl: invoice.pdfPath || '',
-        orderDate: order.createdAt,
-        orderItems: order.orderItems.map(item => ({
+        orderItems: order.orderItems.map((item: any) => ({
           productTitle: item.product.title,
           quantity: item.quantity,
           price: item.price,
-          total: item.quantity * item.price
+          total: item.quantity * item.price,
         })),
         subtotal: order.subtotal,
-        tax: order.tax,
         shipping: order.shipping,
+        couponDiscount: couponDiscount || 0,
         total: order.total,
-        shippingAddress: {
-          address: shippingAddr.street,
-          city: shippingAddr.city,
-          state: shippingAddr.state,
-          zipCode: shippingAddr.zip,
-          country: shippingAddr.country
-        }
+        shippingAddress: shippingAddressJson,
       };
-      
-      // Send email
-      await sendOrderInvoiceEmail(emailData);
-      
-      // Mark email as sent
-      await markInvoiceEmailSent(invoice.id);
 
-    } catch (invoiceError) {
-      console.error('Invoice or email error:', invoiceError);
-      // Don't fail the order if invoice/email fails
+      await Promise.allSettled([
+        sendOrderPlacedEmail(notificationData),
+        sendAdminNewOrderEmail(notificationData),
+      ]);
+    } catch {
+      // Don't fail the order if email fails
     }
 
     return NextResponse.json({

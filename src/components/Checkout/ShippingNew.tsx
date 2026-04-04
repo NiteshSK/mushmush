@@ -131,7 +131,7 @@ const ShippingNew: React.FC<ShippingNewProps> = ({ billingAddress, onAddressChan
                 name="sameAsBilling"
                 checked={sameAsBilling}
                 onChange={(e) => handleSameAsBillingChange(e.target.checked)}
-                className="mt-0.5 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                className="mt-0.5 h-4 w-4 text-blue-600 focus:ring-forest-500 border-gray-300 rounded"
               />
               <div className="ml-3">
                 <span className="font-medium text-gray-900">Ship to billing address</span>
@@ -163,7 +163,7 @@ const ShippingNew: React.FC<ShippingNewProps> = ({ billingAddress, onAddressChan
                           value={address.id}
                           checked={selectedAddressId === address.id}
                           onChange={() => handleAddressSelect(address.id)}
-                          className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                          className="mt-1 h-4 w-4 text-blue-600 focus:ring-forest-500 border-gray-300"
                         />
                         <div className="ml-3 flex-1">
                           <div className="flex items-center">
@@ -196,7 +196,7 @@ const ShippingNew: React.FC<ShippingNewProps> = ({ billingAddress, onAddressChan
                         value="new"
                         checked={useNewAddress}
                         onChange={() => handleAddressSelect("new")}
-                        className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                        className="mt-1 h-4 w-4 text-blue-600 focus:ring-forest-500 border-gray-300"
                       />
                       <div className="ml-3">
                         <span className="font-medium text-gray-900">Use a different address</span>
@@ -235,7 +235,7 @@ const ShippingNew: React.FC<ShippingNewProps> = ({ billingAddress, onAddressChan
                       id="shippingAddress"
                       required
                       placeholder="House number and street name"
-                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
                     />
                   </div>
 
@@ -250,7 +250,7 @@ const ShippingNew: React.FC<ShippingNewProps> = ({ billingAddress, onAddressChan
                         id="shippingCity"
                         required
                         placeholder="Enter city name"
-                        className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                        className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
                       />
                     </div>
                     <div className="w-full">
@@ -261,7 +261,7 @@ const ShippingNew: React.FC<ShippingNewProps> = ({ billingAddress, onAddressChan
                         name="shippingState"
                         id="shippingState"
                         required
-                        className="w-full bg-gray-1 rounded-md border border-gray-3 text-dark py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                        className="w-full bg-gray-1 rounded-md border border-gray-3 text-dark py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
                       >
                         <option value="">Select State</option>
                         {INDIAN_STATES.map((state) => (
@@ -286,7 +286,7 @@ const ShippingNew: React.FC<ShippingNewProps> = ({ billingAddress, onAddressChan
                       maxLength={6}
                       pattern="\d{6}"
                       onChange={handleZipChange}
-                      className={`rounded-md border ${errors.zip ? 'border-red-500' : 'border-gray-3'} bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20`}
+                      className={`rounded-md border ${errors.zip ? 'border-red-500' : 'border-gray-3'} bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20`}
                     />
                     {errors.zip && (
                       <p className="text-red-500 text-xs mt-1">{errors.zip}</p>
@@ -300,7 +300,7 @@ const ShippingNew: React.FC<ShippingNewProps> = ({ billingAddress, onAddressChan
                         type="checkbox"
                         name="saveShippingAddress"
                         id="saveShippingAddress"
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        className="h-4 w-4 text-blue-600 focus:ring-forest-500 border-gray-300 rounded"
                       />
                       <label htmlFor="saveShippingAddress" className="ml-3 text-sm text-gray-700">
                         <span className="font-medium">Save this address</span> for future orders

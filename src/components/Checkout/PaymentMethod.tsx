@@ -39,7 +39,7 @@ const PaymentMethod = ({ onPaymentChange }: PaymentMethodProps) => {
               <div
                 className={`flex h-4 w-4 items-center justify-center rounded-full ${
                   payment === "bank"
-                    ? "border-4 border-blue"
+                    ? "border-4 border-forest"
                     : "border border-gray-4"
                 }`}
               ></div>
@@ -82,7 +82,7 @@ const PaymentMethod = ({ onPaymentChange }: PaymentMethodProps) => {
                 <div
                   className={`flex h-4 w-4 items-center justify-center rounded-full ${
                     payment === "cash"
-                      ? "border-4 border-blue"
+                      ? "border-4 border-forest"
                       : "border border-gray-4"
                   }`}
                 ></div>

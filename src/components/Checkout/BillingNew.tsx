@@ -153,7 +153,7 @@ const BillingNew: React.FC<BillingNewProps> = ({ onAddressChange }) => {
                   id="firstName"
                   required
                   placeholder="Your first name"
-                  className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                  className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
                 />
               </div>
               <div className="w-full">
@@ -166,7 +166,7 @@ const BillingNew: React.FC<BillingNewProps> = ({ onAddressChange }) => {
                   id="lastName"
                   required
                   placeholder="Your last name"
-                  className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                  className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
                 />
               </div>
             </div>
@@ -183,7 +183,7 @@ const BillingNew: React.FC<BillingNewProps> = ({ onAddressChange }) => {
                   required
                   placeholder="your.email@example.com"
                   onChange={handleEmailChange}
-                  className={`rounded-md border ${errors.email ? 'border-red-500' : 'border-gray-3'} bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20`}
+                  className={`rounded-md border ${errors.email ? 'border-red-500' : 'border-gray-3'} bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20`}
                 />
                 {errors.email && (
                   <p className="text-red-500 text-xs mt-1">{errors.email}</p>
@@ -202,7 +202,7 @@ const BillingNew: React.FC<BillingNewProps> = ({ onAddressChange }) => {
                   maxLength={10}
                   pattern="[6-9]\d{9}"
                   onChange={handlePhoneChange}
-                  className={`rounded-md border ${errors.phone ? 'border-red-500' : 'border-gray-3'} bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20`}
+                  className={`rounded-md border ${errors.phone ? 'border-red-500' : 'border-gray-3'} bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20`}
                 />
                 {errors.phone && (
                   <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
@@ -244,7 +244,7 @@ const BillingNew: React.FC<BillingNewProps> = ({ onAddressChange }) => {
                         value={address.id}
                         checked={selectedAddressId === address.id}
                         onChange={() => handleAddressSelect(address.id)}
-                        className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                        className="mt-1 h-4 w-4 text-blue-600 focus:ring-forest-500 border-gray-300"
                       />
                       <div className="ml-3 flex-1">
                         <div className="flex items-center">
@@ -278,7 +278,7 @@ const BillingNew: React.FC<BillingNewProps> = ({ onAddressChange }) => {
                       value="new"
                       checked={useNewAddress}
                       onChange={() => handleAddressSelect("new")}
-                      className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                      className="mt-1 h-4 w-4 text-blue-600 focus:ring-forest-500 border-gray-300"
                     />
                     <div className="ml-3">
                       <span className="font-medium text-gray-900">Use a different address</span>
@@ -317,7 +317,7 @@ const BillingNew: React.FC<BillingNewProps> = ({ onAddressChange }) => {
                     id="billingAddress"
                     required
                     placeholder="House number and street name"
-                    className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                    className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
                   />
                 </div>
 
@@ -332,7 +332,7 @@ const BillingNew: React.FC<BillingNewProps> = ({ onAddressChange }) => {
                       id="billingCity"
                       required
                       placeholder="Enter city name"
-                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
                     />
                   </div>
                   <div className="w-full">
@@ -343,7 +343,7 @@ const BillingNew: React.FC<BillingNewProps> = ({ onAddressChange }) => {
                       name="billingState"
                       id="billingState"
                       required
-                      className="w-full bg-gray-1 rounded-md border border-gray-3 text-dark py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                      className="w-full bg-gray-1 rounded-md border border-gray-3 text-dark py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
                     >
                       <option value="">Select State</option>
                       {INDIAN_STATES.map((state) => (
@@ -368,7 +368,7 @@ const BillingNew: React.FC<BillingNewProps> = ({ onAddressChange }) => {
                     maxLength={6}
                     pattern="\d{6}"
                     onChange={handleZipChange}
-                    className={`rounded-md border ${errors.zip ? 'border-red-500' : 'border-gray-3'} bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20`}
+                    className={`rounded-md border ${errors.zip ? 'border-red-500' : 'border-gray-3'} bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20`}
                   />
                   {errors.zip && (
                     <p className="text-red-500 text-xs mt-1">{errors.zip}</p>
@@ -382,7 +382,7 @@ const BillingNew: React.FC<BillingNewProps> = ({ onAddressChange }) => {
                       type="checkbox"
                       name="saveBillingAddress"
                       id="saveBillingAddress"
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-blue-600 focus:ring-forest-500 border-gray-300 rounded"
                     />
                     <label htmlFor="saveBillingAddress" className="ml-3 text-sm text-gray-700">
                       <span className="font-medium">Save this address</span> for future orders

@@ -90,43 +90,40 @@ export async function PUT(
       }
     }
 
-    // If status is COMPLETED, generate invoice and send email
+    // Send status change email to customer
+    try {
+      const { sendOrderStatusEmail } = await import('@/lib/email');
+      await sendOrderStatusEmail({
+        customerName: order.customerName,
+        customerEmail: order.customerEmail,
+        orderNumber: order.orderNumber,
+        status,
+        total: order.total,
+      });
+    } catch {
+      // Don't fail status update if email fails
+    }
+
+    // If COMPLETED, also generate invoice and send it
     if (status === 'COMPLETED') {
       try {
-        
-        // Generate invoice
         const invoice = await generateInvoice(order.id);
-        
-        
-        // Fetch shipping address for email
-        let shippingAddressForEmail: any = {
-          address: 'N/A',
-          city: 'N/A',
-          state: 'N/A',
-          zipCode: 'N/A',
-          country: 'India'
-        };
-        
+
+        let shippingAddressForEmail: any = { address: 'N/A', city: 'N/A', state: 'N/A', zipCode: 'N/A', country: 'India' };
         if (order.shippingAddressId) {
-          try {
-            const addr = await prisma.addresses.findUnique({
-              where: { id: order.shippingAddressId }
-            });
-            if (addr) {
-              shippingAddressForEmail = {
-                address: addr.street,
-                city: addr.city,
-                state: addr.state,
-                zipCode: addr.zip,
-                country: addr.country
-              };
-            }
-          } catch (e) {
-            console.error('Error loading address for email:', e);
+          const addr = await prisma.addresses.findUnique({ where: { id: order.shippingAddressId } });
+          if (addr) {
+            shippingAddressForEmail = { address: addr.street, city: addr.city, state: addr.state, zipCode: addr.zip, country: addr.country };
           }
         }
-        
-        // Prepare email data
+
+        // Fetch coupon code if present
+        let couponCode: string | null = null;
+        if (order.couponId) {
+          const coupon = await prisma.coupon.findUnique({ where: { id: order.couponId }, select: { code: true } });
+          couponCode = coupon?.code || null;
+        }
+
         const emailData: OrderInvoiceEmailData = {
           customerName: order.customerName,
           customerEmail: order.customerEmail,
@@ -143,37 +140,28 @@ export async function PUT(
           subtotal: order.subtotal,
           tax: order.tax,
           shipping: order.shipping,
+          couponDiscount: order.couponDiscount,
+          couponCode,
           total: order.total,
           shippingAddress: shippingAddressForEmail
         };
 
-        // Send email
         await sendOrderInvoiceEmail(emailData);
-        
-        // Mark email as sent
         await markInvoiceEmailSent(invoice.id);
-        
 
         return NextResponse.json({
           success: true,
-          message: 'Order status updated to COMPLETED. Invoice generated and email sent.',
+          message: 'Order completed. Invoice generated and emails sent.',
           order,
-          invoice: {
-            id: invoice.id,
-            invoiceNumber: invoice.invoiceNumber,
-            pdfPath: invoice.pdfPath
-          }
+          invoice: { id: invoice.id, invoiceNumber: invoice.invoiceNumber, pdfPath: invoice.pdfPath }
         });
-
       } catch (invoiceError) {
-        console.error('❌ Error generating invoice or sending email:', invoiceError);
-        
-        // Return success for order update but note invoice/email failure
+        console.error('Invoice/email error:', invoiceError);
         return NextResponse.json({
           success: true,
-          message: 'Order status updated to COMPLETED, but invoice generation or email failed.',
+          message: 'Order completed, but invoice generation failed.',
           order,
-          warning: 'Invoice generation or email delivery failed. Please check logs.'
+          warning: 'Invoice generation or email delivery failed.'
         });
       }
     }

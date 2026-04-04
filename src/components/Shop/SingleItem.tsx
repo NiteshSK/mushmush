@@ -88,24 +88,17 @@ const SingleItem = ({ item }: { item: Product }) => {
         <button
           onClick={handleItemToWishList}
           disabled={isWishlistLoading}
-          className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 ${
-            isInWishlist(item.id) 
-              ? "bg-red text-white" 
-              : "bg-white text-dark-4 hover:bg-red hover:text-white"
-          } ${isWishlistLoading ? "opacity-50" : ""}`}
+          className={`absolute top-3 right-3 z-20 w-9 h-9 rounded-full bg-white shadow-md hover:shadow-lg flex items-center justify-center transition-all duration-200 ${isWishlistLoading ? "opacity-50" : ""}`}
           aria-label={isInWishlist(item.id) ? "Remove from wishlist" : "Add to wishlist"}
         >
-          <svg
-            className="fill-current"
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+          <svg width="18" height="18" viewBox="0 0 24 24">
             <path
-              d="M5.97441 12.6073L6.43872 12.0183L5.97441 12.6073ZM7.99992 3.66709L7.45955 4.18719C7.60094 4.33408 7.79604 4.41709 7.99992 4.41709C8.2038 4.41709 8.3989 4.33408 8.54028 4.18719L7.99992 3.66709ZM10.0254 12.6073L10.4897 13.1962L10.0254 12.6073ZM6.43872 12.0183C5.41345 11.21 4.33627 10.4524 3.47904 9.48717C2.64752 8.55085 2.08325 7.47831 2.08325 6.0914H0.583252C0.583252 7.94644 1.3588 9.35867 2.35747 10.4832C3.33043 11.5788 4.57383 12.4582 5.51009 13.1962L6.43872 12.0183ZM2.08325 6.0914C2.08325 4.75102 2.84027 3.63995 3.85342 3.17683C4.81929 2.73533 6.15155 2.82823 7.45955 4.18719L8.54028 3.14699C6.84839 1.38917 4.84732 1.07324 3.22983 1.8126C1.65962 2.53035 0.583252 4.18982 0.583252 6.0914H2.08325ZM5.51009 13.1962C5.84928 13.4636 6.22932 13.7618 6.61834 13.9891C7.00711 14.2163 7.47619 14.4167 7.99992 14.4167V12.9167C7.85698 12.9167 7.65939 12.8601 7.37512 12.694C7.0911 12.5281 6.79171 12.2965 6.43872 12.0183L5.51009 13.1962ZM10.4897 13.1962C11.426 12.4582 12.6694 11.5788 13.6424 10.4832C14.641 9.35867 15.4166 7.94644 15.4166 6.0914H13.9166C13.9166 7.47831 13.3523 8.55085 12.5208 9.48717C11.6636 10.4524 10.5864 11.21 9.56112 12.0183L10.4897 13.1962ZM15.4166 6.0914C15.4166 4.18982 14.3402 2.53035 12.77 1.8126C11.1525 1.07324 9.15145 1.38917 7.45955 3.14699L8.54028 4.18719C9.84828 2.82823 11.1805 2.73533 12.1464 3.17683C13.1596 3.63995 13.9166 4.75102 13.9166 6.0914H15.4166ZM9.56112 12.0183C9.20813 12.2965 8.90874 12.5281 8.62471 12.694C8.34044 12.8601 8.14285 12.9167 7.99992 12.9167V14.4167C8.52365 14.4167 8.99273 14.2163 9.3815 13.9891C9.77052 13.7618 10.1506 13.4636 10.4897 13.1962L9.56112 12.0183Z"
-              fill=""
+              d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+              fill={isInWishlist(item.id) ? "#ef4444" : "none"}
+              stroke={isInWishlist(item.id) ? "#ef4444" : "#9ca3af"}
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
           </svg>
         </button>
@@ -130,7 +123,7 @@ const SingleItem = ({ item }: { item: Product }) => {
           <StarRating rating={item.averageRating ?? 0} count={item.reviewCount ?? item.reviews ?? 0} />
         </div>
 
-        <h3 className="font-medium text-dark ease-out duration-200 hover:text-blue mb-2 text-lg flex-grow">
+        <h3 className="font-medium text-dark ease-out duration-200 hover:text-forest mb-2 text-lg flex-grow">
           <Link href={`/shop-details/${item.slug}`} onClick={handleNavigateToDetails}>
             {item.title}
           </Link>
@@ -149,24 +142,31 @@ const SingleItem = ({ item }: { item: Product }) => {
             </span>
 
             {!item.inStock ? (
-              <button 
+              <button
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                   setIsNotifyModalOpen(true);
                 }}
-                className="inline-flex font-medium text-sm text-white bg-forest py-2 px-4 rounded-full ease-out duration-200 hover:bg-dark"
+                className="inline-flex font-medium text-sm text-white bg-dark py-2 px-5 rounded-full ease-out duration-200 hover:bg-forest"
               >
                 Notify Me
               </button>
             ) : (
-              <Link
-                href={`/shop-details/${item.slug}`}
-                onClick={handleNavigateToDetails}
-                className="inline-flex font-medium text-sm text-white bg-blue py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue-dark"
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleAddToCart();
+                }}
+                className="inline-flex items-center gap-1.5 font-medium text-sm text-white bg-forest py-2 px-5 rounded-full ease-out duration-200 hover:bg-dark"
               >
-                View Details
-              </Link>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" />
+                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                </svg>
+                Add to Cart
+              </button>
             )}
         </div>
       </div>

@@ -1,6 +1,5 @@
 "use client";
 import React from "react";
-import Discount from "./Discount";
 import OrderSummary from "./OrderSummary";
 import { useAppSelector } from "@/redux/store";
 import SingleItem from "./SingleItem";
@@ -17,35 +16,30 @@ const Cart = () => {
       {cartItems.length > 0 ? (
         <section className="py-12 sm:py-16">
           <div className="max-w-[1200px] w-full mx-auto px-4 sm:px-6 xl:px-0">
-            <div className="bg-white rounded-xl border border-gray-100">
-              <div className="w-full overflow-x-auto">
-                <div className="min-w-[900px]">
-                  {/* Header */}
-                  <div className="flex items-center py-4 px-6 border-b border-gray-100">
-                    <div className="min-w-[400px]">
-                      <p className="text-xs font-medium uppercase tracking-wider text-gray-400">Product</p>
-                    </div>
-                    <div className="min-w-[150px]">
-                      <p className="text-xs font-medium uppercase tracking-wider text-gray-400">Price</p>
-                    </div>
-                    <div className="min-w-[200px]">
-                      <p className="text-xs font-medium uppercase tracking-wider text-gray-400">Quantity</p>
-                    </div>
-                    <div className="min-w-[100px]">
-                      <p className="text-xs font-medium uppercase tracking-wider text-gray-400">Subtotal</p>
-                    </div>
-                    <div className="min-w-[50px]"></div>
-                  </div>
-
-                  {cartItems.map((item, key) => (
-                    <SingleItem item={item} key={key} />
-                  ))}
+            <div className="bg-white rounded-lg border border-gray-100">
+              {/* Desktop header — hidden on mobile */}
+              <div className="hidden md:flex items-center py-4 px-6 border-b border-gray-100">
+                <div className="flex-1">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">Product</p>
                 </div>
+                <div className="w-[120px] text-center">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">Price</p>
+                </div>
+                <div className="w-[160px] text-center">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">Quantity</p>
+                </div>
+                <div className="w-[100px] text-right">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">Subtotal</p>
+                </div>
+                <div className="w-[50px]"></div>
               </div>
+
+              {cartItems.map((item, key) => (
+                <SingleItem item={item} key={key} />
+              ))}
             </div>
 
             <div className="flex flex-col lg:flex-row gap-8 mt-10">
-              <Discount />
               <OrderSummary />
             </div>
           </div>

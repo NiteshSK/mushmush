@@ -16,6 +16,8 @@ export interface InvoiceData {
   subtotal: number;
   tax: number; // Used as convenience fee
   shipping: number;
+  couponDiscount: number;
+  couponCode?: string | null;
   total: number;
   orderItems: Array<{
     productTitle: string;
@@ -25,6 +27,13 @@ export interface InvoiceData {
   }>;
   orderDate: Date;
 }
+
+// ─── Brand Colours ───────────────────────────────────────────────────────
+const FOREST = [92, 142, 97] as const;  // #5C8E61
+const DARK   = [30, 30, 30] as const;
+const GRAY   = [120, 120, 120] as const;
+const LIGHT  = [245, 245, 245] as const;
+const WHITE  = [255, 255, 255] as const;
 
 /**
  * Generate invoice number in format: INV-YYYYMMDD-XXXXX
@@ -40,201 +49,285 @@ export function generateInvoiceNumber(): string {
 
 /**
  * Generate PDF invoice and upload to Vercel Blob Storage
- * Path format: userId/YYYY-MM-DD/invoiceNumber.pdf
  */
 export async function generateInvoicePDF(data: InvoiceData, userId?: string): Promise<string> {
   const doc = new jsPDF();
+  const pageW = doc.internal.pageSize.getWidth();   // 210
+  const pageH = doc.internal.pageSize.getHeight();   // 297
+  const marginL = 20;
+  const marginR = 20;
+  const contentW = pageW - marginL - marginR;
 
-  // Add logo
+  // ─── WATERMARK — scattered small "Kosvana" across the page ──────────
+  const cx = pageW / 2;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(18);
+  doc.setTextColor(238, 242, 238);  // barely visible sage
+
+  const wmPositions = [
+    { x: 30,  y: 60 },  { x: 130, y: 45 },
+    { x: 70,  y: 120 }, { x: 155, y: 110 },
+    { x: 25,  y: 180 }, { x: 110, y: 170 },
+    { x: 60,  y: 235 }, { x: 150, y: 225 },
+    { x: 90,  y: 85 },  { x: 40,  y: 150 },
+    { x: 140, y: 145 }, { x: 80,  y: 260 },
+    { x: 160, y: 270 }, { x: 30,  y: 275 },
+  ];
+  for (const pos of wmPositions) {
+    doc.text('Kosvana', pos.x, pos.y, { angle: 35 });
+  }
+
+  // ─── TOP ACCENT BAR ──────────────────────────────────────────────────
+  doc.setFillColor(...FOREST);
+  doc.rect(0, 0, pageW, 4, 'F');
+
+  // ─── HEADER ──────────────────────────────────────────────────────────
+  let y = 16;
+
+  // Logo — wider to let the script-style logo speak for itself
   try {
     const logoPath = path.join(process.cwd(), 'public', 'images', 'logo', 'logo.png');
     if (fs.existsSync(logoPath)) {
       const logoBuffer = fs.readFileSync(logoPath);
       const logoBase64 = `data:image/png;base64,${logoBuffer.toString('base64')}`;
-      doc.addImage(logoBase64, 'PNG', 15, 10, 25, 25);
+      doc.addImage(logoBase64, 'PNG', marginL, y - 1, 38, 14);
     }
-  } catch (error) {
-  }
+  } catch {}
 
-  // Company Header with updated branding
-  doc.setFontSize(22);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(92, 142, 97); // Kosvana forest green
-  doc.text('Kosvana', 105, 20, { align: 'center' });
-
-  doc.setFontSize(11);
+  // Tagline under logo
   doc.setFont('helvetica', 'normal');
-  doc.setTextColor(100, 100, 100);
-  doc.text('by Mush Agro Products', 105, 27, { align: 'center' });
+  doc.setFontSize(7);
+  doc.setTextColor(...GRAY);
+  doc.text('by Mush Agro Products LLP', marginL, y + 18);
+  doc.text('Premium Mushrooms, Dry Fruits, Seeds & Spices', marginL, y + 22);
 
-  doc.setFontSize(9);
-  doc.setTextColor(80, 80, 80);
-  doc.text('Premium Mushrooms, Dry Fruits, Seeds & Spices', 105, 33, { align: 'center' });
-  doc.text('Email: mushagroprod@gmail.com | Phone: +91-7618362662', 105, 38, { align: 'center' });
-
-  // Invoice Title
-  doc.setFontSize(16);
+  // INVOICE label — right-aligned
   doc.setFont('helvetica', 'bold');
-  doc.setTextColor(0, 0, 0);
-  doc.text('INVOICE', 105, 52, { align: 'center' });
+  doc.setFontSize(28);
+  doc.setTextColor(...DARK);
+  doc.text('INVOICE', pageW - marginR, y + 5, { align: 'right' });
 
-  // Invoice Details
-  doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(...GRAY);
+  doc.text('mushagroprod@gmail.com | +91-7618362662', pageW - marginR, y + 12, { align: 'right' });
+  doc.text('NH 507, Herbertpur, Dehradun 248142', pageW - marginR, y + 17, { align: 'right' });
+
+  // Divider
+  y = 42;
+  doc.setDrawColor(...FOREST);
+  doc.setLineWidth(0.5);
+  doc.line(marginL, y, pageW - marginR, y);
+
+  // ─── INVOICE META ────────────────────────────────────────────────────
+  y = 50;
   const invoiceNumber = generateInvoiceNumber();
-  doc.text(`Invoice Number: ${invoiceNumber}`, 20, 65);
-  doc.text(`Order Number: ${data.orderNumber}`, 20, 71);
 
-  // Format date with timestamp
   const orderDate = new Date(data.orderDate);
-  const formattedDate = orderDate.toLocaleString('en-IN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: true
+  const formattedDate = orderDate.toLocaleDateString('en-IN', {
+    year: 'numeric', month: 'long', day: 'numeric'
   });
-  doc.text(`Date: ${formattedDate}`, 20, 77);
+  const formattedTime = orderDate.toLocaleTimeString('en-IN', {
+    hour: '2-digit', minute: '2-digit', hour12: true
+  });
 
-  // Billing Information (Left Side)
+  // Meta — two columns
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(...GRAY);
+
+  doc.text('Invoice No.', marginL, y);
+  doc.text('Order No.', marginL, y + 6);
+  doc.text('Date', marginL, y + 12);
+
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(10);
-  doc.setTextColor(45, 80, 22);
-  doc.text('Bill To:', 20, 90);
+  doc.setTextColor(...DARK);
+  doc.text(invoiceNumber, marginL + 28, y);
+  doc.text(data.orderNumber, marginL + 28, y + 6);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`${formattedDate}, ${formattedTime}`, marginL + 28, y + 12);
+
+  // ─── ADDRESSES ───────────────────────────────────────────────────────
+  y = 74;
+  const addrCol2 = pageW / 2 + 5;
+
+  // Bill To
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7);
+  doc.setTextColor(...FOREST);
+  doc.text('BILL TO', marginL, y);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
-  doc.setTextColor(0, 0, 0);
-  doc.text(data.customerName, 20, 96);
-  doc.text(data.customerEmail, 20, 101);
-  if (data.customerPhone) {
-    doc.text(data.customerPhone, 20, 106);
-  }
+  doc.setTextColor(...DARK);
+  doc.text(data.customerName, marginL, y + 6);
 
-  // Billing Address
+  doc.setFontSize(8);
+  doc.setTextColor(...GRAY);
+  doc.text(data.customerEmail, marginL, y + 11);
+  if (data.customerPhone) doc.text(data.customerPhone, marginL, y + 16);
+
   const billingAddr = data.billingAddress;
-  let billYPos = data.customerPhone ? 111 : 106;
-  doc.text(`${billingAddr.address || billingAddr.street || ''}`, 20, billYPos);
-  billYPos += 5;
-  doc.text(`${billingAddr.city || ''}, ${billingAddr.state || ''} ${billingAddr.zipCode || billingAddr.zip || ''}`, 20, billYPos);
-  billYPos += 5;
-  doc.text(`${billingAddr.country || 'India'}`, 20, billYPos);
+  let bY = y + (data.customerPhone ? 22 : 17);
+  doc.text(billingAddr.address || billingAddr.street || '', marginL, bY);
+  bY += 4.5;
+  doc.text(`${billingAddr.city || ''}, ${billingAddr.state || ''} ${billingAddr.zipCode || billingAddr.zip || ''}`, marginL, bY);
+  bY += 4.5;
+  doc.text(billingAddr.country || 'India', marginL, bY);
 
-  // Shipping Address (Right Side)
+  // Ship To
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(10);
-  doc.setTextColor(45, 80, 22);
-  doc.text('Ship To:', 110, 90);
+  doc.setFontSize(7);
+  doc.setTextColor(...FOREST);
+  doc.text('SHIP TO', addrCol2, y);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
-  doc.setTextColor(0, 0, 0);
-  doc.text(data.customerName, 110, 96);
+  doc.setTextColor(...DARK);
+  doc.text(data.customerName, addrCol2, y + 6);
 
-  // Shipping Address Details
   const shippingAddr = data.shippingAddress;
-  let shipYPos = 101;
-  doc.text(`${shippingAddr.address || shippingAddr.street || ''}`, 110, shipYPos);
-  shipYPos += 5;
-  doc.text(`${shippingAddr.city || ''}, ${shippingAddr.state || ''} ${shippingAddr.zipCode || shippingAddr.zip || ''}`, 110, shipYPos);
-  shipYPos += 5;
-  doc.text(`${shippingAddr.country || 'India'}`, 110, shipYPos);
+  let sY = y + 12;
+  doc.setFontSize(8);
+  doc.setTextColor(...GRAY);
+  doc.text(shippingAddr.address || shippingAddr.street || '', addrCol2, sY);
+  sY += 4.5;
+  doc.text(`${shippingAddr.city || ''}, ${shippingAddr.state || ''} ${shippingAddr.zipCode || shippingAddr.zip || ''}`, addrCol2, sY);
+  sY += 4.5;
+  doc.text(shippingAddr.country || 'India', addrCol2, sY);
 
-  // Items Table - start after both addresses
-  const tableStartY = Math.max(billYPos, shipYPos) + 15;
+  // ─── ITEMS TABLE ─────────────────────────────────────────────────────
+  const tableStartY = Math.max(bY, sY) + 14;
 
   autoTable(doc, {
     startY: tableStartY,
-    head: [['Item', 'Quantity', 'Price', 'Total']],
-    body: data.orderItems.map(item => [
+    head: [['#', 'Item', 'Qty', 'Unit Price', 'Amount']],
+    body: data.orderItems.map((item, idx) => [
+      (idx + 1).toString(),
       item.productTitle,
       item.quantity.toString(),
-      `Rs ${item.price.toFixed(2)}`,  // Using Rs instead of ₹ symbol
-      `Rs ${item.total.toFixed(2)}`   // Using Rs instead of ₹ symbol
+      `Rs. ${item.price.toFixed(2)}`,
+      `Rs. ${item.total.toFixed(2)}`
     ]),
-    theme: 'grid',
+    theme: 'plain',
     headStyles: {
-      fillColor: [92, 142, 97], // Kosvana forest green
-      textColor: [255, 255, 255],
+      fillColor: [...FOREST] as [number, number, number],
+      textColor: [...WHITE] as [number, number, number],
       fontStyle: 'bold',
-      fontSize: 10
+      fontSize: 8,
+      cellPadding: { top: 4, right: 5, bottom: 4, left: 5 },
+      halign: 'left',
     },
-    styles: {
-      fontSize: 10,
-      cellPadding: 5,
-      font: 'helvetica',
-      fontStyle: 'normal'
+    bodyStyles: {
+      fontSize: 8,
+      cellPadding: { top: 3.5, right: 5, bottom: 3.5, left: 5 },
+      textColor: [...DARK] as [number, number, number],
+    },
+    alternateRowStyles: {
+      fillColor: [...LIGHT] as [number, number, number],
     },
     columnStyles: {
-      0: { cellWidth: 80, halign: 'left' },
-      1: { cellWidth: 30, halign: 'center' },
-      2: { cellWidth: 35, halign: 'right', fontStyle: 'normal' },
-      3: { cellWidth: 35, halign: 'right', fontStyle: 'normal' }
-    }
+      0: { cellWidth: 12, halign: 'center' },
+      1: { cellWidth: 'auto' },
+      2: { cellWidth: 18, halign: 'center' },
+      3: { cellWidth: 32, halign: 'right' },
+      4: { cellWidth: 34, halign: 'right', fontStyle: 'bold' },
+    },
+    margin: { left: marginL, right: marginR },
+    tableLineColor: [220, 220, 220],
+    tableLineWidth: 0.1,
   });
 
-  // Get the final Y position after the table
+  // ─── TOTALS ──────────────────────────────────────────────────────────
   const finalY = (doc as any).lastAutoTable.finalY || tableStartY + 50;
+  const totalsLabelX = pageW - marginR - 65;
+  const totalsValueX = pageW - marginR;
+  let tY = finalY + 10;
 
-  // Totals - Compact version with smaller font
-  const totalsX = 135;
-  let totalsY = finalY + 12;
+  const drawTotalRow = (label: string, value: string, opts?: { bold?: boolean; color?: readonly [number, number, number]; large?: boolean }) => {
+    doc.setFont('helvetica', opts?.bold ? 'bold' : 'normal');
+    doc.setFontSize(opts?.large ? 10 : 8.5);
+    doc.setTextColor(...(opts?.color || DARK));
+    doc.text(label, totalsLabelX, tY);
+    doc.text(value, totalsValueX, tY, { align: 'right' });
+    tY += opts?.large ? 7 : 5.5;
+  };
 
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(0, 0, 0);
-  doc.text('Subtotal:', totalsX, totalsY);
-  doc.text(`Rs ${data.subtotal.toFixed(2)}`, 185, totalsY, { align: 'right' });
+  drawTotalRow('Subtotal', `Rs. ${data.subtotal.toFixed(2)}`);
+  drawTotalRow('Convenience Fee', `Rs. ${data.tax.toFixed(2)}`);
+  drawTotalRow('Shipping', data.shipping === 0 ? 'FREE' : `Rs. ${data.shipping.toFixed(2)}`);
 
-  totalsY += 5;
-  doc.text('Convenience Fee:', totalsX, totalsY);
-  doc.text(`Rs ${data.tax.toFixed(2)}`, 185, totalsY, { align: 'right' });
+  if (data.couponDiscount > 0) {
+    const couponLabel = data.couponCode ? `Coupon (${data.couponCode})` : 'Coupon Discount';
+    drawTotalRow(couponLabel, `- Rs. ${data.couponDiscount.toFixed(2)}`, { color: FOREST });
+  }
 
-  totalsY += 5;
-  doc.text('Shipping:', totalsX, totalsY);
-  doc.text(`Rs ${data.shipping.toFixed(2)}`, 185, totalsY, { align: 'right' });
+  // Separator
+  doc.setDrawColor(...FOREST);
+  doc.setLineWidth(0.5);
+  doc.line(totalsLabelX, tY - 2, totalsValueX, tY - 2);
+  tY += 3;
 
-  // Total with slightly larger font and line separator
-  totalsY += 2;
-  doc.setDrawColor(45, 80, 22);
-  doc.line(totalsX, totalsY, 185, totalsY);
+  drawTotalRow('Total', `Rs. ${data.total.toFixed(2)}`, { bold: true, color: FOREST, large: true });
 
-  totalsY += 6;
+  // ─── PAYMENT INFO BOX ────────────────────────────────────────────────
+  tY += 4;
+  const boxY = tY;
+  doc.setFillColor(...LIGHT);
+  doc.roundedRect(marginL, boxY, contentW, 16, 2, 2, 'F');
+
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(11);
-  doc.setTextColor(45, 80, 22);
-  doc.text('Total:', totalsX, totalsY);
-  doc.text(`Rs ${data.total.toFixed(2)}`, 185, totalsY, { align: 'right' });
+  doc.setFontSize(7);
+  doc.setTextColor(...FOREST);
+  doc.text('PAYMENT METHOD', marginL + 5, boxY + 6);
 
-  // Footer
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(...DARK);
+  doc.text('UPI / Online Transfer', marginL + 5, boxY + 12);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7);
+  doc.setTextColor(...FOREST);
+  doc.text('AMOUNT PAID', pageW - marginR - 50, boxY + 6);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(...DARK);
+  doc.text(`Rs. ${data.total.toFixed(2)}`, pageW - marginR - 5, boxY + 12, { align: 'right' });
+
+  // ─── FOOTER ──────────────────────────────────────────────────────────
+  // Bottom accent bar
+  doc.setFillColor(...FOREST);
+  doc.rect(0, pageH - 28, pageW, 28, 'F');
+
+  doc.setFont('helvetica', 'bold');
   doc.setFontSize(9);
-  doc.setFont('helvetica', 'italic');
-  doc.text('Thank you for your business!', 105, 270, { align: 'center' });
-  doc.text('For any queries, please contact us at mushagroprod@gmail.com', 105, 276, { align: 'center' });
+  doc.setTextColor(...WHITE);
+  doc.text('Thank you for shopping with Kosvana!', cx, pageH - 19, { align: 'center' });
 
-  // Generate PDF buffer
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7);
+  doc.setTextColor(200, 220, 200);
+  doc.text('For queries: mushagroprod@gmail.com | +91-7618362662 | kosvana.com', cx, pageH - 13, { align: 'center' });
+  doc.text('Mush Agro Products LLP | NH 507, Herbertpur, Dehradun, Uttarakhand 248142', cx, pageH - 8, { align: 'center' });
+
+  // ─── UPLOAD ──────────────────────────────────────────────────────────
   const pdfBuffer = doc.output('arraybuffer');
   const fileName = `${invoiceNumber}.pdf`;
-
-  // Create structured path: userId/YYYY-MM-DD/invoiceNumber.pdf
   const date = new Date();
-  const dateFolder = date.toISOString().split('T')[0]; // YYYY-MM-DD format
+  const dateFolder = date.toISOString().split('T')[0];
   const userFolder = userId || 'guest';
   const blobPath = `invoices/${userFolder}/${dateFolder}/${fileName}`;
 
-
-  // Upload to Vercel Blob with structured path
   try {
     const blob = await put(blobPath, Buffer.from(pdfBuffer), {
       access: 'public',
       contentType: 'application/pdf',
     });
-
     return blob.url;
   } catch (error) {
-    console.error('❌ Error uploading PDF to Vercel Blob:', error);
+    console.error('Error uploading PDF to Vercel Blob:', error);
     throw new Error('Failed to upload invoice PDF to cloud storage');
   }
 }
@@ -244,7 +337,6 @@ export async function generateInvoicePDF(data: InvoiceData, userId?: string): Pr
  */
 export async function generateInvoice(orderId: string): Promise<any> {
   try {
-
     // Fetch order with all details
     const order = await prisma.order.findUnique({
       where: { id: orderId },
@@ -257,6 +349,11 @@ export async function generateInvoice(orderId: string): Promise<any> {
               }
             }
           }
+        },
+        coupon: {
+          select: {
+            code: true
+          }
         }
       }
     });
@@ -264,7 +361,6 @@ export async function generateInvoice(orderId: string): Promise<any> {
     if (!order) {
       throw new Error('Order not found');
     }
-
 
     // Check if invoice already exists
     const existingInvoice = await prisma.invoice.findUnique({
@@ -300,7 +396,7 @@ export async function generateInvoice(orderId: string): Promise<any> {
           };
         }
       } catch (error) {
-        console.error('⚠️ Error loading shipping address:', error);
+        console.error('Error loading shipping address:', error);
       }
     }
 
@@ -311,11 +407,13 @@ export async function generateInvoice(orderId: string): Promise<any> {
       customerName: order.customerName,
       customerEmail: order.customerEmail,
       customerPhone: order.customerPhone || undefined,
-      billingAddress: shippingAddressData, // Using shipping as billing for now
+      billingAddress: shippingAddressData,
       shippingAddress: shippingAddressData,
       subtotal: order.subtotal,
       tax: order.tax,
       shipping: order.shipping,
+      couponDiscount: order.couponDiscount,
+      couponCode: order.coupon?.code || null,
       total: order.total,
       orderItems: order.orderItems.map(item => ({
         productTitle: item.product.title,
@@ -326,17 +424,16 @@ export async function generateInvoice(orderId: string): Promise<any> {
       orderDate: order.createdAt
     };
 
-    // Generate PDF and upload to Vercel Blob with structured path
+    // Generate PDF and upload to Vercel Blob
     const blobUrl = await generateInvoicePDF(invoiceData, order.userId || undefined);
-    // Extract invoice number from the blob URL (format: https://...blob.vercel-storage.com/invoices/userId/date/INV-XXX.pdf)
     const invoiceNumber = blobUrl.split('/').pop()?.replace('.pdf', '') || generateInvoiceNumber();
 
-    // Create invoice record with Blob URL
+    // Create invoice record
     const invoice = await prisma.invoice.create({
       data: {
         invoiceNumber,
         orderId: order.id,
-        pdfPath: blobUrl, // Store the Vercel Blob URL
+        pdfPath: blobUrl,
         customerName: order.customerName,
         customerEmail: order.customerEmail,
         customerPhone: order.customerPhone,

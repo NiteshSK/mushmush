@@ -5,9 +5,9 @@ import { useRouter, usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { menuData } from "./menuData";
 import Dropdown from "./Dropdown";
-import { useAppSelector } from "@/redux/store";
-import { useSelector } from "react-redux";
-import { selectTotalPrice } from "@/redux/features/cart-slice";
+import { useAppSelector, AppDispatch } from "@/redux/store";
+import { useSelector, useDispatch } from "react-redux";
+import { selectTotalPrice, removeAllItemsFromCart } from "@/redux/features/cart-slice";
 import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
 import { useWishlist } from "@/app/context/WishlistContext";
 import Image from "next/image";
@@ -21,11 +21,27 @@ const Header = () => {
   const { data: session, status, update } = useSession();
   const router = useRouter();
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const dispatch = useDispatch<AppDispatch>();
+  const prevUserRef = useRef<string | null | undefined>(undefined);
 
   const product = useAppSelector((state) => state.cartReducer.items);
   const totalPrice = useSelector(selectTotalPrice);
   const { items: wishlistItems } = useWishlist();
   const pathUrl = usePathname();
+
+  // Clear cart when user changes (sign out → sign in as different user)
+  useEffect(() => {
+    const currentUser = session?.user?.email ?? null;
+    if (prevUserRef.current !== undefined && prevUserRef.current !== currentUser) {
+      dispatch(removeAllItemsFromCart());
+    }
+    prevUserRef.current = currentUser;
+  }, [session?.user?.email, dispatch]);
+
+  const handleSignOut = () => {
+    dispatch(removeAllItemsFromCart());
+    signOut({ callbackUrl: '/' });
+  };
 
   const handleOpenCartModal = () => {
     openCartModal();
@@ -202,7 +218,7 @@ const Header = () => {
                       </>
                     )}
                     <hr className="my-1 border-gray-100" />
-                    <button onClick={() => { setUserMenuOpen(false); signOut(); }} className="block w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">Sign Out</button>
+                    <button onClick={() => { setUserMenuOpen(false); handleSignOut(); }} className="block w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">Sign Out</button>
                   </div>
                 )}
               </div>
@@ -222,14 +238,16 @@ const Header = () => {
             {/* Cart pill */}
             <button
               onClick={handleOpenCartModal}
-              className="flex items-center gap-2 bg-forest text-white rounded-full px-5 py-2.5 text-sm font-medium hover:bg-dark transition-colors duration-300"
+              className="flex items-center gap-1.5 sm:gap-2 bg-forest text-white rounded-full px-3 sm:px-5 py-2.5 text-xs sm:text-sm font-medium hover:bg-dark transition-colors duration-300"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="9" cy="21" r="1" />
                 <circle cx="20" cy="21" r="1" />
                 <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
               </svg>
-              ₹{totalPrice} ({product.length})
+              <span className="hidden sm:inline">&#8377;{totalPrice}</span>
+              <span className="sm:hidden">{product.length}</span>
+              <span className="hidden sm:inline">({product.length})</span>
             </button>
 
             {/* Mobile hamburger */}
@@ -344,7 +362,7 @@ const Header = () => {
                       My Account
                     </Link>
                     <button
-                      onClick={() => { setNavigationOpen(false); signOut(); }}
+                      onClick={() => { setNavigationOpen(false); handleSignOut(); }}
                       className="flex-1 text-center border border-gray-200 text-gray-500 rounded-full py-2.5 text-sm font-medium hover:bg-gray-50 transition-colors"
                     >
                       Sign Out
