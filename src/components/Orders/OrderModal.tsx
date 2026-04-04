@@ -21,7 +21,7 @@ const OrderModal = ({ showDetails, showEdit, toggleModal, order }: OrderModalPro
       >
         <div className="shadow-7 relative w-full max-w-[600px] h-[242px] scale-100 transform rounded-[15px] bg-white transition-all flex flex-col justify-center items-center">
           <button
-            onClick={() => toggleModal(false)}
+            onClick={() => toggleModal()}
             className="text-body absolute -right-6 -top-6 z-[9999] flex h-11.5 w-11.5 items-center justify-center rounded-full border-2 border-stroke bg-white hover:text-dark"
           >
             <svg
