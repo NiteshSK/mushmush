@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { usePromotionalBanners } from "@/hooks/usePromotionalBanners";
 
 const FALLBACK = [
-    "Free shipping on orders above ₹999",
+    "Free Delivery on orders above ₹1999",
     "Use code KOSVANA10 for 10% off your first order",
     "100% Natural & Sustainably Sourced Products",
 ];

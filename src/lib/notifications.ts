@@ -23,7 +23,6 @@ export async function sendRestockNotifications(productId: number) {
     } | null;
 
     if (!product || !product.inStock) {
-      console.log(`Product ${productId} not found or not in stock`);
       return { success: false, message: 'Product not found or not in stock' };
     }
 
@@ -36,7 +35,6 @@ export async function sendRestockNotifications(productId: number) {
     });
 
     if (notifications.length === 0) {
-      console.log(`No active notifications found for product ${productId}`);
       return { success: true, message: 'No notifications to send' };
     }
 
@@ -80,7 +78,6 @@ export async function sendRestockNotifications(productId: number) {
     const successCount = results.filter(r => r.success).length;
     const failureCount = results.filter(r => !r.success).length;
 
-    console.log(`Restock notifications sent for product ${productId}: ${successCount} successful, ${failureCount} failed`);
 
     return {
       success: true,

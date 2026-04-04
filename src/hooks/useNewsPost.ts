@@ -26,7 +26,6 @@ export const useNewsPost = (slug: string) => {
       if (!slug) return
       
       try {
-        console.log('useNewsPost: Fetching news post for slug:', slug)
         
         // Check if this article has been viewed in this session
         const viewedArticles = sessionStorage.getItem('viewedNewsArticles')
@@ -49,16 +48,13 @@ export const useNewsPost = (slug: string) => {
         }
         
         const data = await response.json()
-        console.log('useNewsPost: Successfully fetched news post:', data.title)
         setBlogPost(data)
         
         // Mark this article as viewed in session storage
         if (shouldIncrementViews) {
           viewedList.push(slug)
           sessionStorage.setItem('viewedNewsArticles', JSON.stringify(viewedList))
-          console.log('useNewsPost: View counted for:', slug)
         } else {
-          console.log('useNewsPost: Already viewed in this session, not incrementing')
         }
       } catch (error) {
         console.error('useNewsPost: Failed to fetch news post:', error)

@@ -2,7 +2,12 @@ import React, { useState } from "react";
 import OrderActions from "./OrderActions";
 import OrderModal from "./OrderModal";
 
-const SingleOrder = ({ orderItem, smallView }: any) => {
+interface SingleOrderProps {
+  orderItem: { id: string; orderNumber: string; createdAt: string; status: string; total: number };
+  smallView?: boolean;
+}
+
+const SingleOrder = ({ orderItem, smallView }: SingleOrderProps) => {
   const [showDetails, setShowDetails] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
 

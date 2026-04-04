@@ -1,6 +1,7 @@
 "use client";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Testimonial } from "@/types/testimonial";
 import testimonialsData from "./testimonialsData";
 
 import { Pagination, Navigation } from "swiper/modules";
@@ -13,6 +14,43 @@ const Testimonials = () => {
   const [prevEl, setPrevEl] = useState<HTMLElement | null>(null);
   const [nextEl, setNextEl] = useState<HTMLElement | null>(null);
   const [paginationEl, setPaginationEl] = useState<HTMLElement | null>(null);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        const res = await fetch("/api/testimonials");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.testimonials && data.testimonials.length > 0) {
+            setTestimonials(data.testimonials);
+          } else {
+            // Fall back to hardcoded data if no DB reviews yet
+            setTestimonials(testimonialsData);
+          }
+        } else {
+          setTestimonials(testimonialsData);
+        }
+      } catch {
+        setTestimonials(testimonialsData);
+      } finally {
+        setLoaded(true);
+      }
+    };
+
+    fetchTestimonials();
+  }, []);
+
+  // Don't render the section at all if no testimonials
+  if (loaded && testimonials.length === 0) {
+    return null;
+  }
+
+  // Don't render until loaded to avoid layout shift
+  if (!loaded) {
+    return null;
+  }
 
   return (
     <section className="py-12 sm:py-16 bg-cream">
@@ -45,17 +83,17 @@ const Testimonials = () => {
             nextEl,
           }}
           onBeforeInit={(swiper) => {
-            if (typeof swiper.params.navigation !== 'boolean') {
+            if (typeof swiper.params.navigation !== "boolean") {
               swiper.params.navigation!.prevEl = prevEl;
               swiper.params.navigation!.nextEl = nextEl;
             }
-            if (typeof swiper.params.pagination !== 'boolean') {
+            if (typeof swiper.params.pagination !== "boolean") {
               swiper.params.pagination!.el = paginationEl;
             }
           }}
         >
-          {testimonialsData.map((item, key) => (
-            <SwiperSlide key={key}>
+          {testimonials.map((item, key) => (
+            <SwiperSlide key={item.id ?? key}>
               <SingleItem testimonial={item} />
             </SwiperSlide>
           ))}
@@ -67,18 +105,39 @@ const Testimonials = () => {
             ref={setPrevEl}
             className="custom-prev w-8 h-8 flex items-center justify-center rounded-full border border-transparent hover:border-dark hover:bg-transparent transition-all text-dark hover:text-black disabled:opacity-30"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M15 18l-6-6 6-6" />
             </svg>
           </button>
 
-          <div ref={setPaginationEl} className="custom-pagination !static !w-auto !transform-none flex gap-2 items-center" />
+          <div
+            ref={setPaginationEl}
+            className="custom-pagination !static !w-auto !transform-none flex gap-2 items-center"
+          />
 
           <button
             ref={setNextEl}
             className="custom-next w-8 h-8 flex items-center justify-center rounded-full border border-transparent hover:border-dark hover:bg-transparent transition-all text-dark hover:text-black disabled:opacity-30"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M9 18l6-6-6-6" />
             </svg>
           </button>

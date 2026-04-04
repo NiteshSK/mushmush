@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { availablePacks, formatBulkQuantity } from '@/lib/inventory'
 
 // GET /api/products - Fetch all products with optional filtering
 export async function GET(request: NextRequest) {
@@ -10,8 +11,8 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category')
     const featured = searchParams.get('featured')
     const inStock = searchParams.get('inStock')
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '10')
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1'))
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '10')))
     const skip = (page - 1) * limit
 
     const where: any = {}
@@ -82,7 +83,7 @@ export async function GET(request: NextRequest) {
       ]);
     } catch (error) {
       // Fallback: fetch products without discounts if table doesn't exist
-      console.log('Discounts table not found, fetching products without discounts');
+      // Fallback: fetch products without discounts table
       [products, total] = await Promise.all([
         prisma.product.findMany({
           where,
@@ -138,11 +139,16 @@ export async function GET(request: NextRequest) {
       }
       // Removed fallback to old discountedPrice field - only use active discount records
 
+      const packs = availablePacks(product.quantity, product.measurementValue, product.measurementType);
+
       return {
         ...product,
         averageRating,
         reviewCount: product.reviews.length,
         isOutOfStock: !product.inStock,
+        stockQuantity: packs,
+        bulkQuantity: product.quantity,
+        bulkDisplay: formatBulkQuantity(product.quantity, product.measurementType),
         discountedPrice,
         discountPercentage: Math.round(discountPercentage),
         hasDiscount: discountedPrice !== null

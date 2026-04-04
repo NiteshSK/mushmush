@@ -16,7 +16,6 @@ export async function POST(request: NextRequest) {
         }
       }
     });
-    console.log('🧹 Cleaned up news older than 3 months');
 
     // Check if we have recent SCRAPED news (last 24 hours)
     const recentScrapedNews = await prisma.news.findFirst({
@@ -44,7 +43,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Trigger scraping
-    console.log('🚀 Triggering news scraping...');
 
     fetch(`${request.nextUrl.origin}/api/admin/scrape-news`, {
       method: 'POST',

@@ -26,7 +26,6 @@ export async function POST(request: NextRequest) {
     // Verify webhook signature (in production, implement proper signature verification)
     const signature = request.headers.get('x-webhook-signature');
     if (!signature) {
-      console.log('Webhook received without signature - proceeding in development mode');
     }
 
     // Find pending registration by amount with pending payment
@@ -56,7 +55,6 @@ export async function POST(request: NextRequest) {
     });
 
     if (!registration) {
-      console.log(`No pending registration found for amount: ${amount}`);
       return NextResponse.json(
         { error: "No matching registration found" },
         { status: 404 }

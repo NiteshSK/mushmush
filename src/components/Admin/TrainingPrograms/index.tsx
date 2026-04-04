@@ -54,14 +54,11 @@ const TrainingProgramsAdmin = () => {
       const response = await fetch("/api/admin/training-programs");
       if (response.ok) {
         const data = await response.json();
-        console.log("Admin fetched training programs:", data);
         setTrainingPrograms(data);
       } else {
-        console.error("Admin failed to fetch training programs:", response.status);
         toast.error("Failed to fetch training programs");
       }
     } catch (error) {
-      console.error("Admin error fetching training programs:", error);
       toast.error("Error fetching training programs");
     } finally {
       setLoading(false);

@@ -1,16 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateOTP, sendOTPEmail } from '@/lib/email';
-import { otpStore } from '@/lib/otp-store';
+import { otpStore, cleanupExpiredOTPs } from '@/lib/otp-store';
+import { sendOTPViaSMS, isSMSConfigured } from '@/lib/sms';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { email, customerName } = body;
+    // Lazy cleanup of expired OTPs (at most once every 5 min)
+    cleanupExpiredOTPs();
 
-    console.log('📧 OTP Request received for:', email);
+    const body = await request.json();
+    const { email, customerName, phone } = body;
 
     if (!email || !customerName) {
-      console.error('❌ Missing email or customerName');
       return NextResponse.json(
         { error: 'Email and customer name are required' },
         { status: 400 }
@@ -19,11 +20,10 @@ export async function POST(request: NextRequest) {
 
     // Check rate limiting
     const rateLimitCheck = await otpStore.checkRateLimit(email.toLowerCase());
-    
+
     if (!rateLimitCheck.allowed) {
-      console.log('⏱️ Rate limit exceeded for:', email);
       return NextResponse.json(
-        { 
+        {
           error: rateLimitCheck.message,
           retryAfter: rateLimitCheck.retryAfter
         },
@@ -31,42 +31,68 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate OTP
+    // Generate cryptographically secure OTP
     const otp = generateOTP();
-    console.log('🔐 Generated OTP:', otp, 'for', email);
-    
-    // Store OTP with 5 minute expiration
-    const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes
-    await otpStore.set(email.toLowerCase(), { otp, expiresAt });
-    console.log('💾 OTP stored in database');
 
-    // Send OTP email
-    console.log('📨 Attempting to send OTP email...');
-    const result = await sendOTPEmail(email, otp, customerName);
+    // Store OTP (hashed) with 5 minute expiration
+    const expiresAt = Date.now() + 5 * 60 * 1000;
+    await otpStore.set(email.toLowerCase(), {
+      otp,
+      expiresAt,
+      phone: phone || undefined,
+    });
 
-    if (result.success) {
-      console.log('✅ OTP email sent successfully!');
-      return NextResponse.json({
-        success: true,
-        message: 'OTP sent successfully to your email',
-        expiresIn: 300, // 5 minutes in seconds
-        debug: {
-          email,
-          otpGenerated: true,
-          emailSent: true
-        }
-      });
-    } else {
-      console.error('❌ Failed to send OTP email:', result.error);
+    // Send OTP via both channels in parallel
+    const sendPromises: Promise<any>[] = [];
+
+    // 1. Email (primary — always sent)
+    sendPromises.push(sendOTPEmail(email, otp, customerName));
+
+    // 2. SMS (secondary — sent if phone provided and MSG91 configured)
+    let smsSent = false;
+    if (phone && isSMSConfigured()) {
+      sendPromises.push(
+        sendOTPViaSMS(phone, otp).then(result => {
+          smsSent = result.success;
+          return result;
+        })
+      );
+    }
+
+    const results = await Promise.allSettled(sendPromises);
+
+    // Check if at least email was sent successfully
+    const emailResult = results[0];
+    const emailSuccess = emailResult.status === 'fulfilled' && emailResult.value?.success;
+
+    if (!emailSuccess) {
       return NextResponse.json(
-        { error: 'Failed to send OTP email', details: result.error },
+        { error: 'Failed to send OTP. Please try again.' },
         { status: 500 }
       );
     }
+
+    // Build response message
+    let message = 'OTP sent to your email';
+    if (smsSent) {
+      message = 'OTP sent to your email and phone';
+    } else if (phone && isSMSConfigured()) {
+      message = 'OTP sent to your email (SMS delivery pending)';
+    }
+
+    return NextResponse.json({
+      success: true,
+      message,
+      channels: {
+        email: true,
+        sms: smsSent,
+      },
+      expiresIn: 300,
+    });
   } catch (error) {
-    console.error('❌ Error in send-otp API:', error);
+    console.error('Send OTP error:', error);
     return NextResponse.json(
-      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }

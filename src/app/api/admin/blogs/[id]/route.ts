@@ -201,10 +201,19 @@ export async function PATCH(request: NextRequest, context: RouteParams) {
       )
     }
 
-    // Update blog post with provided fields
+    // Whitelist allowed fields to prevent mass assignment
+    const allowedFields = ['title', 'content', 'excerpt', 'img', 'published', 'metaTitle', 'metaDescription'];
+    const safeData: Record<string, any> = {};
+    for (const field of allowedFields) {
+      if (body[field] !== undefined) safeData[field] = body[field];
+    }
+    if (safeData.title) {
+      safeData.slug = safeData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    }
+
     const updatedPost = await prisma.blogPost.update({
       where: { id },
-      data: body
+      data: safeData
     })
 
     return NextResponse.json({

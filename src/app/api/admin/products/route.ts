@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
+import { availablePacks, formatBulkQuantity } from '@/lib/inventory';
 
 // GET - Fetch all products for admin
 export async function GET() {
@@ -39,9 +38,12 @@ export async function GET() {
 
     const productsWithStats = products.map(product => ({
       ...product,
+      stockQuantity: availablePacks(product.quantity, product.measurementValue, product.measurementType),
+      bulkQuantity: product.quantity,
+      bulkDisplay: formatBulkQuantity(product.quantity, product.measurementType),
       reviewCount: product.reviews.length,
-      averageRating: product.reviews.length > 0 
-        ? product.reviews.reduce((sum, review) => sum + review.rating, 0) / product.reviews.length 
+      averageRating: product.reviews.length > 0
+        ? product.reviews.reduce((sum, review) => sum + review.rating, 0) / product.reviews.length
         : 0,
       hasActiveDiscount: product.discounts.length > 0,
       activeDiscountValue: product.discounts[0]?.value || 0,

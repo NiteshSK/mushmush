@@ -23,8 +23,7 @@ export async function GET(request: NextRequest) {
       include: {
         user: {
           select: {
-            name: true,
-            email: true
+            name: true
           }
         }
       },
@@ -46,7 +45,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("Error fetching reviews:", error);
     return NextResponse.json(
-      { error: "Failed to fetch reviews", details: error instanceof Error ? error.message : "Unknown error" },
+      { error: "Failed to fetch reviews", details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : 'Unknown error') : undefined },
       { status: 500 }
     );
   }
@@ -69,6 +68,13 @@ export async function POST(request: NextRequest) {
     if (!productId || !rating || rating < 1 || rating > 5) {
       return NextResponse.json(
         { error: "Product ID and rating (1-5) are required" },
+        { status: 400 }
+      );
+    }
+
+    if (comment && comment.length > 2000) {
+      return NextResponse.json(
+        { error: "Review comment must be under 2000 characters" },
         { status: 400 }
       );
     }
@@ -146,7 +152,7 @@ export async function POST(request: NextRequest) {
     }
     
     return NextResponse.json(
-      { error: "Failed to create review", details: error instanceof Error ? error.message : "Unknown error" },
+      { error: "Failed to create review", details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : 'Unknown error') : undefined },
       { status: 500 }
     );
   }

@@ -3,6 +3,7 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Breadcrumb from "@/components/Common/Breadcrumb";
 
 interface Order {
   id: string;
@@ -28,11 +29,32 @@ interface Invoice {
   emailSent: boolean;
 }
 
+const statusStyle = (status: string) => {
+  switch (status) {
+    case "DELIVERED":
+      return "text-forest bg-forest/10";
+    case "SHIPPED":
+      return "text-blue bg-blue/10";
+    case "PROCESSING":
+      return "text-yellow-600 bg-yellow-50";
+    case "CONFIRMED":
+      return "text-blue bg-blue/10";
+    case "CANCELLED":
+      return "text-red bg-red/10";
+    case "PENDING":
+      return "text-dark-5 bg-gray-1";
+    default:
+      return "text-dark-5 bg-gray-1";
+  }
+};
+
 export default function OrdersPage() {
   const { data: session, status } = useSession();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [downloadingInvoice, setDownloadingInvoice] = useState<string | null>(null);
+  const [downloadingInvoice, setDownloadingInvoice] = useState<string | null>(
+    null
+  );
   const router = useRouter();
 
   useEffect(() => {
@@ -48,14 +70,12 @@ export default function OrdersPage() {
 
   const fetchOrders = async () => {
     try {
-      // CRITICAL: Filter orders by current user ID
       const userId = session?.user?.id;
       if (!userId) {
-        console.error("No user ID found");
         setLoading(false);
         return;
       }
-      
+
       const response = await fetch(`/api/orders?userId=${userId}`);
       if (response.ok) {
         const data = await response.json();
@@ -71,10 +91,9 @@ export default function OrdersPage() {
   const handleDownloadInvoice = async (orderId: string) => {
     try {
       setDownloadingInvoice(orderId);
-      
-      // Fetch invoice details
+
       const response = await fetch(`/api/orders/${orderId}/invoice`);
-      
+
       if (!response.ok) {
         if (response.status === 404) {
           alert("Invoice not available yet. It will be generated shortly.");
@@ -83,12 +102,11 @@ export default function OrdersPage() {
         }
         return;
       }
-      
+
       const invoice: Invoice = await response.json();
-      
-      // Open PDF in new tab
+
       if (invoice.pdfPath) {
-        window.open(invoice.pdfPath, '_blank');
+        window.open(invoice.pdfPath, "_blank");
       } else {
         alert("Invoice PDF not available yet.");
       }
@@ -102,8 +120,8 @@ export default function OrdersPage() {
 
   if (status === "loading" || loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-[#F6F7FB] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-forest"></div>
       </div>
     );
   }
@@ -113,181 +131,237 @@ export default function OrdersPage() {
   }
 
   return (
-    
-    <div className="min-h-screen bg-gray-50 py-55">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">My Orders</h1>
-          <p className="mt-2 text-sm sm:text-base text-gray-600">
-            Track and manage your orders
-          </p>
-        </div>
+    <>
+      <Breadcrumb title="My Orders" pages={["My Orders"]} />
 
-        {/* Orders List */}
-        {orders.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-8 text-center">
-            <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-              </svg>
+      <section className="overflow-hidden py-20 bg-[#F6F7FB]">
+        <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
+          {/* Orders List */}
+          {orders.length === 0 ? (
+            <div className="bg-white shadow-1 rounded-[10px] p-12 text-center">
+              <div className="w-20 h-20 mx-auto mb-5 bg-forest/10 rounded-full flex items-center justify-center">
+                <svg
+                  className="w-10 h-10 text-forest"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                  />
+                </svg>
+              </div>
+              <h3 className="font-medium text-lg text-dark mb-2">
+                No orders yet
+              </h3>
+              <p className="text-dark-5 mb-6">
+                You haven't placed any orders yet. Start shopping to see your
+                orders here.
+              </p>
+              <Link
+                href="/shop"
+                className="inline-flex items-center bg-forest text-white text-sm font-medium py-2.5 px-6 rounded-md hover:bg-dark transition-colors"
+              >
+                Start Shopping
+              </Link>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No orders yet</h3>
-            <p className="text-gray-600 mb-6">
-              You haven't placed any orders yet. Start shopping to see your orders here.
-            </p>
-            <Link
-              href="/shop"
-              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-            >
-              Start Shopping
-            </Link>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {orders.map((order) => (
-              <div key={order.id} className="bg-white rounded-lg shadow overflow-hidden">
-                <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
-                  {/* Mobile Layout */}
-                  <div className="block sm:hidden space-y-3">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="text-base font-medium text-gray-900">
-                          Order #{order.orderNumber}
-                        </h3>
-                        <p className="text-xs text-gray-600 mt-1">
-                          {new Date(order.createdAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap ${
-                        order.status === 'DELIVERED' ? 'bg-green-light-6 text-green-dark' :
-                        order.status === 'SHIPPED' ? 'bg-blue-light-4 text-blue' :
-                        order.status === 'PROCESSING' ? 'bg-yellow-light-2 text-yellow-dark-2' :
-                        order.status === 'CONFIRMED' ? 'bg-blue-light-5 text-blue-dark' :
-                        order.status === 'PENDING' ? 'bg-gray-2 text-gray-7' :
-                        order.status === 'CANCELLED' ? 'bg-red-light-6 text-red-dark' :
-                        'bg-gray-2 text-gray-7'
-                      }`}>
-                        {order.status}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <p className="text-lg font-semibold text-gray-900">
-                        ₹{order.total.toFixed(2)}
-                      </p>
-                      <button
-                        onClick={() => handleDownloadInvoice(order.id)}
-                        disabled={downloadingInvoice === order.id}
-                        className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green hover:bg-green-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green disabled:opacity-50 disabled:cursor-not-allowed"
-                        title="Download Invoice"
-                      >
-                        {downloadingInvoice === order.id ? (
-                          <>
-                            <svg className="animate-spin h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <span className="ml-1.5">Loading...</span>
-                          </>
-                        ) : (
-                          <>
-                            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            <span className="ml-1.5">Invoice</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Desktop Layout */}
-                  <div className="hidden sm:flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-medium text-gray-900">
-                        Order #{order.orderNumber}
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        Placed on {new Date(order.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div className="text-right flex items-center gap-4">
-                      <div>
-                        <p className="text-lg font-medium text-gray-900">
-                          ₹{order.total.toFixed(2)}
-                        </p>
-                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                          order.status === 'DELIVERED' ? 'bg-green-light-6 text-green-dark' :
-                          order.status === 'SHIPPED' ? 'bg-blue-light-4 text-blue' :
-                          order.status === 'PROCESSING' ? 'bg-yellow-light-2 text-yellow-dark-2' :
-                          order.status === 'CONFIRMED' ? 'bg-blue-light-5 text-blue-dark' :
-                          order.status === 'PENDING' ? 'bg-gray-2 text-gray-7' :
-                          order.status === 'CANCELLED' ? 'bg-red-light-6 text-red-dark' :
-                          'bg-gray-2 text-gray-7'
-                        }`}>
+          ) : (
+            <div className="space-y-5">
+              {orders.map((order) => (
+                <div
+                  key={order.id}
+                  className="bg-white shadow-1 rounded-[10px] overflow-hidden"
+                >
+                  {/* Order Header */}
+                  <div className="border-b border-gray-3 py-4 px-4 sm:px-8.5">
+                    {/* Mobile */}
+                    <div className="block sm:hidden space-y-3">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h3 className="font-medium text-dark">
+                            Order #{order.orderNumber}
+                          </h3>
+                          <p className="text-xs text-dark-5 mt-1">
+                            {new Date(order.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <span
+                          className={`inline-flex px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider rounded-full ${statusStyle(order.status)}`}
+                        >
                           {order.status}
                         </span>
                       </div>
-                      <button
-                        onClick={() => handleDownloadInvoice(order.id)}
-                        disabled={downloadingInvoice === order.id}
-                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green hover:bg-green-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green disabled:opacity-50 disabled:cursor-not-allowed"
-                        title="Download Invoice"
-                      >
-                        {downloadingInvoice === order.id ? (
-                          <>
-                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            Loading...
-                          </>
-                        ) : (
-                          <>
-                            <svg className="-ml-1 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            Invoice
-                          </>
-                        )}
-                      </button>
+                      <div className="flex items-center justify-between">
+                        <p className="text-lg font-semibold text-dark">
+                          &#8377;{order.total.toFixed(2)}
+                        </p>
+                        <button
+                          onClick={() => handleDownloadInvoice(order.id)}
+                          disabled={downloadingInvoice === order.id}
+                          className="inline-flex items-center gap-1.5 text-xs font-medium text-forest bg-forest/10 py-1.5 px-3 rounded-md hover:bg-forest/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {downloadingInvoice === order.id ? (
+                            <>
+                              <svg
+                                className="animate-spin h-3 w-3"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                />
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                />
+                              </svg>
+                              Loading...
+                            </>
+                          ) : (
+                            <>
+                              <svg
+                                className="h-3 w-3"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                />
+                              </svg>
+                              Invoice
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Desktop */}
+                    <div className="hidden sm:flex items-center justify-between">
+                      <div>
+                        <h3 className="font-medium text-lg text-dark">
+                          Order #{order.orderNumber}
+                        </h3>
+                        <p className="text-sm text-dark-5">
+                          Placed on{" "}
+                          {new Date(order.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-5">
+                        <div className="text-right">
+                          <p className="text-lg font-medium text-dark">
+                            &#8377;{order.total.toFixed(2)}
+                          </p>
+                          <span
+                            className={`inline-flex px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider rounded-full ${statusStyle(order.status)}`}
+                          >
+                            {order.status}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => handleDownloadInvoice(order.id)}
+                          disabled={downloadingInvoice === order.id}
+                          className="inline-flex items-center gap-2 text-sm font-medium text-forest bg-forest/10 py-2.5 px-5 rounded-md hover:bg-forest/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {downloadingInvoice === order.id ? (
+                            <>
+                              <svg
+                                className="animate-spin h-4 w-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                />
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                />
+                              </svg>
+                              Loading...
+                            </>
+                          ) : (
+                            <>
+                              <svg
+                                className="h-4 w-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                />
+                              </svg>
+                              Invoice
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Order Items */}
+                  <div className="p-4 sm:p-8.5">
+                    <div className="space-y-3">
+                      {order.orderItems.map((item) => (
+                        <div
+                          key={item.id}
+                          className="flex items-center gap-3 sm:gap-4"
+                        >
+                          <div className="flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 bg-gray-1 rounded-[10px] overflow-hidden">
+                            {item.product.imgs && (
+                              <img
+                                src={
+                                  item.product.imgs.thumbnails?.[0] ||
+                                  "/images/placeholder.jpg"
+                                }
+                                alt={item.product.title}
+                                className="w-full h-full object-cover"
+                              />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-sm font-medium text-dark truncate">
+                              {item.product.title}
+                            </h4>
+                            <p className="text-xs sm:text-sm text-dark-5">
+                              Qty: {item.quantity} &times; &#8377;{item.price}
+                            </p>
+                          </div>
+                          <div className="text-sm font-medium text-dark whitespace-nowrap">
+                            &#8377;{(item.quantity * item.price).toFixed(2)}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
-                
-                <div className="px-4 sm:px-6 py-4">
-                  <div className="space-y-3">
-                    {order.orderItems.map((item) => (
-                      <div key={item.id} className="flex items-center space-x-3 sm:space-x-4">
-                        <div className="flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 rounded-lg overflow-hidden">
-                          {item.product.imgs && (
-                            <img
-                              src={item.product.imgs.thumbnails?.[0] || '/images/placeholder.jpg'}
-                              alt={item.product.title}
-                              className="w-full h-full object-cover"
-                            />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-sm font-medium text-gray-900 truncate">
-                            {item.product.title}
-                          </h4>
-                          <p className="text-xs sm:text-sm text-gray-600">
-                            Qty: {item.quantity} × ₹{item.price}
-                          </p>
-                        </div>
-                        <div className="text-sm font-medium text-gray-900 whitespace-nowrap">
-                          ₹{(item.quantity * item.price).toFixed(2)}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+    </>
   );
 }

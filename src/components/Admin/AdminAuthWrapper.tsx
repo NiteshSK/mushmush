@@ -16,16 +16,13 @@ const AdminAuthWrapperContent: React.FC<AdminAuthWrapperProps> = ({ children }) 
   const [debugInfo, setDebugInfo] = useState<string>('');
 
   useEffect(() => {
-    console.log('Admin Auth Debug:', { status, session, userRole: session?.user?.role });
     setDebugInfo(`Status: ${status}, Session: ${!!session}, Role: ${session?.user?.role || 'none'}`);
 
     if (status === 'loading') {
-      console.log('Session still loading...');
       return;
     }
 
     if (!session) {
-      console.log('No session found, redirecting to signin');
       setTimeout(() => {
         router.push('/auth/signin?callbackUrl=/admin');
       }, 2000);
@@ -33,14 +30,12 @@ const AdminAuthWrapperContent: React.FC<AdminAuthWrapperProps> = ({ children }) 
     }
 
     if (session.user?.role !== 'ADMIN') {
-      console.log('User role is not ADMIN:', session.user?.role);
       setTimeout(() => {
         router.push('/');
       }, 3000);
       return;
     }
 
-    console.log('User authorized as admin');
     setIsAuthorized(true);
   }, [session, status, router]);
 

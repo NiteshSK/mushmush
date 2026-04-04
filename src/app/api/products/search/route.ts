@@ -7,12 +7,12 @@ export async function GET(request: NextRequest) {
     await prisma.$connect();
     
     const { searchParams } = new URL(request.url);
-    const query = searchParams.get('q') || '';
-    const category = searchParams.get('category') || '';
+    const query = (searchParams.get('q') || '').slice(0, 200);
+    const category = (searchParams.get('category') || '').slice(0, 100);
     const minPrice = parseFloat(searchParams.get('minPrice') || '0');
     const maxPrice = parseFloat(searchParams.get('maxPrice') || '999999');
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '12');
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
+    const limit = Math.min(50, Math.max(1, parseInt(searchParams.get('limit') || '12')));
 
     const skip = (page - 1) * limit;
 

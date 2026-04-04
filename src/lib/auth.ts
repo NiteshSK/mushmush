@@ -54,7 +54,13 @@ const providers = [
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as any,
   providers,
-  secret: process.env.NEXTAUTH_SECRET || "fallback-secret-for-development",
+  secret: (() => {
+    const secret = process.env.NEXTAUTH_SECRET;
+    if (!secret && process.env.NODE_ENV === 'production') {
+      throw new Error('NEXTAUTH_SECRET environment variable is required in production');
+    }
+    return secret || 'dev-only-insecure-secret-do-not-use-in-prod';
+  })(),
   debug: process.env.NODE_ENV !== "production",
   events: {
     createUser: async ({ user }) => {
@@ -73,7 +79,6 @@ export const authOptions: NextAuthOptions = {
             html: notification.html,
             text: notification.text,
           });
-          console.log(`Admin notification sent for OAuth signup: ${user.email}`);
         }
       } catch (error) {
         console.error('Failed to send admin notification for OAuth signup:', error);
@@ -97,7 +102,6 @@ export const authOptions: NextAuthOptions = {
           
           // Single device login - only NextAuth sessions are managed
           
-          console.log(`Single device login: invalidated all existing sessions for user: ${user.id}`);
         } catch (error) {
           console.error('Single device login error:', error);
           // Don't block login if session management fails

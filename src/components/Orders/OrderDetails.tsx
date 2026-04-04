@@ -1,6 +1,14 @@
 import React from "react";
 
-const OrderDetails = ({ orderItem }: any) => {
+interface OrderItem {
+  id: string;
+  orderNumber: string;
+  createdAt: string;
+  status: string;
+  total: number;
+}
+
+const OrderDetails = ({ orderItem }: { orderItem: OrderItem }) => {
   return (
     <>
       <div className="items-center justify-between py-4.5 px-7.5 hidden md:flex ">

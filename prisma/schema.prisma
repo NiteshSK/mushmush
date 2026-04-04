@@ -95,6 +95,7 @@ model Product {
   price              Float
   measurementValue   Int
   measurementType    String
+  quantity           Float                 @default(0)
   inStock            Boolean               @default(true)
   featured           Boolean               @default(false)
   createdAt          DateTime              @default(now())
@@ -149,6 +150,7 @@ model Order {
   subtotal                                      Float
   tax                                           Float          @default(0)
   shipping                                      Float          @default(0)
+  couponDiscount                                Float          @default(0)
   createdAt                                     DateTime       @default(now())
   updatedAt                                     DateTime       @updatedAt
   customerName                                  String
@@ -158,8 +160,11 @@ model Order {
   userId                                        String?
   billingAddressId                              String?
   shippingAddressId                             String?
+  couponId                                      Int?
+  coupon                                        Coupon?        @relation(fields: [couponId], references: [id])
   invoice                                       Invoice?
   orderItems                                    OrderItem[]
+  couponUsage                                   CouponUsage?
   addresses_orders_billingAddressIdToaddresses  addresses?     @relation("orders_billingAddressIdToaddresses", fields: [billingAddressId], references: [id])
   addresses_orders_shippingAddressIdToaddresses addresses?     @relation("orders_shippingAddressIdToaddresses", fields: [shippingAddressId], references: [id])
   user                                          User?          @relation(fields: [userId], references: [id])
@@ -281,6 +286,42 @@ model ProductDiscount {
   product   Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@map("product_discounts")
+}
+
+model Coupon {
+  id              Int           @id @default(autoincrement())
+  code            String        @unique
+  type            DiscountType
+  value           Float
+  minOrderValue   Float?
+  maxDiscount     Float?
+  maxUses         Int?
+  maxUsesPerEmail Int           @default(1)
+  usedCount       Int           @default(0)
+  startDate       DateTime      @default(now())
+  endDate         DateTime
+  isActive        Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  orders          Order[]
+  usages          CouponUsage[]
+
+  @@map("coupons")
+}
+
+model CouponUsage {
+  id             String   @id @default(cuid())
+  couponId       Int
+  email          String
+  orderId        String   @unique
+  discountAmount Float
+  usedAt         DateTime @default(now())
+  coupon         Coupon   @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([couponId, email])
+  @@index([email])
+  @@map("coupon_usages")
 }
 
 model PromotionalBanner {
@@ -518,7 +559,9 @@ enum UpiPaymentStatus {
 model OTP {
   id        String   @id @default(cuid())
   email     String
-  otp       String
+  otp       String   // SHA-256 hashed OTP
+  phone     String?  // Phone number for SMS delivery
+  attempts  Int      @default(0)
   expiresAt DateTime
   createdAt DateTime @default(now())
 

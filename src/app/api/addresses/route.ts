@@ -181,16 +181,8 @@ export async function POST(request: NextRequest) {
 
   } catch (error: any) {
     console.error('Error creating address:', error);
-    console.error('Error details:', {
-      message: error?.message,
-      code: error?.code,
-      meta: error?.meta
-    });
     return NextResponse.json(
-      { 
-        error: 'Failed to create address',
-        details: error?.message || 'Unknown error'
-      },
+      { error: 'Failed to create address' },
       { status: 500 }
     );
   }

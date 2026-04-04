@@ -15,6 +15,7 @@ interface SingleItemProps {
     price: number;
     discountedPrice?: number;
     quantity: number;
+    stockQuantity?: number;
     imgs?: {
       thumbnails: string[];
       previews: string[];
@@ -32,6 +33,8 @@ const SingleItem = ({ item }: SingleItemProps) => {
   };
 
   const handleIncreaseQuantity = () => {
+    const maxQty = item.stockQuantity ?? Infinity;
+    if (quantity >= maxQty) return;
     setQuantity(quantity + 1);
     dispatch(updateCartItemQuantity({ id: item.id, quantity: quantity + 1 }));
   };

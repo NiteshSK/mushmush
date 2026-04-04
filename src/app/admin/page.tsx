@@ -111,6 +111,13 @@ const AdminDashboardContent: React.FC = () => {
       color: 'bg-yellow'
     },
     {
+      title: 'Manage Coupons',
+      description: 'Create & manage coupon codes',
+      icon: '🎟️',
+      link: '/admin/coupons',
+      color: 'bg-orange'
+    },
+    {
       title: 'View Orders',
       description: 'Check recent orders',
       icon: '🛒',

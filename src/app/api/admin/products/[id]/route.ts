@@ -82,7 +82,6 @@ export async function PUT(
 
     // Send restock notifications if product came back in stock
     if (shouldSendRestockNotifications) {
-      console.log(`Product ${id} came back in stock, sending notifications...`);
       sendRestockNotifications(parseInt(id)).catch((error) => {
         console.error('Failed to send restock notifications:', error);
       });
@@ -124,14 +123,25 @@ export async function PATCH(
         where: { id: parseInt(id) },
         select: { inStock: true }
       });
-      
+
       if (currentProduct && !currentProduct.inStock) {
+        shouldSendRestockNotifications = true;
+      }
+    }
+    // Also check for restock when quantity is updated from 0 to >0
+    if (field === 'quantity' && parseFloat(value) > 0) {
+      const currentProduct = await prisma.product.findUnique({
+        where: { id: parseInt(id) },
+        select: { quantity: true, inStock: true }
+      });
+
+      if (currentProduct && currentProduct.quantity === 0 && !currentProduct.inStock) {
         shouldSendRestockNotifications = true;
       }
     }
 
     // Validate allowed fields
-    const allowedFields = ['price', 'inStock', 'featured', 'title', 'description', 'measurementValue', 'measurementType'];
+    const allowedFields = ['price', 'inStock', 'featured', 'title', 'description', 'measurementValue', 'measurementType', 'quantity'];
     if (!allowedFields.includes(field)) {
       return NextResponse.json(
         { error: `Field '${field}' is not allowed for updates` },
@@ -141,7 +151,7 @@ export async function PATCH(
 
     // Prepare update data based on field type
     let updateData: any = {};
-    
+
     switch (field) {
       case 'price':
         updateData.price = parseFloat(value);
@@ -153,6 +163,29 @@ export async function PATCH(
       case 'measurementValue':
         updateData.measurementValue = parseInt(value);
         break;
+      case 'quantity': {
+        const qty = parseFloat(value);
+        if (isNaN(qty) || qty < 0) {
+          return NextResponse.json(
+            { error: 'Quantity must be a non-negative number' },
+            { status: 400 }
+          );
+        }
+        updateData.quantity = qty;
+        // Check if at least 1 pack can be sold
+        const prod = await prisma.product.findUnique({
+          where: { id: parseInt(id) },
+          select: { measurementValue: true, measurementType: true }
+        });
+        if (prod) {
+          const { availablePacks } = await import('@/lib/inventory');
+          const packs = availablePacks(qty, prod.measurementValue, prod.measurementType);
+          updateData.inStock = packs > 0;
+        } else {
+          updateData.inStock = qty > 0;
+        }
+        break;
+      }
       default:
         updateData[field] = value;
     }
@@ -178,7 +211,6 @@ export async function PATCH(
 
     // Send restock notifications if product came back in stock
     if (shouldSendRestockNotifications) {
-      console.log(`Product ${id} came back in stock via PATCH, sending notifications...`);
       sendRestockNotifications(parseInt(id)).catch((error) => {
         console.error('Failed to send restock notifications:', error);
       });

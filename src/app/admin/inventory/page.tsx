@@ -21,10 +21,11 @@ const InventoryPageContent: React.FC = () => {
       <div className="bg-blue-light-5 rounded-lg p-6">
         <h3 className="text-lg font-semibold text-blue mb-2">💡 Quick Tips</h3>
         <ul className="text-sm text-blue-dark space-y-1">
-          <li>• Stock changes take effect immediately on the website</li>
+          <li>• Set product quantity to control how many units can be ordered</li>
+          <li>• Products are automatically marked out of stock when quantity reaches 0</li>
+          <li>• Quantity is decremented automatically when orders are placed</li>
           <li>• Out of stock products show "Notify Me" instead of "Add to Cart"</li>
-          <li>• Products with active discounts are highlighted in the discount column</li>
-          <li>• Use the search and filter features to find specific products quickly</li>
+          <li>• Low stock items (5 or fewer) are highlighted in yellow</li>
         </ul>
       </div>
     </div>

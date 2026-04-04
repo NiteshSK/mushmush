@@ -62,7 +62,6 @@ export async function POST(request: NextRequest) {
         html: welcomeEmail.html,
         text: welcomeEmail.text
       });
-      console.log(`Welcome email sent to ${email}`);
     } catch (emailError) {
       console.error('Failed to send welcome email:', emailError);
       // Don't fail registration if email fails
@@ -79,7 +78,6 @@ export async function POST(request: NextRequest) {
           html: adminNotification.html,
           text: adminNotification.text,
         });
-        console.log(`Admin notification sent for new user: ${email}`);
       }
     } catch (adminEmailError) {
       console.error('Failed to send admin notification:', adminEmailError);

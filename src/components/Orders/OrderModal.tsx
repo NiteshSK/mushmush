@@ -2,7 +2,14 @@ import React, { useRef, useEffect } from "react";
 import OrderDetails from "./OrderDetails";
 import EditOrder from "./EditOrder";
 
-const OrderModal = ({ showDetails, showEdit, toggleModal, order }: any) => {
+interface OrderModalProps {
+  showDetails: boolean;
+  showEdit: boolean;
+  toggleModal: () => void;
+  order: { id: string; orderNumber: string; createdAt: string; status: string; total: number } | null;
+}
+
+const OrderModal = ({ showDetails, showEdit, toggleModal, order }: OrderModalProps) => {
   if (!showDetails && !showEdit) {
     return null;
   }

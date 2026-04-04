@@ -8,6 +8,7 @@ import { addItemToCart } from "@/redux/features/cart-slice";
 import { useWishlist } from "@/app/context/WishlistContext";
 import { updateproductDetails } from "@/redux/features/product-details";
 import { useDispatch } from "react-redux";
+import StarRating from "@/components/Common/StarRating";
 import { AppDispatch } from "@/redux/store";
 import Link from "next/link";
 import toast from "react-hot-toast";
@@ -110,7 +111,7 @@ const ProductItem = ({ item }: { item: Product }) => {
             onClick={() => handleAddToCart()}
             className="inline-flex font-medium text-custom-sm py-[7px] px-5 rounded-[5px] bg-blue text-white ease-out duration-200 hover:bg-blue-dark"
           >
-            Add to cart
+            Add to Cart
           </button>
 
           <button
@@ -164,41 +165,8 @@ const ProductItem = ({ item }: { item: Product }) => {
         </div>
       </div>
 
-      <div className="flex items-center gap-2.5 mb-2">
-        <div className="flex items-center gap-1">
-          <Image
-            src="/images/icons/icon-star.svg"
-            alt="star icon"
-            width={14}
-            height={14}
-          />
-          <Image
-            src="/images/icons/icon-star.svg"
-            alt="star icon"
-            width={14}
-            height={14}
-          />
-          <Image
-            src="/images/icons/icon-star.svg"
-            alt="star icon"
-            width={14}
-            height={14}
-          />
-          <Image
-            src="/images/icons/icon-star.svg"
-            alt="star icon"
-            width={14}
-            height={14}
-          />
-          <Image
-            src="/images/icons/icon-star.svg"
-            alt="star icon"
-            width={14}
-            height={14}
-          />
-        </div>
-
-        <p className="text-custom-sm">({item.reviews})</p>
+      <div className="mb-2">
+        <StarRating rating={item.averageRating ?? 0} count={item.reviewCount ?? item.reviews ?? 0} />
       </div>
 
       <h3

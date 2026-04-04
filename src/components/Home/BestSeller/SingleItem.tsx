@@ -7,35 +7,7 @@ import { addItemToCart } from "@/redux/features/cart-slice";
 import Image from "next/image";
 import Link from "next/link";
 import toast from "react-hot-toast";
-
-const StarRating = ({ rating = 5, count = 0 }: { rating?: number; count?: number }) => {
-  return (
-    <div className="flex items-center gap-1.5">
-      <div className="flex items-center gap-0.5">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <svg
-            key={star}
-            width="13"
-            height="13"
-            viewBox="0 0 14 14"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M7 1L8.854 4.764L13 5.382L10 8.326L10.708 12.5L7 10.527L3.292 12.5L4 8.326L1 5.382L5.146 4.764L7 1Z"
-              fill={star <= Math.round(rating) ? "#1a1a1a" : "none"}
-              stroke={star <= Math.round(rating) ? "#1a1a1a" : "#d1d5db"}
-              strokeWidth="1"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        ))}
-      </div>
-      <span className="text-[11px] text-gray-400">({count})</span>
-    </div>
-  );
-};
+import StarRating from "@/components/Common/StarRating";
 
 const SingleItem = ({
   item,
@@ -125,7 +97,7 @@ const SingleItem = ({
         )}
 
         {/* Stars */}
-        <StarRating rating={item.averageRating ?? 5} count={item.reviewCount ?? 0} />
+        <StarRating rating={item.averageRating ?? 0} count={item.reviewCount ?? 0} size={13} />
 
         {/* Price */}
         <div className="flex items-baseline gap-2 mt-1">

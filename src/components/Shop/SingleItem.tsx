@@ -8,6 +8,7 @@ import { useWishlist } from "@/app/context/WishlistContext";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store";
 import Link from "next/link";
+import StarRating from "@/components/Common/StarRating";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import NotifyMeModal from "@/components/NotifyMeModal";
@@ -20,8 +21,6 @@ const SingleItem = ({ item }: { item: Product }) => {
   const [isWishlistLoading, setIsWishlistLoading] = useState(false);
   const [isNotifyModalOpen, setIsNotifyModalOpen] = useState(false);
   
-  console.log('SingleItem render - isNotifyModalOpen:', isNotifyModalOpen, 'inStock:', item.inStock);
-
   const handleQuickViewUpdate = () => {
     dispatch(updateQuickView({ ...item }));
   };
@@ -34,6 +33,7 @@ const SingleItem = ({ item }: { item: Product }) => {
         price: item.price,
         discountedPrice: item.discountedPrice,
         quantity: 1,
+        stockQuantity: item.stockQuantity,
         imgs: item.imgs,
       })
     );
@@ -62,22 +62,10 @@ const SingleItem = ({ item }: { item: Product }) => {
   };
 
   const handleNavigateToDetails = () => {
-    // Debug: Log what product data is being stored
-    console.log('SingleItem: Navigating to product details:', {
-      id: item.id,
-      title: item.title,
-      slug: item.slug,
-      price: item.price
-    });
-    
     // Clear any existing product details from localStorage to prevent stale data
     localStorage.removeItem("productDetails");
     // Set the new product details
     localStorage.setItem("productDetails", JSON.stringify(item));
-    
-    // Debug: Verify localStorage was set correctly
-    const storedItem = localStorage.getItem("productDetails");
-    console.log('SingleItem: Product data stored in localStorage:', storedItem ? JSON.parse(storedItem).title : 'None');
   };
 
   return (
@@ -138,14 +126,8 @@ const SingleItem = ({ item }: { item: Product }) => {
 
       {/* Content container */}
       <div className="p-4 flex flex-col flex-grow">
-        {/* Star ratings restored */}
-        <div className="flex items-center gap-2.5 mb-2">
-            <div className="flex items-center gap-1">
-                {[...Array(5)].map((_, i) => (
-                    <Image key={i} src="/images/icons/icon-star.svg" alt="star icon" width={15} height={15}/>
-                ))}
-            </div>
-            <p className="text-custom-sm text-gray-500">({item.reviews})</p>
+        <div className="mb-2">
+          <StarRating rating={item.averageRating ?? 0} count={item.reviewCount ?? item.reviews ?? 0} />
         </div>
 
         <h3 className="font-medium text-dark ease-out duration-200 hover:text-blue mb-2 text-lg flex-grow">
@@ -171,8 +153,6 @@ const SingleItem = ({ item }: { item: Product }) => {
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  console.log('Notify Me clicked for product:', item.id, item.title);
-                  console.log('Current modal state:', isNotifyModalOpen);
                   setIsNotifyModalOpen(true);
                 }}
                 className="inline-flex font-medium text-sm text-white bg-forest py-2 px-4 rounded-full ease-out duration-200 hover:bg-dark"

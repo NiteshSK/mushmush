@@ -31,7 +31,6 @@ export const useBlogPosts = (page: number = 1, limit: number = 6, published: boo
   useEffect(() => {
     const fetchBlogPosts = async () => {
       try {
-        console.log('useBlogPosts: Fetching blog posts...')
         const params = new URLSearchParams({
           page: page.toString(),
           limit: limit.toString(),
@@ -48,7 +47,6 @@ export const useBlogPosts = (page: number = 1, limit: number = 6, published: boo
         }
         
         const responseData = await response.json()
-        console.log('useBlogPosts: Successfully fetched blog posts:', responseData.posts?.length)
         setData(responseData)
       } catch (error) {
         console.error('useBlogPosts: Failed to fetch blog posts:', error)

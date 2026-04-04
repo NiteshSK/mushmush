@@ -46,7 +46,6 @@ const TrainingPrograms = () => {
         const response = await fetch("/api/training-programs");
         if (response.ok) {
           const data = await response.json();
-          console.log("Fetched training programs:", data);
           setTrainingPrograms(data);
         } else {
           console.error("Failed to fetch training programs:", response.status);

@@ -89,12 +89,6 @@ export async function GET() {
       };
     });
 
-    console.log('GET - Wishlist items for user:', { 
-      userId: user.id, 
-      itemCount: wishlistItems.length,
-      productIds: wishlistItems.map(item => item.product.id)
-    });
-
     return NextResponse.json({ items: wishlistItems });
   } catch (error) {
     console.error('Wishlist fetch error:', error);
@@ -140,8 +134,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Add to wishlist
-    console.log('POST - Adding to wishlist:', { userId: user.id, productId: parseInt(productId) });
-    
     const wishlistItem = await prisma.wishlistItem.create({
       data: {
         userId: user.id,
@@ -152,7 +144,6 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    console.log('POST - Successfully added:', wishlistItem.id);
     return NextResponse.json({ item: wishlistItem }, { status: 201 });
   } catch (error) {
     console.error('Add to wishlist error:', error);
@@ -194,14 +185,7 @@ export async function DELETE(request: NextRequest) {
       }
     });
 
-    console.log('DELETE - Checking wishlist item:', { 
-      userId: user.id, 
-      productId: parseInt(productId), 
-      existingItem: !!existingItem 
-    });
-
     if (!existingItem) {
-      console.log('DELETE - Item not found in wishlist');
       return NextResponse.json({ error: 'Item not found in wishlist' }, { status: 404 });
     }
 

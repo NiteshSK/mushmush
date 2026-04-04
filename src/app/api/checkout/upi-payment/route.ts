@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { writeFile } from 'fs/promises';
 import { join } from 'path';
+import { decrementStockAtomic } from '@/lib/inventory';
 
 export async function POST(request: NextRequest) {
   try {
@@ -92,9 +93,8 @@ export async function POST(request: NextRequest) {
         await writeFile(filepath, uint8Array);
         paymentProofPath = `/payment-proofs/${filename}`;
         
-        console.log('✅ Payment proof uploaded:', paymentProofPath);
       } catch (uploadError) {
-        console.error('❌ Error uploading payment proof:', uploadError);
+        console.error('Payment proof upload error:', uploadError);
         // Don't fail the payment if upload fails
       }
     }
@@ -116,19 +116,32 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    // Update order status to PROCESSING (payment submitted, awaiting verification)
+    // Atomically decrement stock — race-condition safe
+    // Uses WHERE quantity >= X to prevent overselling
+    const orderItems = order.orderItems.map((item: any) => ({
+      productId: item.productId,
+      quantity: item.quantity,
+    }));
+
+    const stockResult = await decrementStockAtomic(prisma, orderItems);
+
+    if (!stockResult.success) {
+      // Stock insufficient — cancel the payment record and fail
+      await prisma.upi_payments.delete({ where: { id: payment.id } });
+      return NextResponse.json(
+        {
+          error: 'Some items are no longer available',
+          stockErrors: stockResult.failedItems,
+        },
+        { status: 409 }
+      );
+    }
+
+    // Update order status to CONFIRMED (payment submitted + stock reserved)
     await prisma.order.update({
       where: { id: order.id },
-      data: { status: 'PROCESSING' }
+      data: { status: 'CONFIRMED' }
     });
-
-    console.log('✅ UPI payment submitted for order:', orderNumber);
-    console.log('💳 Transaction ID:', upiTransactionId);
-    console.log('📊 Payment Status: PENDING (awaiting admin verification)');
-
-    // TODO: Send confirmation email when email template is ready
-    // For now, we'll skip email sending to avoid interface mismatch
-    console.log('📧 Email notification skipped (to be implemented with proper template)');
 
     return NextResponse.json({
       success: true,
@@ -147,9 +160,9 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Error processing UPI payment:', error);
+    console.error('UPI payment error:', error);
     return NextResponse.json(
-      { error: 'Failed to process payment', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Failed to process payment' },
       { status: 500 }
     );
   }

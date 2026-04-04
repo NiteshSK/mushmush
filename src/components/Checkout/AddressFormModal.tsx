@@ -1,17 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { toast } from "react-hot-toast";
-
-const INDIAN_STATES = [
-  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
-  "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand",
-  "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur",
-  "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab",
-  "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura",
-  "Uttar Pradesh", "Uttarakhand", "West Bengal",
-  "Andaman and Nicobar Islands", "Chandigarh", "Dadra and Nagar Haveli and Daman and Diu",
-  "Delhi", "Jammu and Kashmir", "Ladakh", "Lakshadweep", "Puducherry"
-];
+import { INDIAN_STATES } from "@/lib/constants";
 
 interface AddressFormData {
   street: string;
@@ -131,7 +121,6 @@ const AddressFormModal: React.FC<AddressFormModalProps> = ({
               required
               value={formData.street}
               onChange={(e) => {
-                console.log('Street changed:', e.target.value);
                 setFormData({ ...formData, street: e.target.value });
               }}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -163,7 +152,6 @@ const AddressFormModal: React.FC<AddressFormModalProps> = ({
                 required
                 value={formData.state}
                 onChange={(e) => {
-                  console.log('State changed:', e.target.value);
                   setFormData({ ...formData, state: e.target.value });
                 }}
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"

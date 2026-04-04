@@ -35,12 +35,9 @@ const handleExternalLinkClick = async (e: React.MouseEvent) => {
         // Mark as viewed
         viewedList.push(slug)
         sessionStorage.setItem('viewedNewsArticles', JSON.stringify(viewedList))
-        console.log('View counted for external article:', slug)
       } catch (error) {
         console.error('Failed to increment view:', error);
       }
-    } else {
-      console.log('Already viewed in this session, not incrementing')
     }
   }
 };

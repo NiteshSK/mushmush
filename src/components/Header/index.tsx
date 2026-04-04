@@ -192,6 +192,15 @@ const Header = () => {
                     <Link href="/account" className="block px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-dark transition-colors" onClick={() => setUserMenuOpen(false)}>My Account</Link>
                     <Link href="/orders" className="block px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-dark transition-colors" onClick={() => setUserMenuOpen(false)}>My Orders</Link>
                     <Link href="/wishlist" className="block px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-dark transition-colors" onClick={() => setUserMenuOpen(false)}>Wishlist</Link>
+                    {session.user?.role === 'ADMIN' && (
+                      <>
+                        <hr className="my-1 border-gray-100" />
+                        <Link href="/admin" className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-forest hover:bg-forest/5 transition-colors" onClick={() => setUserMenuOpen(false)}>
+                          <span className="w-2 h-2 rounded-full bg-forest"></span>
+                          Admin Dashboard
+                        </Link>
+                      </>
+                    )}
                     <hr className="my-1 border-gray-100" />
                     <button onClick={() => { setUserMenuOpen(false); signOut(); }} className="block w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">Sign Out</button>
                   </div>
@@ -315,20 +324,32 @@ const Header = () => {
                     <p className="text-xs text-gray-400 truncate max-w-[180px]">{session.user?.email}</p>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <Link
-                    href="/account"
-                    className="flex-1 text-center bg-gray-100 text-dark rounded-full py-2.5 text-sm font-medium hover:bg-gray-200 transition-colors"
-                    onClick={() => setNavigationOpen(false)}
-                  >
-                    My Account
-                  </Link>
-                  <button
-                    onClick={() => { setNavigationOpen(false); signOut(); }}
-                    className="flex-1 text-center border border-gray-200 text-gray-500 rounded-full py-2.5 text-sm font-medium hover:bg-gray-50 transition-colors"
-                  >
-                    Sign Out
-                  </button>
+                <div className="flex flex-col gap-2">
+                  {session.user?.role === 'ADMIN' && (
+                    <Link
+                      href="/admin"
+                      className="w-full flex items-center justify-center gap-2 bg-forest text-white rounded-full py-2.5 text-sm font-medium hover:bg-dark transition-colors"
+                      onClick={() => setNavigationOpen(false)}
+                    >
+                      <span className="w-2 h-2 rounded-full bg-white"></span>
+                      Admin Dashboard
+                    </Link>
+                  )}
+                  <div className="flex gap-2">
+                    <Link
+                      href="/account"
+                      className="flex-1 text-center bg-gray-100 text-dark rounded-full py-2.5 text-sm font-medium hover:bg-gray-200 transition-colors"
+                      onClick={() => setNavigationOpen(false)}
+                    >
+                      My Account
+                    </Link>
+                    <button
+                      onClick={() => { setNavigationOpen(false); signOut(); }}
+                      className="flex-1 text-center border border-gray-200 text-gray-500 rounded-full py-2.5 text-sm font-medium hover:bg-gray-50 transition-colors"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
                 </div>
               </div>
             ) : (

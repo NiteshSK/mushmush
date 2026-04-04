@@ -32,7 +32,7 @@ const ShippingMethod = () => {
                 }`}
               ></div>
             </div>
-            Free Shipping
+            Free Delivery
           </label>
 
           <label

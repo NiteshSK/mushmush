@@ -8,6 +8,7 @@ import { useWishlist } from "@/app/context/WishlistContext";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store";
 import Link from "next/link";
+import StarRating from "@/components/Common/StarRating";
 import Image from "next/image";
 import toast from "react-hot-toast";
 
@@ -98,13 +99,8 @@ const SingleListItem = ({ item, priority = false, onNotifyMe }: Props) => {
           </Link>
         </h3>
         
-        <div className="flex items-center gap-2.5 mb-3">
-          <div className="flex items-center gap-1">
-              {[...Array(5)].map((_, i) => (
-                  <Image key={i} src="/images/icons/icon-star.svg" alt="star icon" width={15} height={15}/>
-              ))}
-          </div>
-          <p className="text-custom-sm">({item.reviewCount || 0} Reviews)</p>
+        <div className="mb-3">
+          <StarRating rating={item.averageRating ?? 0} count={item.reviewCount ?? 0} />
         </div>
         
         <div className="flex items-center justify-between">

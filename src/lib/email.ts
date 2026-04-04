@@ -28,7 +28,6 @@ export async function sendEmail({ to, subject, html, text }: EmailOptions) {
       text,
     });
 
-    console.log('Email sent successfully:', info.messageId);
     return { success: true, messageId: info.messageId };
   } catch (error) {
     console.error('Email sending failed:', error);
@@ -556,7 +555,7 @@ export function generatePaymentConfirmationEmail(data: PaymentEmailData): string
 export async function sendTrainingEmail(emailData: EmailData): Promise<void> {
   try {
     // Log email details for development
-    console.log('📧 Sending email:', {
+    console.log('📧 Sending training email:', {
       to: emailData.to,
       subject: emailData.subject,
       contentLength: emailData.html.length
@@ -565,9 +564,6 @@ export async function sendTrainingEmail(emailData: EmailData): Promise<void> {
     // Check if email configuration is available
     if (!process.env.SMTP_USER || !process.env.SMTP_PASSWORD) {
       console.warn('⚠️ Email configuration missing. Please set SMTP_USER and SMTP_PASSWORD environment variables.');
-      console.log('📧 Email would be sent to:', emailData.to);
-      console.log('📧 Email subject:', emailData.subject);
-      console.log('📧 Email content preview:', emailData.html.substring(0, 200) + '...');
       return;
     }
 
@@ -580,7 +576,6 @@ export async function sendTrainingEmail(emailData: EmailData): Promise<void> {
     });
 
     if (result.success) {
-      console.log('✅ Email sent successfully to:', emailData.to);
     } else {
       console.error('❌ Email sending failed:', result.error);
     }
@@ -810,7 +805,6 @@ export async function sendOrderInvoiceEmail(data: OrderInvoiceEmailData): Promis
     const result = await sendEmail(emailData);
 
     if (result.success) {
-      console.log('✅ Order invoice email sent successfully to:', data.customerEmail);
     } else {
       console.error('❌ Order invoice email failed:', result.error);
     }
@@ -825,10 +819,11 @@ export async function sendOrderInvoiceEmail(data: OrderInvoiceEmailData): Promis
 // ============================================
 
 /**
- * Generate a 6-digit OTP
+ * Generate a cryptographically secure 6-digit OTP
  */
 export function generateOTP(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  const { randomInt } = require('crypto');
+  return randomInt(100000, 999999).toString();
 }
 
 /**
@@ -903,7 +898,6 @@ export async function sendOTPEmail(email: string, otp: string, customerName: str
     const result = await sendEmail(emailData);
 
     if (result.success) {
-      console.log('✅ OTP email sent successfully to:', email);
       return { success: true, messageId: result.messageId };
     } else {
       console.error('❌ OTP email failed:', result.error);

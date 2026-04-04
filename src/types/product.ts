@@ -8,6 +8,7 @@ export type Product = {
   measurementValue: number;
   measurementType: string;
   quantity?: number;
+  stockQuantity?: number;
   inStock: boolean;
   featured: boolean;
   isOutOfStock?: boolean;

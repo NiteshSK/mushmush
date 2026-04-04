@@ -54,7 +54,6 @@ export async function generateInvoicePDF(data: InvoiceData, userId?: string): Pr
       doc.addImage(logoBase64, 'PNG', 15, 10, 25, 25);
     }
   } catch (error) {
-    console.log('Logo not found, continuing without logo');
   }
 
   // Company Header with updated branding
@@ -225,7 +224,6 @@ export async function generateInvoicePDF(data: InvoiceData, userId?: string): Pr
   const userFolder = userId || 'guest';
   const blobPath = `invoices/${userFolder}/${dateFolder}/${fileName}`;
 
-  console.log('📁 Uploading invoice to path:', blobPath);
 
   // Upload to Vercel Blob with structured path
   try {
@@ -234,8 +232,6 @@ export async function generateInvoicePDF(data: InvoiceData, userId?: string): Pr
       contentType: 'application/pdf',
     });
 
-    console.log('✅ Invoice PDF uploaded to Vercel Blob:', blob.url);
-    console.log('📊 Storage path:', blobPath);
     return blob.url;
   } catch (error) {
     console.error('❌ Error uploading PDF to Vercel Blob:', error);
@@ -248,7 +244,6 @@ export async function generateInvoicePDF(data: InvoiceData, userId?: string): Pr
  */
 export async function generateInvoice(orderId: string): Promise<any> {
   try {
-    console.log('🔄 Starting invoice generation for order:', orderId);
 
     // Fetch order with all details
     const order = await prisma.order.findUnique({
@@ -270,7 +265,6 @@ export async function generateInvoice(orderId: string): Promise<any> {
       throw new Error('Order not found');
     }
 
-    console.log('✅ Order found:', order.orderNumber);
 
     // Check if invoice already exists
     const existingInvoice = await prisma.invoice.findUnique({
@@ -278,7 +272,6 @@ export async function generateInvoice(orderId: string): Promise<any> {
     });
 
     if (existingInvoice) {
-      console.log('⚠️ Invoice already exists for order:', orderId);
       return existingInvoice;
     }
 
@@ -305,7 +298,6 @@ export async function generateInvoice(orderId: string): Promise<any> {
             zipCode: shippingAddr.zip,
             country: shippingAddr.country
           };
-          console.log('✅ Shipping address loaded');
         }
       } catch (error) {
         console.error('⚠️ Error loading shipping address:', error);
@@ -359,7 +351,6 @@ export async function generateInvoice(orderId: string): Promise<any> {
       }
     });
 
-    console.log('✅ Invoice generated successfully:', invoiceNumber);
     return invoice;
 
   } catch (error) {

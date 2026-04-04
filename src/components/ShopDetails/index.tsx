@@ -26,6 +26,7 @@ interface ProductDetails {
   measurementValue: number;
   measurementType: string;
   quantity?: number;
+  stockQuantity?: number;
   inStock: boolean;
   featured: boolean;
   isOutOfStock?: boolean;
@@ -84,7 +85,8 @@ const ShopDetails = () => {
         title: displayProduct.title || "",
         price: displayProduct.price || 0,
         discountedPrice: displayProduct.discountedPrice,
-        quantity: quantity, // Use the state for quantity
+        quantity: quantity,
+        stockQuantity: displayProduct.stockQuantity,
         imgs: displayProduct.imgs,
       })
     );
@@ -147,17 +149,12 @@ const ShopDetails = () => {
   useEffect(() => {
     setIsClient(true);
 
-    console.log('ShopDetails: useEffect triggered with slug:', slug);
-
     // Fetch product by slug from URL
     if (slug) {
-      console.log('ShopDetails: Fetching product by slug:', slug);
       fetchProductBySlug(slug);
     } else {
-      console.log('ShopDetails: No slug provided, using localStorage fallback');
       // Fallback to localStorage for backward compatibility
       const alreadyExist = localStorage.getItem("productDetails");
-      console.log('ShopDetails: localStorage productDetails:', alreadyExist ? 'Found' : 'Not found');
       const resolvedProduct =
         productFromStorage && productFromStorage.title
           ? productFromStorage
@@ -165,7 +162,6 @@ const ShopDetails = () => {
             ? JSON.parse(alreadyExist)
             : {};
 
-      console.log('ShopDetails: Resolved product from fallback:', resolvedProduct.title || 'No title');
       setProduct(resolvedProduct);
 
       if (resolvedProduct.id) {
@@ -189,27 +185,21 @@ const ShopDetails = () => {
   }, []);
 
   const fetchProductBySlug = async (productSlug: string) => {
-    console.log('ShopDetails: fetchProductBySlug called with slug:', productSlug);
-
     try {
       setProductLoading(true);
-      console.log('ShopDetails: Making API call to /api/products?slug=', productSlug);
 
       const response = await fetch(`/api/products?slug=${productSlug}`);
 
       if (!response.ok) {
-        console.log('ShopDetails: API call failed, status:', response.status);
         throw new Error('Failed to fetch product by slug');
       }
 
       const data = await response.json();
-      console.log('ShopDetails: API response data:', data);
 
       // Find the specific product from the response
       const productBySlug = data.products?.find((p: any) => p.slug === productSlug);
 
       if (productBySlug) {
-        console.log('ShopDetails: Found product in API response:', productBySlug.title);
         // Set the product data
         const updatedProduct = {
           ...product,
@@ -224,25 +214,20 @@ const ShopDetails = () => {
           } : productBySlug.measurement
         };
 
-        console.log('ShopDetails: Setting product data:', updatedProduct.title);
         setProduct(updatedProduct);
         localStorage.setItem("productDetails", JSON.stringify(updatedProduct));
-        console.log('ShopDetails: Updated localStorage with fresh product data');
       } else {
-        console.error('ShopDetails: Product not found for slug:', productSlug);
         // Fallback to localStorage
         const alreadyExist = localStorage.getItem("productDetails");
         if (alreadyExist) {
-          console.log('ShopDetails: Using localStorage fallback after API failure');
           setProduct(JSON.parse(alreadyExist));
         }
       }
     } catch (error) {
-      console.error('ShopDetails: Error fetching product by slug:', error);
+      console.error('Error fetching product by slug:', error);
       // Fallback to localStorage
       const alreadyExist = localStorage.getItem("productDetails");
       if (alreadyExist) {
-        console.log('ShopDetails: Using localStorage fallback after error');
         setProduct(JSON.parse(alreadyExist));
       }
     } finally {
@@ -335,11 +320,6 @@ const ShopDetails = () => {
 
     try {
       setIsSubmittingReview(true);
-      console.log('Submitting review:', {
-        productId: product.id,
-        rating: rating,
-        comment: comment.trim()
-      });
 
       const response = await fetch('/api/reviews', {
         method: 'POST',
@@ -352,9 +332,6 @@ const ShopDetails = () => {
           comment: comment.trim()
         })
       });
-
-      console.log('Response status:', response.status);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
       if (!response.ok) {
         // Handle non-JSON error responses
@@ -400,17 +377,11 @@ const ShopDetails = () => {
   }, [product?.id, product?.title, addToRecentlyViewed]);
 
   const handlePreviewSlider = () => {
-    console.log("1. Preview button clicked. Checking product data...");
-    console.log("Product to preview:", displayProduct);
-
     if (displayProduct && displayProduct.imgs && displayProduct.imgs.previews) {
-      console.log("2. Product data is valid. Calling openPreviewModal with:", displayProduct.imgs.previews);
       openPreviewModal({
         title: displayProduct.title,
         imgs: displayProduct.imgs,
       });
-    } else {
-      console.error("3. PREVIEW FAILED: displayProduct or its images are missing.");
     }
   };
   return (
@@ -544,7 +515,7 @@ const ShopDetails = () => {
                         <path d="M13.3589 8.35863C13.603 8.11455 13.603 7.71882 13.3589 7.47475C13.1149 7.23067 12.7191 7.23067 12.4751 7.47475L8.75033 11.1995L7.5256 9.97474C7.28152 9.73067 6.8858 9.73067 6.64172 9.97474C6.39764 10.2188 6.39764 10.6146 6.64172 10.8586L8.30838 12.5253C8.55246 12.7694 8.94819 12.7694 9.19227 12.5253L13.3589 8.35863Z" fill="#5c8e61" />
                         <path fillRule="evenodd" clipRule="evenodd" d="M10.0003 1.04169C5.05277 1.04169 1.04199 5.05247 1.04199 10C1.04199 14.9476 5.05277 18.9584 10.0003 18.9584C14.9479 18.9584 18.9587 14.9476 18.9587 10C18.9587 5.05247 14.9479 1.04169 10.0003 1.04169ZM2.29199 10C2.29199 5.74283 5.74313 2.29169 10.0003 2.29169C14.2575 2.29169 17.7087 5.74283 17.7087 10C17.7087 14.2572 14.2575 17.7084 10.0003 17.7084C5.74313 17.7084 2.29199 14.2572 2.29199 10Z" fill="#5c8e61" />
                       </svg>
-                      Free delivery available (on order above 699)
+                      Free Delivery on orders above ₹1999
                     </li>
                     {displayProduct.measurement && (
                       <li className="flex items-center gap-2.5">
@@ -574,10 +545,13 @@ const ShopDetails = () => {
                               <svg className="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.33301 10C3.33301 9.53984 3.7061 9.16675 4.16634 9.16675H15.833C16.2932 9.16675 16.6663 9.53984 16.6663 10.0001C16.6663 10.4603 16.2932 10.8334 15.833 10.8334H4.16634C3.7061 10.8334 3.33301 10.4603 3.33301 10.0001Z" /></svg>
                             </button>
                             <span className="flex items-center justify-center w-16 h-12 border-x border-gray-200">{quantity}</span>
-                            <button onClick={() => setQuantity(quantity + 1)} aria-label="button for add product" className="flex items-center justify-center w-12 h-12 ease-out duration-200 hover:text-forest">
+                            <button onClick={() => { const maxQty = displayProduct?.stockQuantity ?? Infinity; if (quantity < maxQty) setQuantity(quantity + 1); }} aria-label="button for add product" className="flex items-center justify-center w-12 h-12 ease-out duration-200 hover:text-forest">
                               <svg className="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.33301 10C3.33301 9.5398 3.7061 9.16671 4.16634 9.16671H15.833C16.2932 9.16671 16.6663 9.5398 16.6663 10C16.6663 10.4603 16.2932 10.8334 15.833 10.8334H4.16634C3.7061 10.8334 3.33301 10.4603 3.33301 10Z" /><path d="M9.99967 16.6667C9.53944 16.6667 9.16634 16.2936 9.16634 15.8334L9.16634 4.16671C9.16634 3.70647 9.53944 3.33337 9.99967 3.33337C10.4599 3.33337 10.833 3.70647 10.833 4.16671L10.833 15.8334C10.833 16.2936 10.4599 16.6667 9.99967 16.6667Z" /></svg>
                             </button>
                           </div>
+                          {displayProduct?.stockQuantity !== undefined && displayProduct.stockQuantity > 0 && displayProduct.stockQuantity <= 10 && (
+                            <span className="text-sm text-red font-medium">Only {displayProduct.stockQuantity} left in stock</span>
+                          )}
                           <button
                             type="button"
                             onClick={handlePurchaseNow}

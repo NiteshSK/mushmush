@@ -27,21 +27,18 @@ export const useBlogPost = (slug: string) => {
 
     const fetchBlogPost = async () => {
       try {
-        console.log('useBlogPost: Fetching blog post for slug:', slug)
         const response = await fetch(`/api/blog/${slug}`)
         
         if (!response.ok) {
           const errorData = await response.json()
-          console.error('useBlogPost: API response error:', errorData)
           setError(errorData.error || 'Failed to fetch blog post')
           return
         }
-        
+
         const data = await response.json()
-        console.log('useBlogPost: Successfully fetched blog post:', data.blogPost?.title)
         setBlogPost(data.blogPost)
       } catch (error) {
-        console.error('useBlogPost: Failed to fetch blog post:', error)
+        console.error('Failed to fetch blog post:', error)
         setError('Failed to fetch blog post')
       } finally {
         setLoading(false)

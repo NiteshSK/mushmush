@@ -11,6 +11,7 @@ type CartItem = {
   price: number;
   discountedPrice?: number;
   quantity: number;
+  stockQuantity?: number;
   imgs?: {
     thumbnails: string[];
     previews: string[];
@@ -26,19 +27,22 @@ export const cart = createSlice({
   initialState,
   reducers: {
     addItemToCart: (state, action: PayloadAction<CartItem>) => {
-      const { id, title, price, quantity, discountedPrice, imgs } =
+      const { id, title, price, quantity, discountedPrice, imgs, stockQuantity } =
         action.payload;
       const existingItem = state.items.find((item) => item.id === id);
 
       if (existingItem) {
-        existingItem.quantity += quantity;
+        const maxQty = stockQuantity ?? existingItem.stockQuantity ?? Infinity;
+        existingItem.quantity = Math.min(existingItem.quantity + quantity, maxQty);
+        if (stockQuantity !== undefined) existingItem.stockQuantity = stockQuantity;
       } else {
         state.items.push({
           id,
           title,
           price,
-          quantity,
+          quantity: stockQuantity !== undefined ? Math.min(quantity, stockQuantity) : quantity,
           discountedPrice,
+          stockQuantity,
           imgs,
         });
       }

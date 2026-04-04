@@ -11,31 +11,10 @@ import Link from "next/link";
 import Breadcrumb from "../Common/Breadcrumb";
 import PaymentMethod from "./PaymentMethod";
 import Coupon from "./Coupon";
-import AddressSelector from "./AddressSelector";
-import Shipping from "./Shipping";
+import AddressSection, { Address } from "./AddressSection";
 import UPIPaymentModal from "@/components/Payment/UPIPaymentModal";
 
-const INDIAN_STATES = [
-  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
-  "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand",
-  "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur",
-  "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab",
-  "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura",
-  "Uttar Pradesh", "Uttarakhand", "West Bengal",
-  "Andaman and Nicobar Islands", "Chandigarh", "Dadra and Nagar Haveli and Daman and Diu",
-  "Delhi", "Jammu and Kashmir", "Ladakh", "Lakshadweep", "Puducherry"
-];
-
-interface Address {
-  id: string;
-  street: string;
-  city: string;
-  state: string;
-  zip: string;
-  country: string;
-  type: string;
-  isDefault: boolean;
-}
+// Address type imported from AddressSection
 
 interface AddressData {
   street: string;
@@ -62,23 +41,20 @@ const CheckoutWithOTP = () => {
   // OTP Modal
   const [showOTPModal, setShowOTPModal] = useState(false);
   const [otp, setOtp] = useState("");
-  const [checkoutData, setCheckoutData] = useState<any>(null);
+  const [checkoutData, setCheckoutData] = useState<Record<string, unknown> | null>(null);
   const [resendingOTP, setResendingOTP] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
   
   // UPI Payment Modal
   const [showUPIModal, setShowUPIModal] = useState(false);
-  const [orderCreated, setOrderCreated] = useState<any>(null);
+  const [orderCreated, setOrderCreated] = useState<{ id: string; orderNumber: string; total: number; status: string } | null>(null);
   
-  // Address management
+  // Address management — simplified
   const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
   const [loadingAddresses, setLoadingAddresses] = useState(true);
-  const [selectedBillingId, setSelectedBillingId] = useState<string>("");
-  const [selectedShippingId, setSelectedShippingId] = useState<string>("");
-  const [useNewBilling, setUseNewBilling] = useState(false);
-  const [useNewShipping, setUseNewShipping] = useState(false);
-  const [sameAsBilling, setSameAsBilling] = useState(true);
-  const [changeBillingAddress, setChangeBillingAddress] = useState(false);
+  const [deliveryAddress, setDeliveryAddress] = useState<Address | null>(null);
+  const [billToDifferent, setBillToDifferent] = useState(false);
+  const [billingAddress, setBillingAddress] = useState<Address | null>(null);
   
   // Contact info
   const [contactInfo, setContactInfo] = useState({
@@ -88,10 +64,6 @@ const CheckoutWithOTP = () => {
     phone: ""
   });
   
-  // Temporary compatibility variables (to be removed in full refactor)
-  const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
-  const [useNewAddress, setUseNewAddress] = useState(true);
-  const [otpSent, setOtpSent] = useState(false);
   const userPhone = contactInfo.phone;
 
   // Dynamic shipping fee based on pincode
@@ -107,8 +79,17 @@ const CheckoutWithOTP = () => {
   const [shippingPincode, setShippingPincode] = useState('');
   const [checkingShipping, setCheckingShipping] = useState(false);
 
+  // Coupon state
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    code: string;
+    couponId: number;
+    discountAmount: number;
+    message: string;
+  } | null>(null);
+
   const convenienceFee = 12;
-  const total = subtotal + (shippingFee ?? 0) + convenienceFee;
+  const couponDiscount = appliedCoupon?.discountAmount ?? 0;
+  const total = subtotal + (shippingFee ?? 0) + convenienceFee - couponDiscount;
 
   // Fetch saved addresses and user profile on mount
   useEffect(() => {
@@ -117,8 +98,6 @@ const CheckoutWithOTP = () => {
       fetchUserProfile();
     } else {
       setLoadingAddresses(false);
-      setUseNewBilling(true);
-      setUseNewShipping(true);
     }
   }, [session]);
 
@@ -148,18 +127,11 @@ const CheckoutWithOTP = () => {
         const data = await response.json();
         const addresses = data.addresses || [];
         setSavedAddresses(addresses);
-        
+
+        // Auto-select default address
         if (addresses.length > 0) {
-          // Auto-select default or first address for both billing and shipping
           const defaultAddr = addresses.find((a: Address) => a.isDefault) || addresses[0];
-          setSelectedBillingId(defaultAddr.id);
-          setSelectedShippingId(defaultAddr.id);
-          setUseNewBilling(false);
-          setUseNewShipping(false);
-        } else {
-          // First time user - need to add billing address
-          setUseNewBilling(true);
-          setUseNewShipping(true);
+          setDeliveryAddress(defaultAddr);
         }
       }
     } catch (error) {
@@ -201,65 +173,14 @@ const CheckoutWithOTP = () => {
     }
   }, [subtotal]);
 
-  // Auto-check shipping from selected address pincode
-  useEffect(() => {
-    if (!sameAsBilling && selectedShippingId) {
-      const addr = savedAddresses.find(a => a.id === selectedShippingId);
-      if (addr?.zip) {
-        setShippingPincode(addr.zip);
-        checkShippingFee(addr.zip);
-      }
-    } else if (selectedBillingId) {
-      const addr = savedAddresses.find(a => a.id === selectedBillingId);
-      if (addr?.zip) {
-        setShippingPincode(addr.zip);
-        checkShippingFee(addr.zip);
-      }
-    }
-  }, [selectedBillingId, selectedShippingId, sameAsBilling, savedAddresses]);
-
-  const handleSameAsBillingChange = (checked: boolean) => {
-    setSameAsBilling(checked);
-    if (checked) {
-      // Use billing address for shipping
-      setSelectedShippingId(selectedBillingId);
-      setUseNewShipping(false);
-    }
-  };
-
-  const handleChangeBillingToggle = (checked: boolean) => {
-    setChangeBillingAddress(checked);
-    if (!checked && savedAddresses.length > 0) {
-      // Reset to saved address
-      const defaultAddr = savedAddresses.find(a => a.isDefault) || savedAddresses[0];
-      setSelectedBillingId(defaultAddr.id);
-      setUseNewBilling(false);
-    }
-  };
-
-  // Temporary handler for old AddressSelector component
-  const handleAddressSelect = (address: Address | null) => {
-    setSelectedAddress(address);
-    setUseNewAddress(address === null);
-  };
-
   // Handle checkout button click
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('🛒 Checkout button clicked!');
-    console.log('💳 Payment method:', paymentMethod);
-    
     // Get form data
     const form = e.target as HTMLFormElement;
     const formData = new FormData(form);
-    
-    // Log all form data for debugging
-    console.log('📋 Form data:');
-    Array.from(formData.entries()).forEach(([key, value]) => {
-      console.log(`  ${key}: ${value}`);
-    });
-    
+
     // Get contact information - prioritize shipping fields if filled
     const firstName = formData.get('firstName') as string;
     const lastName = formData.get('lastName') as string;
@@ -268,15 +189,8 @@ const CheckoutWithOTP = () => {
     
     const customerName = `${firstName || ''} ${lastName || ''}`.trim();
     
-    console.log('👤 First Name:', firstName);
-    console.log('👤 Last Name:', lastName);
-    console.log('👤 Customer Name:', customerName);
-    console.log('📧 Email:', email);
-    console.log('📞 Phone:', phone);
-    
     if (!email) {
       const errorMsg = 'Please enter your email address in Contact Information';
-      console.error('❌', errorMsg);
       setError(errorMsg);
       toast.error(errorMsg, { duration: 4000 });
       return;
@@ -291,7 +205,6 @@ const CheckoutWithOTP = () => {
     
     if (!customerName || customerName === '') {
       const errorMsg = 'Please enter your first and last name in Contact Information';
-      console.error('❌', errorMsg);
       setError(errorMsg);
       toast.error(errorMsg, { duration: 4000 });
       return;
@@ -299,111 +212,56 @@ const CheckoutWithOTP = () => {
     
     if (!phone) {
       const errorMsg = 'Please enter your phone number in Contact Information';
-      console.error('❌', errorMsg);
       setError(errorMsg);
       toast.error(errorMsg, { duration: 4000 });
       return;
     }
     
-    // NEW FLOW: UPI payment with OTP verification
-    // Step 1: Collect address data
-    let addressData;
-
-    // Priority: 1. Saved address (selectedBillingId), 2. Shipping section, 3. Billing section
-    if (selectedBillingId && !useNewBilling) {
-      // Using saved billing address
-      const savedAddress = savedAddresses.find(addr => addr.id === selectedBillingId);
-      if (savedAddress) {
-        addressData = {
-          street: savedAddress.street,
-          city: savedAddress.city,
-          state: savedAddress.state,
-          zip: savedAddress.zip,
-          country: savedAddress.country
-        };
-        console.log('✅ Using saved billing address:', savedAddress);
-      } else {
-        const errorMsg = 'Selected address not found. Please select a valid address.';
-        console.error('❌', errorMsg);
-        setError(errorMsg);
-        toast.error(errorMsg, { duration: 4000 });
-        return;
-      }
-    } else if (selectedAddress && !useNewAddress) {
-      // Fallback: Using old selectedAddress (for compatibility)
-      addressData = {
-        street: selectedAddress.street,
-        city: selectedAddress.city,
-        state: selectedAddress.state,
-        zip: selectedAddress.zip,
-        country: selectedAddress.country
-      };
-      console.log('✅ Using selected address (legacy)');
-    } else {
-      // Check if shipping section was filled (Ship to different address)
-      const shippingAddress = formData.get('shippingAddress') as string;
-      const shippingCity = formData.get('shippingCity') as string;
-      const shippingState = formData.get('shippingState') as string;
-      const shippingZip = formData.get('shippingZip') as string;
-      
-      if (shippingAddress && shippingCity && shippingState) {
-        // Use shipping address
-        addressData = {
-          street: shippingAddress,
-          city: shippingCity,
-          state: shippingState,
-          zip: shippingZip || '000000',
-          country: 'India'
-        };
-        console.log('✅ Using shipping address from "Ship to different address" section');
-      } else {
-        // Use billing address
-        const address = formData.get('address') as string;
-        const town = formData.get('town') as string;
-        const state = formData.get('country') as string;
-        const zip = formData.get('zip') as string;
-        
-        // Validate required fields
-        if (!address || !town || !state) {
-          const errorMsg = 'Please fill in all address fields (Street Address, City, State) in either Billing Address or "Ship to different address" section';
-          console.error('❌', errorMsg);
-          setError(errorMsg);
-          toast.error(errorMsg, { duration: 4000 });
-          setLoading(false);
-          return;
-        }
-        
-        addressData = {
-          street: address,
-          city: town,
-          state: state,
-          zip: zip || '000000',
-          country: 'India'
-        };
-        console.log('✅ Using billing address');
-      }
+    // Validate delivery address
+    if (!deliveryAddress) {
+      const errorMsg = 'Please select or enter a delivery address';
+      setError(errorMsg);
+      toast.error(errorMsg, { duration: 4000 });
+      return;
     }
-    
+
+    // Build address objects
+    const toAddrObj = (addr: Address) => ({
+      street: addr.street,
+      city: addr.city,
+      state: addr.state,
+      zip: addr.zip,
+      country: addr.country || 'India',
+    });
+
+    const shippingAddrData = toAddrObj(deliveryAddress);
+    const billingAddrData = billToDifferent && billingAddress
+      ? toAddrObj(billingAddress)
+      : shippingAddrData;
+
+    const isSavedDelivery = !deliveryAddress.id.startsWith('temp-');
+    const isSavedBilling = billToDifferent && billingAddress && !billingAddress.id.startsWith('temp-');
+
     // Store checkout data for later use
     const storedData = {
       email,
       customerName,
       customerPhone: phone,
-      billingAddress: addressData,
-      shippingAddress: addressData,
-      billingAddressId: selectedBillingId || null,
-      shippingAddressId: (sameAsBilling ? selectedBillingId : selectedShippingId) || null,
+      billingAddress: billingAddrData,
+      shippingAddress: shippingAddrData,
+      billingAddressId: (billToDifferent && isSavedBilling ? billingAddress!.id : isSavedDelivery ? deliveryAddress.id : null),
+      shippingAddressId: isSavedDelivery ? deliveryAddress.id : null,
       cartItems,
       subtotal,
       shippingFee,
       convenienceFee,
       total,
       paymentMethod: 'UPI',
-      notes
+      notes,
+      couponCode: appliedCoupon?.code || null,
     };
-    
+
     setCheckoutData(storedData);
-    console.log('💾 Stored checkout data:', storedData);
     
     // Step 2: Send OTP for verification
     setLoading(true);
@@ -413,28 +271,24 @@ const CheckoutWithOTP = () => {
       const response = await fetch('/api/checkout/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, customerName })
+        body: JSON.stringify({ email, customerName, phone })
       });
-      
+
       const data = await response.json();
-      console.log('OTP Response:', data);
-      
+
       if (response.ok) {
-        setOtpSent(true);
         setShowOTPModal(true);
-        console.log('✅ OTP sent! Check your email:', email);
-        console.log('📧 If email not received, check server logs for the OTP');
-        console.log('🔍 Modal state - showOTPModal:', true);
-        toast.success(`OTP sent to ${email}! Valid for 5 minutes.`, { duration: 6000 });
+        const channelMsg = data.channels?.sms
+          ? `OTP sent to ${email} and your phone!`
+          : `OTP sent to ${email}!`;
+        toast.success(`${channelMsg} Valid for 5 minutes.`, { duration: 6000 });
       } else if (response.status === 429) {
         // Rate limit error
-        console.error('Rate limit exceeded:', data);
         toast.error(data.error || 'Too many OTP requests. Please wait.', { duration: 5000 });
         if (data.retryAfter) {
           setResendTimer(data.retryAfter);
         }
       } else {
-        console.error('Failed to send OTP:', data);
         setError(data.error || 'Failed to send OTP');
         toast.error(data.error || 'Failed to send OTP', { duration: 4000 });
       }
@@ -471,9 +325,10 @@ const CheckoutWithOTP = () => {
       const response = await fetch('/api/checkout/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          email: checkoutData.email, 
-          customerName: checkoutData.customerName 
+        body: JSON.stringify({
+          email: checkoutData.email,
+          customerName: checkoutData.customerName,
+          phone: checkoutData.customerPhone
         })
       });
       
@@ -522,8 +377,6 @@ const CheckoutWithOTP = () => {
         otp
       };
       
-      console.log('📦 Creating order with verified OTP:', orderData);
-      
       const response = await fetch('/api/checkout/verify-and-place-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -533,8 +386,6 @@ const CheckoutWithOTP = () => {
       const data = await response.json();
       
       if (response.ok) {
-        console.log('✅ Order created successfully:', data.order);
-        
         // Close OTP modal
         setShowOTPModal(false);
         setOtp("");
@@ -545,7 +396,11 @@ const CheckoutWithOTP = () => {
         
         toast.success(`Order created! Order Number: ${data.order.orderNumber}. Please complete UPI payment.`, { duration: 5000 });
       } else {
-        setError(data.error || 'Failed to create order');
+        if (data.stockErrors && data.stockErrors.length > 0) {
+          setError(data.stockErrors.join('. '));
+        } else {
+          setError(data.error || 'Failed to create order');
+        }
       }
     } catch (err) {
       setError('Network error. Please try again.');
@@ -556,12 +411,9 @@ const CheckoutWithOTP = () => {
   
   // Handle UPI payment completion
   const handleUPIPaymentComplete = (paymentData: any) => {
-    console.log('✅ UPI Payment completed:', paymentData);
-    
     // Clear the cart
     dispatch(removeAllItemsFromCart());
-    console.log('✅ Cart cleared after successful payment');
-    
+
     // Close UPI modal
     setShowUPIModal(false);
     setCheckoutData(null);
@@ -680,119 +532,46 @@ const CheckoutWithOTP = () => {
                   </div>
                 </div>
                 
-                {/* Address Selector for logged-in users */}
-                {session && (
-                  <div className="bg-white border border-gray-100 rounded-[10px] p-4 sm:p-8.5 mb-7.5">
-                    <AddressSelector 
-                      onAddressSelect={handleAddressSelect}
-                      selectedAddressId={selectedAddress?.id}
+                {/* Delivery Address */}
+                <AddressSection
+                  addresses={savedAddresses}
+                  selectedId={deliveryAddress?.id || null}
+                  onSelect={(addr) => setDeliveryAddress(addr)}
+                  onPincodeChange={(pin) => { setShippingPincode(pin); checkShippingFee(pin); }}
+                  isGuest={!session}
+                  label="Delivery Address"
+                  onAddressesChange={setSavedAddresses}
+                />
+
+                {/* Bill to different address toggle */}
+                <div className="bg-white border border-gray-100 rounded-[10px] p-4 sm:p-8 mb-7.5">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={billToDifferent}
+                      onChange={(e) => {
+                        setBillToDifferent(e.target.checked);
+                        if (!e.target.checked) setBillingAddress(null);
+                      }}
+                      className="h-4 w-4 accent-forest rounded"
                     />
-                  </div>
-                )}
-                
-                {/* Show full billing address form only if using new address or not logged in */}
-                {(useNewAddress || !session) && (
-                  <div className="bg-white border border-gray-100 rounded-[10px] p-4 sm:p-8.5 mb-7.5">
-                    <h3 className="font-medium text-lg text-dark mb-5">Billing Address</h3>
-                    
-                    <div className="mb-5">
-                      <label htmlFor="address" className="block mb-2.5">
-                        Street Address <span className="text-red">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="address"
-                        id="address"
-                        required
-                        placeholder="House number and street name"
-                        className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
+                    <span className="text-sm font-medium text-dark">Bill to a different address</span>
+                  </label>
+
+                  {billToDifferent && (
+                    <div className="mt-5">
+                      <AddressSection
+                        addresses={savedAddresses}
+                        selectedId={billingAddress?.id || null}
+                        onSelect={(addr) => setBillingAddress(addr)}
+                        onPincodeChange={() => {}}
+                        isGuest={!session}
+                        label="Billing Address"
+                        onAddressesChange={setSavedAddresses}
                       />
                     </div>
-
-                    <div className="mb-5">
-                      <label htmlFor="town" className="block mb-2.5">
-                        City <span className="text-red">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="town"
-                        id="town"
-                        required
-                        placeholder="Enter city name"
-                        className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
-                      />
-                    </div>
-
-                    <div className="mb-5">
-                      <label htmlFor="country" className="block mb-2.5">
-                        State <span className="text-red">*</span>
-                      </label>
-                      <select
-                        name="country"
-                        id="country"
-                        required
-                        className="w-full bg-gray-1 rounded-md border border-gray-3 text-dark py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
-                      >
-                        <option value="">Select State</option>
-                        <option value="Andhra Pradesh">Andhra Pradesh</option>
-                        <option value="Arunachal Pradesh">Arunachal Pradesh</option>
-                        <option value="Assam">Assam</option>
-                        <option value="Bihar">Bihar</option>
-                        <option value="Chhattisgarh">Chhattisgarh</option>
-                        <option value="Goa">Goa</option>
-                        <option value="Gujarat">Gujarat</option>
-                        <option value="Haryana">Haryana</option>
-                        <option value="Himachal Pradesh">Himachal Pradesh</option>
-                        <option value="Jharkhand">Jharkhand</option>
-                        <option value="Karnataka">Karnataka</option>
-                        <option value="Kerala">Kerala</option>
-                        <option value="Madhya Pradesh">Madhya Pradesh</option>
-                        <option value="Maharashtra">Maharashtra</option>
-                        <option value="Manipur">Manipur</option>
-                        <option value="Meghalaya">Meghalaya</option>
-                        <option value="Mizoram">Mizoram</option>
-                        <option value="Nagaland">Nagaland</option>
-                        <option value="Odisha">Odisha</option>
-                        <option value="Punjab">Punjab</option>
-                        <option value="Rajasthan">Rajasthan</option>
-                        <option value="Sikkim">Sikkim</option>
-                        <option value="Tamil Nadu">Tamil Nadu</option>
-                        <option value="Telangana">Telangana</option>
-                        <option value="Tripura">Tripura</option>
-                        <option value="Uttar Pradesh">Uttar Pradesh</option>
-                        <option value="Uttarakhand">Uttarakhand</option>
-                        <option value="West Bengal">West Bengal</option>
-                        <option value="Delhi">Delhi</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label htmlFor="zip" className="block mb-2.5">
-                        PIN Code <span className="text-red">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="zip"
-                        id="zip"
-                        required
-                        placeholder="6-digit PIN code"
-                        maxLength={6}
-                        pattern="\d{6}"
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/\D/g, '');
-                          e.target.value = val;
-                          if (val.length === 6) {
-                            setShippingPincode(val);
-                            checkShippingFee(val);
-                          }
-                        }}
-                        className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
-                      />
-                    </div>
-                  </div>
-                )}
-                
-                <Shipping onPincodeChange={(pin) => { setShippingPincode(pin); checkShippingFee(pin); }} />
+                  )}
+                </div>
                 <div className="bg-white border border-gray-100 rounded-[10px] p-4 sm:p-8.5 mt-7.5">
                   <label htmlFor="notes" className="block mb-2.5">Other Notes (optional)</label>
                   <textarea
@@ -833,7 +612,7 @@ const CheckoutWithOTP = () => {
                       })
                     ) : (
                       <div className="py-5">
-                        <p className="text-dark text-center">Your cart is empty.</p>
+                        <p className="text-dark text-center">Your cart is empty</p>
                       </div>
                     )}
 
@@ -880,13 +659,13 @@ const CheckoutWithOTP = () => {
                             <div>
                               <div className="flex items-center gap-1.5 text-forest font-medium">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-                                {shippingInfo.freeShipping ? 'Free delivery!' : `Delivery available — ₹${shippingFee}`}
+                                {shippingInfo.freeShipping ? 'Free Delivery!' : `Delivery available — ₹${shippingFee}`}
                               </div>
                               {shippingInfo.estimatedDays && (
                                 <p className="text-gray-500 mt-1">Estimated: {shippingInfo.estimatedDays}</p>
                               )}
                               {!shippingInfo.freeShipping && shippingInfo.freeAbove && (
-                                <p className="text-gray-500 mt-0.5">Free shipping on orders above ₹{shippingInfo.freeAbove}</p>
+                                <p className="text-gray-500 mt-0.5">Free Delivery on orders above ₹{shippingInfo.freeAbove}</p>
                               )}
                             </div>
                           ) : (
@@ -917,6 +696,13 @@ const CheckoutWithOTP = () => {
                       <p className="text-dark text-right">₹{convenienceFee.toFixed(2)}</p>
                     </div>
 
+                    {couponDiscount > 0 && (
+                      <div className="flex items-center justify-between py-5 border-b border-gray-3">
+                        <p className="text-forest">Coupon Discount ({appliedCoupon?.code})</p>
+                        <p className="text-forest font-medium text-right">-₹{couponDiscount.toFixed(2)}</p>
+                      </div>
+                    )}
+
                     <div className="flex items-center justify-between pt-5">
                       <p className="font-medium text-lg text-dark">Total</p>
                       <p className="font-medium text-lg text-dark text-right">₹{total.toFixed(2)}</p>
@@ -924,7 +710,13 @@ const CheckoutWithOTP = () => {
                   </div>
                 </div>
 
-                <Coupon />
+                <Coupon
+                  subtotal={subtotal}
+                  email={contactInfo.email}
+                  appliedCoupon={appliedCoupon}
+                  onApply={setAppliedCoupon}
+                  onRemove={() => setAppliedCoupon(null)}
+                />
                 <PaymentMethod onPaymentChange={setPaymentMethod} />
 
                 {error && (
@@ -958,6 +750,7 @@ const CheckoutWithOTP = () => {
             <h3 className="text-2xl font-bold text-dark mb-3">Enter OTP</h3>
             <p className="text-gray-600 mb-2">
               We've sent a 6-digit OTP to <span className="font-medium text-dark">{checkoutData?.email}</span>
+              {checkoutData?.customerPhone && <> and <span className="font-medium text-dark">{checkoutData.customerPhone}</span></>}
             </p>
             <p className="text-sm text-gray-500 mb-4">
               ⏱️ OTP expires in <span className="font-medium text-dark">5 minutes</span>

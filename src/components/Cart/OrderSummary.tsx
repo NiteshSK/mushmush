@@ -99,7 +99,7 @@ const OrderSummary = () => {
               <div className={`mt-2.5 text-sm ${shippingResult.deliverable ? 'text-forest' : 'text-red-500'}`}>
                 {shippingResult.deliverable ? (
                   <span>
-                    {shippingResult.freeShipping ? 'Free delivery' : `Shipping: ₹${shippingResult.shippingFee}`}
+                    {shippingResult.freeShipping ? 'Free Delivery' : `Delivery: ₹${shippingResult.shippingFee}`}
                     {shippingResult.estimatedDays && ` · ${shippingResult.estimatedDays}`}
                   </span>
                 ) : (

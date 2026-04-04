@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { generateInvoice, markInvoiceEmailSent } from '@/lib/invoice';
 import { sendOrderInvoiceEmail, OrderInvoiceEmailData } from '@/lib/email';
+import { packsToBulk } from '@/lib/inventory';
 
 /**
  * PUT /api/orders/[id]/status
@@ -45,6 +46,15 @@ export async function PUT(
       );
     }
 
+    // Check if we need to restore stock (cancelling a confirmed/processing order)
+    const currentOrder = await prisma.order.findUnique({
+      where: { id },
+      select: { status: true },
+    });
+
+    const stockWasDeducted = ['CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'COMPLETED'].includes(currentOrder?.status || '');
+    const isCancelling = status === 'CANCELLED';
+
     // Update order status
     const order = await prisma.order.update({
       where: { id },
@@ -54,7 +64,10 @@ export async function PUT(
           include: {
             product: {
               select: {
-                title: true
+                id: true,
+                title: true,
+                measurementValue: true,
+                measurementType: true,
               }
             }
           }
@@ -62,17 +75,28 @@ export async function PUT(
       }
     });
 
-    console.log(`✅ Order ${order.orderNumber} status updated to: ${status}`);
+
+    // Restore stock if cancelling an order whose stock was already deducted
+    if (isCancelling && stockWasDeducted) {
+      for (const item of order.orderItems) {
+        const bulkToRestore = packsToBulk(item.quantity, item.product.measurementValue, item.product.measurementType);
+        await prisma.product.update({
+          where: { id: item.product.id },
+          data: {
+            quantity: { increment: bulkToRestore },
+            inStock: true,
+          },
+        });
+      }
+    }
 
     // If status is COMPLETED, generate invoice and send email
     if (status === 'COMPLETED') {
       try {
-        console.log('🔄 Generating invoice for completed order...');
         
         // Generate invoice
         const invoice = await generateInvoice(order.id);
         
-        console.log('✅ Invoice generated:', invoice.invoiceNumber);
         
         // Fetch shipping address for email
         let shippingAddressForEmail: any = {
@@ -124,13 +148,11 @@ export async function PUT(
         };
 
         // Send email
-        console.log('📧 Sending invoice email...');
         await sendOrderInvoiceEmail(emailData);
         
         // Mark email as sent
         await markInvoiceEmailSent(invoice.id);
         
-        console.log('✅ Invoice email sent successfully');
 
         return NextResponse.json({
           success: true,

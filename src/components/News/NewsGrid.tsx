@@ -14,20 +14,11 @@ const NewsGrid = () => {
   useEffect(() => {
     const triggerScraping = async () => {
       try {
-        console.log('🔍 Checking if news scraping is needed...');
-
         const response = await fetch('/api/admin/scrape-news/trigger', {
           method: 'POST'
         });
 
-        const result = await response.json();
-        console.log('Scraping check result:', result);
-
-        if (result.shouldScrape) {
-          console.log('✅ News scraping initiated');
-        } else {
-          console.log(`ℹ️ ${result.message} - ${result.hoursRemaining || 0} hours remaining`);
-        }
+        await response.json();
       } catch (error) {
         console.error('Failed to check scraping:', error);
       }

@@ -1,6 +1,6 @@
 import React from "react";
 
-const OrderActions = ({ toggleEdit, toggleDetails }: any) => {
+const OrderActions = ({ toggleEdit, toggleDetails }: { toggleEdit: () => void; toggleDetails: () => void }) => {
   return (
     <>
       <button

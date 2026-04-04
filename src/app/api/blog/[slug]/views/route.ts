@@ -9,10 +9,8 @@ export async function POST(
   try {
     const { slug } = await params
 
-    console.log('API: Received request to increment views for slug:', slug)
 
     if (!slug) {
-      console.log('API: No slug provided')
       return NextResponse.json(
         { error: 'Blog slug is required' },
         { status: 400 }
@@ -25,14 +23,12 @@ export async function POST(
     })
 
     if (!existingBlog) {
-      console.log('API: Blog post not found for slug:', slug)
       return NextResponse.json(
         { error: 'Blog post not found' },
         { status: 404 }
       )
     }
 
-    console.log('API: Found blog post, current views:', existingBlog.views)
 
     // Increment the view count for the blog post
     const updatedBlog = await prisma.blogPost.update({
@@ -44,7 +40,6 @@ export async function POST(
       }
     })
 
-    console.log('API: Successfully incremented views. New count:', updatedBlog.views)
 
     return NextResponse.json({
       success: true,

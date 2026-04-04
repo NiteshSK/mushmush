@@ -10,22 +10,16 @@ export const usePromotionalBanners = () => {
   useEffect(() => {
     const fetchBanners = async () => {
       try {
-        console.log('🔍 Fetching banners from API...');
         const response = await fetch('/api/promotional-banners?limit=5');
-        console.log('📡 Response status:', response.status);
-        
         const data = await response.json();
-        console.log('📦 API Response data:', data);
-        
+
         if (data.success && data.data.length > 0) {
-          console.log('✅ Setting banners:', data.data.length, 'banners found');
           setBanners(data.data);
         } else {
-          console.log('❌ No banners found in API response');
           setBanners([]);
         }
       } catch (error) {
-        console.error('❌ Error fetching promotional banners:', error);
+        console.error('Error fetching promotional banners:', error);
         setBanners([]);
       } finally {
         setLoading(false);

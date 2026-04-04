@@ -8,6 +8,11 @@ interface Product {
   title: string;
   price: number;
   inStock: boolean;
+  stockQuantity: number;
+  bulkQuantity: number;
+  bulkDisplay: string;
+  measurementValue: number;
+  measurementType: string;
   imgs: {
     thumbnails: string[];
   };
@@ -18,12 +23,46 @@ interface Product {
   activeDiscountValue: number;
 }
 
+/** Convert admin input to base units (grams or ml) */
+function toBaseUnits(value: number, unit: string): number {
+  switch (unit.toLowerCase()) {
+    case 'kg': return value * 1000;
+    case 'gm': case 'g': return value;
+    case 'l': case 'litre': return value * 1000;
+    case 'ml': return value;
+    default: return value;
+  }
+}
+
+/** Get the convenient input unit for a measurement type */
+function getInputUnit(measurementType: string): string {
+  switch (measurementType.toLowerCase()) {
+    case 'gm': case 'g': return 'kg';
+    case 'kg': return 'kg';
+    case 'ml': return 'L';
+    case 'l': case 'litre': return 'L';
+    default: return measurementType;
+  }
+}
+
+/** Convert base units to the convenient input unit */
+function fromBaseUnits(baseValue: number, inputUnit: string): number {
+  switch (inputUnit.toLowerCase()) {
+    case 'kg': return baseValue / 1000;
+    case 'l': return baseValue / 1000;
+    default: return baseValue;
+  }
+}
+
 const ProductInventoryTable: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<number | null>(null);
   const [editingPrice, setEditingPrice] = useState<number | null>(null);
   const [newPrice, setNewPrice] = useState<string>('');
+  const [editingQuantity, setEditingQuantity] = useState<number | null>(null);
+  const [newQuantity, setNewQuantity] = useState<string>('');
+  const [quantityUnit, setQuantityUnit] = useState<string>('kg');
 
   useEffect(() => {
     fetchProducts();
@@ -46,6 +85,25 @@ const ProductInventoryTable: React.FC = () => {
   };
 
   const toggleStock = async (productId: number, currentStock: boolean) => {
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+
+    // Trying to mark IN STOCK but quantity is 0 → block and prompt to update quantity first
+    const packs = product.stockQuantity ?? 0;
+    if (!currentStock && packs <= 0) {
+      alert('Cannot mark in stock — quantity is 0.\n\nPlease update the quantity first.');
+      startEditingQuantity(productId, product.bulkQuantity || 0, product.measurementType);
+      return;
+    }
+
+    // Trying to mark OUT OF STOCK but there's still stock → confirm first
+    if (currentStock && packs > 0) {
+      const confirmed = window.confirm(
+        `"${product.title}" still has ${packs} pack(s) in stock (${product.bulkDisplay || '0 gm'}).\n\nAre you sure you want to mark it as out of stock?`
+      );
+      if (!confirmed) return;
+    }
+
     setUpdating(productId);
     try {
       const response = await fetch(`/api/admin/products/${productId}`, {
@@ -61,13 +119,13 @@ const ProductInventoryTable: React.FC = () => {
 
       if (response.ok) {
         setProducts(prev =>
-          prev.map(product =>
-            product.id === productId
-              ? { ...product, inStock: !currentStock }
-              : product
+          prev.map(p =>
+            p.id === productId
+              ? { ...p, inStock: !currentStock }
+              : p
           )
         );
-        toast.success(`Product ${!currentStock ? 'marked in stock' : 'marked out of stock'}`);
+        toast.success(`Product ${!currentStock ? 'marked In Stock' : 'marked Out of Stock'}`);
       } else {
         toast.error('Failed to update product stock');
       }
@@ -118,6 +176,59 @@ const ProductInventoryTable: React.FC = () => {
     }
   };
 
+  const updateQuantity = async (productId: number, quantity: string, unit: string) => {
+    const inputVal = parseFloat(quantity);
+    if (isNaN(inputVal) || inputVal < 0) {
+      toast.error('Please enter a valid quantity (0 or more)');
+      return;
+    }
+
+    const baseUnits = toBaseUnits(inputVal, unit);
+    const product = products.find(p => p.id === productId);
+    const packSize = product ? toBaseUnits(product.measurementValue, product.measurementType) : 1;
+    const packs = Math.floor(baseUnits / packSize);
+
+    setUpdating(productId);
+    try {
+      const response = await fetch(`/api/admin/products/${productId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ field: 'quantity', value: baseUnits }),
+      });
+
+      if (response.ok) {
+        setProducts(prev =>
+          prev.map(p =>
+            p.id === productId
+              ? { ...p, bulkQuantity: baseUnits, stockQuantity: packs, inStock: packs > 0 }
+              : p
+          )
+        );
+        toast.success(`Stock updated to ${inputVal} ${unit} (${packs} packs)`);
+        setEditingQuantity(null);
+        setNewQuantity('');
+      } else {
+        toast.error('Failed to update stock quantity');
+      }
+    } catch (error) {
+      toast.error('Error updating stock quantity');
+    } finally {
+      setUpdating(null);
+    }
+  };
+
+  const startEditingQuantity = (productId: number, bulkQuantity: number, measurementType: string) => {
+    const unit = getInputUnit(measurementType);
+    setEditingQuantity(productId);
+    setQuantityUnit(unit);
+    setNewQuantity(fromBaseUnits(bulkQuantity, unit).toString());
+  };
+
+  const cancelEditingQuantity = () => {
+    setEditingQuantity(null);
+    setNewQuantity('');
+  };
+
   const startEditingPrice = (productId: number, currentPrice: number) => {
     setEditingPrice(productId);
     setNewPrice(currentPrice.toString());
@@ -166,6 +277,9 @@ const ProductInventoryTable: React.FC = () => {
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-6 uppercase tracking-wider">
                 Discount
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-6 uppercase tracking-wider">
+                Quantity
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-6 uppercase tracking-wider">
                 Stock Status
@@ -259,6 +373,61 @@ const ProductInventoryTable: React.FC = () => {
                     </span>
                   ) : (
                     <span className="text-sm text-gray-5">No discount</span>
+                  )}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {editingQuantity === product.id ? (
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="number"
+                        value={newQuantity}
+                        onChange={(e) => setNewQuantity(e.target.value)}
+                        className="w-20 px-2 py-1 text-sm border border-gray-3 rounded focus:outline-none focus:ring-2 focus:ring-blue"
+                        min="0"
+                        step="0.1"
+                      />
+                      <select
+                        value={quantityUnit}
+                        onChange={(e) => setQuantityUnit(e.target.value)}
+                        className="px-1 py-1 text-sm border border-gray-3 rounded focus:outline-none focus:ring-2 focus:ring-blue"
+                      >
+                        <option value="gm">gm</option>
+                        <option value="kg">kg</option>
+                        <option value="ml">ml</option>
+                        <option value="L">L</option>
+                      </select>
+                      <button
+                        onClick={() => updateQuantity(product.id, newQuantity, quantityUnit)}
+                        disabled={updating === product.id}
+                        className="px-2 py-1 text-xs bg-green text-white rounded hover:bg-green-dark disabled:opacity-50"
+                      >
+                        ✓
+                      </button>
+                      <button
+                        onClick={cancelEditingQuantity}
+                        className="px-2 py-1 text-xs bg-gray-5 text-white rounded hover:bg-gray-6"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col">
+                      <div className="flex items-center space-x-2">
+                        <span className={`text-sm font-medium ${product.stockQuantity === 0 ? 'text-red' : product.stockQuantity <= 5 ? 'text-yellow' : 'text-dark'}`}>
+                          {product.bulkDisplay || '0 gm'}
+                        </span>
+                        <button
+                          onClick={() => startEditingQuantity(product.id, product.bulkQuantity || 0, product.measurementType)}
+                          className="text-xs text-blue hover:text-blue-dark"
+                          title="Edit quantity"
+                        >
+                          ✏️
+                        </button>
+                      </div>
+                      <span className="text-xs text-gray-5">
+                        {product.stockQuantity} packs of {product.measurementValue}{product.measurementType}
+                      </span>
+                    </div>
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">

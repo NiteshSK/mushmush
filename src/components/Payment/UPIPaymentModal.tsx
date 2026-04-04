@@ -171,7 +171,7 @@ const UPIPaymentModal: React.FC<UPIPaymentModalProps> = ({
                 </p>
               )}
               <p className="text-lg font-semibold text-dark pt-1">
-                Amount: <span className="text-forest">Rs {payment.amount.toLocaleString()}</span>
+                Amount: <span className="text-forest">₹{payment.amount.toLocaleString()}</span>
               </p>
             </div>
           </div>
@@ -215,7 +215,7 @@ const UPIPaymentModal: React.FC<UPIPaymentModalProps> = ({
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
             <p className="text-xs font-semibold text-amber-800 mb-2">Instructions</p>
             <ol className="list-decimal list-inside text-xs text-amber-700 space-y-1">
-              <li>Pay exactly Rs {payment.amount.toLocaleString()} to the UPI ID above</li>
+              <li>Pay exactly ₹{payment.amount.toLocaleString()} to the UPI ID above</li>
               <li>Save the transaction ID after payment</li>
               <li>Enter the transaction ID below and submit</li>
             </ol>

@@ -6,7 +6,6 @@ export const useBlogViews = (slug: string) => {
   
   useEffect(() => {
     if (!slug) {
-      console.log('useBlogViews: No slug provided')
       return
     }
 
@@ -17,7 +16,6 @@ export const useBlogViews = (slug: string) => {
 
     // Prevent multiple rapid increments
     if (isProcessing.current) {
-      console.log('useBlogViews: Already processing increment, skipping')
       return
     }
 
@@ -25,8 +23,7 @@ export const useBlogViews = (slug: string) => {
       if (isProcessing.current) return
       
       isProcessing.current = true
-      console.log('useBlogViews: Incrementing views for slug:', slug)
-      
+
       try {
         const response = await fetch(`/api/blog/${slug}/views`, {
           method: 'POST',
@@ -36,15 +33,12 @@ export const useBlogViews = (slug: string) => {
         })
         
         if (!response.ok) {
-          const errorData = await response.json()
-          console.error('useBlogViews: API response error:', errorData)
           return
         }
-        
-        const data = await response.json()
-        console.log('useBlogViews: Successfully incremented views:', data)
+
+        await response.json()
       } catch (error) {
-        console.error('useBlogViews: Failed to increment blog views:', error)
+        console.error('Failed to increment blog views:', error)
       } finally {
         // Reset processing state after a delay to prevent double increments
         incrementTimeout.current = setTimeout(() => {

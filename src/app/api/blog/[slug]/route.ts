@@ -9,10 +9,8 @@ export async function GET(
   try {
     const { slug } = await params
 
-    console.log('API: Fetching blog post for slug:', slug)
 
     if (!slug) {
-      console.log('API: No slug provided')
       return NextResponse.json(
         { error: 'Blog slug is required' },
         { status: 400 }
@@ -24,14 +22,12 @@ export async function GET(
     })
 
     if (!blogPost) {
-      console.log('API: Blog post not found for slug:', slug)
       return NextResponse.json(
         { error: 'Blog post not found' },
         { status: 404 }
       )
     }
 
-    console.log('API: Found blog post:', blogPost.title)
 
     return NextResponse.json({
       success: true,

@@ -133,7 +133,6 @@ export async function PUT(
     // Trigger restock notifications whenever product is in stock.
     // Safe to call repeatedly; function only emails active subscribers and deactivates them after send.
     if (product.inStock) {
-      console.log(`Product ${productId} is in stock, attempting to send restock notifications...`);
       try {
         await triggerRestockNotifications(productId);
       } catch (error) {

@@ -52,10 +52,10 @@ export async function GET(request: NextRequest) {
       freeShipping: isFreeShipping,
       freeAbove: FREE_SHIPPING_THRESHOLD,
       message: isFreeShipping
-        ? 'Free shipping applied!'
+        ? 'Free Delivery applied!'
         : subtotal > 0
-          ? `Shipping: ₹${totalShippingFee}. Free shipping on orders above ₹${FREE_SHIPPING_THRESHOLD}!`
-          : `Shipping: ₹${totalShippingFee}`,
+          ? `Delivery: ₹${totalShippingFee}. Free Delivery on orders above ₹${FREE_SHIPPING_THRESHOLD}!`
+          : `Delivery: ₹${totalShippingFee}`,
     });
   } catch (error) {
     console.error('Shipping check error:', error);

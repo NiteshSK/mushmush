@@ -33,7 +33,6 @@ export const useNewsPosts = (page: number = 1, limit: number = 6, published: boo
   useEffect(() => {
     const fetchNewsPosts = async () => {
       try {
-        console.log('useNewsPosts: Fetching news posts...')
         const params = new URLSearchParams({
           page: page.toString(),
           limit: limit.toString()
@@ -43,16 +42,14 @@ export const useNewsPosts = (page: number = 1, limit: number = 6, published: boo
         
         if (!response.ok) {
           const errorData = await response.json()
-          console.error('useNewsPosts: API response error:', errorData)
           setError(errorData.error || 'Failed to fetch news posts')
           return
         }
-        
+
         const responseData = await response.json()
-        console.log('useNewsPosts: Successfully fetched news posts:', responseData.news?.length)
         setData(responseData)
       } catch (error) {
-        console.error('useNewsPosts: Failed to fetch news posts:', error)
+        console.error('Failed to fetch news posts:', error)
         setError('Failed to fetch news posts')
       } finally {
         setLoading(false)

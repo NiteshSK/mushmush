@@ -71,13 +71,13 @@ export const useWishlist = () => {
       }
       
       const data = await response.json();
-      console.log('Fetched wishlist data:', data);
       setItems(data.items || []);
       // Force re-render by updating refresh key
       setRefreshKey(prev => prev + 1);
     } catch (err) {
       console.error('Wishlist fetch error:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch wishlist');
+
       setItems([]); // Clear items on error
     } finally {
       if (!skipLoading) {
@@ -93,7 +93,6 @@ export const useWishlist = () => {
     }
 
     try {
-      console.log('Adding to wishlist:', productId);
       const response = await fetch('/api/wishlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -101,8 +100,6 @@ export const useWishlist = () => {
         cache: 'no-store' // Prevent caching
       });
 
-      console.log('Add response status:', response.status);
-      
       if (response.status === 409) {
         // Item already in wishlist, refresh and return success
         await fetchWishlist();
@@ -129,19 +126,13 @@ export const useWishlist = () => {
     const confirmDelete = window.confirm('Are you sure you want to remove this item from your wishlist?');
     if (!confirmDelete) return false;
 
-    console.log('Removing from wishlist:', productId);
-    console.log('Current items before removal:', items.map(i => i.product.id));
-
     try {
       const response = await fetch(`/api/wishlist?productId=${productId}`, {
         method: 'DELETE',
         cache: 'no-store'
       });
 
-      console.log('Remove response status:', response.status);
-
       if (response.status === 404) {
-        console.log('Item not found in DB, refreshing state');
         await fetchWishlist();
         return true;
       }
@@ -152,15 +143,12 @@ export const useWishlist = () => {
 
       // Immediately update state by filtering out the removed item
       setItems(currentItems => {
-        const filteredItems = currentItems.filter(item => item.product.id !== productId);
-        console.log('Immediately updated items:', filteredItems.map(i => i.product.id));
-        return filteredItems;
+        return currentItems.filter(item => item.product.id !== productId);
       });
 
       // Also update refresh key to trigger any dependent re-renders
       setRefreshKey(prev => prev + 1);
-      
-      console.log('Successfully removed from wishlist');
+
       return true;
     } catch (err) {
       console.error('Remove from wishlist error:', err);
@@ -170,9 +158,7 @@ export const useWishlist = () => {
   };
 
   const isInWishlist = (productId: number) => {
-    const result = items.some(item => item.product.id === productId);
-    console.log('isInWishlist check:', { productId, items: items.map(i => i.product.id), result, refreshKey });
-    return result;
+    return items.some(item => item.product.id === productId);
   };
 
   useEffect(() => {

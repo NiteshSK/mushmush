@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import * as cheerio from 'cheerio';
-
-const prisma = new PrismaClient();
 
 const RSS_SOURCES = [
   {
@@ -74,16 +72,13 @@ async function fetchArticleImage(url: string): Promise<string> {
             
             // Check if this image was already used
             if (!usedImageUrls.has(imageUrl)) {
-              console.log(`✅ Got unique Unsplash image (attempt ${attempt + 1})`);
               return imageUrl;
             }
             
-            console.log(`⚠️ Image already used, retrying... (attempt ${attempt + 1})`);
           }
         }
       }
     } catch (error) {
-      console.log(`⚠️ Unsplash API failed`);
     }
     
     // Fallback: Use curated images with database check
@@ -161,7 +156,6 @@ export async function POST(request: NextRequest) {
   const newArticles: any[] = [];
 
   try {
-    console.log('🔍 Starting news scraping...');
 
     // First, collect all potential articles
     for (const source of RSS_SOURCES) {

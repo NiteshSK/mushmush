@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { hash } from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 import { validatePasswordPolicy } from '@/lib/validation';
+import { rateLimit } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,6 +12,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Token and password are required' },
         { status: 400 }
+      );
+    }
+
+    // Rate limit: 5 attempts per token per 15 minutes (prevents brute forcing tokens)
+    const rl = rateLimit(`reset-password:${token.slice(0, 16)}`, { max: 5, windowSeconds: 900 });
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: 'Too many attempts. Please try again later.' },
+        { status: 429 }
       );
     }
 

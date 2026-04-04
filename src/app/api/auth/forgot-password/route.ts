@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { sendEmail, emailTemplates } from '@/lib/email';
 import crypto from 'crypto';
+import { rateLimit } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,6 +12,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Email is required' },
         { status: 400 }
+      );
+    }
+
+    // Rate limit: 3 requests per email per 15 minutes
+    const rl = rateLimit(`forgot-password:${email.toLowerCase()}`, { max: 3, windowSeconds: 900 });
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: `Too many requests. Please try again in ${rl.retryAfterSeconds} seconds.` },
+        { status: 429 }
       );
     }
 
@@ -49,7 +59,6 @@ export async function POST(request: NextRequest) {
         html: resetEmail.html,
         text: resetEmail.text
       });
-      console.log(`Password reset email sent to ${email}`);
     } catch (emailError) {
       console.error('Failed to send reset email:', emailError);
       return NextResponse.json(

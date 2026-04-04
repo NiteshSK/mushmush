@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { otpStore } from '@/lib/otp-store';
+import { availablePacks } from '@/lib/inventory';
+import { validateCoupon } from '@/lib/coupon';
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,7 +26,8 @@ export async function POST(request: NextRequest) {
       convenienceFee,
       total,
       paymentMethod,
-      notes
+      notes,
+      couponCode
     } = body;
 
     // Validate required fields
@@ -35,33 +38,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify OTP
-    const storedOTP = await otpStore.get(email.toLowerCase());
-    
-    if (!storedOTP) {
+    // Verify OTP — hashed comparison with attempt tracking
+    const otpResult = await otpStore.verify(email.toLowerCase(), otp);
+
+    if (!otpResult.valid) {
       return NextResponse.json(
-        { error: 'OTP not found or expired. Please request a new OTP.' },
+        { error: otpResult.error },
         { status: 400 }
       );
     }
-
-    if (storedOTP.expiresAt < Date.now()) {
-      await otpStore.delete(email.toLowerCase());
-      return NextResponse.json(
-        { error: 'OTP has expired. Please request a new OTP.' },
-        { status: 400 }
-      );
-    }
-
-    if (storedOTP.otp !== otp) {
-      return NextResponse.json(
-        { error: 'Invalid OTP. Please check and try again.' },
-        { status: 400 }
-      );
-    }
-
-    // OTP is valid, delete it
-    await otpStore.delete(email.toLowerCase());
 
     // For guest checkout, we need a userId. Create a guest user or use a default guest ID
     let userId = session?.user?.id;
@@ -111,7 +96,6 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
-      console.log('✅ Using existing billing address:', billingAddressId);
     } else {
       // Create new billing address
       billingAddr = await prisma.addresses.create({
@@ -128,7 +112,6 @@ export async function POST(request: NextRequest) {
           userId: userId
         }
       });
-      console.log('✅ Created new billing address');
     }
 
     // Handle shipping address - use existing if ID provided, otherwise create new
@@ -145,7 +128,6 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
-      console.log('✅ Using existing shipping address:', shippingAddressId);
     } else {
       // Create new shipping address
       shippingAddr = await prisma.addresses.create({
@@ -162,8 +144,55 @@ export async function POST(request: NextRequest) {
           userId: userId
         }
       });
-      console.log('✅ Created new shipping address');
     }
+
+    // Validate stock availability for all cart items
+    const productIds = cartItems.map((item: any) => item.id);
+    const products = await prisma.product.findMany({
+      where: { id: { in: productIds } },
+      select: { id: true, title: true, quantity: true, inStock: true, measurementValue: true, measurementType: true }
+    });
+
+    const stockErrors: string[] = [];
+    for (const cartItem of cartItems) {
+      const product = products.find((p: any) => p.id === cartItem.id);
+      if (!product) {
+        stockErrors.push(`Product not found: ID ${cartItem.id}`);
+        continue;
+      }
+      const packs = availablePacks(product.quantity, product.measurementValue, product.measurementType);
+      if (!product.inStock || packs <= 0) {
+        stockErrors.push(`"${product.title}" is out of stock`);
+      } else if (cartItem.quantity > packs) {
+        stockErrors.push(`"${product.title}" only has ${packs} unit(s) available`);
+      }
+    }
+
+    if (stockErrors.length > 0) {
+      return NextResponse.json(
+        { error: 'Some items are unavailable', stockErrors },
+        { status: 409 }
+      );
+    }
+
+    // Validate and calculate coupon discount server-side
+    let couponDiscount = 0;
+    let couponId: number | null = null;
+
+    if (couponCode) {
+      const couponResult = await validateCoupon(couponCode, subtotal, email);
+      if (!couponResult.valid) {
+        return NextResponse.json(
+          { error: `Coupon error: ${couponResult.message}` },
+          { status: 400 }
+        );
+      }
+      couponDiscount = couponResult.discountAmount!;
+      couponId = couponResult.couponId!;
+    }
+
+    // Recalculate total server-side (never trust client total)
+    const serverTotal = subtotal + (shippingFee ?? 0) + (convenienceFee ?? 12) - couponDiscount;
 
     // Generate order number
     const orderNumber = `ORD-${Date.now()}`;
@@ -177,18 +206,6 @@ export async function POST(request: NextRequest) {
       country: shippingAddr.country || 'India'
     };
 
-    console.log('📦 Creating order with data:', {
-      orderNumber,
-      customerName,
-      email,
-      customerPhone,
-      shippingAddress: shippingAddressJson,
-      billingAddressId: billingAddr.id,
-      shippingAddressId: shippingAddr.id,
-      userId: session?.user?.id || userId,
-      itemCount: cartItems.length
-    });
-
     // Create order
     // COD orders are CONFIRMED immediately since payment is collected on delivery
     const order = await prisma.order.create({
@@ -200,8 +217,10 @@ export async function POST(request: NextRequest) {
         subtotal,
         tax: convenienceFee || 12, // Convenience fee stored in tax field
         shipping: shippingFee,
-        total,
-        status: 'CONFIRMED', // COD orders are confirmed immediately
+        couponDiscount,
+        couponId,
+        total: serverTotal,
+        status: 'PENDING', // Awaiting payment — stock decremented on payment confirmation
         shippingAddress: shippingAddressJson, // JSON object for jsonb column
         billingAddressId: billingAddr.id,
         shippingAddressId: shippingAddr.id,
@@ -223,19 +242,36 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    console.log('✅ Order created successfully:', orderNumber);
+    // Record coupon usage atomically
+    if (couponId) {
+      await prisma.$transaction([
+        prisma.couponUsage.create({
+          data: {
+            couponId,
+            email: email.toLowerCase(),
+            orderId: order.id,
+            discountAmount: couponDiscount,
+          },
+        }),
+        prisma.coupon.update({
+          where: { id: couponId },
+          data: { usedCount: { increment: 1 } },
+        }),
+      ]);
+    }
 
-    // Generate invoice and send email for CONFIRMED orders
+    // Stock is NOT decremented here — it happens after payment confirmation
+    // to prevent stock leaks from abandoned payments.
+    // See: /api/checkout/upi-payment/route.ts
+
+    // Generate invoice and send email
     try {
-      console.log('🔄 Generating invoice for order...');
-      
       const { generateInvoice, markInvoiceEmailSent } = await import('@/lib/invoice');
       const { sendOrderInvoiceEmail } = await import('@/lib/email');
       
       // Generate invoice
       const invoice = await generateInvoice(order.id);
-      console.log('✅ Invoice generated:', invoice.invoiceNumber);
-      
+
       // Prepare email data
       const emailData = {
         customerName: order.customerName,
@@ -264,15 +300,13 @@ export async function POST(request: NextRequest) {
       };
       
       // Send email
-      console.log('📧 Sending invoice email...');
       await sendOrderInvoiceEmail(emailData);
       
       // Mark email as sent
       await markInvoiceEmailSent(invoice.id);
-      console.log('✅ Invoice email sent successfully');
-      
+
     } catch (invoiceError) {
-      console.error('❌ Error generating invoice or sending email:', invoiceError);
+      console.error('Invoice or email error:', invoiceError);
       // Don't fail the order if invoice/email fails
     }
 
@@ -288,9 +322,9 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Error placing order:', error);
+    console.error('Checkout error:', error);
     return NextResponse.json(
-      { error: 'Failed to place order', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Failed to place order' },
       { status: 500 }
     );
   }
