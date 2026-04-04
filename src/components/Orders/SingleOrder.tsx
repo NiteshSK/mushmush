@@ -19,9 +19,9 @@ const SingleOrder = ({ orderItem, smallView }: SingleOrderProps) => {
     setShowEdit(!showEdit);
   };
 
-  const toggleModal = (status: boolean) => {
-    setShowDetails(status);
-    setShowEdit(status);
+  const toggleModal = () => {
+    setShowDetails(false);
+    setShowEdit(false);
   };
 
   return (
@@ -30,7 +30,7 @@ const SingleOrder = ({ orderItem, smallView }: SingleOrderProps) => {
         <div className="items-center justify-between border-t border-gray-100 py-5 px-7.5 hidden md:flex">
           <div className="min-w-[111px]">
             <p className="text-custom-sm text-forest">
-              #{orderItem.orderId.slice(-8)}
+              #{orderItem.id.slice(-8)}
             </p>
           </div>
           <div className="min-w-[175px]">
@@ -54,7 +54,7 @@ const SingleOrder = ({ orderItem, smallView }: SingleOrderProps) => {
           </div>
 
           <div className="min-w-[213px]">
-            <p className="text-custom-sm text-dark">{orderItem.title}</p>
+            <p className="text-custom-sm text-dark">{orderItem.orderNumber}</p>
           </div>
 
           <div className="min-w-[113px]">
@@ -76,7 +76,7 @@ const SingleOrder = ({ orderItem, smallView }: SingleOrderProps) => {
             <div className="">
               <p className="text-custom-sm text-dark">
                 <span className="font-bold pr-2"> Order:</span> #
-                {orderItem.orderId.slice(-8)}
+                {orderItem.id.slice(-8)}
               </p>
             </div>
             <div className="">
@@ -107,7 +107,7 @@ const SingleOrder = ({ orderItem, smallView }: SingleOrderProps) => {
 
             <div className="">
               <p className="text-custom-sm text-dark">
-                <span className="font-bold pr-2">Title:</span> {orderItem.title}
+                <span className="font-bold pr-2">Title:</span> {orderItem.orderNumber}
               </p>
             </div>
 
