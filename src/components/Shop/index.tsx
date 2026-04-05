@@ -79,31 +79,34 @@ const Shop: React.FC<ShopProps> = ({ showFilters = true }) => {
     return Object.values(map);
   }, [products]);
 
+  // Sync from URL only on initial mount
+  const initializedRef = React.useRef(false);
   useEffect(() => {
+    if (initializedRef.current) return;
+    if (categoriesWithCounts.length === 0) return; // wait for categories to load
+    initializedRef.current = true;
+
     if (initialCategory) {
-      const exists = categoriesWithCounts.some(
-        (cat) => cat.slug === initialCategory
-      );
-      setSelectedCategories(exists ? [initialCategory] : []);
-    } else {
-      setSelectedCategories([]);
+      const exists = categoriesWithCounts.some((cat) => cat.slug === initialCategory);
+      if (exists) setSelectedCategories([initialCategory]);
     }
   }, [initialCategory, categoriesWithCounts]);
 
   const handleCategoryChange = (categorySlug: string) => {
-    const newCategories = selectedCategories.includes(categorySlug)
-      ? selectedCategories.filter((c) => c !== categorySlug)
-      : [...selectedCategories, categorySlug];
+    setSelectedCategories((prev) => {
+      const next = prev.includes(categorySlug)
+        ? prev.filter((c) => c !== categorySlug)
+        : [...prev, categorySlug];
 
-    setSelectedCategories(newCategories);
+      // Update URL for shareability (multi-select uses comma-separated)
+      if (next.length === 0) {
+        router.push(window.location.pathname, { scroll: false });
+      } else {
+        router.push(`?category=${next.join(',')}`, { scroll: false });
+      }
 
-    const singleSlug = newCategories.length === 1 ? newCategories[0] : "";
-
-    if (singleSlug) {
-      router.push(`?category=${singleSlug}`, { scroll: false });
-    } else {
-      router.push(window.location.pathname, { scroll: false });
-    }
+      return next;
+    });
   };
 
   const filteredProducts: Product[] = useMemo(() => {
