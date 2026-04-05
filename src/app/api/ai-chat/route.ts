@@ -215,7 +215,7 @@ When ending a conversation, include our contact information so users know how to
 Answer concisely and helpfully. Keep responses clean and professional.`;
 
         const result = streamText({
-            model: google("gemini-3.1-flash-lite"),
+            model: google("gemini-2.5-flash"),
             system: systemPrompt,
             messages: convertToCoreMessages(messages),
         });
