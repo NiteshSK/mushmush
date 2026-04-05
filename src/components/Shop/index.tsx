@@ -145,7 +145,7 @@ const Shop: React.FC<ShopProps> = ({ showFilters = true }) => {
     };
 
     return [...spread(inStock), ...spread(outOfStock)];
-  }, [products, priceValue]);
+  }, [products, priceValue, selectedCategories]);
 
   useEffect(() => {
     setCurrentPage(1);
