@@ -259,9 +259,9 @@ export default function OrdersPage() {
                             &#8377;{order.total.toFixed(2)}
                           </p>
                           <span
-                            className={`inline-flex px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider rounded-full ${statusStyle(order.status)}`}
+                            className={`inline-flex px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider rounded-full ${getStatus(order.status).style}`}
                           >
-                            {order.status}
+                            {getStatus(order.status).label}
                           </span>
                         </div>
                         <button
