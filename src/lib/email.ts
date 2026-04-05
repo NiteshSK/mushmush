@@ -914,7 +914,7 @@ function formatAddress(addr: any): string {
 function orderItemsTable(items: OrderNotificationData['orderItems']): string {
   return items.map(item => `
     <tr>
-      <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.productTitle}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #eee;">${escapeHtml(item.productTitle)}</td>
       <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
       <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">₹${item.price.toFixed(2)}</td>
       <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">₹${item.total.toFixed(2)}</td>
@@ -978,10 +978,10 @@ export async function sendAdminNewOrderEmail(data: OrderNotificationData): Promi
     `
       <p style="color: #374151;">A new order has been placed. Details below:</p>
       <div style="padding: 15px; background: #eff6ff; border-radius: 8px; margin: 15px 0;">
-        <p style="margin: 0;"><strong>Customer:</strong> ${data.customerName}</p>
-        <p style="margin: 5px 0 0;"><strong>Email:</strong> ${data.customerEmail}</p>
-        ${data.customerPhone ? `<p style="margin: 5px 0 0;"><strong>Phone:</strong> ${data.customerPhone}</p>` : ''}
-        <p style="margin: 5px 0 0;"><strong>Order #:</strong> ${data.orderNumber}</p>
+        <p style="margin: 0;"><strong>Customer:</strong> ${escapeHtml(data.customerName)}</p>
+        <p style="margin: 5px 0 0;"><strong>Email:</strong> <a href="mailto:${escapeHtml(data.customerEmail)}" style="color: #1e40af;">${escapeHtml(data.customerEmail)}</a></p>
+        ${data.customerPhone ? `<p style="margin: 5px 0 0;"><strong>Phone:</strong> <a href="tel:${escapeHtml(data.customerPhone)}" style="color: #1e40af;">${escapeHtml(data.customerPhone)}</a></p>` : ''}
+        <p style="margin: 5px 0 0;"><strong>Order #:</strong> ${escapeHtml(data.orderNumber)}</p>
       </div>
       ${orderSummaryBlock(data)}
       <p style="margin-top: 20px; color: #6b7280; font-size: 13px;">This order is awaiting payment. You'll be notified when payment is submitted.</p>
@@ -1024,39 +1024,92 @@ export async function sendOrderPlacedEmail(data: OrderNotificationData): Promise
 export async function sendPaymentReceivedEmail(data: {
   customerName: string;
   customerEmail: string;
+  customerPhone?: string;
   orderNumber: string;
   transactionId: string;
   amount: number;
+  orderItems?: Array<{ productTitle: string; quantity: number; price: number; total: number }>;
+  subtotal?: number;
+  shipping?: number;
+  shippingAddress?: { street?: string; city?: string; state?: string; zip?: string; address?: string };
 }): Promise<void> {
   const customerHtml = orderEmailWrapper(
     'Payment Received!',
     `Order #${data.orderNumber}`,
     '#059669',
     `
-      <p style="color: #374151;">Hi ${data.customerName},</p>
+      <p style="color: #374151;">Hi ${escapeHtml(data.customerName)},</p>
       <p style="color: #374151;">We've received your payment of <strong>₹${data.amount.toFixed(2)}</strong>.</p>
       <div style="padding: 15px; background: #f0fdf4; border-radius: 8px; margin: 15px 0;">
-        <p style="margin: 0;"><strong>Transaction ID:</strong> ${data.transactionId}</p>
+        <p style="margin: 0;"><strong>Transaction ID:</strong> ${escapeHtml(data.transactionId)}</p>
         <p style="margin: 5px 0 0;"><strong>Amount:</strong> ₹${data.amount.toFixed(2)}</p>
         <p style="margin: 5px 0 0;"><strong>Status:</strong> Awaiting verification</p>
       </div>
+      ${data.orderItems ? `
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+          <thead><tr style="background: #f3f4f6;">
+            <th style="padding: 10px; text-align: left; font-size: 12px; text-transform: uppercase; color: #6b7280;">Item</th>
+            <th style="padding: 10px; text-align: center; font-size: 12px; text-transform: uppercase; color: #6b7280;">Qty</th>
+            <th style="padding: 10px; text-align: right; font-size: 12px; text-transform: uppercase; color: #6b7280;">Total</th>
+          </tr></thead>
+          <tbody>${data.orderItems.map(item => `
+            <tr>
+              <td style="padding: 10px; border-bottom: 1px solid #eee;">${escapeHtml(item.productTitle)}</td>
+              <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
+              <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">₹${item.total.toFixed(2)}</td>
+            </tr>
+          `).join('')}</tbody>
+        </table>
+      ` : ''}
       <p style="color: #6b7280; font-size: 13px;">Our team will verify your payment shortly. You'll receive a confirmation once it's verified.</p>
     `
   );
 
-  const adminEmail = process.env.ADMIN_EMAIL;
   const adminHtml = orderEmailWrapper(
     'Payment Submitted — Verify Now',
     `Order #${data.orderNumber}`,
     '#d97706',
     `
-      <p style="color: #374151;">A payment has been submitted for Order #${data.orderNumber}.</p>
+      <p style="color: #374151;">A payment has been submitted and needs verification.</p>
       <div style="padding: 15px; background: #fffbeb; border-radius: 8px; margin: 15px 0;">
-        <p style="margin: 0;"><strong>Customer:</strong> ${data.customerName} (${data.customerEmail})</p>
-        <p style="margin: 5px 0 0;"><strong>Transaction ID:</strong> ${data.transactionId}</p>
+        <p style="margin: 0;"><strong>Customer:</strong> ${escapeHtml(data.customerName)}</p>
+        <p style="margin: 5px 0 0;"><strong>Email:</strong> ${escapeHtml(data.customerEmail)}</p>
+        ${data.customerPhone ? `<p style="margin: 5px 0 0;"><strong>Phone:</strong> ${escapeHtml(data.customerPhone)}</p>` : ''}
+        <p style="margin: 5px 0 0;"><strong>Order #:</strong> ${escapeHtml(data.orderNumber)}</p>
+        <p style="margin: 5px 0 0;"><strong>Transaction ID:</strong> <code style="background: #fef3c7; padding: 2px 6px; border-radius: 4px;">${escapeHtml(data.transactionId)}</code></p>
         <p style="margin: 5px 0 0;"><strong>Amount:</strong> ₹${data.amount.toFixed(2)}</p>
       </div>
-      <p style="color: #374151;">Please verify this payment in the admin dashboard.</p>
+      ${data.orderItems ? `
+        <h3 style="font-size: 14px; color: #374151; margin: 20px 0 10px;">Order Items</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead><tr style="background: #f3f4f6;">
+            <th style="padding: 10px; text-align: left; font-size: 12px; text-transform: uppercase; color: #6b7280;">Product</th>
+            <th style="padding: 10px; text-align: center; font-size: 12px; text-transform: uppercase; color: #6b7280;">Qty</th>
+            <th style="padding: 10px; text-align: right; font-size: 12px; text-transform: uppercase; color: #6b7280;">Price</th>
+            <th style="padding: 10px; text-align: right; font-size: 12px; text-transform: uppercase; color: #6b7280;">Total</th>
+          </tr></thead>
+          <tbody>${data.orderItems.map(item => `
+            <tr>
+              <td style="padding: 10px; border-bottom: 1px solid #eee;">${escapeHtml(item.productTitle)}</td>
+              <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
+              <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">₹${item.price.toFixed(2)}</td>
+              <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">₹${item.total.toFixed(2)}</td>
+            </tr>
+          `).join('')}</tbody>
+        </table>
+        <div style="text-align: right; margin-top: 10px;">
+          ${data.subtotal ? `<p style="margin: 4px 0; color: #6b7280;">Subtotal: ₹${data.subtotal.toFixed(2)}</p>` : ''}
+          ${data.shipping !== undefined ? `<p style="margin: 4px 0; color: #6b7280;">Shipping: ${data.shipping === 0 ? 'FREE' : '₹' + data.shipping.toFixed(2)}</p>` : ''}
+          <p style="margin: 8px 0 0; font-size: 18px; font-weight: bold; color: #111;">Total: ₹${data.amount.toFixed(2)}</p>
+        </div>
+      ` : ''}
+      ${data.shippingAddress ? `
+        <div style="margin-top: 20px; padding: 15px; background: #f9fafb; border-radius: 8px;">
+          <p style="margin: 0; font-size: 12px; text-transform: uppercase; color: #6b7280; font-weight: 600;">Shipping Address</p>
+          <p style="margin: 5px 0 0; color: #374151;">${formatAddress(data.shippingAddress)}</p>
+        </div>
+      ` : ''}
+      <p style="margin-top: 20px; color: #374151;">Please verify this payment in the <a href="${process.env.NEXTAUTH_URL || ''}/admin/payment-verification" style="color: #d97706; font-weight: 600;">admin dashboard</a>.</p>
     `
   );
 
@@ -1081,6 +1134,11 @@ export async function sendOrderStatusEmail(data: {
   orderNumber: string;
   status: string;
   total: number;
+  orderItems?: Array<{ productTitle: string; quantity: number; price: number; total: number }>;
+  shippingAddress?: any;
+  subtotal?: number;
+  shipping?: number;
+  couponDiscount?: number;
 }): Promise<void> {
   const statusConfig: Record<string, { title: string; message: string; color: string }> = {
     PAYMENT_RECEIVED: {
@@ -1125,12 +1183,42 @@ export async function sendOrderStatusEmail(data: {
     `
       <p style="color: #374151;">Hi ${data.customerName},</p>
       <p style="color: #374151;">${config.message}</p>
-      <div style="padding: 15px; background: #f9fafb; border-radius: 8px; margin: 15px 0;">
-        <p style="margin: 0;"><strong>Order:</strong> #${data.orderNumber}</p>
-        <p style="margin: 5px 0 0;"><strong>Status:</strong> ${data.status}</p>
-        <p style="margin: 5px 0 0;"><strong>Total:</strong> ₹${data.total.toFixed(2)}</p>
-      </div>
-      <p style="color: #6b7280; font-size: 13px;">For any questions, reply to this email or contact us at concierge@kosvana.com</p>
+      ${data.orderItems && data.orderItems.length > 0 ? `
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+          <thead><tr style="background: #f3f4f6;">
+            <th style="padding: 10px; text-align: left; font-size: 12px; text-transform: uppercase; color: #6b7280;">Item</th>
+            <th style="padding: 10px; text-align: center; font-size: 12px; text-transform: uppercase; color: #6b7280;">Qty</th>
+            <th style="padding: 10px; text-align: right; font-size: 12px; text-transform: uppercase; color: #6b7280;">Price</th>
+            <th style="padding: 10px; text-align: right; font-size: 12px; text-transform: uppercase; color: #6b7280;">Total</th>
+          </tr></thead>
+          <tbody>${data.orderItems.map(item => `
+            <tr>
+              <td style="padding: 10px; border-bottom: 1px solid #eee;">${escapeHtml(item.productTitle)}</td>
+              <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
+              <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">₹${item.price.toFixed(2)}</td>
+              <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">₹${item.total.toFixed(2)}</td>
+            </tr>
+          `).join('')}</tbody>
+        </table>
+        <div style="text-align: right; margin-top: 10px;">
+          ${data.subtotal ? `<p style="margin: 4px 0; color: #6b7280;">Subtotal: ₹${data.subtotal.toFixed(2)}</p>` : ''}
+          ${data.shipping !== undefined ? `<p style="margin: 4px 0; color: #6b7280;">Shipping: ${data.shipping === 0 ? 'FREE' : '₹' + data.shipping.toFixed(2)}</p>` : ''}
+          ${data.couponDiscount ? `<p style="margin: 4px 0; color: #059669;">Coupon: -₹${data.couponDiscount.toFixed(2)}</p>` : ''}
+          <p style="margin: 8px 0 0; font-size: 18px; font-weight: bold; color: #111;">Total: ₹${data.total.toFixed(2)}</p>
+        </div>
+      ` : `
+        <div style="padding: 15px; background: #f9fafb; border-radius: 8px; margin: 15px 0;">
+          <p style="margin: 0;"><strong>Order:</strong> #${data.orderNumber}</p>
+          <p style="margin: 5px 0 0;"><strong>Total:</strong> ₹${data.total.toFixed(2)}</p>
+        </div>
+      `}
+      ${data.shippingAddress ? `
+        <div style="margin-top: 15px; padding: 15px; background: #f9fafb; border-radius: 8px;">
+          <p style="margin: 0; font-size: 12px; text-transform: uppercase; color: #6b7280; font-weight: 600;">Delivery Address</p>
+          <p style="margin: 5px 0 0; color: #374151;">${formatAddress(data.shippingAddress)}</p>
+        </div>
+      ` : ''}
+      <p style="margin-top: 20px; color: #6b7280; font-size: 13px;">For any questions, reply to this email or contact us at concierge@kosvana.com</p>
     `
   );
 

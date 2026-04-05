@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { getInvoiceByOrderId } from '@/lib/invoice';
+import { getInvoiceByOrderId, generateInvoice } from '@/lib/invoice';
 
 /**
  * GET /api/orders/[id]/invoice
- * Get invoice by order ID
+ * Get invoice by order ID — generates on-demand if not yet created
  */
 export async function GET(
   request: NextRequest,
@@ -23,11 +23,24 @@ export async function GET(
     const params = await context.params;
     const { id: orderId } = params;
 
-    const invoice = await getInvoiceByOrderId(orderId);
+    let invoice = await getInvoiceByOrderId(orderId);
+
+    // If no invoice exists, generate it on demand
+    if (!invoice) {
+      try {
+        invoice = await generateInvoice(orderId);
+      } catch (genError) {
+        console.error('Invoice generation failed:', genError);
+        return NextResponse.json(
+          { error: 'Failed to generate invoice' },
+          { status: 500 }
+        );
+      }
+    }
 
     if (!invoice) {
       return NextResponse.json(
-        { error: 'Invoice not found for this order' },
+        { error: 'Invoice could not be generated for this order' },
         { status: 404 }
       );
     }

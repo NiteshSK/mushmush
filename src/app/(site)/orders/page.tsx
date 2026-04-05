@@ -29,27 +29,18 @@ interface Invoice {
   emailSent: boolean;
 }
 
-const statusStyle = (status: string) => {
-  switch (status) {
-    case "DELIVERED":
-    case "COMPLETED":
-      return "text-forest bg-forest/10";
-    case "SHIPPED":
-      return "text-blue bg-blue/10";
-    case "PROCESSING":
-      return "text-[#D97706] bg-[#FEF3C7]";
-    case "CONFIRMED":
-      return "text-forest bg-forest/10";
-    case "PAYMENT_RECEIVED":
-      return "text-blue bg-blue/10";
-    case "CANCELLED":
-      return "text-red bg-red/10";
-    case "PENDING":
-      return "text-dark-5 bg-gray-1";
-    default:
-      return "text-dark-5 bg-gray-1";
-  }
+const STATUS_CONFIG: Record<string, { label: string; style: string }> = {
+  PENDING: { label: "Awaiting Payment", style: "text-dark-5 bg-gray-1" },
+  PAYMENT_RECEIVED: { label: "Payment Received", style: "text-blue bg-blue/10" },
+  CONFIRMED: { label: "Confirmed", style: "text-forest bg-forest/10" },
+  PROCESSING: { label: "Being Prepared", style: "text-[#D97706] bg-[#FEF3C7]" },
+  SHIPPED: { label: "Shipped", style: "text-blue bg-blue/10" },
+  DELIVERED: { label: "Delivered", style: "text-forest bg-forest/10" },
+  COMPLETED: { label: "Completed", style: "text-forest bg-forest/10" },
+  CANCELLED: { label: "Cancelled", style: "text-red bg-red/10" },
 };
+
+const getStatus = (status: string) => STATUS_CONFIG[status] || { label: status, style: "text-dark-5 bg-gray-1" };
 
 export default function OrdersPage() {
   const { data: session, status } = useSession();
@@ -192,9 +183,9 @@ export default function OrdersPage() {
                           </p>
                         </div>
                         <span
-                          className={`inline-flex px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider rounded-full ${statusStyle(order.status)}`}
+                          className={`inline-flex px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider rounded-full ${getStatus(order.status).style}`}
                         >
-                          {order.status}
+                          {getStatus(order.status).label}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">

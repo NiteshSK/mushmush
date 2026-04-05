@@ -94,27 +94,65 @@ export async function PUT(
     const sendEmails = async () => {
       try {
         const { sendOrderStatusEmail, sendEmail, getOrderEmails } = await import('@/lib/email');
+        // Fetch shipping address for email
+        let shippingAddr: any = null;
+        if (order.shippingAddressId) {
+          const addr = await prisma.addresses.findUnique({ where: { id: order.shippingAddressId } });
+          if (addr) shippingAddr = { street: addr.street, city: addr.city, state: addr.state, zip: addr.zip };
+        }
+
         await sendOrderStatusEmail({
           customerName: order.customerName,
           customerEmail: order.customerEmail,
           orderNumber: order.orderNumber,
           status,
           total: order.total,
+          subtotal: order.subtotal,
+          shipping: order.shipping,
+          couponDiscount: order.couponDiscount,
+          orderItems: order.orderItems.map(item => ({
+            productTitle: item.product.title,
+            quantity: item.quantity,
+            price: item.price,
+            total: item.quantity * item.price,
+          })),
+          shippingAddress: shippingAddr,
         });
+        // Also notify admin/order team with full details
         const orderRecipients = getOrderEmails();
         if (orderRecipients.length > 0) {
+          const itemsHtml = order.orderItems.map((item: any) =>
+            `<tr><td style="padding:8px;border-bottom:1px solid #eee;">${item.product.title}</td><td style="padding:8px;border-bottom:1px solid #eee;text-align:center;">${item.quantity}</td><td style="padding:8px;border-bottom:1px solid #eee;text-align:right;">₹${item.price.toFixed(2)}</td><td style="padding:8px;border-bottom:1px solid #eee;text-align:right;">₹${(item.quantity * item.price).toFixed(2)}</td></tr>`
+          ).join('');
+
           await sendEmail({
             to: orderRecipients,
-            subject: `Order ${order.orderNumber} — Status changed to ${status}`,
-            html: `<div style="font-family:sans-serif;max-width:500px">
-              <h2 style="color:#5c8e61">Order Status Update</h2>
-              <p><strong>Order:</strong> ${order.orderNumber}</p>
-              <p><strong>Customer:</strong> ${order.customerName} (${order.customerEmail})</p>
-              <p><strong>New Status:</strong> ${status}</p>
-              <p><strong>Total:</strong> Rs. ${order.total.toFixed(2)}</p>
-              <p style="color:#888;font-size:12px;margin-top:20px">This is an automated notification from Kosvana admin.</p>
+            subject: `Order #${order.orderNumber} → ${status} — ₹${order.total.toFixed(2)}`,
+            html: `<div style="font-family:-apple-system,sans-serif;max-width:600px;margin:0 auto;background:#f9fafb;">
+              <div style="background:#1e40af;padding:24px;text-align:center;">
+                <h1 style="color:white;margin:0;font-size:18px;">Order Status: ${status}</h1>
+                <p style="color:rgba(255,255,255,0.8);margin:6px 0 0;font-size:13px;">#${order.orderNumber}</p>
+              </div>
+              <div style="padding:24px;background:white;">
+                <div style="padding:12px;background:#eff6ff;border-radius:8px;margin-bottom:16px;">
+                  <p style="margin:0;font-size:13px;"><strong>Customer:</strong> ${order.customerName}</p>
+                  <p style="margin:4px 0 0;font-size:13px;"><strong>Email:</strong> ${order.customerEmail}</p>
+                  ${order.customerPhone ? `<p style="margin:4px 0 0;font-size:13px;"><strong>Phone:</strong> ${order.customerPhone}</p>` : ''}
+                </div>
+                <table style="width:100%;border-collapse:collapse;margin:16px 0;">
+                  <thead><tr style="background:#f3f4f6;"><th style="padding:8px;text-align:left;font-size:11px;text-transform:uppercase;color:#6b7280;">Item</th><th style="padding:8px;text-align:center;font-size:11px;text-transform:uppercase;color:#6b7280;">Qty</th><th style="padding:8px;text-align:right;font-size:11px;text-transform:uppercase;color:#6b7280;">Price</th><th style="padding:8px;text-align:right;font-size:11px;text-transform:uppercase;color:#6b7280;">Total</th></tr></thead>
+                  <tbody>${itemsHtml}</tbody>
+                </table>
+                <div style="text-align:right;font-size:13px;">
+                  <p style="margin:3px 0;color:#6b7280;">Subtotal: ₹${order.subtotal.toFixed(2)}</p>
+                  <p style="margin:3px 0;color:#6b7280;">Shipping: ${order.shipping === 0 ? 'FREE' : '₹' + order.shipping.toFixed(2)}</p>
+                  ${order.couponDiscount > 0 ? `<p style="margin:3px 0;color:#059669;">Coupon: -₹${order.couponDiscount.toFixed(2)}</p>` : ''}
+                  <p style="margin:6px 0 0;font-size:16px;font-weight:bold;color:#111;">Total: ₹${order.total.toFixed(2)}</p>
+                </div>
+                ${shippingAddr ? `<div style="margin-top:16px;padding:12px;background:#f9fafb;border-radius:8px;"><p style="margin:0;font-size:11px;text-transform:uppercase;color:#6b7280;font-weight:600;">Delivery Address</p><p style="margin:4px 0 0;color:#374151;font-size:13px;">${[shippingAddr.street, shippingAddr.city, shippingAddr.state, shippingAddr.zip].filter(Boolean).join(', ')}</p></div>` : ''}
+              </div>
+              <div style="padding:16px;text-align:center;color:#9ca3af;font-size:11px;">&copy; ${new Date().getFullYear()} Kosvana</div>
             </div>`,
-            text: `Order ${order.orderNumber} status changed to ${status}. Customer: ${order.customerName}. Total: Rs. ${order.total.toFixed(2)}`,
           });
         }
       } catch (emailErr) {
@@ -172,7 +210,7 @@ export async function PUT(
 
     // Don't await — let them run in the background
     sendEmails();
-    if (status === 'COMPLETED') {
+    if (['CONFIRMED', 'DELIVERED', 'COMPLETED'].includes(status)) {
       sendInvoice();
     }
 

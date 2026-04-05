@@ -159,9 +159,19 @@ export async function POST(request: NextRequest) {
       await sendPaymentReceivedEmail({
         customerName: order.customerName,
         customerEmail: order.customerEmail,
+        customerPhone: order.customerPhone || undefined,
         orderNumber: order.orderNumber,
         transactionId: upiTransactionId,
         amount,
+        orderItems: order.orderItems.map((item: any) => ({
+          productTitle: item.product.title,
+          quantity: item.quantity,
+          price: item.price,
+          total: item.quantity * item.price,
+        })),
+        subtotal: order.subtotal,
+        shipping: order.shipping,
+        shippingAddress: order.shippingAddress as any,
       });
     } catch {
       // Don't fail payment if email fails

@@ -47,6 +47,7 @@ jest.mock('@/lib/prisma', () => ({
 
 jest.mock('@/lib/otp-store', () => ({
   otpStore: {
+    verify: jest.fn(),
     get: jest.fn(),
     delete: jest.fn(),
   },
@@ -72,6 +73,10 @@ jest.mock('@/lib/inventory', () => ({
   }),
 }));
 
+jest.mock('@/lib/coupon', () => ({
+  validateCoupon: jest.fn().mockResolvedValue({ valid: false }),
+}));
+
 jest.mock('@/lib/invoice', () => ({
   generateInvoice: jest.fn().mockResolvedValue({ id: 'inv-1', invoiceNumber: 'INV-1', pdfPath: '/inv.pdf' }),
   markInvoiceEmailSent: jest.fn(),
@@ -79,6 +84,8 @@ jest.mock('@/lib/invoice', () => ({
 
 jest.mock('@/lib/email', () => ({
   sendOrderInvoiceEmail: jest.fn(),
+  sendOrderPlacedEmail: jest.fn(),
+  sendAdminNewOrderEmail: jest.fn(),
 }));
 
 import { NextRequest } from 'next/server';
@@ -114,11 +121,7 @@ function makeRequest(body: any) {
 }
 
 function setupValidOTP() {
-  (otpStore.get as jest.Mock).mockResolvedValue({
-    otp: '123456',
-    expiresAt: Date.now() + 300_000,
-  });
-  (otpStore.delete as jest.Mock).mockResolvedValue(undefined);
+  (otpStore.verify as jest.Mock).mockResolvedValue({ valid: true });
 }
 
 function setupSession() {
@@ -245,16 +248,11 @@ describe('POST /api/checkout/verify-and-place-order — stock validation (bulk)'
     expect(data.stockErrors[1]).toContain('only has 2 unit(s)');
   });
 
-  it('allows order when stock is sufficient and decrements bulk quantity', async () => {
-    // 50kg = 50000gm, ordering 2 packs of 100gm = 200gm decrement
+  it('allows order when stock is sufficient — creates order without decrementing stock', async () => {
+    // Stock decrement happens at payment time, not order creation
     (prisma.product.findMany as jest.Mock).mockResolvedValue([
       { id: 1, title: 'Oyster Mushroom Powder', quantity: 50000, inStock: true, ...PRODUCT_100GM },
     ]);
-    (prisma.product.update as jest.Mock).mockResolvedValue({
-      id: 1,
-      quantity: 49800,
-      inStock: true,
-    });
 
     await POST(makeRequest(validBody()));
     const { data, status } = lastResponse();
@@ -262,51 +260,23 @@ describe('POST /api/checkout/verify-and-place-order — stock validation (bulk)'
     expect(status).toBe(200);
     expect(data.success).toBe(true);
     expect(prisma.order.create).toHaveBeenCalled();
-    // Should decrement by 200gm (2 packs × 100gm)
-    expect(prisma.product.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { id: 1 },
-        data: { quantity: { decrement: 200 } },
-      })
-    );
+    // Stock should NOT be decremented at order creation — happens at payment
+    expect(prisma.product.update).not.toHaveBeenCalled();
   });
 
-  it('auto-marks product out of stock when remaining bulk < 1 pack', async () => {
-    // 200gm stock, ordering 2 packs of 100gm = 200gm → 0 remaining
-    (prisma.product.findMany as jest.Mock).mockResolvedValue([
-      { id: 1, title: 'Oyster Mushroom Powder', quantity: 200, inStock: true, ...PRODUCT_100GM },
-    ]);
-    (prisma.product.update as jest.Mock)
-      .mockResolvedValueOnce({ id: 1, quantity: 0, inStock: true })
-      .mockResolvedValueOnce({ id: 1, quantity: 0, inStock: false });
-
-    await POST(makeRequest(validBody()));
-    const { data, status } = lastResponse();
-
-    expect(status).toBe(200);
-    expect(data.success).toBe(true);
-    expect(prisma.product.update).toHaveBeenCalledTimes(2);
-    expect(prisma.product.update).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        where: { id: 1 },
-        data: { inStock: false, quantity: 0 },
-      })
-    );
-  });
-
-  it('does not mark out of stock when remaining bulk still has packs', async () => {
-    // 50000gm stock, ordering 2 packs of 100gm → 49800gm remaining (498 packs)
+  it('creates order with PENDING status (not CONFIRMED)', async () => {
     (prisma.product.findMany as jest.Mock).mockResolvedValue([
       { id: 1, title: 'Oyster Mushroom Powder', quantity: 50000, inStock: true, ...PRODUCT_100GM },
     ]);
-    (prisma.product.update as jest.Mock).mockResolvedValue({
-      id: 1,
-      quantity: 49800,
-      inStock: true,
-    });
 
     await POST(makeRequest(validBody()));
 
-    expect(prisma.product.update).toHaveBeenCalledTimes(1);
+    expect(prisma.order.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          status: 'PENDING',
+        }),
+      })
+    );
   });
 });
