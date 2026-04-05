@@ -95,7 +95,7 @@ const Hero = () => {
                         </svg>
                       </Link>
                       <Link
-                        href="/about"
+                        href="/about-us"
                         className="text-[10px] font-medium tracking-[0.15em] uppercase text-forest border-b border-forest pb-0.5 hover:text-dark hover:border-dark transition-all duration-300"
                       >
                         Our Story
@@ -167,7 +167,7 @@ const Hero = () => {
                             </svg>
                           </Link>
                           <Link
-                            href="/about"
+                            href="/about-us"
                             className="text-xs font-medium tracking-[0.15em] uppercase text-forest border-b border-forest pb-0.5 hover:text-dark hover:border-dark transition-all duration-300"
                           >
                             Our Story

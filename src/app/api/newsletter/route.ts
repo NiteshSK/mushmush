@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     });
 
     // Send welcome email (non-blocking)
-    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+    const baseUrl = request.headers.get('origin') || process.env.NEXTAUTH_URL || "http://localhost:3000";
     sendEmail({
       to: normalizedEmail,
       subject: "Welcome to the Kosvana Newsletter!",

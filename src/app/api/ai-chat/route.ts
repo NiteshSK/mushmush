@@ -125,7 +125,7 @@ export async function POST(req: Request) {
             hours: settingsMap.business_hours || "Monday - Saturday: 9:00 AM - 6:00 PM\n  * Sunday: 9:00 AM - 3:00 PM",
         };
 
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.mushmush.in";
+        const baseUrl = req.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || "https://www.mushmush.in";
 
         const context = `
 Relevant Kosvana Products:

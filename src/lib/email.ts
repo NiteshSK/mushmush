@@ -10,6 +10,9 @@ const transporter = nodemailer.createTransport({
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASSWORD,
   },
+  connectionTimeout: 10000, // 10s connect timeout
+  greetingTimeout: 10000,   // 10s greeting timeout
+  socketTimeout: 15000,     // 15s socket timeout
 });
 
 // ─── Zoho transporter (for @kosvana.com branded emails) ─────────────────
@@ -55,6 +58,28 @@ export interface EmailOptions {
   html: string;
   text?: string;
   useZoho?: boolean;
+}
+
+/** Verify SMTP connection is working — call from an admin API route to diagnose issues */
+export async function verifyEmailConnection(): Promise<{ gmail: boolean; zoho: boolean; gmailError?: string; zohoError?: string }> {
+  const result = { gmail: false, zoho: false, gmailError: undefined as string | undefined, zohoError: undefined as string | undefined };
+  try {
+    await transporter.verify();
+    result.gmail = true;
+  } catch (err) {
+    result.gmailError = err instanceof Error ? err.message : 'Unknown error';
+    console.error('Gmail SMTP verify failed:', err);
+  }
+  if (zohoTransporter) {
+    try {
+      await zohoTransporter.verify();
+      result.zoho = true;
+    } catch (err) {
+      result.zohoError = err instanceof Error ? err.message : 'Unknown error';
+      console.error('Zoho SMTP verify failed:', err);
+    }
+  }
+  return result;
 }
 
 export async function sendEmail({ to, subject, html, text, useZoho }: EmailOptions) {
@@ -964,8 +989,11 @@ export async function sendAdminNewOrderEmail(data: OrderNotificationData): Promi
   );
 
   try {
-    await sendEmail({ to: adminEmail, subject: `New Order #${data.orderNumber} — ₹${data.total.toFixed(2)}`, html });
-  } catch {}
+    const result = await sendEmail({ to: adminEmail, subject: `New Order #${data.orderNumber} — ₹${data.total.toFixed(2)}`, html });
+    if (!result.success) console.error('Admin order email failed:', result.error);
+  } catch (err) {
+    console.error('Admin order email error:', err);
+  }
 }
 
 /** Email sent to CUSTOMER when they place an order (before payment) */
@@ -985,8 +1013,11 @@ export async function sendOrderPlacedEmail(data: OrderNotificationData): Promise
   );
 
   try {
-    await sendEmail({ to: data.customerEmail, subject: `Order Placed — #${data.orderNumber}`, html });
-  } catch {}
+    const result = await sendEmail({ to: data.customerEmail, subject: `Order Placed — #${data.orderNumber}`, html });
+    if (!result.success) console.error('Order placed email failed for', data.customerEmail, ':', result.error);
+  } catch (err) {
+    console.error('Order placed email error:', err);
+  }
 }
 
 /** Email sent to CUSTOMER + ADMIN when payment is submitted */
@@ -1031,11 +1062,16 @@ export async function sendPaymentReceivedEmail(data: {
 
   try {
     const orderRecipients = getOrderEmails();
-    await Promise.allSettled([
+    const results = await Promise.allSettled([
       sendEmail({ to: data.customerEmail, subject: `Payment Received — Order #${data.orderNumber}`, html: customerHtml }),
       orderRecipients.length > 0 ? sendEmail({ to: orderRecipients, subject: `Payment to Verify — Order #${data.orderNumber} — ₹${data.amount.toFixed(2)}`, html: adminHtml }) : Promise.resolve(),
     ]);
-  } catch {}
+    results.forEach((r, i) => {
+      if (r.status === 'rejected') console.error(`Payment email [${i}] failed:`, r.reason);
+    });
+  } catch (err) {
+    console.error('Payment received email error:', err);
+  }
 }
 
 /** Email sent to CUSTOMER when order status changes */
@@ -1099,8 +1135,11 @@ export async function sendOrderStatusEmail(data: {
   );
 
   try {
-    await sendEmail({ to: data.customerEmail, subject: `${config.title} — Order #${data.orderNumber}`, html });
-  } catch {}
+    const result = await sendEmail({ to: data.customerEmail, subject: `${config.title} — Order #${data.orderNumber}`, html });
+    if (!result.success) console.error('Order status email failed:', result.error);
+  } catch (err) {
+    console.error('Order status email error:', err);
+  }
 }
 
 // ============================================

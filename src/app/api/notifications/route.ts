@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Try to send a subscription confirmation email (non-blocking for response)
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+    const baseUrl = request.headers.get('origin') || process.env.NEXTAUTH_URL || 'http://localhost:3000';
     const productUrl = `${baseUrl}/shop-details/${product.slug}`;
     const template = emailTemplates.subscriptionConfirm(product.title, productUrl);
     sendEmail({

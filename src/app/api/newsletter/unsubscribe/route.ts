@@ -6,7 +6,7 @@ export async function GET(request: Request) {
   const email = searchParams.get("email");
 
   if (!email) {
-    return new Response(unsubscribePage("Invalid unsubscribe link."), {
+    return new Response(unsubscribePage("Invalid unsubscribe link.", request.url), {
       headers: { "Content-Type": "text/html" },
       status: 400,
     });
@@ -22,19 +22,22 @@ export async function GET(request: Request) {
     });
 
     return new Response(
-      unsubscribePage("You've been successfully unsubscribed from the Kosvana newsletter."),
+      unsubscribePage("You've been successfully unsubscribed from the Kosvana newsletter.", request.url),
       { headers: { "Content-Type": "text/html" } }
     );
   } catch {
     return new Response(
-      unsubscribePage("This email is not subscribed to our newsletter."),
+      unsubscribePage("This email is not subscribed to our newsletter.", request.url),
       { headers: { "Content-Type": "text/html" }, status: 404 }
     );
   }
 }
 
-function unsubscribePage(message: string): string {
-  const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+function unsubscribePage(message: string, requestUrl?: string): string {
+  let baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+  if (requestUrl) {
+    try { const u = new URL(requestUrl); baseUrl = u.origin; } catch {}
+  }
   return `
     <!DOCTYPE html>
     <html>
