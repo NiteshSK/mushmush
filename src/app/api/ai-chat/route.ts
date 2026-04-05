@@ -37,58 +37,39 @@ export async function POST(req: Request) {
                 .join(" ") || "";
         }
 
-        // Extract meaningful keywords from the query
-        // Remove common words and punctuation to improve search accuracy
-        const stopWords = ['what', 'is', 'the', 'a', 'an', 'of', 'for', 'in', 'on', 'at', 'to', 'price', '?', '!', '.'];
-        const keywords = lastUserMessage
+        // Extract meaningful keywords for DB search
+        const stopWords = new Set(['what', 'is', 'the', 'a', 'an', 'of', 'for', 'in', 'on', 'at', 'to', 'do', 'you', 'have', 'any', 'can', 'i', 'get', 'me', 'tell', 'about', 'how', 'much', 'price', 'cost']);
+        const keywordList = lastUserMessage
             .toLowerCase()
+            .replace(/[?!.,;:'"]/g, '')
             .split(/\s+/)
-            .filter(word => word.length > 2 && !stopWords.includes(word))
-            .join(' ');
+            .filter((word: string) => word.length > 2 && !stopWords.has(word));
 
-        // Use both the full message and extracted keywords for better matching
-        const searchTerms = keywords || lastUserMessage;
+        // Build OR conditions for each keyword (matches any keyword in title or description)
+        const buildSearch = (titleField: string, descField: string) => {
+            if (keywordList.length === 0) return {};
+            return {
+                OR: keywordList.flatMap((kw: string) => [
+                    { [titleField]: { contains: kw, mode: "insensitive" as const } },
+                    { [descField]: { contains: kw, mode: "insensitive" as const } },
+                ]),
+            };
+        };
 
-        // Search for relevant context in the DB
+        // Search for relevant context in the DB — each keyword matched independently
         const [products, programs, blogs, news, featured, banners] = await Promise.all([
-            prisma.product.findMany({
-                where: {
-                    OR: [
-                        { title: { contains: searchTerms, mode: "insensitive" } },
-                        { description: { contains: searchTerms, mode: "insensitive" } },
-                    ],
-                },
-                take: 3,
-            }),
-            prisma.trainingProgram.findMany({
-                where: {
-                    OR: [
-                        { name: { contains: searchTerms, mode: "insensitive" } },
-                        { description: { contains: searchTerms, mode: "insensitive" } },
-                    ],
-                },
-                take: 2,
-            }),
-            prisma.blogPost.findMany({
-                where: {
-                    OR: [
-                        { title: { contains: searchTerms, mode: "insensitive" } },
-                        { content: { contains: searchTerms, mode: "insensitive" } },
-                    ],
-                    published: true,
-                },
-                take: 2,
-            }),
-            prisma.news.findMany({
-                where: {
-                    OR: [
-                        { title: { contains: searchTerms, mode: "insensitive" } },
-                        { content: { contains: searchTerms, mode: "insensitive" } },
-                    ],
-                    published: true,
-                },
-                take: 2,
-            }),
+            keywordList.length > 0
+                ? prisma.product.findMany({ where: buildSearch('title', 'description'), take: 5 })
+                : prisma.product.findMany({ take: 5 }),
+            keywordList.length > 0
+                ? prisma.trainingProgram.findMany({ where: buildSearch('name', 'description'), take: 3 })
+                : Promise.resolve([]),
+            keywordList.length > 0
+                ? prisma.blogPost.findMany({ where: { ...buildSearch('title', 'content'), published: true }, take: 3 })
+                : Promise.resolve([]),
+            keywordList.length > 0
+                ? prisma.news.findMany({ where: { ...buildSearch('title', 'content'), published: true }, take: 3 })
+                : Promise.resolve([]),
             prisma.product.findMany({
                 where: { featured: true },
                 take: 3,
