@@ -128,8 +128,8 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: "jwt" as const,
-    maxAge: 24 * 60 * 60, // 24 hours
-    updateAge: 60 * 60, // Refresh session token every 1 hour
+    maxAge: 15 * 60, // 15 minutes — auto logout after inactivity
+    updateAge: 0, // Refresh on every request (keeps session alive while user is active)
   },
   cookies: {
     sessionToken: {
