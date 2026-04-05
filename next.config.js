@@ -5,6 +5,15 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['swiper']
   },
+  async redirects() {
+    return [
+      {
+        source: '/about',
+        destination: '/about-us',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

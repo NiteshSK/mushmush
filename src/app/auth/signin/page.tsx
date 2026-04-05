@@ -1,7 +1,7 @@
 "use client";
-import { signIn, getSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { validateEmail } from "@/lib/validation";
@@ -11,14 +11,16 @@ export default function SignIn() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState<{ email?: string; password?: string; form?: string }>({});
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { data: session, status } = useSession();
 
   useEffect(() => {
-    getSession().then((session) => {
-      if (session) {
-        router.push("/");
-      }
-    });
-  }, [router]);
+    // Only redirect if fully authenticated (not during loading)
+    if (status === 'authenticated' && session) {
+      const callbackUrl = searchParams.get('callbackUrl') || '/';
+      router.replace(callbackUrl);
+    }
+  }, [status, session, router, searchParams]);
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
