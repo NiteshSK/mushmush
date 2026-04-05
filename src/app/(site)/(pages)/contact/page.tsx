@@ -85,8 +85,8 @@ export default function ContactPage() {
             <div className="lg:col-span-2 space-y-8">
               <div>
                 <p className="text-xs font-medium uppercase tracking-wider text-gray-400 mb-3">Email</p>
-                <a href="mailto:mushagroprod@gmail.com" className="text-sm text-dark hover:text-forest transition-colors">
-                  mushagroprod@gmail.com
+                <a href="mailto:concierge@kosvana.com" className="text-sm text-dark hover:text-forest transition-colors">
+                  concierge@kosvana.com
                 </a>
               </div>
 

@@ -9,7 +9,7 @@ import { LoadingProvider } from "../context/LoadingContext";
 import { Toaster } from "react-hot-toast";
 import { CartModalProvider } from "../context/CartSidebarModalContext";
 import { PreviewSliderProvider } from "../context/PreviewSliderContext";
-import PreviewSliderModal from "@/components/Common/PreviewSlider";
+import { PreviewSliderModal } from "@/components/PreviewSliderModal";
 import QuickViewModal from "@/components/Common/QuickViewModal";
 import CartSidebarModal from "@/components/Common/CartSidebarModal";
 import ScrollToTop from "@/components/Common/ScrollToTop";

@@ -38,7 +38,7 @@ export async function PUT(
     }
 
     // Validate status
-    const validStatuses = ['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'COMPLETED', 'CANCELLED'];
+    const validStatuses = ['PENDING', 'PAYMENT_RECEIVED', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'COMPLETED', 'CANCELLED'];
     if (!validStatuses.includes(status)) {
       return NextResponse.json(
         { error: `Invalid status value: ${status}. Valid statuses are: ${validStatuses.join(', ')}` },
@@ -52,7 +52,7 @@ export async function PUT(
       select: { status: true },
     });
 
-    const stockWasDeducted = ['CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'COMPLETED'].includes(currentOrder?.status || '');
+    const stockWasDeducted = ['PAYMENT_RECEIVED', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'COMPLETED'].includes(currentOrder?.status || '');
     const isCancelling = status === 'CANCELLED';
 
     // Update order status
@@ -90,22 +90,40 @@ export async function PUT(
       }
     }
 
-    // Send status change email to customer
-    try {
-      const { sendOrderStatusEmail } = await import('@/lib/email');
-      await sendOrderStatusEmail({
-        customerName: order.customerName,
-        customerEmail: order.customerEmail,
-        orderNumber: order.orderNumber,
-        status,
-        total: order.total,
-      });
-    } catch {
-      // Don't fail status update if email fails
-    }
+    // Fire emails in background — don't block the API response
+    const sendEmails = async () => {
+      try {
+        const { sendOrderStatusEmail, sendEmail, getOrderEmails } = await import('@/lib/email');
+        await sendOrderStatusEmail({
+          customerName: order.customerName,
+          customerEmail: order.customerEmail,
+          orderNumber: order.orderNumber,
+          status,
+          total: order.total,
+        });
+        const orderRecipients = getOrderEmails();
+        if (orderRecipients.length > 0) {
+          await sendEmail({
+            to: orderRecipients,
+            subject: `Order ${order.orderNumber} — Status changed to ${status}`,
+            html: `<div style="font-family:sans-serif;max-width:500px">
+              <h2 style="color:#5c8e61">Order Status Update</h2>
+              <p><strong>Order:</strong> ${order.orderNumber}</p>
+              <p><strong>Customer:</strong> ${order.customerName} (${order.customerEmail})</p>
+              <p><strong>New Status:</strong> ${status}</p>
+              <p><strong>Total:</strong> Rs. ${order.total.toFixed(2)}</p>
+              <p style="color:#888;font-size:12px;margin-top:20px">This is an automated notification from Kosvana admin.</p>
+            </div>`,
+            text: `Order ${order.orderNumber} status changed to ${status}. Customer: ${order.customerName}. Total: Rs. ${order.total.toFixed(2)}`,
+          });
+        }
+      } catch (emailErr) {
+        console.error('Email send error (non-blocking):', emailErr);
+      }
+    };
 
-    // If COMPLETED, also generate invoice and send it
-    if (status === 'COMPLETED') {
+    // Fire invoice + email in background for COMPLETED status
+    const sendInvoice = async () => {
       try {
         const invoice = await generateInvoice(order.id);
 
@@ -117,7 +135,6 @@ export async function PUT(
           }
         }
 
-        // Fetch coupon code if present
         let couponCode: string | null = null;
         if (order.couponId) {
           const coupon = await prisma.coupon.findUnique({ where: { id: order.couponId }, select: { code: true } });
@@ -148,22 +165,15 @@ export async function PUT(
 
         await sendOrderInvoiceEmail(emailData);
         await markInvoiceEmailSent(invoice.id);
-
-        return NextResponse.json({
-          success: true,
-          message: 'Order completed. Invoice generated and emails sent.',
-          order,
-          invoice: { id: invoice.id, invoiceNumber: invoice.invoiceNumber, pdfPath: invoice.pdfPath }
-        });
-      } catch (invoiceError) {
-        console.error('Invoice/email error:', invoiceError);
-        return NextResponse.json({
-          success: true,
-          message: 'Order completed, but invoice generation failed.',
-          order,
-          warning: 'Invoice generation or email delivery failed.'
-        });
+      } catch (invoiceErr) {
+        console.error('Invoice/email error (non-blocking):', invoiceErr);
       }
+    };
+
+    // Don't await — let them run in the background
+    sendEmails();
+    if (status === 'COMPLETED') {
+      sendInvoice();
     }
 
     return NextResponse.json({

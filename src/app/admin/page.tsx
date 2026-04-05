@@ -31,20 +31,30 @@ const AdminDashboardContent: React.FC = () => {
 
   const fetchDashboardStats = async () => {
     try {
-      const response = await fetch('/api/admin/products');
-      if (response.ok) {
-        const products = await response.json();
-        setStats({
-          totalProducts: products.length,
-          inStockProducts: products.filter((p: any) => p.inStock).length,
-          outOfStockProducts: products.filter((p: any) => !p.inStock).length,
-          productsWithDiscounts: products.filter((p: any) => p.hasActiveDiscount).length,
-          totalOrders: 0, // TODO: Implement when orders API is ready
-          totalUsers: 0, // TODO: Implement when users API is ready
-        });
-      }
-    } catch (error) {
-      console.error('Error fetching dashboard stats:', error);
+      const [productsRes, ordersRes, usersRes] = await Promise.allSettled([
+        fetch('/api/admin/products'),
+        fetch('/api/orders?limit=1'),
+        fetch('/api/admin/users'),
+      ]);
+
+      const products = productsRes.status === 'fulfilled' && productsRes.value.ok
+        ? await productsRes.value.json() : [];
+      const ordersData = ordersRes.status === 'fulfilled' && ordersRes.value.ok
+        ? await ordersRes.value.json() : { pagination: { total: 0 } };
+      const usersData = usersRes.status === 'fulfilled' && usersRes.value.ok
+        ? await usersRes.value.json() : [];
+
+      const productList = Array.isArray(products) ? products : [];
+      setStats({
+        totalProducts: productList.length,
+        inStockProducts: productList.filter((p: any) => p.inStock).length,
+        outOfStockProducts: productList.filter((p: any) => !p.inStock).length,
+        productsWithDiscounts: productList.filter((p: any) => p.hasActiveDiscount).length,
+        totalOrders: ordersData.pagination?.total ?? 0,
+        totalUsers: Array.isArray(usersData) ? usersData.length : (usersData.users?.length ?? 0),
+      });
+    } catch {
+      // Dashboard stats are best-effort
     } finally {
       setLoading(false);
     }

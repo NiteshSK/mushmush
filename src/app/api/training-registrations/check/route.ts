@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
         userId: session.user.id,
         trainingProgramId: parseInt(programId),
         status: {
-          in: ['PENDING', 'CONFIRMED', 'IN_PROGRESS']
+          in: ['PENDING', 'PAYMENT_RECEIVED', 'CONFIRMED', 'IN_PROGRESS']
         }
       },
       include: {

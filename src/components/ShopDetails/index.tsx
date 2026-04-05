@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
 import Image from "next/image";
 import Newsletter from "../Common/Newsletter";
+import { sanitizeHtml } from "@/lib/sanitize";
 import RecentlyViewdItems from "./RecentlyViewd";
 import NotifyMeModal from "../NotifyMeModal";
 import { usePreviewSlider } from "@/app/context/PreviewSliderContext";
@@ -377,14 +378,6 @@ const ShopDetails = () => {
     }
   }, [product?.id, product?.title, addToRecentlyViewed]);
 
-  const handlePreviewSlider = () => {
-    if (displayProduct && displayProduct.imgs && displayProduct.imgs.previews) {
-      openPreviewModal({
-        title: displayProduct.title,
-        imgs: displayProduct.imgs,
-      });
-    }
-  };
   return (
     <>
       <Breadcrumb title={displayProduct?.title || "Shop Details"} pages={["shop", "details"]} />
@@ -395,22 +388,31 @@ const ShopDetails = () => {
         </div>
       ) : (
         <>
-          <section className="py-12 sm:py-16">
+          <section className="py-10 sm:py-14 bg-gray-50">
             <div className="max-w-[1200px] w-full mx-auto px-4 sm:px-6 xl:px-0">
-              <div className="flex flex-col lg:flex-row gap-7.5 xl:gap-17.5">
-                <div className="lg:max-w-[570px] w-full">
-                  <div className="lg:min-h-[512px] rounded-2xl bg-cream p-6 sm:p-8 relative flex items-center justify-center">
+              <div className="flex flex-col lg:flex-row gap-6">
+                {/* Left — Image card */}
+                <div className="lg:max-w-[520px] w-full bg-white rounded-2xl border border-gray-100 p-5 sm:p-6">
+                  <div className="lg:min-h-[450px] rounded-xl bg-gray-50 p-6 sm:p-8 relative flex items-center justify-center">
                     {!displayProduct.inStock && (
                       <div className="sold-out-overlay sold-out-lg"><span>Sold Out</span></div>
                     )}
+                    {/* Preview / zoom button */}
+                    <button
+                      onClick={() => {
+                        if (displayProduct?.imgs?.previews) {
+                          openPreviewModal({ title: displayProduct.title, imgs: displayProduct.imgs });
+                        }
+                      }}
+                      aria-label="View full image"
+                      className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center text-gray-400 hover:text-forest hover:border-forest transition-all duration-200"
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    </button>
                     <div className="relative">
-                      <button
-                        onClick={handlePreviewSlider}
-                        aria-label="button for zoom"
-                        className="gallery__Image w-11 h-11 rounded-full bg-white/80 backdrop-blur-sm shadow-sm flex items-center justify-center ease-out duration-200 text-dark hover:text-forest absolute top-4 lg:top-6 right-4 lg:right-6 z-50"
-                      >
-                        <svg className="fill-current" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M9.11493 1.14581L9.16665 1.14581C9.54634 1.14581 9.85415 1.45362 9.85415 1.83331C9.85415 2.21301 9.54634 2.52081 9.16665 2.52081C7.41873 2.52081 6.17695 2.52227 5.23492 2.64893C4.31268 2.77292 3.78133 3.00545 3.39339 3.39339C3.00545 3.78133 2.77292 4.31268 2.64893 5.23492C2.52227 6.17695 2.52081 7.41873 2.52081 9.16665C2.52081 9.54634 2.21301 9.85415 1.83331 9.85415C1.45362 9.85415 1.14581 9.54634 1.14581 9.16665L1.14581 9.11493C1.1458 7.43032 1.14579 6.09599 1.28619 5.05171C1.43068 3.97699 1.73512 3.10712 2.42112 2.42112C3.10712 1.73512 3.97699 1.43068 5.05171 1.28619C6.09599 1.14579 7.43032 1.1458 9.11493 1.14581ZM16.765 2.64893C15.823 2.52227 14.5812 2.52081 12.8333 2.52081C12.4536 2.52081 12.1458 2.21301 12.1458 1.83331C12.1458 1.45362 12.4536 1.14581 12.8333 1.14581L12.885 1.14581C14.5696 1.1458 15.904 1.14579 16.9483 1.28619C18.023 1.43068 18.8928 1.73512 19.5788 2.42112C20.2648 3.10712 20.5693 3.97699 20.7138 5.05171C20.8542 6.09599 20.8542 7.43032 20.8541 9.11494V9.16665C20.8541 9.54634 20.5463 9.85415 20.1666 9.85415C19.787 9.85415 19.4791 9.54634 19.4791 9.16665C19.4791 7.41873 19.4777 6.17695 19.351 5.23492C19.227 4.31268 18.9945 3.78133 18.6066 3.39339C18.2186 3.00545 17.6873 2.77292 16.765 2.64893ZM1.83331 12.1458C2.21301 12.1458 2.52081 12.4536 2.52081 12.8333C2.52081 14.5812 2.52227 15.823 2.64893 16.765C2.77292 17.6873 3.00545 18.2186 3.39339 18.6066C3.78133 18.9945 4.31268 19.227 5.23492 19.351C6.17695 19.4777 7.41873 19.4791 9.16665 19.4791C9.54634 19.4791 9.85415 19.787 9.85415 20.1666C9.85415 20.5463 9.54634 20.8541 9.16665 20.8541H9.11494C7.43032 20.8542 6.09599 20.8542 5.05171 20.7138C3.97699 20.5693 3.10712 20.2648 2.42112 19.5788C1.73512 18.8928 1.43068 18.023 1.28619 16.9483C1.14579 15.904 1.1458 14.5696 1.14581 12.885L1.14581 12.8333C1.14581 12.4536 1.45362 12.1458 1.83331 12.1458ZM20.1666 12.1458C20.5463 12.1458 20.8541 12.4536 20.8541 12.8333V12.885C20.8542 14.5696 20.8542 15.904 20.7138 16.9483C20.5693 18.023 20.2648 18.8928 19.5788 19.5788C18.8928 20.2648 18.023 20.5693 16.9483 20.7138C15.904 20.8542 14.5696 20.8542 12.885 20.8541H12.8333C12.4536 20.8541 12.1458 20.5463 12.1458 20.1666C12.1458 19.787 12.4536 19.4791 12.8333 19.4791C14.5812 19.4791 15.823 19.4777 16.765 19.351C17.6873 19.227 18.2186 18.9945 18.6066 18.6066C18.9945 18.2186 19.227 17.6873 19.351 16.765C19.4777 15.823 19.4791 14.5812 19.4791 12.8333C19.4791 12.4536 19.787 12.1458 20.1666 12.1458ZM1.83331 16.765C2.21301 16.765 2.52081 17.0744 2.52081 17.4541C2.52081 19.2023 2.52227 20.4445 2.64893 21.3867C2.77292 22.4098 3.00545 23.0407 3.39339 23.4287C3.78133 23.8167 4.31268 24.0495 5.23492 24.1736C6.17695 24.3007 7.41873 24.3021 9.16665 24.3021C9.54634 24.3021 9.85415 24.61 9.85415 24.9907C9.85415 25.3714 9.54634 25.6738 9.16665 25.6738H9.11494C7.43032 25.6739 6.09599 25.6739 5.05171 25.5338C3.97699 25.3893 3.10712 25.0848 2.42112 24.3988C1.73512 23.7128 1.43068 23.043 1.28619 21.9683C1.14579 20.924 1.1458 19.5896 1.14581 17.885L1.14581 17.8333C1.14581 17.4536 1.45362 17.1458 1.83331 17.1458ZM20.1666 17.1458C20.5463 17.1458 20.8541 17.4536 20.8541 17.8333V17.885C20.8542 19.5896 20.8542 20.924 20.7138 21.9683C20.5693 23.043 20.2648 23.7128 19.5788 24.3988C18.8928 25.0848 18.023 25.3893 16.9483 25.5338C15.904 25.6739 14.5696 25.6739 12.885 25.6738H12.8333C12.4536 25.6738 12.1458 25.3714 12.1458 24.9907C12.1458 24.61 12.4536 24.3021 12.8333 24.3021C14.5812 24.3021 15.823 24.3007 16.765 24.1736C17.6873 24.0495 18.2186 23.8167 18.6066 23.4287C18.9945 23.0407 19.227 22.4098 19.351 21.3867C19.4777 20.4445 19.4791 19.2023 19.4791 17.4541C19.4791 17.0744 19.787 16.765 20.1666 16.765ZM1.83331 16.765C2.21301 16.765 2.52081 17.0744 2.52081 17.4541C2.52081 19.2023 2.52227 20.4445 2.64893 21.3867C2.77292 22.4098 3.00545 23.0407 3.39339 23.4287C3.78133 23.8167 4.31268 24.0495 5.23492 24.1736C6.17695 24.3007 7.41873 24.3021 9.16665 24.3021C9.54634 24.3021 9.85415 24.61 9.85415 24.9907C9.85415 25.3714 9.54634 25.6738 9.16665 25.6738H9.11494C7.43032 25.6739 6.09599 25.6739 5.05171 25.5338C3.97699 25.3893 3.10712 25.0848 2.42112 24.3988C1.73512 23.7128 1.43068 23.043 1.28619 21.9683C1.14579 20.924 1.1458 19.5896 1.14581 17.885L1.14581 17.8333C1.14581 17.4536 1.45362 17.1458 1.83331 17.1458ZM20.1666 17.1458C20.5463 17.1458 20.8541 17.4536 20.8541 17.8333V17.885C20.8542 19.5896 20.8542 20.924 20.7138 21.9683C20.5693 23.043 20.2648 23.7128 19.5788 24.3988C18.8928 25.0848 18.023 25.3893 16.9483 25.5338C15.904 25.6739 14.5696 25.6739 12.885 25.6738H12.8333C12.4536 25.6738 12.1458 25.3714 12.1458 24.9907C12.1458 24.61 12.4536 24.3021 12.8333 24.3021C14.5812 24.3021 15.823 24.3007 16.765 24.1736C17.6873 24.0495 18.2186 23.8167 18.6066 23.4287C18.9945 23.0407 19.227 22.4098 19.351 21.3867C19.4777 20.4445 19.4791 19.2023 19.4791 17.4541C19.4791 17.0744 19.787 16.765 20.1666 16.765ZM1.83331 16.765C2.21301 16.765 2.52081 17.0744 2.52081 17.4541C2.52081 19.2023 2.52227 20.4445 2.64893 21.3867C2.77292 22.4098 3.00545 23.0407 3.39339 23.4287C3.78133 23.8167 4.31268 24.0495 5.23492 24.1736C6.17695 24.3007 7.41873 24.3021 9.16665 24.3021C9.54634 24.3021 9.85415 24.61 9.85415 24.9907C9.85415 25.3714 9.54634 25.6738 9.16665 25.6738H9.11494C7.43032 25.6739 6.09599 25.6739 5.05171 25.5338C3.97699 25.3893 3.10712 25.0848 2.42112 24.3988C1.73512 23.7128 1.43068 23.043 1.28619 21.9683C1.14579 20.924 1.1458 19.5896 1.14581 17.885L1.14581 17.8333C1.14581 17.4536 1.45362 17.1458 1.83331 17.1458ZM20.1666 17.1458C20.5463 17.1458 20.8541 17.4536 20.8541 17.8333V17.885C20.8542 19.5896 20.8542 20.924 20.7138 21.9683C20.5693 23.043 20.2648 23.7128 19.5788 24.3988C18.8928 25.0848 18.023 25.3893 16.9483 25.5338C15.904 25.6739 14.5696 25.6739 12.885 25.6738H12.8333C12.4536 25.6738 12.1458 25.3714 12.1458 24.9907C12.1458 24.61 12.4536 24.3021 12.8333 24.3021C14.5812 24.3021 15.823 24.3007 16.765 24.1736C17.6873 24.0495 18.2186 23.8167 18.6066 23.4287C18.9945 23.0407 19.227 22.4098 19.351 21.3867C19.4777 20.4445 19.4791 19.2023 19.4791 17.4541C19.4791 17.0744 19.787 16.765 20.1666 16.765ZM1.83331 16.765C2.21301 16.765 2.52081 17.0744 2.52081 17.4541C2.52081 19.2023 2.52227 20.4445 2.64893 21.3867C2.77292 22.4098 3.00545 23.0407 3.39339 23.4287C3.78133 23.8167 4.31268 24.0495 5.23492 24.1736C6.17695 24.3007 7.41873 24.3021 9.16665 24.3021C9.54634 24.3021 9.85415 24.61 9.85415 24.9907C9.85415 25.3714 9.54634 25.6738 9.16665 25.6738H9.11494C7.43032 25.6739 6.09599 25.6739 5.05171 25.5338C3.97699 25.3893 3.10712 25.0848 2.42112 24.3988C1.73512 23.7128 1.43068 23.043 1.28619 21.9683C1.14579 20.924 1.1458 19.5896 1.14581 17.885L1.14581 17.8333C1.14581 17.4536 1.45362 17.1458 1.83331 17.1458ZM20.1666 17.1458C20.5463 17.1458 20.8541 17.4536 20.8541 17.8333V17.885C20.8542 19.5896 20.8542 20.924 20.7138 21.9683C20.5693 23.043 20.2648 23.7128 19.5788 24.3988C18.8928 25.0848 18.023 25.3893 16.9483 25.5338C15.904 25.6739 14.5696 25.6739 12.885 25.6738H12.8333C12.4536 25.6738 12.1458 25.3714 12.1458 24.9907C12.1458 24.61 12.4536 24.3021 12.8333 24.3021C14.5812 24.3021 15.823 24.3007 16.765 24.1736C17.6873 24.0495 18.2186 23.8167 18.6066 23.4287C18.9945 23.0407 19.227 22.4098 19.351 21.3867C19.4777 20.4445 19.4791 19.2023 19.4791 17.4541C19.4791 17.0744 19.787 16.765 20.1666 16.765ZM1.83331 16.765C2.21301 16.765 2.52081 17.0744 2.52081 17.4541C2.52081 19.2023 2.52227 20.4445 2.64893 21.3867C2.77292 22.4098 3.00545 23.0407 3.39339 23.4287C3.78133 23.8167 4.31268 24.0495 5.23492 24.1736C6.17695 24.3007 7.41873 24.3021 9.16665 24.3021C9.54634 24.3021 9.85415 24.61 9.85415 24.9907C9.85415 25.3714 9.54634 25.6738 9.16665 25.6738H9.11494C7.43032 25.6739 6.09599 25.6739 5.05171 25.5338C3.97699 25.3893 3.10712 25.0848 2.42112 24.3988C1.73512 23.7128 1.43068 23.043 1.28619 21.9683C1.14579 20.924 1.1458 19.5896 1.14581 17.885L1.14581 17.8333C1.14581 17.4536 1.45362 17.1458 1.83331 17.1458ZM20.1666 17.1458C20.5463 17.1458 20.8541 17.4536 20.8541 17.8333V17.885C20.8542 19.5896 20.8542 20.924 20.7138 21.9683C20.5693 23.043 20.2648 23.7128 19.5788 24.3988C18.8928 25.0848 18.023 25.3893 16.9483 25.5338C15.904 25.6739 14.5696 25.6739 12.885 25.6738H12.8333C12.4536 25.6738 12.1458 25.3714 12.1458 24.9907C12.1458 24.61 12.4536 24.3021 12.8333 24.3021C14.5812 24.3021 15.823 24.3007 16.765 24.1736C17.6873 24.0495 18.2186 23.8167 18.6066 23.4287C18.9945 23.0407 19.227 22.4098 19.351 21.3867C19.4777 20.4445 19.4791 19.2023 19.4791 17.4541C19.4791 17.0744 19.787 16.765 20.1666 16.765Z" /></svg>
-                      </button>
                       <Image
                         className={!displayProduct.inStock ? "grayscale" : ""}
                         src={
@@ -448,7 +450,8 @@ const ShopDetails = () => {
                     ))}
                   </div>
                 </div>
-                <div className="max-w-[539px] w-full">
+                {/* Right — Product info card */}
+                <div className="flex-1 bg-white rounded-2xl border border-gray-100 p-5 sm:p-8">
                   <div className="flex items-center justify-between mb-3">
                     <h2 className="font-medium text-2xl sm:text-3xl text-dark">
                       {displayProduct.title}
@@ -486,13 +489,21 @@ const ShopDetails = () => {
                     <div className="flex items-center gap-3">
                       {displayProduct.hasDiscount ? (
                         <>
-                          <span className="font-semibold text-xl text-dark">₹{displayProduct.discountedPrice}</span>
-                          <span className="text-dark-4 line-through text-lg">₹{displayProduct.price}</span>
+                          <span className="font-semibold text-2xl text-dark">₹{displayProduct.discountedPrice}</span>
+                          <span className="text-dark-5 line-through text-base">₹{displayProduct.price}</span>
+                          <span className="text-xs font-medium text-white bg-forest px-2.5 py-1 rounded-full">
+                            Save ₹{(displayProduct.price - (displayProduct.discountedPrice || displayProduct.price)).toFixed(0)}
+                          </span>
                         </>
                       ) : (
-                        <span className="font-semibold text-xl text-dark">₹{displayProduct.price}</span>
+                        <span className="font-semibold text-2xl text-dark">₹{displayProduct.price}</span>
                       )}
                     </div>
+                    {displayProduct.hasDiscount && displayProduct.discountPercentage && (
+                      <p className="text-xs text-forest mt-1.5">
+                        Inclusive of all taxes. You save {displayProduct.discountPercentage}% on this product.
+                      </p>
+                    )}
                   </div>
 
                   <ul className="flex flex-col gap-2 mb-6">
@@ -513,14 +524,6 @@ const ShopDetails = () => {
                       </li>
                     )}
                   </ul>
-
-                  {/* --- UPDATED: Description is now fetched dynamically --- */}
-                  {displayProduct.description && (
-                    <p
-                      className="mb-8 text-dark-4"
-                      dangerouslySetInnerHTML={{ __html: displayProduct.description }}
-                    />
-                  )}
 
                   <form onSubmit={(e) => e.preventDefault()}>
                     <div className="flex flex-wrap items-center gap-4.5">
@@ -590,179 +593,149 @@ const ShopDetails = () => {
                       )}
                     </div>
                   </form>
-                </div>
-              </div>
-            </div>
-          </section>
 
-          <section className="bg-cream py-12 sm:py-16">
-            <div className="max-w-[1200px] w-full mx-auto px-4 sm:px-6 xl:px-0">
-              <div className="flex flex-wrap items-center bg-white rounded-xl gap-5 xl:gap-12.5 py-4.5 px-4 sm:px-6">
-                {tabs.map((item, key) => (
-                  <button
-                    key={key}
-                    onClick={() => setActiveTab(item.id)}
-                    className={`font-medium lg:text-lg ease-out duration-200 hover:text-forest relative before:h-0.5 before:bg-forest before:absolute before:left-0 before:bottom-0 before:ease-out before:duration-200 hover:before:w-full ${activeTab === item.id ? "text-forest before:w-full" : "text-dark before:w-0"
-                      }`}
-                  >
-                    {item.title}
-                  </button>
-                ))}
-              </div>
+                  {/* Tabs — right below buy buttons, at eye level */}
+                  <div className="mt-8 border-t border-gray-200 pt-6">
+                    <div className="flex gap-6 border-b border-gray-200">
+                      {tabs.map((item, key) => (
+                        <button
+                          key={key}
+                          onClick={() => setActiveTab(item.id)}
+                          className={`pb-3 text-sm font-medium transition-colors relative ${
+                            activeTab === item.id
+                              ? "text-forest border-b-2 border-forest -mb-[1px]"
+                              : "text-dark-5 hover:text-dark"
+                          }`}
+                        >
+                          {item.title}
+                        </button>
+                      ))}
+                    </div>
 
-              <div className={`flex-col sm:flex-row gap-7.5 xl:gap-12.5 mt-8 ${activeTab === "tabOne" ? "flex" : "hidden"}`}>
-                <div className="max-w-[670px] w-full">
-                  <h2 className="font-medium text-xl text-dark mb-7">Specifications:</h2>
-                  {displayProduct.description || displayProduct.specifications ? (
-                    <div className="space-y-4">
-                      {displayProduct.description && <p className="mb-4" dangerouslySetInnerHTML={{ __html: displayProduct.description }} />}
-                      {Array.isArray(displayProduct.specifications) && (
+                    {/* Tab: Description */}
+                    <div className={`pt-5 ${activeTab === "tabOne" ? "block" : "hidden"}`}>
+                      {displayProduct.description && (
+                        <div className="text-sm text-dark-4 leading-relaxed mb-5" dangerouslySetInnerHTML={{ __html: sanitizeHtml(displayProduct.description) }} />
+                      )}
+                      {Array.isArray(displayProduct.specifications) && displayProduct.specifications.length > 0 && (
+                        <div className="mb-5">
+                          <h4 className="text-sm font-semibold text-dark mb-2">Specifications</h4>
+                          <ul className="list-disc list-inside space-y-1 text-sm text-dark-4">
+                            {displayProduct.specifications.map((spec: string, idx: number) => (
+                              <li key={idx} dangerouslySetInnerHTML={{ __html: sanitizeHtml(spec) }} />
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {displayProduct.howToConsume?.length > 0 && (
                         <div>
-                          <h3 className="text-lg font-semibold mb-2">Processing & Potency</h3>
-                          <ul className="list-disc list-inside space-y-1">
-                            {displayProduct.specifications.map((spec, idx) => (
-                              <li key={idx} dangerouslySetInnerHTML={{ __html: spec }} />
+                          <h4 className="text-sm font-semibold text-dark mb-2">How to Consume</h4>
+                          <ul className="list-disc list-inside space-y-1 text-sm text-dark-4">
+                            {displayProduct.howToConsume.map((step: string, i: number) => (
+                              <li key={i} dangerouslySetInnerHTML={{ __html: sanitizeHtml(step) }} />
                             ))}
                           </ul>
                         </div>
                       )}
                     </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <p className="mb-4">No specifications available for this product.</p>
-                    </div>
-                  )}
-                </div>
-                <div className="max-w-[447px] w-full">
-                  <h2 className="font-medium text-xl text-dark mb-7">How to consume?</h2>
-                  <ul className="list-disc list-inside mb-6 space-y-2">
-                    {displayProduct.howToConsume?.length ? (
-                      displayProduct.howToConsume.map((step, i) => (
-                        <li key={i} dangerouslySetInnerHTML={{ __html: step }} />
-                      ))
-                    ) : (
-                      <li>No usage instructions available.</li>
-                    )}
-                  </ul>
-                </div>
-              </div>
 
-              <div className={`${activeTab === "tabTwo" ? "block" : "hidden"}`}>
-                <div className="rounded-xl bg-white p-4 sm:p-6 mt-8">
-                  {Array.isArray(displayProduct.additionalInfo) && displayProduct.additionalInfo.length ? (
-                    displayProduct.additionalInfo.map((info, idx) => (
-                      <div key={idx} className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
-                        <div className="max-w-[450px] min-w-[140px] w-full">
-                          <p className="text-sm sm:text-base text-dark">{info.label}</p>
-                        </div>
-                        <div className="w-full">
-                          <p className="text-sm sm:text-base text-dark">{info.value}</p>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="space-y-4">
-                      <p className="mb-4">No additional information available for this product.</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className={`${activeTab === "tabThree" ? "block" : "hidden"}`}>
-                <div className="flex flex-col sm:flex-row gap-7.5 xl:gap-12.5 mt-8">
-                  <div className="max-w-[570px] w-full">
-                    <h2 className="font-medium text-xl text-dark mb-9">
-                      {reviewStats.totalReviews} Review{reviewStats.totalReviews !== 1 ? "s" : ""} for this product
-                      {reviewStats.averageRating > 0 && (
-                        <span className="text-lg text-gray-600 ml-2">
-                          (Average: {reviewStats.averageRating}/5)
-                        </span>
-                      )}
-                    </h2>
-                    <div className="flex flex-col gap-6">
-                      {reviewsLoading ? (
-                        <div className="rounded-xl bg-white border border-gray-100 p-4 sm:p-6">
-                          <p>Loading reviews...</p>
-                        </div>
-                      ) : reviews && reviews.length ? (
-                        reviews.map((review, idx) => (
-                          <div key={idx} className="rounded-xl bg-white border border-gray-100 p-4 sm:p-6">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-4">
-                                <div className="w-12.5 h-12.5 rounded-full overflow-hidden bg-gray-2 flex items-center justify-center">
-                                  <span className="text-lg font-medium text-dark">
-                                    {review.user?.name?.charAt(0)?.toUpperCase() || 'U'}
-                                  </span>
-                                </div>
-                                <div>
-                                  <h3 className="font-medium text-dark">{review.user?.name || 'Anonymous'}</h3>
-                                  <p className="text-custom-sm text-gray-500">
-                                    {new Date(review.createdAt).toLocaleDateString()}
-                                  </p>
-                                </div>
-                              </div>
-                              <StarRating rating={typeof review.rating === 'number' ? review.rating : 0} size={15} />
+                    {/* Tab: Additional Info */}
+                    <div className={`pt-5 ${activeTab === "tabTwo" ? "block" : "hidden"}`}>
+                      {Array.isArray(displayProduct.additionalInfo) && displayProduct.additionalInfo.length > 0 ? (
+                        <div className="divide-y divide-gray-100">
+                          {displayProduct.additionalInfo.map((info: { label: string; value: string }, idx: number) => (
+                            <div key={idx} className="flex py-3 text-sm">
+                              <span className="w-[140px] flex-shrink-0 text-dark-5 font-medium">{info.label}</span>
+                              <span className="text-dark">{info.value}</span>
                             </div>
-                            {review.comment && (
-                              <p className="text-dark mt-6">{review.comment}</p>
-                            )}
-                          </div>
-                        ))
-                      ) : (
-                        <div className="rounded-xl bg-white border border-gray-100 p-4 sm:p-6">
-                          <p>No reviews yet for this product.</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="max-w-[550px] w-full">
-                    <form onSubmit={handleReviewSubmit}>
-                      <h2 className="font-medium text-xl text-dark mb-3.5">Add a Review</h2>
-                      <p className="mb-6">Please sign in to submit a review. Required fields are marked *</p>
-                      <div className="flex items-center gap-3 mb-7.5">
-                        <span>Your Rating*</span>
-                        <div className="flex items-center gap-1">
-                          {[...Array(5)].map((_, i) => (
-                            <button
-                              key={i}
-                              type="button"
-                              onClick={() => setRating(i + 1)}
-                              className={`cursor-pointer ${i < rating ? "text-[#FBB040]" : "text-gray-5"}`}
-                            >
-                              <svg className="fill-current" width="15" height="16" viewBox="0 0 15 16" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M14.6604 5.90785L9.97461 5.18335L7.85178 0.732874C7.69645 0.422375 7.28224 0.422375 7.12691 0.732874L5.00407 5.20923L0.344191 5.90785C0.0076444 5.9596 -0.121797 6.39947 0.137085 6.63235L3.52844 10.1255L2.72591 15.0158C2.67413 15.3522 3.01068 15.6368 3.32134 15.4298L7.54112 13.1269L11.735 15.4298C12.0198 15.5851 12.3822 15.3263 12.3046 15.0158L11.502 10.1255L14.8934 6.63235C15.1005 6.39947 14.9969 5.9596 14.6604 5.90785Z" />
-                              </svg>
-                            </button>
                           ))}
                         </div>
-                      </div>
-                      <div className="rounded-xl bg-white border border-gray-100 p-4 sm:p-6">
-                        <div className="mb-5">
-                          <label htmlFor="comments" className="block mb-2.5">Comments</label>
+                      ) : (
+                        <p className="text-sm text-dark-5">No additional information available.</p>
+                      )}
+                    </div>
+
+                    {/* Tab: Reviews */}
+                    <div className={`pt-5 ${activeTab === "tabThree" ? "block" : "hidden"}`}>
+                      {/* Rating summary */}
+                      {reviewStats.totalReviews > 0 && (
+                        <div className="flex items-center gap-4 mb-6 pb-5 border-b border-gray-100">
+                          <div className="flex items-center gap-1.5 bg-forest text-white text-lg font-semibold px-3 py-1.5 rounded-lg">
+                            {reviewStats.averageRating.toFixed(1)}
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-dark">{reviewStats.totalReviews} Rating{reviewStats.totalReviews !== 1 ? "s" : ""} & Review{reviewStats.totalReviews !== 1 ? "s" : ""}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Review list — compact cards */}
+                      {reviewsLoading ? (
+                        <p className="text-sm text-dark-5 py-4">Loading reviews...</p>
+                      ) : reviews && reviews.length > 0 ? (
+                        <div className="divide-y divide-gray-100">
+                          {reviews.map((review: any, idx: number) => (
+                            <div key={idx} className="py-4 first:pt-0">
+                              <div className="flex items-center gap-3 mb-2">
+                                <div className="flex items-center gap-1 bg-forest text-white text-xs font-semibold px-1.5 py-0.5 rounded">
+                                  {review.rating}
+                                  <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
+                                </div>
+                                <span className="text-sm font-medium text-dark">{review.user?.name || "Anonymous"}</span>
+                                <span className="text-xs text-dark-5">{new Date(review.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</span>
+                              </div>
+                              {review.comment && (
+                                <p className="text-sm text-dark-4 leading-relaxed">{review.comment}</p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-dark-5 py-4">No reviews yet. Be the first to review!</p>
+                      )}
+
+                      {/* Write a review — compact form */}
+                      <div className="mt-6 pt-5 border-t border-gray-100">
+                        <form onSubmit={handleReviewSubmit}>
+                          <h4 className="text-sm font-semibold text-dark mb-3">Write a Review</h4>
+                          <div className="flex items-center gap-3 mb-3">
+                            <span className="text-xs text-dark-5">Your rating:</span>
+                            <div className="flex items-center gap-0.5">
+                              {[...Array(5)].map((_, i) => (
+                                <button
+                                  key={i}
+                                  type="button"
+                                  onClick={() => setRating(i + 1)}
+                                  className={`${i < rating ? "text-[#FBB040]" : "text-gray-300"}`}
+                                >
+                                  <svg className="fill-current" width="16" height="16" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
                           <textarea
                             name="comments"
-                            id="comments"
-                            rows={5}
-                            placeholder="Your comments"
+                            rows={3}
+                            placeholder="Share your experience with this product..."
                             value={comment}
                             onChange={(e) => { if (e.target.value.length <= 250) setComment(e.target.value); }}
                             maxLength={250}
-                            className={`rounded-xl border bg-white placeholder:text-gray-400 w-full p-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20 focus:border-forest ${comment.length >= 250 ? 'border-amber-400' : 'border-gray-200'}`}
+                            className="rounded-lg border border-gray-200 bg-gray-1 placeholder:text-dark-5 w-full p-3 text-sm outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20 mb-2"
                           />
-                          <span className="flex items-center justify-between mt-2.5">
-                            <span className="text-custom-sm text-dark-4">Maximum 250 characters</span>
-                            <span className="text-custom-sm text-dark-4">{comment.length}/250</span>
-                          </span>
-                        </div>
-                        <button
-                          type="submit"
-                          disabled={isSubmittingReview}
-                          className="inline-flex font-medium text-white bg-forest py-3 px-8 rounded-full transition-colors duration-300 hover:bg-dark disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {isSubmittingReview ? "Submitting..." : "Submit Review"}
-                        </button>
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] text-dark-5">{comment.length}/250</span>
+                            <button
+                              type="submit"
+                              disabled={isSubmittingReview}
+                              className="text-sm font-medium text-white bg-forest py-2 px-6 rounded-full hover:bg-dark transition-colors disabled:opacity-50"
+                            >
+                              {isSubmittingReview ? "Submitting..." : "Submit"}
+                            </button>
+                          </div>
+                        </form>
                       </div>
-                    </form>
+                    </div>
                   </div>
                 </div>
               </div>

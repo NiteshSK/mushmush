@@ -104,11 +104,11 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    // Update registration status to confirmed
+    // Update registration status to payment received (awaiting admin verification)
     const updatedRegistration = await prisma.trainingRegistration.update({
       where: { id: registrationId },
       data: {
-        status: 'CONFIRMED'
+        status: 'PAYMENT_RECEIVED'
       },
       include: {
         trainingProgram: true,

@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import AdminAuthWrapper from '@/components/Admin/AdminAuthWrapper';
 
 interface Product {
   id: number;
@@ -402,4 +403,6 @@ const DiscountsPage: React.FC = () => {
   );
 };
 
-export default DiscountsPage;
+export default function ProtectedDiscountsPage() {
+  return <AdminAuthWrapper><DiscountsPage /></AdminAuthWrapper>;
+}

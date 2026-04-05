@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sendEmail } from '@/lib/email';
+import { sendEmail, getConciergeEmails } from '@/lib/email';
 import { rateLimit } from '@/lib/rate-limit';
 
 /** Escape HTML special characters to prevent injection */
@@ -128,9 +128,9 @@ Sent on: ${new Date().toLocaleString('en-US', {
 })}
     `;
 
-    // Send email to mushagroprod@gmail.com
+    // Send email to concierge + admin
     const emailResult = await sendEmail({
-      to: 'mushagroprod@gmail.com',
+      to: getConciergeEmails(),
       subject: `Contact Form: ${safeSubject}`,
       html: emailHtml,
       text: emailText

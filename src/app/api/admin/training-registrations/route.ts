@@ -26,7 +26,10 @@ export async function GET(request: NextRequest) {
     }
     
     if (status) {
-      whereClause.status = status;
+      const validStatuses = ['PENDING', 'PAYMENT_RECEIVED', 'CONFIRMED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'];
+      if (validStatuses.includes(status)) {
+        whereClause.status = status;
+      }
     }
 
     const registrations = await prisma.trainingRegistration.findMany({

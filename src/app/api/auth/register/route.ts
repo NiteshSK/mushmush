@@ -1,11 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { hash } from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
-import { sendEmail, emailTemplates } from '@/lib/email';
+import { sendEmail, emailTemplates, getConciergeEmails } from '@/lib/email';
 import { validatePasswordPolicy } from '@/lib/validation';
+import { rateLimit } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: 5 registrations per IP per hour
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    const rl = rateLimit(`register:${ip}`, { max: 5, windowSeconds: 3600 });
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: 'Too many registration attempts. Please try again later.' },
+        { status: 429 }
+      );
+    }
+
     const { name, email, password, phone } = await request.json();
 
     // Validate input
@@ -67,13 +78,13 @@ export async function POST(request: NextRequest) {
       // Don't fail registration if email fails
     }
 
-    // Send admin notification
+    // Send admin + concierge notification
     try {
-      const adminEmail = process.env.ADMIN_EMAIL;
-      if (adminEmail) {
+      const recipients = getConciergeEmails();
+      if (recipients.length > 0) {
         const adminNotification = emailTemplates.newUserSignup(name, email, user.createdAt);
         await sendEmail({
-          to: adminEmail,
+          to: recipients,
           subject: adminNotification.subject,
           html: adminNotification.html,
           text: adminNotification.text,

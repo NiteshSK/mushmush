@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useModalContext } from "@/app/context/QuickViewModalContext";
 import { AppDispatch, useAppSelector } from "@/redux/store";
 import { addItemToCart } from "@/redux/features/cart-slice";
+import { sanitizeHtml } from "@/lib/sanitize";
 import { useDispatch } from "react-redux";
 import Image from "next/image";
 import { usePreviewSlider } from "@/app/context/PreviewSliderContext";
@@ -135,7 +136,7 @@ const QuickViewModal = () => {
               <p
                 className="text-sm text-gray-500 leading-relaxed mb-6"
                 dangerouslySetInnerHTML={{
-                  __html: product.description?.substring(0, 150) + "..."
+                  __html: sanitizeHtml(product.description?.substring(0, 150) + "...")
                 }}
               />
             )}

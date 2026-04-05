@@ -110,7 +110,7 @@ export async function generateInvoicePDF(data: InvoiceData, userId?: string): Pr
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7.5);
   doc.setTextColor(...GRAY);
-  doc.text('mushagroprod@gmail.com | +91-7618362662', pageW - marginR, y + 12, { align: 'right' });
+  doc.text('concierge@kosvana.com | +91-7618362662', pageW - marginR, y + 12, { align: 'right' });
   doc.text('NH 507, Herbertpur, Dehradun 248142', pageW - marginR, y + 17, { align: 'right' });
 
   // Divider
@@ -119,96 +119,131 @@ export async function generateInvoicePDF(data: InvoiceData, userId?: string): Pr
   doc.setLineWidth(0.5);
   doc.line(marginL, y, pageW - marginR, y);
 
-  // ─── INVOICE META ────────────────────────────────────────────────────
-  y = 50;
+  // ─── INVOICE META + PAYMENT — side by side ────────────────────────────
+  y = 48;
   const invoiceNumber = generateInvoiceNumber();
-
   const orderDate = new Date(data.orderDate);
-  const formattedDate = orderDate.toLocaleDateString('en-IN', {
-    year: 'numeric', month: 'long', day: 'numeric'
-  });
-  const formattedTime = orderDate.toLocaleTimeString('en-IN', {
-    hour: '2-digit', minute: '2-digit', hour12: true
-  });
+  const formattedDate = orderDate.toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
+  const formattedTime = orderDate.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
 
-  // Meta — two columns
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.setTextColor(...GRAY);
+  const midX = pageW / 2;
 
-  doc.text('Invoice No.', marginL, y);
-  doc.text('Order No.', marginL, y + 6);
-  doc.text('Date', marginL, y + 12);
+  // Left: Invoice details
+  const metaLabelX = marginL;
+  const metaValueX = marginL + 24;
 
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(...DARK);
-  doc.text(invoiceNumber, marginL + 28, y);
-  doc.text(data.orderNumber, marginL + 28, y + 6);
-  doc.setFont('helvetica', 'normal');
-  doc.text(`${formattedDate}, ${formattedTime}`, marginL + 28, y + 12);
-
-  // ─── ADDRESSES ───────────────────────────────────────────────────────
-  y = 74;
-  const addrCol2 = pageW / 2 + 5;
-
-  // Bill To
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7);
   doc.setTextColor(...FOREST);
-  doc.text('BILL TO', marginL, y);
+  doc.text('INVOICE DETAILS', metaLabelX, y);
+
+  y += 7;
+  const metaRows = [
+    ['Invoice No.', invoiceNumber],
+    ['Order No.', data.orderNumber],
+    ['Date', `${formattedDate}, ${formattedTime}`],
+    ['Payment', 'UPI / Online Transfer'],
+  ];
+  for (const [label, value] of metaRows) {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(...GRAY);
+    doc.text(label, metaLabelX, y);
+    doc.setFont('helvetica', label === 'Invoice No.' || label === 'Order No.' ? 'bold' : 'normal');
+    doc.setTextColor(...DARK);
+    doc.text(value, metaValueX, y);
+    y += 5;
+  }
+
+  // Right: Amount summary box
+  const boxX = midX + 10;
+  const boxW = pageW - marginR - boxX;
+  const boxTop = 48;
+  doc.setFillColor(...LIGHT);
+  doc.roundedRect(boxX, boxTop, boxW, 28, 2, 2, 'F');
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7);
+  doc.setTextColor(...FOREST);
+  doc.text('TOTAL PAID', boxX + 5, boxTop + 7);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(16);
+  doc.setTextColor(...DARK);
+  doc.text(`Rs. ${data.total.toFixed(2)}`, boxX + 5, boxTop + 19);
+
+  // ─── ADDRESSES — side by side in boxes ────────────────────────────────
+  y = 82;
+  doc.setDrawColor(220, 220, 220);
+  doc.setLineWidth(0.2);
+
+  const addrW = (contentW - 6) / 2;
+  const addrCol2X = marginL + addrW + 6;
+
+  // Bill To box
+  doc.setFillColor(252, 252, 252);
+  doc.roundedRect(marginL, y, addrW, 32, 1.5, 1.5, 'FD');
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7);
+  doc.setTextColor(...FOREST);
+  doc.text('BILL TO', marginL + 4, y + 6);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8.5);
+  doc.setTextColor(...DARK);
+  doc.text(data.customerName, marginL + 4, y + 12);
 
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  doc.setTextColor(...DARK);
-  doc.text(data.customerName, marginL, y + 6);
-
-  doc.setFontSize(8);
+  doc.setFontSize(7.5);
   doc.setTextColor(...GRAY);
-  doc.text(data.customerEmail, marginL, y + 11);
-  if (data.customerPhone) doc.text(data.customerPhone, marginL, y + 16);
+  doc.text(data.customerEmail, marginL + 4, y + 17);
+  if (data.customerPhone) doc.text(data.customerPhone, marginL + 4, y + 21);
 
   const billingAddr = data.billingAddress;
-  let bY = y + (data.customerPhone ? 22 : 17);
-  doc.text(billingAddr.address || billingAddr.street || '', marginL, bY);
-  bY += 4.5;
-  doc.text(`${billingAddr.city || ''}, ${billingAddr.state || ''} ${billingAddr.zipCode || billingAddr.zip || ''}`, marginL, bY);
-  bY += 4.5;
-  doc.text(billingAddr.country || 'India', marginL, bY);
+  const billLine = [billingAddr.address || billingAddr.street, [billingAddr.city, billingAddr.state, billingAddr.zipCode || billingAddr.zip].filter(Boolean).join(', ')].filter(v => v && v !== 'N/A').join(', ');
+  if (billLine) doc.text(billLine.slice(0, 55), marginL + 4, y + (data.customerPhone ? 26 : 22));
 
-  // Ship To
+  // Ship To box
+  doc.setFillColor(252, 252, 252);
+  doc.roundedRect(addrCol2X, y, addrW, 32, 1.5, 1.5, 'FD');
+
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7);
   doc.setTextColor(...FOREST);
-  doc.text('SHIP TO', addrCol2, y);
+  doc.text('SHIP TO', addrCol2X + 4, y + 6);
 
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8.5);
   doc.setTextColor(...DARK);
-  doc.text(data.customerName, addrCol2, y + 6);
+  doc.text(data.customerName, addrCol2X + 4, y + 12);
 
   const shippingAddr = data.shippingAddress;
-  let sY = y + 12;
-  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
   doc.setTextColor(...GRAY);
-  doc.text(shippingAddr.address || shippingAddr.street || '', addrCol2, sY);
-  sY += 4.5;
-  doc.text(`${shippingAddr.city || ''}, ${shippingAddr.state || ''} ${shippingAddr.zipCode || shippingAddr.zip || ''}`, addrCol2, sY);
-  sY += 4.5;
-  doc.text(shippingAddr.country || 'India', addrCol2, sY);
+  const shipLine1 = shippingAddr.address || shippingAddr.street || '';
+  const shipLine2 = [shippingAddr.city, shippingAddr.state, shippingAddr.zipCode || shippingAddr.zip].filter(v => v && v !== 'N/A').join(', ');
+  if (shipLine1 && shipLine1 !== 'N/A') doc.text(shipLine1.slice(0, 55), addrCol2X + 4, y + 17);
+  if (shipLine2) doc.text(shipLine2.slice(0, 55), addrCol2X + 4, y + 21);
+  doc.text(shippingAddr.country || 'India', addrCol2X + 4, y + 25);
 
   // ─── ITEMS TABLE ─────────────────────────────────────────────────────
-  const tableStartY = Math.max(bY, sY) + 14;
+  const tableStartY = y + 38;
+
+  // Build table body — items + totals in one table
+  const itemRows = data.orderItems.map((item, idx) => [
+    (idx + 1).toString(),
+    item.productTitle,
+    item.quantity.toString(),
+    `Rs. ${item.price.toFixed(2)}`,
+    `Rs. ${item.total.toFixed(2)}`
+  ]);
 
   autoTable(doc, {
     startY: tableStartY,
     head: [['#', 'Item', 'Qty', 'Unit Price', 'Amount']],
-    body: data.orderItems.map((item, idx) => [
-      (idx + 1).toString(),
-      item.productTitle,
-      item.quantity.toString(),
-      `Rs. ${item.price.toFixed(2)}`,
-      `Rs. ${item.total.toFixed(2)}`
-    ]),
+    body: itemRows,
     theme: 'plain',
     headStyles: {
       fillColor: [...FOREST] as [number, number, number],
@@ -238,63 +273,50 @@ export async function generateInvoicePDF(data: InvoiceData, userId?: string): Pr
     tableLineWidth: 0.1,
   });
 
-  // ─── TOTALS ──────────────────────────────────────────────────────────
+  // ─── TOTALS — right-aligned summary box ───────────────────────────────
   const finalY = (doc as any).lastAutoTable.finalY || tableStartY + 50;
-  const totalsLabelX = pageW - marginR - 65;
-  const totalsValueX = pageW - marginR;
-  let tY = finalY + 10;
+  const summaryX = pageW - marginR - 80;
+  const summaryW = 80;
+  let tY = finalY + 4;
 
-  const drawTotalRow = (label: string, value: string, opts?: { bold?: boolean; color?: readonly [number, number, number]; large?: boolean }) => {
-    doc.setFont('helvetica', opts?.bold ? 'bold' : 'normal');
-    doc.setFontSize(opts?.large ? 10 : 8.5);
-    doc.setTextColor(...(opts?.color || DARK));
-    doc.text(label, totalsLabelX, tY);
-    doc.text(value, totalsValueX, tY, { align: 'right' });
-    tY += opts?.large ? 7 : 5.5;
-  };
-
-  drawTotalRow('Subtotal', `Rs. ${data.subtotal.toFixed(2)}`);
-  drawTotalRow('Convenience Fee', `Rs. ${data.tax.toFixed(2)}`);
-  drawTotalRow('Shipping', data.shipping === 0 ? 'FREE' : `Rs. ${data.shipping.toFixed(2)}`);
-
+  // Light background for totals
+  const totalRows = [
+    { label: 'Subtotal', value: `Rs. ${data.subtotal.toFixed(2)}` },
+    { label: 'Convenience Fee', value: `Rs. ${data.tax.toFixed(2)}` },
+    { label: 'Shipping', value: data.shipping === 0 ? 'FREE' : `Rs. ${data.shipping.toFixed(2)}` },
+  ];
   if (data.couponDiscount > 0) {
-    const couponLabel = data.couponCode ? `Coupon (${data.couponCode})` : 'Coupon Discount';
-    drawTotalRow(couponLabel, `- Rs. ${data.couponDiscount.toFixed(2)}`, { color: FOREST });
+    totalRows.push({ label: data.couponCode ? `Coupon (${data.couponCode})` : 'Coupon', value: `- Rs. ${data.couponDiscount.toFixed(2)}` });
   }
 
-  // Separator
+  const totalsHeight = (totalRows.length * 5.5) + 12;
+  doc.setFillColor(252, 252, 252);
+  doc.setDrawColor(220, 220, 220);
+  doc.roundedRect(summaryX, tY, summaryW, totalsHeight, 1.5, 1.5, 'FD');
+  tY += 4;
+
+  for (const row of totalRows) {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    const isDiscount = row.value.startsWith('-');
+    doc.setTextColor(...(isDiscount ? FOREST : GRAY));
+    doc.text(row.label, summaryX + 4, tY);
+    doc.setTextColor(...(isDiscount ? FOREST : DARK));
+    doc.text(row.value, summaryX + summaryW - 4, tY, { align: 'right' });
+    tY += 5.5;
+  }
+
+  // Total row — green separator + bold
   doc.setDrawColor(...FOREST);
   doc.setLineWidth(0.5);
-  doc.line(totalsLabelX, tY - 2, totalsValueX, tY - 2);
-  tY += 3;
-
-  drawTotalRow('Total', `Rs. ${data.total.toFixed(2)}`, { bold: true, color: FOREST, large: true });
-
-  // ─── PAYMENT INFO BOX ────────────────────────────────────────────────
+  doc.line(summaryX + 3, tY - 1, summaryX + summaryW - 3, tY - 1);
   tY += 4;
-  const boxY = tY;
-  doc.setFillColor(...LIGHT);
-  doc.roundedRect(marginL, boxY, contentW, 16, 2, 2, 'F');
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(7);
-  doc.setTextColor(...FOREST);
-  doc.text('PAYMENT METHOD', marginL + 5, boxY + 6);
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.setTextColor(...DARK);
-  doc.text('UPI / Online Transfer', marginL + 5, boxY + 12);
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(7);
-  doc.setTextColor(...FOREST);
-  doc.text('AMOUNT PAID', pageW - marginR - 50, boxY + 6);
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(10);
-  doc.setTextColor(...DARK);
-  doc.text(`Rs. ${data.total.toFixed(2)}`, pageW - marginR - 5, boxY + 12, { align: 'right' });
+  doc.setTextColor(...FOREST);
+  doc.text('Total', summaryX + 4, tY);
+  doc.text(`Rs. ${data.total.toFixed(2)}`, summaryX + summaryW - 4, tY, { align: 'right' });
 
   // ─── FOOTER ──────────────────────────────────────────────────────────
   // Bottom accent bar
@@ -309,7 +331,7 @@ export async function generateInvoicePDF(data: InvoiceData, userId?: string): Pr
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7);
   doc.setTextColor(200, 220, 200);
-  doc.text('For queries: mushagroprod@gmail.com | +91-7618362662 | kosvana.com', cx, pageH - 13, { align: 'center' });
+  doc.text('For queries: concierge@kosvana.com | +91-7618362662 | kosvana.com', cx, pageH - 13, { align: 'center' });
   doc.text('Mush Agro Products LLP | NH 507, Herbertpur, Dehradun, Uttarakhand 248142', cx, pageH - 8, { align: 'center' });
 
   // ─── UPLOAD ──────────────────────────────────────────────────────────

@@ -65,20 +65,22 @@ export const authOptions: NextAuthOptions = {
   events: {
     createUser: async ({ user }) => {
       try {
-        const adminEmail = process.env.ADMIN_EMAIL;
-        if (adminEmail && user.email) {
-          const { sendEmail, emailTemplates } = await import('./email');
-          const notification = emailTemplates.newUserSignup(
-            user.name || 'Google User',
-            user.email,
-            new Date()
-          );
-          await sendEmail({
-            to: adminEmail,
-            subject: notification.subject,
-            html: notification.html,
-            text: notification.text,
-          });
+        if (user.email) {
+          const { sendEmail, emailTemplates, getConciergeEmails } = await import('./email');
+          const recipients = getConciergeEmails();
+          if (recipients.length > 0) {
+            const notification = emailTemplates.newUserSignup(
+              user.name || 'Google User',
+              user.email,
+              new Date()
+            );
+            await sendEmail({
+              to: recipients,
+              subject: notification.subject,
+              html: notification.html,
+              text: notification.text,
+            });
+          }
         }
       } catch (error) {
         console.error('Failed to send admin notification for OAuth signup:', error);
@@ -126,8 +128,21 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: "jwt" as const,
-    maxAge: 15 * 60, // 15 minutes (900 seconds)
-    updateAge: 0, // Update session on every request to trigger validation
+    maxAge: 24 * 60 * 60, // 24 hours
+    updateAge: 60 * 60, // Refresh session token every 1 hour
+  },
+  cookies: {
+    sessionToken: {
+      name: process.env.NODE_ENV === 'production'
+        ? '__Secure-next-auth.session-token'
+        : 'next-auth.session-token',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax' as const,
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+      },
+    },
   },
   pages: {
     signIn: "/auth/signin",

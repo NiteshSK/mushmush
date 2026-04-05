@@ -1,28 +1,73 @@
 import nodemailer from 'nodemailer';
+import { escapeHtml } from './sanitize';
 
-// Create transporter for sending emails
+// ─── Gmail transporter (primary) ────────────────────────────────────────
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp.gmail.com',
   port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: false, // true for 465, false for other ports
+  secure: false,
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASSWORD,
   },
 });
 
+// ─── Zoho transporter (for @kosvana.com branded emails) ─────────────────
+let zohoTransporter: nodemailer.Transporter | null = null;
+if (process.env.ZOHO_SMTP_USER && process.env.ZOHO_SMTP_PASSWORD) {
+  zohoTransporter = nodemailer.createTransport({
+    host: process.env.ZOHO_SMTP_HOST || 'smtp.zoho.in',
+    port: parseInt(process.env.ZOHO_SMTP_PORT || '587'),
+    secure: false,
+    auth: {
+      user: process.env.ZOHO_SMTP_USER,
+      pass: process.env.ZOHO_SMTP_PASSWORD,
+    },
+  });
+}
+
+// ─── Email routing helpers ──────────────────────────────────────────────
+
+/** All admin recipients (vikrant + mushagroprod) */
+export function getAdminEmails(): string[] {
+  return (process.env.ADMIN_EMAIL || '').split(',').map(e => e.trim()).filter(Boolean);
+}
+
+/** Order-specific recipients (admin + orders@kosvana.com) */
+export function getOrderEmails(): string[] {
+  const admins = getAdminEmails();
+  const orders = process.env.ORDERS_EMAIL;
+  if (orders) admins.push(orders);
+  return Array.from(new Set(admins));
+}
+
+/** Concierge recipients (admin + concierge@kosvana.com) — for non-order notifications */
+export function getConciergeEmails(): string[] {
+  const admins = getAdminEmails();
+  const concierge = process.env.CONCIERGE_EMAIL;
+  if (concierge) admins.push(concierge);
+  return Array.from(new Set(admins));
+}
+
 export interface EmailOptions {
-  to: string;
+  to: string | string[];
   subject: string;
   html: string;
   text?: string;
+  useZoho?: boolean;
 }
 
-export async function sendEmail({ to, subject, html, text }: EmailOptions) {
+export async function sendEmail({ to, subject, html, text, useZoho }: EmailOptions) {
   try {
-    const info = await transporter.sendMail({
-      from: `"Kosvana" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
-      to,
+    const recipients = Array.isArray(to) ? to.join(', ') : to;
+    const transport = useZoho && zohoTransporter ? zohoTransporter : transporter;
+    const fromAddress = useZoho && process.env.ZOHO_SMTP_USER
+      ? `"Kosvana" <${process.env.ZOHO_SMTP_USER}>`
+      : `"Kosvana" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`;
+
+    const info = await transport.sendMail({
+      from: fromAddress,
+      to: recipients,
       subject,
       html,
       text,
@@ -72,7 +117,7 @@ export const emailTemplates = {
         <div style="border-top: 1px solid #eee; padding-top: 20px; text-align: center;">
           <p style="color: #666; font-size: 14px; margin: 0;">
             If you have any questions, feel free to contact us at 
-            <a href="mailto:mushagroprod@gmail.com" style="color: #5c8e61;">mushagroprod@gmail.com</a>
+            <a href="mailto:concierge@kosvana.com" style="color: #5c8e61;">concierge@kosvana.com</a>
           </p>
           <p style="color: #666; font-size: 12px; margin-top: 10px;">
             &copy; ${new Date().getFullYear()} Kosvana by Mush Agro Products. All rights reserved.
@@ -89,7 +134,7 @@ export const emailTemplates = {
       
       Visit us at: ${process.env.NEXTAUTH_URL || 'http://localhost:3000'}
       
-      If you have any questions, contact us at mushagroprod@gmail.com
+      If you have any questions, contact us at concierge@kosvana.com
       
       &copy; ${new Date().getFullYear()} Kosvana by Mush Agro Products. All rights reserved.
     `
@@ -170,7 +215,7 @@ export const emailTemplates = {
         <div style="border-top: 1px solid #eee; padding-top: 20px; text-align: center;">
           <p style="color: #666; font-size: 14px; margin: 0;">
             Need help? Contact us at 
-            <a href="mailto:mushagroprod@gmail.com" style="color: #5c8e61;">mushagroprod@gmail.com</a>
+            <a href="mailto:concierge@kosvana.com" style="color: #5c8e61;">concierge@kosvana.com</a>
           </p>
           <p style="color: #666; font-size: 12px; margin-top: 10px;">
             &copy; ${new Date().getFullYear()} Kosvana by Mush Agro Products. All rights reserved.
@@ -192,7 +237,7 @@ export const emailTemplates = {
       
       If you didn't request this password reset, please ignore this email.
       
-      Need help? Contact us at mushagroprod@gmail.com
+      Need help? Contact us at concierge@kosvana.com
       
       &copy; ${new Date().getFullYear()} Kosvana by Mush Agro Products. All rights reserved.
     `
@@ -348,10 +393,10 @@ export function generateRegistrationConfirmationEmail(data: RegistrationEmailDat
       <div style="background: #f8f9fa; padding: 30px; border-radius: 10px; margin-bottom: 30px; border-left: 4px solid #5c8e61;">
         <h2 style="color: #5c8e61; margin-top: 0;">Registration Confirmed! 🎉</h2>
         <p style="color: #333; line-height: 1.6; margin-bottom: 20px;">
-          Dear <strong>${data.participantName}</strong>,
+          Dear <strong>${escapeHtml(data.participantName)}</strong>,
         </p>
         <p style="color: #333; line-height: 1.6; margin-bottom: 20px;">
-          Your registration for <strong>${data.programName}</strong> has been successfully confirmed. We're excited to have you join our comprehensive cultivation training program!
+          Your registration for <strong>${escapeHtml(data.programName)}</strong> has been successfully confirmed. We're excited to have you join our comprehensive cultivation training program!
         </p>
         
         <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #e0e0e0;">
@@ -363,7 +408,7 @@ export function generateRegistrationConfirmationEmail(data: RegistrationEmailDat
             </tr>
             <tr>
               <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Program Name:</td>
-              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">${data.programName}</td>
+              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">${escapeHtml(data.programName)}</td>
             </tr>
             <tr>
               <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Registration Status:</td>
@@ -404,7 +449,7 @@ export function generateRegistrationConfirmationEmail(data: RegistrationEmailDat
           For any questions or assistance, please contact us:
         </p>
         <p style="color: #5c8e61; font-size: 14px; margin: 5px 0;">
-          📧 <a href="mailto:mushagroprod@gmail.com" style="color: #5c8e61;">mushagroprod@gmail.com</a><br>
+          📧 <a href="mailto:concierge@kosvana.com" style="color: #5c8e61;">concierge@kosvana.com</a><br>
           📞 <a href="tel:+919876543210" style="color: #5c8e61;">+91 98765 43210</a>
         </p>
         <p style="color: #666; font-size: 12px; margin-top: 10px;">
@@ -427,10 +472,10 @@ export function generatePaymentConfirmationEmail(data: PaymentEmailData): string
       <div style="background: #f8f9fa; padding: 30px; border-radius: 10px; margin-bottom: 30px; border-left: 4px solid #28a745;">
         <h2 style="color: #28a745; margin-top: 0;">Payment Successfully Processed!</h2>
         <p style="color: #333; line-height: 1.6; margin-bottom: 20px;">
-          Dear <strong>${data.participantName}</strong>,
+          Dear <strong>${escapeHtml(data.participantName)}</strong>,
         </p>
         <p style="color: #333; line-height: 1.6; margin-bottom: 20px;">
-          Great news! Your payment for <strong>${data.programName}</strong> has been successfully processed. Your training registration is now fully confirmed and you're all set to begin your cultivation journey!
+          Great news! Your payment for <strong>${escapeHtml(data.programName)}</strong> has been successfully processed. Your training registration is now fully confirmed and you're all set to begin your cultivation journey!
         </p>
         
         <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #e0e0e0;">
@@ -442,7 +487,7 @@ export function generatePaymentConfirmationEmail(data: PaymentEmailData): string
             </tr>
             <tr>
               <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Training Program:</td>
-              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">${data.programName}</td>
+              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">${escapeHtml(data.programName)}</td>
             </tr>
             <tr>
               <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Amount Paid:</td>
@@ -450,11 +495,11 @@ export function generatePaymentConfirmationEmail(data: PaymentEmailData): string
             </tr>
             <tr>
               <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Payment Method:</td>
-              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">${data.paymentMethod}</td>
+              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">${escapeHtml(data.paymentMethod)}</td>
             </tr>
             <tr>
               <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Transaction ID:</td>
-              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-family: monospace; font-size: 12px;">${data.upiTransactionId}</td>
+              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-family: monospace; font-size: 12px;">${escapeHtml(data.upiTransactionId)}</td>
             </tr>
             <tr>
               <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Payment Date:</td>
@@ -474,28 +519,28 @@ export function generatePaymentConfirmationEmail(data: PaymentEmailData): string
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
               <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Program Duration:</td>
-              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">${data.programDuration}</td>
+              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">${escapeHtml(data.programDuration)}</td>
             </tr>
             <tr>
               <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Training Schedule:</td>
-              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">${data.programSchedule}</td>
+              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">${escapeHtml(data.programSchedule)}</td>
             </tr>
             ${data.programStartDate ? `
             <tr>
               <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Start Date:</td>
-              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">${data.programStartDate}</td>
+              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">${escapeHtml(data.programStartDate)}</td>
             </tr>
             ` : ''}
             ${data.programLocation ? `
             <tr>
               <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Training Location:</td>
-              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">${data.programLocation}</td>
+              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">${escapeHtml(data.programLocation)}</td>
             </tr>
             ` : ''}
             ${data.programInstructor ? `
             <tr>
               <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; color: #555;">Lead Instructor:</td>
-              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">${data.programInstructor}</td>
+              <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">${escapeHtml(data.programInstructor)}</td>
             </tr>
             ` : ''}
           </table>
@@ -540,7 +585,7 @@ export function generatePaymentConfirmationEmail(data: PaymentEmailData): string
           For any questions or assistance, please contact us:
         </p>
         <p style="color: #5c8e61; font-size: 14px; margin: 5px 0;">
-          📧 <a href="mailto:mushagroprod@gmail.com" style="color: #5c8e61;">mushagroprod@gmail.com</a><br>
+          📧 <a href="mailto:concierge@kosvana.com" style="color: #5c8e61;">concierge@kosvana.com</a><br>
           📞 <a href="tel:+919876543210" style="color: #5c8e61;">+91 98765 43210</a>
         </p>
         <p style="color: #666; font-size: 12px; margin-top: 10px;">
@@ -716,7 +761,7 @@ export function generateOrderInvoiceEmail(data: OrderInvoiceEmailData): string {
           <tbody>
             ${data.orderItems.map(item => `
               <tr>
-                <td style="padding: 12px; border-bottom: 1px solid #f0f0f0;">${item.productTitle}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #f0f0f0;">${escapeHtml(item.productTitle)}</td>
                 <td style="padding: 12px; text-align: center; border-bottom: 1px solid #f0f0f0;">${item.quantity}</td>
                 <td style="padding: 12px; text-align: right; border-bottom: 1px solid #f0f0f0;">₹${item.price.toFixed(2)}</td>
                 <td style="padding: 12px; text-align: right; border-bottom: 1px solid #f0f0f0;">₹${item.total.toFixed(2)}</td>
@@ -754,8 +799,8 @@ export function generateOrderInvoiceEmail(data: OrderInvoiceEmailData): string {
       <div style="background: white; padding: 30px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
         <h3 style="color: #5c8e61; margin-top: 0; border-bottom: 2px solid #5c8e61; padding-bottom: 10px;">Shipping Address</h3>
         <p style="color: #333; line-height: 1.6; margin: 0;">
-          ${data.shippingAddress.address || ''}<br>
-          ${data.shippingAddress.city || ''}, ${data.shippingAddress.state || ''} ${data.shippingAddress.zipCode || ''}<br>
+          ${escapeHtml(data.shippingAddress.address || '')}<br>
+          ${escapeHtml(data.shippingAddress.city || '')}, ${escapeHtml(data.shippingAddress.state || '')} ${escapeHtml(data.shippingAddress.zipCode || '')}<br>
           ${data.shippingAddress.country || 'India'}
         </p>
       </div>
@@ -785,7 +830,7 @@ export function generateOrderInvoiceEmail(data: OrderInvoiceEmailData): string {
           Need help with your order?
         </p>
         <p style="color: #5c8e61; font-size: 14px; margin: 5px 0;">
-          📧 <a href="mailto:mushagroprod@gmail.com" style="color: #5c8e61; text-decoration: none;">mushagroprod@gmail.com</a><br>
+          📧 <a href="mailto:concierge@kosvana.com" style="color: #5c8e61; text-decoration: none;">concierge@kosvana.com</a><br>
           📞 <a href="tel:+917618362662" style="color: #5c8e61; text-decoration: none;">+91-7618362662</a>
         </p>
         <p style="color: #666; font-size: 12px; margin-top: 20px;">
@@ -895,10 +940,11 @@ function orderSummaryBlock(data: OrderNotificationData): string {
   `;
 }
 
-/** Email sent to ADMIN when a new order is placed */
+/** Email sent to ADMIN + ORDERS when a new order is placed */
 export async function sendAdminNewOrderEmail(data: OrderNotificationData): Promise<void> {
-  const adminEmail = process.env.ADMIN_EMAIL;
-  if (!adminEmail) return;
+  const recipients = getOrderEmails();
+  if (recipients.length === 0) return;
+  const adminEmail = recipients.join(', ');
 
   const html = orderEmailWrapper(
     'New Order Received!',
@@ -984,9 +1030,10 @@ export async function sendPaymentReceivedEmail(data: {
   );
 
   try {
+    const orderRecipients = getOrderEmails();
     await Promise.allSettled([
       sendEmail({ to: data.customerEmail, subject: `Payment Received — Order #${data.orderNumber}`, html: customerHtml }),
-      adminEmail ? sendEmail({ to: adminEmail, subject: `Payment to Verify — Order #${data.orderNumber} — ₹${data.amount.toFixed(2)}`, html: adminHtml }) : Promise.resolve(),
+      orderRecipients.length > 0 ? sendEmail({ to: orderRecipients, subject: `Payment to Verify — Order #${data.orderNumber} — ₹${data.amount.toFixed(2)}`, html: adminHtml }) : Promise.resolve(),
     ]);
   } catch {}
 }
@@ -1000,6 +1047,11 @@ export async function sendOrderStatusEmail(data: {
   total: number;
 }): Promise<void> {
   const statusConfig: Record<string, { title: string; message: string; color: string }> = {
+    PAYMENT_RECEIVED: {
+      title: 'Payment Received!',
+      message: 'We\'ve received your payment details. Our team will verify it shortly and confirm your order.',
+      color: '#2563eb',
+    },
     CONFIRMED: {
       title: 'Order Confirmed!',
       message: 'Your payment has been verified and your order is confirmed. We\'ll start processing it shortly.',
@@ -1042,7 +1094,7 @@ export async function sendOrderStatusEmail(data: {
         <p style="margin: 5px 0 0;"><strong>Status:</strong> ${data.status}</p>
         <p style="margin: 5px 0 0;"><strong>Total:</strong> ₹${data.total.toFixed(2)}</p>
       </div>
-      <p style="color: #6b7280; font-size: 13px;">For any questions, reply to this email or contact us at mushagroprod@gmail.com</p>
+      <p style="color: #6b7280; font-size: 13px;">For any questions, reply to this email or contact us at concierge@kosvana.com</p>
     `
   );
 
@@ -1110,7 +1162,7 @@ export function generateOTPEmail(otp: string, customerName: string): string {
           <strong>Kosvana - Premium Mushrooms, Dry Fruits, Seeds & Spices</strong>
         </p>
         <p style="margin: 0 0 5px 0;">
-          📧 Email: mushagroprod@gmail.com | 📞 Phone: +91-7618362662
+          📧 Email: concierge@kosvana.com | 📞 Phone: +91-7618362662
         </p>
         <p style="margin: 10px 0 0 0; color: #999;">
           © ${new Date().getFullYear()} Kosvana by Mush Agro Products. All rights reserved.

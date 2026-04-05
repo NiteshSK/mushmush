@@ -1,12 +1,20 @@
 import { streamText, convertToCoreMessages } from "ai";
 import { google } from "@ai-sdk/google";
 import { prisma } from "@/lib/prisma";
+import { rateLimit } from "@/lib/rate-limit";
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
     try {
+        // Rate limit: 15 messages per IP per minute
+        const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+        const rl = rateLimit(`ai-chat:${ip}`, { max: 15, windowSeconds: 60 });
+        if (!rl.allowed) {
+            return new Response("Too many requests. Please slow down.", { status: 429 });
+        }
+
         const { messages } = await req.json();
 
         if (!messages || !Array.isArray(messages)) {
@@ -112,7 +120,7 @@ export async function POST(req: Request) {
             name: settingsMap.company_name || "Kosvana by Mush Agro Products",
             address: settingsMap.company_address || "Kosvana, Herbertpur, Dehradun, Uttarakhand, India",
             mapLink: settingsMap.google_maps_link || "https://www.google.com/maps/search/Mush+Agro+Products+Herbertpur",
-            email: settingsMap.contact_email || "mushagroprod@gmail.com",
+            email: settingsMap.contact_email || "concierge@kosvana.com",
             phone: settingsMap.contact_phone || "+91-7618362662",
             hours: settingsMap.business_hours || "Monday - Saturday: 9:00 AM - 6:00 PM\n  * Sunday: 9:00 AM - 3:00 PM",
         };
@@ -197,7 +205,7 @@ If the user asks for a product or its price, ALWAYS provide the direct link to t
 
 To order products or get in touch, users can contact us via:
 - WhatsApp: https://wa.me/917618362662
-- Email: mailto:mushagroprod@gmail.com
+- Email: mailto:concierge@kosvana.com
 - Phone: tel:+917618362662
 
 If you don't know the answer or the context doesn't provide it, answer based on your general mushroom knowledge but clarify that for Kosvana-specific details (like exact training dates or shipping), the user should check the relevant pages or contact us.

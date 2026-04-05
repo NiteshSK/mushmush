@@ -12,16 +12,56 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const pathname = usePathname();
   const { data: session } = useSession();
 
-  const navigation = [
-    { name: 'Dashboard', href: '/admin', icon: '📊' },
-    { name: 'Products', href: '/admin/products', icon: '📦' },
-    { name: 'Inventory', href: '/admin/inventory', icon: '📋' },
-    { name: 'Discounts', href: '/admin/discounts', icon: '🏷️' },
-    { name: 'Coupons', href: '/admin/coupons', icon: '🎟️' },
-    { name: 'Orders', href: '/admin/orders', icon: '🛒' },
-    { name: 'Blogs', href: '/admin/blogs', icon: '📝' },
-    { name: 'Users', href: '/admin/users', icon: '👥' },
+  const navGroups = [
+    {
+      label: null,
+      items: [
+        { name: 'Dashboard', href: '/admin', icon: '📊' },
+      ],
+    },
+    {
+      label: 'Store',
+      items: [
+        { name: 'Products', href: '/admin/products', icon: '📦' },
+        { name: 'Inventory', href: '/admin/inventory', icon: '📋' },
+        { name: 'Orders', href: '/admin/orders', icon: '🛒' },
+      ],
+    },
+    {
+      label: 'Marketing',
+      items: [
+        { name: 'Discounts', href: '/admin/discounts', icon: '🏷️' },
+        { name: 'Coupons', href: '/admin/coupons', icon: '🎟️' },
+        { name: 'Banners', href: '/admin/promotional-banners', icon: '🎨' },
+      ],
+    },
+    {
+      label: 'Content',
+      items: [
+        { name: 'Blogs', href: '/admin/blogs', icon: '📝' },
+        { name: 'News', href: '/admin/news', icon: '📰' },
+        { name: 'Tags', href: '/admin/tags', icon: '🔖' },
+      ],
+    },
+    {
+      label: 'Training',
+      items: [
+        { name: 'Programs', href: '/admin/training-programs', icon: '🎓' },
+        { name: 'Registrations', href: '/admin/training-registrations', icon: '📋' },
+        { name: 'Payments', href: '/admin/payment-verification', icon: '💳' },
+      ],
+    },
+    {
+      label: 'System',
+      items: [
+        { name: 'Users', href: '/admin/users', icon: '👥' },
+        { name: 'Settings', href: '/admin/settings', icon: '⚙️' },
+      ],
+    },
   ];
+
+  // Flat list for header title lookup
+  const navigation = navGroups.flatMap(g => g.items);
 
   const isActive = (href: string) => {
     if (href === '/admin') {
@@ -38,24 +78,33 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           <h1 className="text-xl font-semibold text-dark">MushMush Admin</h1>
         </div>
         
-        <nav className="mt-8 px-4">
-          <ul className="space-y-2">
-            {navigation.map((item) => (
-              <li key={item.name}>
-                <Link
-                  href={item.href}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                    isActive(item.href)
-                      ? 'bg-blue text-white'
-                      : 'text-gray-6 hover:bg-gray-2 hover:text-dark'
-                  }`}
-                >
-                  <span className="text-lg">{item.icon}</span>
-                  {item.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
+        <nav className="mt-4 px-3 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 180px)' }}>
+          {navGroups.map((group, gi) => (
+            <div key={gi} className={gi > 0 ? 'mt-5' : ''}>
+              {group.label && (
+                <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-gray-400">
+                  {group.label}
+                </p>
+              )}
+              <ul className="space-y-0.5">
+                {group.items.map((item) => (
+                  <li key={item.name}>
+                    <Link
+                      href={item.href}
+                      className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                        isActive(item.href)
+                          ? 'bg-forest text-white'
+                          : 'text-gray-6 hover:bg-gray-2 hover:text-dark'
+                      }`}
+                    >
+                      <span className="text-base">{item.icon}</span>
+                      {item.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </nav>
 
         {/* User Info & Logout */}

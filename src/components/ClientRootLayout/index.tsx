@@ -3,8 +3,6 @@
 import { useState, useEffect } from "react";
 import AuthSessionProvider from "@/components/Providers/SessionProvider";
 import { WishlistProvider } from "@/app/context/WishlistContext";
-import { PreviewSliderProvider } from "@/app/context/PreviewSliderContext";
-import { PreviewSliderModal } from "@/components/PreviewSliderModal";
 
 interface ClientRootLayoutProps {
   children: React.ReactNode;
@@ -20,12 +18,9 @@ export default function ClientRootLayout({ children }: ClientRootLayoutProps) {
   return (
     <AuthSessionProvider>
       <WishlistProvider>
-        <PreviewSliderProvider>
-          <div className={loading ? "overflow-hidden" : ""}>
-            {children}
-          </div>
-          <PreviewSliderModal />
-        </PreviewSliderProvider>
+        <div className={loading ? "overflow-hidden" : ""}>
+          {children}
+        </div>
       </WishlistProvider>
     </AuthSessionProvider>
   );

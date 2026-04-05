@@ -3,7 +3,7 @@ import { generateOTP, sendOTPEmail } from '@/lib/email';
 
 export async function GET() {
   try {
-    const testEmail = 'mushagroprod@gmail.com'; // Send to your own email
+    const testEmail = 'vikrant@kosvana.com'; // Send to admin for testing
     const testName = 'Test User';
     const otp = generateOTP();
     

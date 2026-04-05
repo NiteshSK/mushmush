@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { availablePacks, formatBulkQuantity } from '@/lib/inventory'
 
 // GET /api/products - Fetch all products with optional filtering
@@ -176,6 +178,12 @@ export async function GET(request: NextRequest) {
 // POST /api/products - Create a new product (Admin only)
 export async function POST(request: NextRequest) {
   try {
+    // Verify admin authentication
+    const session = await getServerSession(authOptions);
+    if (!session?.user || (session.user as any).role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json()
     const {
       title,

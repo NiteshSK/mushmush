@@ -6,8 +6,6 @@ import { store, persistor } from "@/redux/store"; // Import store and persistor
 
 import AuthSessionProvider from "@/components/Providers/SessionProvider";
 import { WishlistProvider } from "@/app/context/WishlistContext";
-import { PreviewSliderProvider } from "@/app/context/PreviewSliderContext";
-import { PreviewSliderModal } from "./PreviewSliderModal";
 import ChatBot from "./AI/ChatBot";
 
 
@@ -27,13 +25,10 @@ export default function ClientRootLayout({ children }: ClientRootLayoutProps) {
       <PersistGate loading={null} persistor={persistor}>
         <AuthSessionProvider>
           <WishlistProvider>
-            <PreviewSliderProvider>
-              <div className={loading ? "overflow-hidden" : ""}>
-                {children}
-              </div>
-              <PreviewSliderModal />
-              <ChatBot />
-            </PreviewSliderProvider>
+            <div className={loading ? "overflow-hidden" : ""}>
+              {children}
+            </div>
+            <ChatBot />
           </WishlistProvider>
         </AuthSessionProvider>
       </PersistGate>

@@ -4,6 +4,8 @@ import { useDispatch } from "react-redux";
 import { addItemToCart } from "@/redux/features/cart-slice";
 import { Product } from "@/types/product";
 import Image from "next/image";
+import Link from "next/link";
+import toast from "react-hot-toast";
 
 interface SingleItemProps {
   item: Product;
@@ -13,11 +15,16 @@ interface SingleItemProps {
 const SingleItem = ({ item, onRemoveFromWishlist }: SingleItemProps) => {
   const dispatch = useDispatch<AppDispatch>();
 
-  const handleRemoveFromWishlist = async () => {
-    await onRemoveFromWishlist(item.id);
+  const handleRemoveFromWishlist = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const success = await onRemoveFromWishlist(item.id);
+    if (success) toast.success("Removed from wishlist");
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     dispatch(
       addItemToCart({
         id: item.id,
@@ -28,135 +35,94 @@ const SingleItem = ({ item, onRemoveFromWishlist }: SingleItemProps) => {
         imgs: item.imgs,
       })
     );
+    toast.success("Added to cart!");
   };
 
   return (
-    <div className="flex items-center border-t border-gray-200 py-5 px-10">
-      <div className="min-w-[83px]">
-        <button
-          onClick={() => handleRemoveFromWishlist()}
-          aria-label="button for remove product from wishlist"
-          className="flex items-center justify-center rounded-lg max-w-[38px] w-full h-9.5 bg-cream border border-gray-200 ease-out duration-200 hover:bg-red-light-6 hover:border-red-light-4 hover:text-red"
-        >
-          <svg
-            className="fill-current"
-            width="22"
-            height="22"
-            viewBox="0 0 22 22"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M9.19509 8.22222C8.92661 7.95374 8.49131 7.95374 8.22282 8.22222C7.95433 8.49071 7.95433 8.92601 8.22282 9.1945L10.0284 11L8.22284 12.8056C7.95435 13.074 7.95435 13.5093 8.22284 13.7778C8.49133 14.0463 8.92663 14.0463 9.19511 13.7778L11.0006 11.9723L12.8061 13.7778C13.0746 14.0463 13.5099 14.0463 13.7784 13.7778C14.0469 13.5093 14.0469 13.074 13.7784 12.8055L11.9729 11L13.7784 9.19451C14.0469 8.92603 14.0469 8.49073 13.7784 8.22224C13.5099 7.95376 13.0746 7.95376 12.8062 8.22224L11.0006 10.0278L9.19509 8.22222Z"
-              fill=""
-            />
-            <path
-              fillRule="evenodd"
-              clipRule="evenodd"
-              d="M11.0007 1.14587C5.55835 1.14587 1.14648 5.55773 1.14648 11C1.14648 16.4423 5.55835 20.8542 11.0007 20.8542C16.443 20.8542 20.8548 16.4423 20.8548 11C20.8548 5.55773 16.443 1.14587 11.0007 1.14587ZM2.52148 11C2.52148 6.31713 6.31774 2.52087 11.0007 2.52087C15.6836 2.52087 19.4798 6.31713 19.4798 11C19.4798 15.683 15.6836 19.4792 11.0007 19.4792C6.31774 19.4792 2.52148 15.683 2.52148 11Z"
-              fill=""
-            />
-          </svg>
-        </button>
-      </div>
+    <div className="group relative border border-gray-200 rounded-lg bg-white hover:shadow-md transition-shadow duration-200 flex flex-col h-full overflow-hidden">
+      {/* Remove button — top right X */}
+      <button
+        onClick={handleRemoveFromWishlist}
+        aria-label="Remove from wishlist"
+        className="absolute top-2.5 right-2.5 z-10 w-7 h-7 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:text-red hover:border-red transition-colors duration-200"
+      >
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
 
-      <div className="min-w-[387px]">
-        <div className="flex items-center justify-between gap-5">
-          <div className="w-full flex items-center gap-5.5">
-            <div className="flex items-center justify-center rounded-[5px] bg-cream max-w-[80px] w-full h-17.5">
-              <Image src={item.imgs?.thumbnails[0]} alt="product" width={200} height={200} />
-            </div>
+      {/* Image */}
+      <Link
+        href={`/shop-details/${item.slug}`}
+        className="block relative bg-gray-50 aspect-[4/5] flex items-center justify-center"
+      >
+        <Image
+          src={item.imgs?.thumbnails[0]}
+          alt={item.title}
+          width={300}
+          height={375}
+          className={`object-contain w-full h-full p-4 ${!item.inStock ? "opacity-40 grayscale" : ""}`}
+        />
+        {!item.inStock && (
+          <span className="absolute bottom-0 left-0 right-0 bg-dark/70 text-white text-[10px] uppercase tracking-wider font-medium text-center py-1.5">
+            Out of Stock
+          </span>
+        )}
+      </Link>
 
-            <div>
-              <h3 className="text-dark ease-out duration-200 hover:text-forest">
-                <a href="#"> {item.title} </a>
-              </h3>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Info */}
+      <div className="px-3.5 pt-3 pb-3 flex flex-col flex-1">
+        <Link href={`/shop-details/${item.slug}`}>
+          <h3 className="text-sm text-dark font-medium line-clamp-1 hover:text-forest transition-colors">
+            {item.title}
+          </h3>
+        </Link>
 
-      <div className="min-w-[205px]">
-        <div className="flex items-center gap-2">
+        {/* Price row */}
+        <div className="flex items-baseline gap-2 mt-1">
           {item.hasDiscount ? (
             <>
-              <span className="text-dark font-medium">₹{item.discountedPrice}</span>
-              <span className="text-dark-4 line-through text-sm">₹{item.price}</span>
+              <span className="text-sm font-semibold text-dark">
+                &#8377;{item.discountedPrice}
+              </span>
+              <span className="text-xs text-gray-400 line-through">
+                &#8377;{item.price}
+              </span>
+              {item.discountPercentage && (
+                <span className="text-xs font-medium text-forest">
+                  ({item.discountPercentage}% off)
+                </span>
+              )}
             </>
           ) : (
-            <span className="text-dark font-medium">₹{item.price}</span>
+            <span className="text-sm font-semibold text-dark">
+              &#8377;{item.price}
+            </span>
           )}
         </div>
       </div>
 
-      <div className="min-w-[265px]">
-        {item.inStock ? (
-          <div className="flex items-center gap-1.5">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M6.66667 10L8.75 12.0833L13.3333 7.5"
-                stroke="#22C55E"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M10 18.3333C14.6024 18.3333 18.3333 14.6024 18.3333 10C18.3333 5.39763 14.6024 1.66667 10 1.66667C5.39763 1.66667 1.66667 5.39763 1.66667 10C1.66667 14.6024 5.39763 18.3333 10 18.3333Z"
-                stroke="#22C55E"
-                strokeWidth="2"
-              />
-            </svg>
-            <span className="text-green font-medium">In Stock</span>
-          </div>
-        ) : (
-          <div className="flex items-center gap-1.5">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M9.99935 14.7917C10.3445 14.7917 10.6243 14.5119 10.6243 14.1667V9.16669C10.6243 8.82151 10.3445 8.54169 9.99935 8.54169C9.65417 8.54169 9.37435 8.82151 9.37435 9.16669V14.1667C9.37435 14.5119 9.65417 14.7917 9.99935 14.7917Z"
-                fill="#F23030"
-              />
-              <path
-                d="M9.99935 5.83335C10.4596 5.83335 10.8327 6.20645 10.8327 6.66669C10.8327 7.12692 10.4596 7.50002 9.99935 7.50002C9.53911 7.50002 9.16602 7.12692 9.16602 6.66669C9.16602 6.20645 9.53911 5.83335 9.99935 5.83335Z"
-                fill="#F23030"
-              />
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M1.04102 10C1.04102 5.05247 5.0518 1.04169 9.99935 1.04169C14.9469 1.04169 18.9577 5.05247 18.9577 10C18.9577 14.9476 14.9469 18.9584 9.99935 18.9584C5.0518 18.9584 1.04102 14.9476 1.04102 10ZM9.99935 2.29169C5.74215 2.29169 2.29102 5.74283 2.29102 10C2.29102 14.2572 5.74215 17.7084 9.99935 17.7084C14.2565 17.7084 17.7077 14.2572 17.7077 10C17.7077 5.74283 14.2565 2.29169 9.99935 2.29169Z"
-                fill="#F23030"
-              />
-            </svg>
-            <span className="text-red">Out of Stock</span>
-          </div>
-        )}
-      </div>
-
-      <div className="min-w-[150px] flex justify-end">
+      {/* Full-width bottom CTA — Flipkart/Myntra style */}
+      <div className="border-t border-gray-200 mt-auto">
         {item.inStock ? (
           <button
-            onClick={() => handleAddToCart()}
-            className="inline-flex text-dark hover:text-white bg-gray-1 border border-gray-200 py-2.5 px-6 rounded-full ease-out duration-200 hover:bg-forest hover:border-forest"
+            onClick={handleAddToCart}
+            className="w-full flex items-center justify-center gap-2 py-3 text-sm font-semibold text-forest uppercase tracking-wide hover:bg-forest hover:text-white transition-all duration-200"
           >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="9" cy="21" r="1" />
+              <circle cx="20" cy="21" r="1" />
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+            </svg>
             Add to Cart
           </button>
         ) : (
           <button
             disabled
-            className="inline-flex text-dark-4 bg-cream border border-gray-200 py-2.5 px-6 rounded-full cursor-not-allowed opacity-60"
+            className="w-full py-3 text-sm font-medium text-gray-400 uppercase tracking-wide cursor-not-allowed"
           >
-            Out of Stock
+            Currently Unavailable
           </button>
         )}
       </div>

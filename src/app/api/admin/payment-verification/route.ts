@@ -16,7 +16,9 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status') || 'PENDING';
+    const rawStatus = searchParams.get('status') || 'PENDING';
+    const validUpiStatuses = ['PENDING', 'VERIFIED', 'FAILED'];
+    const status = validUpiStatuses.includes(rawStatus) ? rawStatus : 'PENDING';
 
     const registrations = await prisma.trainingRegistration.findMany({
       where: {

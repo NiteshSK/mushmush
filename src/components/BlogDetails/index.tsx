@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useBlogViews } from "@/hooks/useBlogViews";
 import { useBlogPost } from "@/hooks/useBlogPost";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 interface BlogDetailsProps {
   slug: string;
@@ -107,8 +108,8 @@ const BlogDetails = ({ slug }: BlogDetailsProps) => {
                   <div className="mb-6">
                     <p className="mb-4 text-gray-6">{blogPost.excerpt}</p>
                     {blogPost.content ? (
-                      <div 
-                        dangerouslySetInnerHTML={{ __html: blogPost.content }}
+                      <div
+                        dangerouslySetInnerHTML={{ __html: sanitizeHtml(blogPost.content) }}
                         className="prose prose-lg prose-xl:max-w-none max-w-full text-gray-6
                                   prose-headings:text-dark
                                   prose-h1:text-2xl prose-h1:font-bold prose-h1:mb-4

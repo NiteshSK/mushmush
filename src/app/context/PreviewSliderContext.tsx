@@ -6,6 +6,7 @@ interface PreviewProduct {
   title: string;
   imgs: {
     previews: string[];
+    thumbnails?: string[];
   };
 }
 

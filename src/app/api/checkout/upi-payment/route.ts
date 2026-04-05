@@ -85,11 +85,21 @@ export async function POST(request: NextRequest) {
         const bytes = await paymentProof.arrayBuffer();
         const uint8Array = new Uint8Array(bytes);
         
-        // Create unique filename
+        // Create unique filename with validated extension
         const timestamp = Date.now();
-        const filename = `payment-${orderNumber}-${timestamp}.${paymentProof.name.split('.').pop()}`;
+        const allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp'];
+        const rawExt = (paymentProof.name.split('.').pop() || '').toLowerCase();
+        const ext = allowedExtensions.includes(rawExt) ? rawExt : 'bin';
+        const safeOrderNumber = (orderNumber || 'unknown').replace(/[^a-zA-Z0-9\-_]/g, '');
+        const filename = `payment-${safeOrderNumber}-${timestamp}.${ext}`;
         const filepath = join(process.cwd(), 'public', 'payment-proofs', filename);
-        
+
+        // Verify path stays within allowed directory
+        const allowedDir = join(process.cwd(), 'public', 'payment-proofs');
+        if (!filepath.startsWith(allowedDir)) {
+          throw new Error('Invalid file path');
+        }
+
         await writeFile(filepath, uint8Array);
         paymentProofPath = `/payment-proofs/${filename}`;
         
@@ -137,10 +147,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Update order status to CONFIRMED (payment submitted + stock reserved)
+    // Update order status to PAYMENT_RECEIVED (payment submitted + stock reserved, awaiting admin verification)
     await prisma.order.update({
       where: { id: order.id },
-      data: { status: 'CONFIRMED' }
+      data: { status: 'PAYMENT_RECEIVED' }
     });
 
     // Send payment received email to customer + admin

@@ -60,6 +60,17 @@ export async function GET(request: NextRequest) {
               name: true,
               email: true
             }
+          },
+          upi_payments: {
+            select: {
+              id: true,
+              status: true,
+              amount: true,
+              transactionId: true,
+              createdAt: true,
+            },
+            orderBy: { createdAt: 'desc' },
+            take: 1,
           }
         },
         skip,
@@ -89,12 +100,18 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/orders - Create new order
+// POST /api/orders - Create new order (authenticated users only)
 export async function POST(request: NextRequest) {
   try {
+    // Verify user is authenticated
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+
     const body = await request.json()
     const {
-      userId,
+      userId: _userId, // Ignore client-supplied userId
       customerName,
       customerEmail,
       customerPhone,
@@ -112,6 +129,7 @@ export async function POST(request: NextRequest) {
 
     // Create shipping address if provided
     let shippingAddressId: string | undefined;
+    const userId = session.user.id; // Always use authenticated user's ID
     if (shippingAddress && userId) {
       const address = await prisma.addresses.create({
         data: {

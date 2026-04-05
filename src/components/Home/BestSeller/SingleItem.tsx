@@ -47,13 +47,13 @@ const SingleItem = ({
       <div className="relative bg-white flex items-center justify-center rounded-xl" style={{ height: 260 }}>
         {/* Badge */}
         {item.hasDiscount && item.discountPercentage ? (
-          <span className="absolute top-3 right-3 text-[10px] font-medium uppercase tracking-wider text-red border border-red-light-3 bg-white px-2.5 py-1 rounded-full z-10">
+          <span className="absolute top-3 left-3 text-[10px] font-medium uppercase tracking-wider text-white bg-forest px-2.5 py-1 rounded-full z-10">
             -{item.discountPercentage}%
           </span>
         ) : !item.inStock ? (
           <div className="sold-out-overlay"><span>Sold Out</span></div>
         ) : item.featured ? (
-          <span className="absolute top-3 right-3 text-[10px] font-medium uppercase tracking-wider text-blue border border-blue-light-4 bg-white px-2.5 py-1 rounded-full z-10">
+          <span className="absolute top-3 left-3 text-[10px] font-medium uppercase tracking-wider text-blue border border-blue-light-4 bg-white px-2.5 py-1 rounded-full z-10">
             New
           </span>
         ) : null}

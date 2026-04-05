@@ -16,12 +16,15 @@ interface Order {
 const statusStyle = (status: string) => {
   switch (status) {
     case "DELIVERED":
+    case "COMPLETED":
       return "text-forest bg-forest/10";
     case "SHIPPED":
       return "text-blue bg-blue/10";
     case "PROCESSING":
-      return "text-yellow-600 bg-yellow-50";
+      return "text-[#D97706] bg-[#FEF3C7]";
     case "CONFIRMED":
+      return "text-forest bg-forest/10";
+    case "PAYMENT_RECEIVED":
       return "text-blue bg-blue/10";
     case "CANCELLED":
       return "text-red bg-red/10";

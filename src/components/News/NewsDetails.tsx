@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
 import Image from "next/image";
 import Link from "next/link";
+import { sanitizeHtml } from "@/lib/sanitize";
 import { useNewsPost } from "@/hooks/useNewsPost";
 
 interface NewsDetailsProps {
@@ -102,7 +103,7 @@ const NewsDetails = ({ slug }: NewsDetailsProps) => {
                   </span>
                   <div 
                     className="text-base text-gray-6 leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: blogPost.content }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(blogPost.content) }}
                   />
                   
                   {/* === ADD THIS ENTIRE DIV BLOCK HERE === */}

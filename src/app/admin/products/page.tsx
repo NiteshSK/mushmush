@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import AdminAuthWrapper from '@/components/Admin/AdminAuthWrapper';
 
 type Product = {
   id: number;
@@ -85,4 +86,6 @@ const ProductsPage: React.FC = () => {
   );
 };
 
-export default ProductsPage;
+export default function ProtectedProductsPage() {
+  return <AdminAuthWrapper><ProductsPage /></AdminAuthWrapper>;
+}

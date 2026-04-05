@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Breadcrumb from "@/components/Common/Breadcrumb";
 import { toast } from "react-hot-toast";
+import AdminAuthWrapper from '@/components/Admin/AdminAuthWrapper';
 
 type Setting = {
     key: string;
@@ -15,7 +16,7 @@ const DEFAULT_SETTINGS = [
     { key: "company_name", label: "Company Name", value: "MushMush by Mush Agro Products", group: "general" },
     { key: "company_address", label: "Address", value: "Mush Agro Products, Herbetpur, Dehradun, Uttarakhand, India", group: "contact", type: "longtext" },
     { key: "google_maps_link", label: "Google Maps Link", value: "https://www.google.com/maps/search/Mush+Agro+Products+Herbertpur", group: "contact" },
-    { key: "contact_email", label: "Contact Email", value: "mushagroprod@gmail.com", group: "contact" },
+    { key: "contact_email", label: "Contact Email", value: "concierge@kosvana.com", group: "contact" },
     { key: "contact_phone", label: "Contact Phone", value: "+91-7618362662", group: "contact" },
     { key: "business_hours", label: "Business Hours", value: "Mon-Sat: 9AM-6PM, Sun: 9AM-3PM", group: "contact", type: "longtext" },
 ];
@@ -173,4 +174,6 @@ const SettingsPage = () => {
     );
 };
 
-export default SettingsPage;
+export default function ProtectedSettingsPage() {
+  return <AdminAuthWrapper><SettingsPage /></AdminAuthWrapper>;
+}
