@@ -299,9 +299,9 @@ export async function generateInvoicePDF(data: InvoiceData, userId?: string): Pr
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
     const isDiscount = row.value.startsWith('-');
-    doc.setTextColor(...(isDiscount ? FOREST : GRAY));
+    doc.setTextColor(...(isDiscount ? FOREST : GRAY) as [number, number, number]);
     doc.text(row.label, summaryX + 4, tY);
-    doc.setTextColor(...(isDiscount ? FOREST : DARK));
+    doc.setTextColor(...(isDiscount ? FOREST : DARK) as [number, number, number]);
     doc.text(row.value, summaryX + summaryW - 4, tY, { align: 'right' });
     tY += 5.5;
   }
