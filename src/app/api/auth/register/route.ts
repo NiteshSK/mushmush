@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { sendEmail, emailTemplates, getConciergeEmails } from '@/lib/email';
 import { validatePasswordPolicy } from '@/lib/validation';
 import { rateLimit } from '@/lib/rate-limit';
+import { otpStore } from '@/lib/otp-store';
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,12 +18,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { name, email, password, phone } = await request.json();
+    const { name, email, password, phone, otp } = await request.json();
 
     // Validate input
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !otp) {
       return NextResponse.json(
-        { error: 'Name, email, and password are required' },
+        { error: 'Name, email, password, and OTP are required' },
+        { status: 400 }
+      );
+    }
+
+    // Verify OTP first — proves email ownership
+    const otpResult = await otpStore.verify(email.toLowerCase(), otp);
+    if (!otpResult.valid) {
+      return NextResponse.json(
+        { error: otpResult.error || 'Invalid OTP' },
         { status: 400 }
       );
     }
@@ -35,7 +45,7 @@ export async function POST(request: NextRequest) {
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
-      where: { email }
+      where: { email: email.toLowerCase() }
     });
 
     if (existingUser) {
@@ -48,12 +58,13 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await hash(password, 12);
 
-    // Create user
+    // Create user with verified email
     const user = await prisma.user.create({
       data: {
         name,
-        email,
+        email: email.toLowerCase(),
         password: hashedPassword,
+        emailVerified: new Date(), // Email verified via OTP
         ...(phone && { phone }),
       },
       select: {

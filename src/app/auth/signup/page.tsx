@@ -19,6 +19,10 @@ export default function SignUp() {
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [successMsg, setSuccessMsg] = useState('');
+  const [showOTPModal, setShowOTPModal] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [otpError, setOtpError] = useState('');
+  const [resendTimer, setResendTimer] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
@@ -76,34 +80,99 @@ export default function SignUp() {
     setErrors({});
     setIsLoading(true);
     try {
-      const response = await fetch('/api/auth/register', {
+      // Step 1: Send OTP to verify email
+      const response = await fetch('/api/auth/send-signup-otp', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: formData.name,
           email: formData.email,
+          name: formData.name,
           phone: formData.phone || undefined,
-          password: formData.password,
         }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        setSuccessMsg(`Account created successfully for ${formData.email}! Redirecting to sign in...`);
-        setTimeout(() => router.push('/auth/signin'), 2000);
+        setShowOTPModal(true);
+        setResendTimer(60);
       } else {
-        setErrors({ form: data.error || 'Registration failed. Please try again.' });
+        setErrors({ form: data.error || 'Failed to send OTP. Please try again.' });
       }
-    } catch (error) {
-      console.error("Sign up error:", error);
-      setErrors({ form: "An error occurred during registration. Please try again." });
+    } catch {
+      setErrors({ form: "An error occurred. Please try again." });
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Step 2: Verify OTP and create account
+  const handleVerifyOTP = async () => {
+    if (!otp || otp.length !== 6) {
+      setOtpError('Please enter the 6-digit OTP');
+      return;
+    }
+
+    setIsLoading(true);
+    setOtpError('');
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone || undefined,
+          password: formData.password,
+          otp,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setShowOTPModal(false);
+        setSuccessMsg(`Account created! Redirecting to sign in...`);
+        setTimeout(() => router.push('/auth/signin'), 2000);
+      } else {
+        setOtpError(data.error || 'Verification failed. Please try again.');
+      }
+    } catch {
+      setOtpError('An error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendOTP = async () => {
+    if (resendTimer > 0) return;
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/auth/send-signup-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          name: formData.name,
+          phone: formData.phone || undefined,
+        }),
+      });
+      if (response.ok) {
+        setResendTimer(60);
+        setOtpError('');
+        setOtp('');
+      }
+    } catch {} finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Resend timer countdown
+  useEffect(() => {
+    if (resendTimer <= 0) return;
+    const timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [resendTimer]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4 py-20">
@@ -288,6 +357,63 @@ export default function SignUp() {
           </Link>
         </p>
       </div>
+
+      {/* OTP Verification Modal */}
+      {showOTPModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-8">
+            <h3 className="text-xl font-semibold text-dark mb-2">Verify Your Email</h3>
+            <p className="text-sm text-gray-500 mb-1">
+              We've sent a 6-digit OTP to <span className="font-medium text-dark">{formData.email}</span>
+            </p>
+            <p className="text-xs text-gray-400 mb-6">OTP expires in 5 minutes</p>
+
+            <div className="mb-4">
+              <input
+                type="text"
+                value={otp}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+                  setOtp(val);
+                  setOtpError('');
+                }}
+                placeholder="Enter 6-digit OTP"
+                maxLength={6}
+                className="w-full text-center text-2xl font-mono tracking-[0.5em] bg-gray-1 border border-gray-200 rounded-lg py-4 px-4 outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && otp.length === 6) handleVerifyOTP();
+                }}
+              />
+              {otpError && <p className="text-sm text-red-500 mt-2 text-center">{otpError}</p>}
+            </div>
+
+            <button
+              onClick={handleVerifyOTP}
+              disabled={isLoading || otp.length !== 6}
+              className="w-full bg-forest text-white py-3 rounded-full text-sm font-medium hover:bg-dark transition-colors disabled:opacity-50 mb-3"
+            >
+              {isLoading ? 'Verifying...' : 'Verify & Create Account'}
+            </button>
+
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => { setShowOTPModal(false); setOtp(''); setOtpError(''); }}
+                className="text-sm text-gray-400 hover:text-dark transition-colors"
+              >
+                Back
+              </button>
+              <button
+                onClick={handleResendOTP}
+                disabled={resendTimer > 0 || isLoading}
+                className="text-sm text-forest hover:text-dark transition-colors disabled:text-gray-300"
+              >
+                {resendTimer > 0 ? `Resend in ${resendTimer}s` : 'Resend OTP'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
