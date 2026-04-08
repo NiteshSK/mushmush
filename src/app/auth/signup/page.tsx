@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { validateEmail, validateName, validatePhone, validatePasswordPolicy, passwordRequirementsText } from "@/lib/validation";
 
-type FormErrors = { name?: string; email?: string; phone?: string; password?: string; confirmPassword?: string; form?: string };
+type FormErrors = { name?: string; email?: string; phone?: string; password?: string; confirmPassword?: string; terms?: string; form?: string };
 
 export default function SignUp() {
   const [isLoading, setIsLoading] = useState(false);
@@ -70,6 +70,11 @@ export default function SignUp() {
 
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords don't match";
+    }
+
+    const termsCheckbox = document.getElementById('agree-terms') as HTMLInputElement;
+    if (!termsCheckbox?.checked) {
+      newErrors.terms = 'Please agree to the Terms of Service and Privacy Policy';
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -320,24 +325,26 @@ export default function SignUp() {
 
             <p className="text-xs text-gray-400">{passwordRequirementsText}</p>
 
-            <div className="flex items-center">
-              <input
-                id="agree-terms"
-                name="agree-terms"
-                type="checkbox"
-                required
-                className="h-4 w-4 text-forest focus:ring-forest/20 border-gray-300 rounded"
-              />
-              <label htmlFor="agree-terms" className="ml-2 block text-sm text-gray-500">
-                I agree to the{" "}
-                <a href="#" className="text-dark hover:text-forest transition-colors">
-                  Terms of Service
-                </a>{" "}
-                and{" "}
-                <a href="#" className="text-dark hover:text-forest transition-colors">
-                  Privacy Policy
-                </a>
-              </label>
+            <div>
+              <div className="flex items-center">
+                <input
+                  id="agree-terms"
+                  name="agree-terms"
+                  type="checkbox"
+                  className="h-4 w-4 text-forest focus:ring-forest/20 border-gray-300 rounded"
+                />
+                <label htmlFor="agree-terms" className="ml-2 block text-sm text-gray-500">
+                  I agree to the{" "}
+                  <a href="#" className="text-dark hover:text-forest transition-colors">
+                    Terms of Service
+                  </a>{" "}
+                  and{" "}
+                  <a href="#" className="text-dark hover:text-forest transition-colors">
+                    Privacy Policy
+                  </a>
+                </label>
+              </div>
+              {errors.terms && <p className="text-xs text-red-500 mt-1.5">{errors.terms}</p>}
             </div>
 
             <button
