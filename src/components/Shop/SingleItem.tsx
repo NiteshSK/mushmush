@@ -63,9 +63,7 @@ const SingleItem = ({ item }: { item: Product }) => {
 
   const handleNavigateToDetails = () => {
     // Clear any existing product details from localStorage to prevent stale data
-    localStorage.removeItem("productDetails");
-    // Set the new product details
-    localStorage.setItem("productDetails", JSON.stringify(item));
+    // Product details fetched fresh from API by slug
   };
 
   return (

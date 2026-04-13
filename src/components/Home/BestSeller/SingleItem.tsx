@@ -33,7 +33,7 @@ const SingleItem = ({
   };
 
   const handleNavigateToDetails = () => {
-    localStorage.setItem("productDetails", JSON.stringify(item));
+    // Product details fetched fresh from API by slug
   };
 
   // Short excerpt from description (strip HTML tags)

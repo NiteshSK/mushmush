@@ -60,7 +60,7 @@ const SingleGridItem = ({ item, priority = false, onNotifyMe }: Props) => {
   };
 
   const handleNavigateToDetails = () => {
-    localStorage.setItem("productDetails", JSON.stringify(item));
+    // Product details are fetched fresh from API by slug — no localStorage needed
   };
 
   const shortDescription = item.description

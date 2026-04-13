@@ -202,14 +202,12 @@ const ShopDetails = () => {
       const productBySlug = data.products?.find((p: any) => p.slug === productSlug);
 
       if (productBySlug) {
-        // Set the product data
+        // Always use fresh API data — don't merge with stale state
         const updatedProduct = {
-          ...product,
           ...productBySlug,
           discountPercentage: productBySlug.discountPercentage,
           hasDiscount: productBySlug.hasDiscount,
           discountedPrice: productBySlug.discountedPrice,
-          // Preserve measurement structure
           measurement: productBySlug.measurementValue && productBySlug.measurementType ? {
             value: productBySlug.measurementValue,
             type: productBySlug.measurementType
@@ -217,21 +215,10 @@ const ShopDetails = () => {
         };
 
         setProduct(updatedProduct);
-        localStorage.setItem("productDetails", JSON.stringify(updatedProduct));
-      } else {
-        // Fallback to localStorage
-        const alreadyExist = localStorage.getItem("productDetails");
-        if (alreadyExist) {
-          setProduct(JSON.parse(alreadyExist));
-        }
+        // Don't cache in localStorage — always fetch fresh from API
       }
     } catch (error) {
       console.error('Error fetching product by slug:', error);
-      // Fallback to localStorage
-      const alreadyExist = localStorage.getItem("productDetails");
-      if (alreadyExist) {
-        setProduct(JSON.parse(alreadyExist));
-      }
     } finally {
       setProductLoading(false);
     }
@@ -252,14 +239,12 @@ const ShopDetails = () => {
       const productWithDiscounts = data.products?.find((p: any) => p.id === productId);
 
       if (productWithDiscounts) {
-        // Merge the fresh data with existing product data, preserving structure
+        // Always use fresh API data
         const updatedProduct = {
-          ...product,
           ...productWithDiscounts,
           discountPercentage: productWithDiscounts.discountPercentage,
           hasDiscount: productWithDiscounts.hasDiscount,
           discountedPrice: productWithDiscounts.discountedPrice,
-          // Preserve measurement structure
           measurement: productWithDiscounts.measurementValue && productWithDiscounts.measurementType ? {
             value: productWithDiscounts.measurementValue,
             type: productWithDiscounts.measurementType
@@ -267,7 +252,6 @@ const ShopDetails = () => {
         };
 
         setProduct(updatedProduct);
-        localStorage.setItem("productDetails", JSON.stringify(updatedProduct));
       }
     } catch (error) {
       console.error('Error fetching product with discounts:', error);
@@ -367,7 +351,6 @@ const ShopDetails = () => {
 
   useEffect(() => {
     if (product && product.title) {
-      localStorage.setItem("productDetails", JSON.stringify(product));
       // Track product view in recently viewed with debounce
       if (product.id) {
         const timeoutId = setTimeout(() => {

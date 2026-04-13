@@ -48,8 +48,7 @@ const nextConfig = {
       'images.unsplash.com',
       'source.unsplash.com',
       'via.placeholder.com',
-      'lh3.googleusercontent.com', // Google images
-      '*.public.blob.vercel-storage.com', // Vercel Blob
+      'lh3.googleusercontent.com',
     ],
     remotePatterns: [
       {

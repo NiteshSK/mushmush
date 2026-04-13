@@ -63,8 +63,7 @@ const SingleListItem = ({ item, priority = false, onNotifyMe }: Props) => {
 
   // --- UPDATED: This function now runs for ALL products ---
   const handleNavigateToDetails = () => {
-    // Always set localStorage on click, regardless of stock status
-    localStorage.setItem("productDetails", JSON.stringify(item));
+    // Product details fetched fresh from API by slug
   };
 
   return (
