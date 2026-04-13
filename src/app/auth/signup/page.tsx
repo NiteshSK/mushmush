@@ -282,9 +282,16 @@ export default function SignUp() {
                 type="tel"
                 autoComplete="tel"
                 value={formData.phone}
-                onChange={handleInputChange}
+                onChange={(e) => {
+                  const digits = e.target.value.replace(/\D/g, '').slice(0, 10);
+                  setFormData(prev => ({ ...prev, phone: digits }));
+                  if (errors.phone) {
+                    setErrors(prev => ({ ...prev, phone: undefined, form: undefined }));
+                  }
+                }}
+                maxLength={10}
                 className={`w-full bg-white border rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:ring-1 transition-colors ${errors.phone ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : 'border-forest/15 focus:border-forest focus:ring-forest/20'}`}
-                placeholder="+91 XXXXX XXXXX"
+                placeholder="10-digit mobile number"
               />
               {errors.phone && <p className="text-xs text-red-500 mt-1.5">{errors.phone}</p>}
             </div>
