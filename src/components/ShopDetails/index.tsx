@@ -399,9 +399,8 @@ const ShopDetails = () => {
                       <Image
                         className={!displayProduct.inStock ? "grayscale" : ""}
                         src={
-                          displayProduct.imgs?.previews?.slice(1)[previewImg] ??
+                          (displayProduct.imgs?.previews || displayProduct.imgs?.thumbnails)?.[previewImg] ??
                           displayProduct.imgs?.previews?.[0] ??
-                          displayProduct.imgs?.thumbnails?.slice(1)[previewImg] ??
                           displayProduct.imgs?.thumbnails?.[0] ??
                           "/images/placeholder.png"
                         }
@@ -415,7 +414,7 @@ const ShopDetails = () => {
                     </div>
                   </div>
                   <div className="flex flex-wrap sm:flex-nowrap gap-4.5 mt-6">
-                    {displayProduct.imgs?.thumbnails.slice(1).map((item, key) => (
+                    {(displayProduct.imgs?.thumbnails || displayProduct.imgs?.previews || []).map((item, key) => (
                       <button
                         onClick={() => setPreviewImg(key)}
                         key={key}
