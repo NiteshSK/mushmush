@@ -139,7 +139,7 @@ const PromotionalBannersContent: React.FC = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-forest mx-auto mb-4"></div>
           <p className="text-gray-600">Loading promotional banners...</p>
         </div>
       </div>
@@ -156,7 +156,7 @@ const PromotionalBannersContent: React.FC = () => {
         </div>
         <Link
           href="/admin/promotional-banners/new"
-          className="inline-flex items-center px-4 py-2 bg-blue text-white rounded-md hover:bg-blue-dark transition-colors"
+          className="inline-flex items-center px-4 py-2 bg-forest text-white rounded-md hover:bg-dark-dark transition-colors"
         >
           <Plus size={20} className="mr-2" />
           Create Banner
@@ -164,13 +164,13 @@ const PromotionalBannersContent: React.FC = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow-1 p-4">
+      <div className="bg-white rounded-[10px] shadow-1 p-4">
         <div className="flex items-center space-x-4">
           <label className="text-sm font-medium text-gray-700">Filter by status:</label>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'inactive')}
-            className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
+            className="border border-gray-3 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
           >
             <option value="all">All Banners</option>
             <option value="active">Active Only</option>
@@ -180,7 +180,7 @@ const PromotionalBannersContent: React.FC = () => {
       </div>
 
       {/* Banners List */}
-      <div className="bg-white rounded-lg shadow-1 overflow-hidden">
+      <div className="bg-white rounded-[10px] shadow-1 overflow-hidden">
         {banners.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-4xl mb-4">🎨</div>
@@ -188,7 +188,7 @@ const PromotionalBannersContent: React.FC = () => {
             <p className="text-gray-500 mb-4">Create your first promotional banner to get started.</p>
             <Link
               href="/admin/promotional-banners/new"
-              className="inline-flex items-center px-4 py-2 bg-blue text-white rounded-md hover:bg-blue-dark transition-colors"
+              className="inline-flex items-center px-4 py-2 bg-forest text-white rounded-md hover:bg-dark-dark transition-colors"
             >
               <Plus size={20} className="mr-2" />
               Create Banner
@@ -304,7 +304,7 @@ const PromotionalBannersContent: React.FC = () => {
                           </button>
                           <Link
                             href={`/admin/promotional-banners/${banner.id}/edit`}
-                            className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-md transition-colors"
+                            className="p-2 text-blue-600 hover:text-blue-800 hover:bg-dark-100 rounded-md transition-colors"
                             title="Edit"
                           >
                             <Edit size={16} />
@@ -334,7 +334,7 @@ const PromotionalBannersContent: React.FC = () => {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="bg-white rounded-lg shadow-1 px-6 py-4">
+        <div className="bg-white rounded-[10px] shadow-1 px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-700">
               Page {currentPage} of {totalPages}
@@ -343,14 +343,14 @@ const PromotionalBannersContent: React.FC = () => {
               <button
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                className="px-3 py-1 border border-gray-3 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
                 Previous
               </button>
               <button
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                className="px-3 py-1 border border-gray-3 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
                 Next
               </button>

@@ -75,7 +75,7 @@ const UsersPageContent: React.FC = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-forest mx-auto mb-4"></div>
           <p className="text-gray-6">Loading users...</p>
         </div>
       </div>
@@ -85,7 +85,7 @@ const UsersPageContent: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="bg-white rounded-lg shadow-1 p-6">
+      <div className="bg-white rounded-[10px] shadow-1 p-6">
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-semibold text-dark mb-2">User Management</h1>
@@ -95,7 +95,7 @@ const UsersPageContent: React.FC = () => {
           </div>
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className="bg-blue text-white px-4 py-2 rounded-lg hover:bg-blue-dark transition-colors"
+            className="bg-forest text-white px-4 py-2 rounded-lg hover:bg-dark-dark transition-colors"
           >
             Create User
           </button>
@@ -103,7 +103,7 @@ const UsersPageContent: React.FC = () => {
       </div>
 
       {/* Users Table */}
-      <div className="bg-white rounded-lg shadow-1 overflow-hidden">
+      <div className="bg-white rounded-[10px] shadow-1 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-2">
           <h2 className="text-lg font-semibold text-dark">All Users ({users.length})</h2>
         </div>

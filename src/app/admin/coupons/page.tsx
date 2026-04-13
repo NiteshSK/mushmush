@@ -68,7 +68,7 @@ const CouponForm = ({ onCreated }: { onCreated: () => void }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-1 p-6">
+    <div className="bg-white rounded-[10px] shadow-1 p-6">
       <h3 className="text-lg font-semibold text-dark mb-4">Create New Coupon</h3>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div>
@@ -180,7 +180,7 @@ const CouponForm = ({ onCreated }: { onCreated: () => void }) => {
           <button
             type="submit"
             disabled={creating}
-            className="w-full bg-blue text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-blue-dark disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-forest text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-dark-dark disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {creating ? 'Creating...' : 'Create Coupon'}
           </button>
@@ -247,21 +247,21 @@ const CouponsPageContent = () => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg shadow-1 p-6">
+      <div className="bg-white rounded-[10px] shadow-1 p-6">
         <h1 className="text-2xl font-semibold text-dark mb-2">Coupon Management</h1>
         <p className="text-gray-6">Create and manage discount coupons for your customers.</p>
       </div>
 
       <CouponForm onCreated={fetchCoupons} />
 
-      <div className="bg-white rounded-lg shadow-1 overflow-hidden">
+      <div className="bg-white rounded-[10px] shadow-1 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-3">
           <h3 className="text-lg font-semibold text-dark">All Coupons</h3>
         </div>
 
         {loading ? (
           <div className="flex items-center justify-center h-40">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-forest"></div>
           </div>
         ) : coupons.length === 0 ? (
           <div className="text-center py-12 text-gray-5">No coupons created yet</div>

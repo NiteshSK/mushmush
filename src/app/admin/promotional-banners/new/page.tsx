@@ -139,7 +139,7 @@ const CreateBannerContent: React.FC = () => {
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="bg-white rounded-lg shadow-1 p-6">
+        <div className="bg-white rounded-[10px] shadow-1 p-6">
           <h2 className="text-lg font-medium text-dark mb-4">Basic Information</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -153,7 +153,7 @@ const CreateBannerContent: React.FC = () => {
                 name="title"
                 value={formData.title}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
                 placeholder="Enter banner title"
                 required
               />
@@ -169,7 +169,7 @@ const CreateBannerContent: React.FC = () => {
                 name="subtitle"
                 value={formData.subtitle}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
                 placeholder="Enter banner subtitle"
               />
             </div>
@@ -184,7 +184,7 @@ const CreateBannerContent: React.FC = () => {
                 value={formData.description}
                 onChange={handleInputChange}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
                 placeholder="Enter banner description"
               />
             </div>
@@ -199,7 +199,7 @@ const CreateBannerContent: React.FC = () => {
                 name="discount"
                 value={formData.discount}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
                 placeholder="e.g., UP TO 50% OFF"
               />
             </div>
@@ -214,7 +214,7 @@ const CreateBannerContent: React.FC = () => {
                 name="buttonText"
                 value={formData.buttonText}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
                 placeholder="Button text"
               />
             </div>
@@ -222,7 +222,7 @@ const CreateBannerContent: React.FC = () => {
         </div>
 
         {/* Link Configuration */}
-        <div className="bg-white rounded-lg shadow-1 p-6">
+        <div className="bg-white rounded-[10px] shadow-1 p-6">
           <h2 className="text-lg font-medium text-dark mb-4">Link Configuration</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -235,7 +235,7 @@ const CreateBannerContent: React.FC = () => {
                 name="productId"
                 value={formData.productId}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
               >
                 <option value="">Select a product</option>
                 {products.map(product => (
@@ -255,7 +255,7 @@ const CreateBannerContent: React.FC = () => {
                 name="categoryId"
                 value={formData.categoryId}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
               >
                 <option value="">Select a category</option>
                 {categories.map(category => (
@@ -276,7 +276,7 @@ const CreateBannerContent: React.FC = () => {
                 name="buttonLink"
                 value={formData.buttonLink}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
                 placeholder="/shop-details or https://example.com"
               />
             </div>
@@ -288,7 +288,7 @@ const CreateBannerContent: React.FC = () => {
         </div>
 
         {/* Visual Configuration */}
-        <div className="bg-white rounded-lg shadow-1 p-6">
+        <div className="bg-white rounded-[10px] shadow-1 p-6">
           <h2 className="text-lg font-medium text-dark mb-4">Visual Configuration</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -302,7 +302,7 @@ const CreateBannerContent: React.FC = () => {
                 name="imageUrl"
                 value={formData.imageUrl}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
                 placeholder="/images/promo/banner-image.png"
                 required
               />
@@ -319,13 +319,13 @@ const CreateBannerContent: React.FC = () => {
                   name="bgColor"
                   value={formData.bgColor}
                   onChange={handleInputChange}
-                  className="w-12 h-10 border border-gray-300 rounded-md cursor-pointer"
+                  className="w-12 h-10 border border-gray-3 rounded-md cursor-pointer"
                 />
                 <input
                   type="text"
                   value={formData.bgColor}
                   onChange={(e) => setFormData(prev => ({ ...prev, bgColor: e.target.value }))}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
+                  className="flex-1 px-3 py-2 border border-gray-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
                   placeholder="#F5F5F7"
                 />
               </div>
@@ -342,13 +342,13 @@ const CreateBannerContent: React.FC = () => {
                   name="textColor"
                   value={formData.textColor}
                   onChange={handleInputChange}
-                  className="w-12 h-10 border border-gray-300 rounded-md cursor-pointer"
+                  className="w-12 h-10 border border-gray-3 rounded-md cursor-pointer"
                 />
                 <input
                   type="text"
                   value={formData.textColor}
                   onChange={(e) => setFormData(prev => ({ ...prev, textColor: e.target.value }))}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
+                  className="flex-1 px-3 py-2 border border-gray-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
                   placeholder="#000000"
                 />
               </div>
@@ -357,7 +357,7 @@ const CreateBannerContent: React.FC = () => {
         </div>
 
         {/* Schedule & Settings */}
-        <div className="bg-white rounded-lg shadow-1 p-6">
+        <div className="bg-white rounded-[10px] shadow-1 p-6">
           <h2 className="text-lg font-medium text-dark mb-4">Schedule & Settings</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -371,7 +371,7 @@ const CreateBannerContent: React.FC = () => {
                 name="startDate"
                 value={formData.startDate}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
               />
             </div>
 
@@ -385,7 +385,7 @@ const CreateBannerContent: React.FC = () => {
                 name="endDate"
                 value={formData.endDate}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
               />
             </div>
 
@@ -399,7 +399,7 @@ const CreateBannerContent: React.FC = () => {
                 name="priority"
                 value={formData.priority}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
                 placeholder="0"
                 min="0"
                 max="100"
@@ -415,7 +415,7 @@ const CreateBannerContent: React.FC = () => {
                 name="isActive"
                 checked={formData.isActive}
                 onChange={handleInputChange}
-                className="rounded border-gray-300 text-blue focus:ring-blue"
+                className="rounded border-gray-3 text-forest focus:ring-forest"
               />
               <span className="ml-2 text-sm text-gray-700">Active (banner will be displayed)</span>
             </label>
@@ -424,7 +424,7 @@ const CreateBannerContent: React.FC = () => {
 
         {/* Preview */}
         {formData.title && formData.imageUrl && (
-          <div className="bg-white rounded-lg shadow-1 p-6">
+          <div className="bg-white rounded-[10px] shadow-1 p-6">
             <h2 className="text-lg font-medium text-dark mb-4">Preview</h2>
             <div 
               className="relative overflow-hidden rounded-lg py-12 px-8 max-w-2xl"
@@ -447,7 +447,7 @@ const CreateBannerContent: React.FC = () => {
                     {formData.description}
                   </p>
                 )}
-                <div className="inline-flex font-medium text-sm text-white bg-blue py-2 px-6 rounded-md">
+                <div className="inline-flex font-medium text-sm text-white bg-forest py-2.5 px-6 rounded-md">
                   {formData.buttonText}
                 </div>
               </div>
@@ -467,14 +467,14 @@ const CreateBannerContent: React.FC = () => {
         <div className="flex justify-end space-x-4">
           <Link
             href="/admin/promotional-banners"
-            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+            className="px-6 py-2 border border-gray-3 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
           >
             Cancel
           </Link>
           <button
             type="submit"
             disabled={loading}
-            className="inline-flex items-center px-6 py-2 bg-blue text-white rounded-md hover:bg-blue-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center px-6 py-2 bg-forest text-white rounded-md hover:bg-dark-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
               <>

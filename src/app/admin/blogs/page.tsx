@@ -121,19 +121,19 @@ const BlogsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg shadow-1 p-6 flex items-center justify-between gap-4 flex-wrap">
+      <div className="bg-white rounded-[10px] shadow-1 p-6 flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-semibold text-dark mb-1">Blog Management</h1>
           <p className="text-gray-6">Create, edit and manage blog posts, content and images.</p>
         </div>
-        <Link href="/admin/blogs/new" className="inline-flex items-center px-4 py-2 rounded-md bg-blue text-white">
+        <Link href="/admin/blogs/new" className="inline-flex items-center px-4 py-2 rounded-md bg-forest text-white">
           + New Blog Post
         </Link>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-lg shadow-1 p-4">
+        <div className="bg-white rounded-[10px] shadow-1 p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-6">Total Posts</p>
@@ -142,7 +142,7 @@ const BlogsPage: React.FC = () => {
             <div className="text-3xl">📝</div>
           </div>
         </div>
-        <div className="bg-white rounded-lg shadow-1 p-4">
+        <div className="bg-white rounded-[10px] shadow-1 p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-6">Published</p>
@@ -151,7 +151,7 @@ const BlogsPage: React.FC = () => {
             <div className="text-3xl">✅</div>
           </div>
         </div>
-        <div className="bg-white rounded-lg shadow-1 p-4">
+        <div className="bg-white rounded-[10px] shadow-1 p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-6">Total Views</p>
@@ -163,7 +163,7 @@ const BlogsPage: React.FC = () => {
       </div>
 
       {/* Filters and Search */}
-      <div className="bg-white rounded-lg shadow-1 p-4 space-y-4">
+      <div className="bg-white rounded-[10px] shadow-1 p-4 space-y-4">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1">
             <input 
@@ -203,7 +203,7 @@ const BlogsPage: React.FC = () => {
       </div>
 
       {/* Blog Posts Table */}
-      <div className="bg-white rounded-lg shadow-1">
+      <div className="bg-white rounded-[10px] shadow-1">
         {loading ? (
           <div className="p-6">Loading...</div>
         ) : (
@@ -302,7 +302,7 @@ const BlogsPage: React.FC = () => {
                 {(!query && statusFilter === "all") && (
                   <Link
                     href="/admin/blogs/new"
-                    className="inline-block mt-4 px-4 py-2 bg-blue text-white rounded-md hover:bg-blue/90 text-sm"
+                    className="inline-block mt-4 px-4 py-2 bg-forest text-white rounded-md hover:bg-dark/90 text-sm"
                   >
                     Create Blog Post
                   </Link>

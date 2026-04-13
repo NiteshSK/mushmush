@@ -182,7 +182,7 @@ const AdminDashboardContent: React.FC = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-forest mx-auto mb-4"></div>
           <p className="text-gray-6">Loading dashboard...</p>
         </div>
       </div>
@@ -192,7 +192,7 @@ const AdminDashboardContent: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
-      <div className="bg-white rounded-lg shadow-1 p-6">
+      <div className="bg-white rounded-[10px] shadow-1 p-6">
         <h1 className="text-2xl font-semibold text-dark mb-2">Welcome to MushMush Admin</h1>
         <p className="text-gray-6">
           Manage your e-commerce store efficiently. Quick access to inventory, products, and more.
@@ -205,7 +205,7 @@ const AdminDashboardContent: React.FC = () => {
           <Link
             key={index}
             href={card.link}
-            className="bg-white rounded-lg shadow-1 p-6 hover:shadow-2 transition-shadow"
+            className="bg-white rounded-[10px] shadow-1 p-6 hover:shadow-2 transition-shadow"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -221,14 +221,14 @@ const AdminDashboardContent: React.FC = () => {
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-white rounded-lg shadow-1 p-6">
+      <div className="bg-white rounded-[10px] shadow-1 p-6">
         <h2 className="text-lg font-semibold text-dark mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {quickActions.map((action, index) => (
             <Link
               key={index}
               href={action.link}
-              className="group p-4 rounded-lg border border-gray-3 hover:border-blue transition-colors"
+              className="group p-4 rounded-lg border border-gray-3 hover:border-forest transition-colors"
             >
               <div className={`w-10 h-10 rounded-lg ${action.color} text-white flex items-center justify-center text-xl mb-3 group-hover:scale-110 transition-transform`}>
                 {action.icon}
@@ -241,7 +241,7 @@ const AdminDashboardContent: React.FC = () => {
       </div>
 
       {/* Recent Activity Placeholder */}
-      <div className="bg-white rounded-lg shadow-1 p-6">
+      <div className="bg-white rounded-[10px] shadow-1 p-6">
         <h2 className="text-lg font-semibold text-dark mb-4">Recent Activity</h2>
         <div className="text-center py-8">
           <div className="text-4xl mb-4">📊</div>

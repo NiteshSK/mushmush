@@ -72,10 +72,10 @@ const EditBlogPage: React.FC = () => {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="bg-white rounded-lg shadow-1 p-6">
+        <div className="bg-white rounded-[10px] shadow-1 p-6">
           <h1 className="text-2xl font-semibold text-dark mb-1">Edit Blog Post</h1>
         </div>
-        <div className="bg-white rounded-lg shadow-1 p-6">
+        <div className="bg-white rounded-[10px] shadow-1 p-6">
           Loading...
         </div>
       </div>
@@ -85,7 +85,7 @@ const EditBlogPage: React.FC = () => {
   if (!blog) {
     return (
       <div className="space-y-6">
-        <div className="bg-white rounded-lg shadow-1 p-6">
+        <div className="bg-white rounded-[10px] shadow-1 p-6">
           <h1 className="text-2xl font-semibold text-dark mb-1">Blog Post Not Found</h1>
         </div>
       </div>
@@ -94,7 +94,7 @@ const EditBlogPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg shadow-1 p-6">
+      <div className="bg-white rounded-[10px] shadow-1 p-6">
         <h1 className="text-2xl font-semibold text-dark mb-1">Edit Blog Post</h1>
         <p className="text-gray-6">Update your blog post content and settings.</p>
       </div>

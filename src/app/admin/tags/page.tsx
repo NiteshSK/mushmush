@@ -121,11 +121,11 @@ const TagsAdminPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg shadow-1 p-6">
+      <div className="bg-white rounded-[10px] shadow-1 p-6">
         <h1 className="text-2xl font-semibold text-dark mb-1">Tag Management</h1>
         <p className="text-gray-6">Create, edit, and delete tags for blog posts.</p>
       </div>
-      <div className="bg-white rounded-lg shadow-1 p-6">
+      <div className="bg-white rounded-[10px] shadow-1 p-6">
         <h2 className="text-lg font-semibold text-dark mb-4">Create New Tag</h2>
         <form onSubmit={handleCreate} className="flex flex-col md:flex-row gap-4 items-end">
           <div>
@@ -150,7 +150,7 @@ const TagsAdminPage: React.FC = () => {
           </div>
           <button
             type="submit"
-            className="px-6 py-2 bg-blue text-white rounded-md hover:bg-blue/90 disabled:opacity-50"
+            className="px-6 py-2 bg-forest text-white rounded-md hover:bg-dark/90 disabled:opacity-50"
             disabled={loading}
           >
             Add Tag
@@ -159,7 +159,7 @@ const TagsAdminPage: React.FC = () => {
         {error && <p className="text-red mt-2">{error}</p>}
         {success && <p className="text-green-700 mt-2">{success}</p>}
       </div>
-      <div className="bg-white rounded-lg shadow-1 p-6">
+      <div className="bg-white rounded-[10px] shadow-1 p-6">
         <h2 className="text-lg font-semibold text-dark mb-4">All Tags</h2>
         {loading ? (
           <div>Loading...</div>
@@ -221,7 +221,7 @@ const TagsAdminPage: React.FC = () => {
                       <>
                         <button
                           onClick={() => startEdit(tag)}
-                          className="px-3 py-1 bg-blue text-white rounded-md mr-2"
+                          className="px-3 py-1 bg-forest text-white rounded-md mr-2"
                         >
                           Edit
                         </button>

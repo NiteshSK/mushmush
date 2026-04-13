@@ -35,7 +35,7 @@ const NewBlogPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg shadow-1 p-6">
+      <div className="bg-white rounded-[10px] shadow-1 p-6">
         <h1 className="text-2xl font-semibold text-dark mb-1">Create New Blog Post</h1>
         <p className="text-gray-6">Write and publish a new blog post with rich content and images.</p>
       </div>

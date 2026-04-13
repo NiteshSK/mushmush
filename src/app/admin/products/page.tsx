@@ -33,19 +33,19 @@ const ProductsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg shadow-1 p-6 flex items-center justify-between gap-4 flex-wrap">
+      <div className="bg-white rounded-[10px] shadow-1 p-6 flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-semibold text-dark mb-1">Product Management</h1>
           <p className="text-gray-6">Create, edit and manage products, content and images.</p>
         </div>
-        <Link href="/admin/products/new" className="inline-flex items-center px-4 py-2 rounded-md bg-blue text-white">+ New Product</Link>
+        <Link href="/admin/products/new" className="inline-flex items-center px-4 py-2 rounded-md bg-forest text-white">+ New Product</Link>
       </div>
 
-      <div className="bg-white rounded-lg shadow-1 p-4 flex items-center gap-3">
+      <div className="bg-white rounded-[10px] shadow-1 p-4 flex items-center gap-3">
         <input value={query} onChange={(e)=>setQuery(e.target.value)} placeholder="Search by title" className="flex-1 border rounded-md px-3 py-2" />
       </div>
 
-      <div className="bg-white rounded-lg shadow-1">
+      <div className="bg-white rounded-[10px] shadow-1">
         {loading ? (
           <div className="p-6">Loading...</div>
         ) : (

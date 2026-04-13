@@ -246,7 +246,7 @@ const OrderRow = ({
                     }
                     // PENDING
                     return (
-                      <div className="flex items-center gap-2 bg-blue/5 border border-blue/15 rounded-lg px-3 py-2.5">
+                      <div className="flex items-center gap-2 bg-blue/5 border border-forest/15 rounded-lg px-3 py-2.5">
                         <StatusIcon name="clock" size={14} />
                         <div>
                           <p className="text-xs font-medium text-blue">Payment Submitted — Awaiting Verification</p>

@@ -155,7 +155,7 @@ const DiscountsPage: React.FC = () => {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="bg-white rounded-lg shadow-1 p-6">
+        <div className="bg-white rounded-[10px] shadow-1 p-6">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-3 rounded w-1/3 mb-2"></div>
             <div className="h-4 bg-gray-3 rounded w-2/3"></div>
@@ -168,7 +168,7 @@ const DiscountsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="bg-white rounded-lg shadow-1 p-6">
+      <div className="bg-white rounded-[10px] shadow-1 p-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-dark mb-2">Discount Management</h1>
@@ -182,7 +182,7 @@ const DiscountsPage: React.FC = () => {
               setEditingDiscount(null);
               resetForm();
             }}
-            className="bg-blue text-white px-4 py-2 rounded-md hover:bg-blue-dark transition-colors"
+            className="bg-forest text-white px-4 py-2 rounded-md hover:bg-dark-dark transition-colors"
           >
             Create Discount
           </button>
@@ -191,7 +191,7 @@ const DiscountsPage: React.FC = () => {
 
       {/* Create/Edit Form */}
       {showCreateForm && (
-        <div className="bg-white rounded-lg shadow-1 p-6">
+        <div className="bg-white rounded-[10px] shadow-1 p-6">
           <h2 className="text-xl font-semibold text-dark mb-4">
             {editingDiscount ? 'Edit Discount' : 'Create New Discount'}
           </h2>
@@ -289,7 +289,7 @@ const DiscountsPage: React.FC = () => {
             <div className="flex gap-3 pt-4">
               <button
                 type="submit"
-                className="bg-blue text-white px-6 py-2 rounded-md hover:bg-blue-dark transition-colors"
+                className="bg-forest text-white px-6 py-2 rounded-md hover:bg-dark-dark transition-colors"
               >
                 {editingDiscount ? 'Update Discount' : 'Create Discount'}
               </button>
@@ -310,7 +310,7 @@ const DiscountsPage: React.FC = () => {
       )}
 
       {/* Discounts List */}
-      <div className="bg-white rounded-lg shadow-1 overflow-hidden">
+      <div className="bg-white rounded-[10px] shadow-1 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-3">
           <h2 className="text-lg font-semibold text-dark">Active Discounts ({discounts.length})</h2>
         </div>
@@ -324,7 +324,7 @@ const DiscountsPage: React.FC = () => {
                 setShowCreateForm(true);
                 resetForm();
               }}
-              className="bg-blue text-white px-4 py-2 rounded-md hover:bg-blue-dark transition-colors"
+              className="bg-forest text-white px-4 py-2 rounded-md hover:bg-dark-dark transition-colors"
             >
               Create First Discount
             </button>

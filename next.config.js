@@ -49,8 +49,15 @@ const nextConfig = {
       'source.unsplash.com',
       'via.placeholder.com',
       'lh3.googleusercontent.com', // Google images
+      '*.public.blob.vercel-storage.com', // Vercel Blob
     ],
     remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '*.public.blob.vercel-storage.com',
+        port: '',
+        pathname: '/**',
+      },
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',

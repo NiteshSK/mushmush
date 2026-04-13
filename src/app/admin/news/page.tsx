@@ -156,14 +156,14 @@ const NewsPage: React.FC = () => {
         <h1 className="text-3xl font-bold text-gray-900">News Management</h1>
         <Link
           href="/admin/news/create"
-          className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark"
+          className="inline-flex font-medium text-white bg-forest py-2.5 px-6 rounded-md text-sm font-medium hover:bg-dark transition-colors"
         >
           Create New Article
         </Link>
       </div>
 
       {/* Filters and Search */}
-      <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
+      <div className="bg-white rounded-[10px] shadow-1 border p-6 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -174,7 +174,7 @@ const NewsPage: React.FC = () => {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search news articles..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           
@@ -185,7 +185,7 @@ const NewsPage: React.FC = () => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as "all" | "published" | "draft")}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All</option>
               <option value="published">Published</option>
@@ -200,7 +200,7 @@ const NewsPage: React.FC = () => {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as "createdAt" | "title" | "views")}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="createdAt">Date Created</option>
               <option value="title">Title</option>
@@ -215,7 +215,7 @@ const NewsPage: React.FC = () => {
             <select
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value as "asc" | "desc")}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="desc">Descending</option>
               <option value="asc">Ascending</option>
@@ -225,7 +225,7 @@ const NewsPage: React.FC = () => {
       </div>
 
       {/* News List */}
-      <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+      <div className="bg-white rounded-[10px] shadow-1 border overflow-hidden">
         {filteredAndSorted.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
             {query || statusFilter !== "all" 

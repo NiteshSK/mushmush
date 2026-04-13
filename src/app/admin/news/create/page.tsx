@@ -47,7 +47,7 @@ const CreateNewsPage: React.FC = () => {
         <p className="mt-2 text-gray-600">Write and publish a new news article</p>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border p-6">
+      <div className="bg-white rounded-[10px] shadow-1 border p-6">
         <NewsEditor
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}

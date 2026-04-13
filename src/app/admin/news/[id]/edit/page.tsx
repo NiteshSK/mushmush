@@ -105,7 +105,7 @@ const EditNewsPage: React.FC = () => {
           <h1 className="text-2xl font-bold text-gray-900 mb-4">News Article Not Found</h1>
           <button
             onClick={() => router.push('/admin/news')}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+            className="bg-forest text-white px-6 py-2.5 rounded-md text-sm font-medium hover:bg-dark transition-colors"
           >
             Back to News
           </button>
@@ -121,7 +121,7 @@ const EditNewsPage: React.FC = () => {
         <p className="mt-2 text-gray-600">Update your news article</p>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border p-6">
+      <div className="bg-white rounded-[10px] shadow-1 border p-6">
         <NewsEditor
           initialData={newsData}
           onSubmit={handleSubmit}
