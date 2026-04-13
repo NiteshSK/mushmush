@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import Breadcrumb from "@/components/Common/Breadcrumb";
 import { INDIAN_STATES, MAX_ADDRESSES_PER_USER } from "@/lib/constants";
+import { validateStreet, validateCity, validatePincode } from "@/lib/validation";
 
 interface Address {
   id: string;
@@ -27,6 +28,7 @@ export default function AddressesPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
   const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const router = useRouter();
 
   const [formData, setFormData] = useState({
@@ -68,11 +70,25 @@ export default function AddressesPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!/^\d{6}$/.test(formData.zip)) {
-      toast.error("PIN code must be 6 digits");
+    const newErrors: { [key: string]: string } = {};
+
+    const streetErr = validateStreet(formData.street);
+    if (streetErr) newErrors.street = streetErr;
+
+    const cityErr = validateCity(formData.city);
+    if (cityErr) newErrors.city = cityErr;
+
+    if (!formData.state) newErrors.state = 'State is required';
+
+    const pinErr = validatePincode(formData.zip);
+    if (pinErr) newErrors.zip = pinErr;
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
 
+    setErrors({});
     setSaving(true);
     try {
       const url = editingAddress
@@ -175,6 +191,7 @@ export default function AddressesPage() {
       type: "BOTH",
       isDefault: false,
     });
+    setErrors({});
   };
 
   if (status === "loading" || loading) {
@@ -400,14 +417,15 @@ export default function AddressesPage() {
                 </label>
                 <input
                   type="text"
-                  required
                   value={formData.street}
-                  onChange={(e) =>
-                    setFormData({ ...formData, street: e.target.value })
-                  }
-                  className={inputClass}
+                  onChange={(e) => {
+                    setFormData({ ...formData, street: e.target.value });
+                    if (errors.street) setErrors(prev => ({ ...prev, street: '' }));
+                  }}
+                  className={`${inputClass} ${errors.street ? '!border-red-500' : ''}`}
                   placeholder="House no, Building name, Street"
                 />
+                {errors.street && <p className="text-red-500 text-xs mt-1">{errors.street}</p>}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -417,14 +435,15 @@ export default function AddressesPage() {
                   </label>
                   <input
                     type="text"
-                    required
                     value={formData.city}
-                    onChange={(e) =>
-                      setFormData({ ...formData, city: e.target.value })
-                    }
-                    className={inputClass}
+                    onChange={(e) => {
+                      setFormData({ ...formData, city: e.target.value });
+                      if (errors.city) setErrors(prev => ({ ...prev, city: '' }));
+                    }}
+                    className={`${inputClass} ${errors.city ? '!border-red-500' : ''}`}
                     placeholder="Enter city"
                   />
+                  {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
                 </div>
 
                 <div>
@@ -432,12 +451,12 @@ export default function AddressesPage() {
                     State <span className="text-red">*</span>
                   </label>
                   <select
-                    required
                     value={formData.state}
-                    onChange={(e) =>
-                      setFormData({ ...formData, state: e.target.value })
-                    }
-                    className={inputClass}
+                    onChange={(e) => {
+                      setFormData({ ...formData, state: e.target.value });
+                      if (errors.state) setErrors(prev => ({ ...prev, state: '' }));
+                    }}
+                    className={`${inputClass} ${errors.state ? '!border-red-500' : ''}`}
                   >
                     <option value="">Select State</option>
                     {INDIAN_STATES.map((state) => (
@@ -446,6 +465,7 @@ export default function AddressesPage() {
                       </option>
                     ))}
                   </select>
+                  {errors.state && <p className="text-red-500 text-xs mt-1">{errors.state}</p>}
                 </div>
               </div>
 
@@ -456,19 +476,19 @@ export default function AddressesPage() {
                   </label>
                   <input
                     type="text"
-                    required
-                    pattern="\d{6}"
                     maxLength={6}
                     value={formData.zip}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       setFormData({
                         ...formData,
                         zip: e.target.value.replace(/\D/g, ""),
-                      })
-                    }
-                    className={inputClass}
+                      });
+                      if (errors.zip) setErrors(prev => ({ ...prev, zip: '' }));
+                    }}
+                    className={`${inputClass} ${errors.zip ? '!border-red-500' : ''}`}
                     placeholder="6-digit PIN code"
                   />
+                  {errors.zip && <p className="text-red-500 text-xs mt-1">{errors.zip}</p>}
                 </div>
 
                 <div>

@@ -75,18 +75,20 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    // Send welcome email
+    // Send welcome email (non-blocking — don't fail registration if email fails)
     try {
       const welcomeEmail = emailTemplates.welcome(name);
-      await sendEmail({
+      const welcomeResult = await sendEmail({
         to: email,
         subject: welcomeEmail.subject,
         html: welcomeEmail.html,
         text: welcomeEmail.text
       });
+      if (!welcomeResult.success) {
+        console.error('Failed to send welcome email:', welcomeResult.error);
+      }
     } catch (emailError) {
       console.error('Failed to send welcome email:', emailError);
-      // Don't fail registration if email fails
     }
 
     // Send admin + concierge notification

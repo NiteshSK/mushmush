@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { toast } from "react-hot-toast";
 import { INDIAN_STATES } from "@/lib/constants";
+import { validateStreet, validateCity, validatePincode } from "@/lib/validation";
 
 interface AddressFormData {
   street: string;
@@ -34,19 +35,30 @@ const AddressFormModal: React.FC<AddressFormModalProps> = ({
     isDefault: false
   });
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.street || !formData.city || !formData.state || !formData.zip) {
-      toast.error("Please fill in all required fields");
+    const newErrors: { [key: string]: string } = {};
+
+    const streetErr = validateStreet(formData.street);
+    if (streetErr) newErrors.street = streetErr;
+
+    const cityErr = validateCity(formData.city);
+    if (cityErr) newErrors.city = cityErr;
+
+    if (!formData.state) newErrors.state = 'State is required';
+
+    const pinErr = validatePincode(formData.zip);
+    if (pinErr) newErrors.zip = pinErr;
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
 
-    if (!/^\d{6}$/.test(formData.zip)) {
-      toast.error("PIN code must be 6 digits");
-      return;
-    }
+    setErrors({});
 
     setLoading(true);
     try {
@@ -71,6 +83,7 @@ const AddressFormModal: React.FC<AddressFormModalProps> = ({
           country: "India",
           isDefault: false
         });
+        setErrors({});
       } else {
         // Handle specific error codes
         if (data.code === 'ADDRESS_LIMIT_REACHED') {
@@ -118,14 +131,15 @@ const AddressFormModal: React.FC<AddressFormModalProps> = ({
             <input
               type="text"
               id="street"
-              required
               value={formData.street}
               onChange={(e) => {
                 setFormData({ ...formData, street: e.target.value });
+                if (errors.street) setErrors(prev => ({ ...prev, street: '' }));
               }}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest-500 focus:border-transparent"
+              className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:border-transparent ${errors.street ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-forest-500'}`}
               placeholder="House no, Building name, Street"
             />
+            {errors.street && <p className="text-red-500 text-xs mt-1">{errors.street}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -136,11 +150,14 @@ const AddressFormModal: React.FC<AddressFormModalProps> = ({
               <input
                 type="text"
                 id="city"
-                required
                 value={formData.city}
-                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest-500 focus:border-transparent"
+                onChange={(e) => {
+                  setFormData({ ...formData, city: e.target.value });
+                  if (errors.city) setErrors(prev => ({ ...prev, city: '' }));
+                }}
+                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:border-transparent ${errors.city ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-forest-500'}`}
               />
+              {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
             </div>
 
             <div>
@@ -149,12 +166,12 @@ const AddressFormModal: React.FC<AddressFormModalProps> = ({
               </label>
               <select
                 id="state"
-                required
                 value={formData.state}
                 onChange={(e) => {
                   setFormData({ ...formData, state: e.target.value });
+                  if (errors.state) setErrors(prev => ({ ...prev, state: '' }));
                 }}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest-500 focus:border-transparent"
+                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:border-transparent ${errors.state ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-forest-500'}`}
               >
                 <option value="">Select State</option>
                 {INDIAN_STATES.map((state) => (
@@ -163,6 +180,7 @@ const AddressFormModal: React.FC<AddressFormModalProps> = ({
                   </option>
                 ))}
               </select>
+              {errors.state && <p className="text-red-500 text-xs mt-1">{errors.state}</p>}
             </div>
           </div>
 
@@ -174,14 +192,16 @@ const AddressFormModal: React.FC<AddressFormModalProps> = ({
               <input
                 type="text"
                 id="zip"
-                required
-                pattern="\d{6}"
                 maxLength={6}
                 value={formData.zip}
-                onChange={(e) => setFormData({ ...formData, zip: e.target.value.replace(/\D/g, '') })}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest-500 focus:border-transparent"
+                onChange={(e) => {
+                  setFormData({ ...formData, zip: e.target.value.replace(/\D/g, '') });
+                  if (errors.zip) setErrors(prev => ({ ...prev, zip: '' }));
+                }}
+                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:border-transparent ${errors.zip ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-forest-500'}`}
                 placeholder="6-digit PIN code"
               />
+              {errors.zip && <p className="text-red-500 text-xs mt-1">{errors.zip}</p>}
             </div>
 
             <div>

@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import Breadcrumb from "@/components/Common/Breadcrumb";
+import { validateName, validateEmail, validatePhone, validateRequired, validateMaxLength } from "@/lib/validation";
+
+type ContactErrors = { name?: string; email?: string; phone?: string; subject?: string; message?: string };
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -11,6 +14,7 @@ export default function ContactPage() {
     subject: "",
     message: "",
   });
+  const [errors, setErrors] = useState<ContactErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{
     type: "success" | "error" | null;
@@ -25,10 +29,40 @@ export default function ContactPage() {
       ...prev,
       [name]: value,
     }));
+    if (errors[name as keyof ContactErrors]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const newErrors: ContactErrors = {};
+    const nameErr = validateName(formData.name);
+    if (nameErr) newErrors.name = nameErr;
+
+    const emailErr = validateEmail(formData.email);
+    if (emailErr) newErrors.email = emailErr;
+
+    const phoneErr = validatePhone(formData.phone);
+    if (phoneErr) newErrors.phone = phoneErr;
+
+    const subjectErr = validateRequired(formData.subject, 'Subject');
+    if (subjectErr) newErrors.subject = subjectErr;
+
+    const msgErr = validateRequired(formData.message, 'Message');
+    if (msgErr) newErrors.message = msgErr;
+    else {
+      const maxErr = validateMaxLength(formData.message, 1000, 'Message');
+      if (maxErr) newErrors.message = maxErr;
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
     setIsSubmitting(true);
     setSubmitStatus({ type: null, message: "" });
 
@@ -47,6 +81,7 @@ export default function ContactPage() {
           message: "Message sent successfully! We'll get back to you soon.",
         });
         setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
+        setErrors({});
       } else {
         setSubmitStatus({
           type: "error",
@@ -152,7 +187,7 @@ export default function ContactPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
                       <label htmlFor="name" className="block text-xs font-medium uppercase tracking-wider text-gray-400 mb-2">
-                        Name
+                        Name <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -160,14 +195,14 @@ export default function ContactPage() {
                         name="name"
                         value={formData.name}
                         onChange={handleInputChange}
-                        required
-                        className="w-full bg-white border border-forest/15 rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:border-forest focus:ring-1 focus:ring-forest/20 transition-colors"
+                        className={`w-full bg-white border rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:ring-1 transition-colors ${errors.name ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : 'border-forest/15 focus:border-forest focus:ring-forest/20'}`}
                         placeholder="Your name"
                       />
+                      {errors.name && <p className="text-xs text-red-500 mt-1.5">{errors.name}</p>}
                     </div>
                     <div>
                       <label htmlFor="email" className="block text-xs font-medium uppercase tracking-wider text-gray-400 mb-2">
-                        Email
+                        Email <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="email"
@@ -175,10 +210,10 @@ export default function ContactPage() {
                         name="email"
                         value={formData.email}
                         onChange={handleInputChange}
-                        required
-                        className="w-full bg-white border border-forest/15 rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:border-forest focus:ring-1 focus:ring-forest/20 transition-colors"
+                        className={`w-full bg-white border rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:ring-1 transition-colors ${errors.email ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : 'border-forest/15 focus:border-forest focus:ring-forest/20'}`}
                         placeholder="you@example.com"
                       />
+                      {errors.email && <p className="text-xs text-red-500 mt-1.5">{errors.email}</p>}
                     </div>
                   </div>
 
@@ -193,14 +228,14 @@ export default function ContactPage() {
                         name="phone"
                         value={formData.phone}
                         onChange={handleInputChange}
-                        required
-                        className="w-full bg-white border border-forest/15 rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:border-forest focus:ring-1 focus:ring-forest/20 transition-colors"
+                        className={`w-full bg-white border rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:ring-1 transition-colors ${errors.phone ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : 'border-forest/15 focus:border-forest focus:ring-forest/20'}`}
                         placeholder="+91 XXXXX XXXXX"
                       />
+                      {errors.phone && <p className="text-xs text-red-500 mt-1.5">{errors.phone}</p>}
                     </div>
                     <div>
                       <label htmlFor="subject" className="block text-xs font-medium uppercase tracking-wider text-gray-400 mb-2">
-                        Subject
+                        Subject <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -208,27 +243,27 @@ export default function ContactPage() {
                         name="subject"
                         value={formData.subject}
                         onChange={handleInputChange}
-                        required
-                        className="w-full bg-white border border-forest/15 rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:border-forest focus:ring-1 focus:ring-forest/20 transition-colors"
+                        className={`w-full bg-white border rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:ring-1 transition-colors ${errors.subject ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : 'border-forest/15 focus:border-forest focus:ring-forest/20'}`}
                         placeholder="What's this about?"
                       />
+                      {errors.subject && <p className="text-xs text-red-500 mt-1.5">{errors.subject}</p>}
                     </div>
                   </div>
 
                   <div>
                     <label htmlFor="message" className="block text-xs font-medium uppercase tracking-wider text-gray-400 mb-2">
-                      Message
+                      Message <span className="text-red-500">*</span>
                     </label>
                     <textarea
                       id="message"
                       name="message"
                       value={formData.message}
                       onChange={handleInputChange}
-                      required
                       rows={5}
-                      className="w-full bg-white border border-forest/15 rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:border-forest focus:ring-1 focus:ring-forest/20 transition-colors resize-none"
+                      className={`w-full bg-white border rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:ring-1 transition-colors resize-none ${errors.message ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : 'border-forest/15 focus:border-forest focus:ring-forest/20'}`}
                       placeholder="Tell us more..."
                     />
+                    {errors.message && <p className="text-xs text-red-500 mt-1.5">{errors.message}</p>}
                   </div>
 
                   <button

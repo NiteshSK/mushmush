@@ -1244,13 +1244,19 @@ export function generateOTP(): string {
 
 /**
  * Generate OTP email HTML
+ * @param purpose - 'signup' for email verification, 'order' for order verification
  */
-export function generateOTPEmail(otp: string, customerName: string): string {
+export function generateOTPEmail(otp: string, customerName: string, purpose: 'signup' | 'order' = 'order'): string {
+  const heading = purpose === 'signup' ? 'Verify Your Email' : 'Verify Your Order';
+  const instruction = purpose === 'signup'
+    ? 'To verify your email and complete registration, please use the following One-Time Password (OTP):'
+    : 'To complete your order, please use the following One-Time Password (OTP):';
+
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
       <!-- Header -->
       <div style="text-align: center; margin-bottom: 30px; background: linear-gradient(135deg, #5c8e61 0%, #4a7a4f 100%); padding: 30px; border-radius: 10px;">
-        <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Verify Your Order</h1>
+        <h1 style="color: #ffffff; margin: 0; font-size: 28px;">${heading}</h1>
         <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 16px;">Kosvana - Premium Natural Products</p>
       </div>
 
@@ -1261,7 +1267,7 @@ export function generateOTPEmail(otp: string, customerName: string): string {
         </p>
 
         <p style="font-size: 16px; color: #333; margin-bottom: 30px;">
-          To complete your order, please use the following One-Time Password (OTP):
+          ${instruction}
         </p>
 
         <!-- OTP Box -->
@@ -1301,14 +1307,20 @@ export function generateOTPEmail(otp: string, customerName: string): string {
 
 /**
  * Send OTP email
+ * @param purpose - 'signup' for email verification, 'order' for order verification
  */
-export async function sendOTPEmail(email: string, otp: string, customerName: string) {
+export async function sendOTPEmail(email: string, otp: string, customerName: string, purpose: 'signup' | 'order' = 'order') {
   try {
+    const subjectMap = { signup: 'Verify Your Email - Kosvana', order: 'Your Kosvana Verification Code' };
+    const textMap = {
+      signup: `Your OTP to verify your email is: ${otp}. This OTP is valid for 5 minutes.`,
+      order: `Your OTP for order verification is: ${otp}. This OTP is valid for 10 minutes.`,
+    };
     const emailData: EmailOptions = {
       to: email,
-      subject: `Your OTP for Order Verification - ${otp}`,
-      html: generateOTPEmail(otp, customerName),
-      text: `Your OTP for order verification is: ${otp}. This OTP is valid for 10 minutes.`
+      subject: subjectMap[purpose],
+      html: generateOTPEmail(otp, customerName, purpose),
+      text: textMap[purpose],
     };
 
     const result = await sendEmail(emailData);

@@ -134,9 +134,7 @@ describe('AddressFormModal', () => {
       fireEvent.submit(submitButton.closest('form')!);
 
       await waitFor(() => {
-        const calls = (toast.error as jest.Mock).mock.calls;
-        expect(calls.length).toBeGreaterThan(0);
-        expect(calls[0][0]).toBe('PIN code must be 6 digits');
+        expect(screen.getByText(/PIN code must be exactly 6 digits/i)).toBeInTheDocument();
       });
     });
 
@@ -238,7 +236,10 @@ describe('AddressFormModal', () => {
       fireEvent.submit(submitButton.closest('form')!);
 
       await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith(expect.stringContaining('Please fill in all required fields'));
+        expect(screen.getByText(/Street address is required/i)).toBeInTheDocument();
+        expect(screen.getByText(/City is required/i)).toBeInTheDocument();
+        expect(screen.getByText(/State is required/i)).toBeInTheDocument();
+        expect(screen.getByText(/PIN code is required/i)).toBeInTheDocument();
       });
     });
 
@@ -270,9 +271,7 @@ describe('AddressFormModal', () => {
       fireEvent.submit(submitButton.closest('form')!);
 
       await waitFor(() => {
-        const calls = (toast.error as jest.Mock).mock.calls;
-        expect(calls.length).toBeGreaterThan(0);
-        expect(calls[0][0]).toBe('PIN code must be 6 digits');
+        expect(screen.getByText(/PIN code must be exactly 6 digits/i)).toBeInTheDocument();
       });
     });
 

@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { useSession } from "next-auth/react";
+import { validateEmail, validateRequired } from "@/lib/validation";
 
 const Login = () => {
   const [dropdown, setDropdown] = useState(false);
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const { data: session } = useSession();
 
   // Don't show login prompt if user is already authenticated
@@ -64,20 +66,36 @@ const Login = () => {
 
         <div className="mb-5">
           <label htmlFor="name" className="block mb-2.5">
-            Username or Email
+            Username or Email <span className="text-red">*</span>
           </label>
 
           <input
             type="text"
             name="name"
             id="name"
-            className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
+            placeholder="you@example.com"
+            onChange={(e) => {
+              const val = e.target.value;
+              if (errors.email) {
+                const err = validateEmail(val);
+                setErrors(prev => ({ ...prev, email: err || undefined }));
+              }
+            }}
+            onBlur={(e) => {
+              const val = e.target.value;
+              if (val) {
+                const err = validateEmail(val);
+                setErrors(prev => ({ ...prev, email: err || undefined }));
+              }
+            }}
+            className={`rounded-md border ${errors.email ? 'border-red-500' : 'border-gray-3'} bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20`}
           />
+          {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
         </div>
 
         <div className="mb-5">
           <label htmlFor="password" className="block mb-2.5">
-            Password
+            Password <span className="text-red">*</span>
           </label>
 
           <input
@@ -85,8 +103,20 @@ const Login = () => {
             name="password"
             id="password"
             autoComplete="on"
-            className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
+            placeholder="Enter your password"
+            onChange={() => {
+              if (errors.password) setErrors(prev => ({ ...prev, password: undefined }));
+            }}
+            onBlur={(e) => {
+              const val = e.target.value;
+              if (val) {
+                const err = validateRequired(val, 'Password');
+                setErrors(prev => ({ ...prev, password: err || undefined }));
+              }
+            }}
+            className={`rounded-md border ${errors.password ? 'border-red-500' : 'border-gray-3'} bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20`}
           />
+          {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
         </div>
 
         <button

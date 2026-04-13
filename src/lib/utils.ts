@@ -31,8 +31,8 @@ export const getTrainingProgramPrice = (program: {
 
   // Check if Early Bird offer is available and valid
   if (program.hasEarlyBirdOffer &&
-    program.earlyBirdPrice &&
-    program.originalPrice &&
+    program.earlyBirdPrice != null &&
+    program.originalPrice != null &&
     program.earlyBirdEndDate) {
 
     const now = new Date();
@@ -47,7 +47,7 @@ export const getTrainingProgramPrice = (program: {
   }
 
   // Fall back to the original price
-  return program.originalPrice || program.price;
+  return program.originalPrice ?? program.price;
 };
 
 /**
@@ -67,8 +67,8 @@ export const isEarlyBirdOfferValid = (program: {
   }
 
   if (!program.hasEarlyBirdOffer ||
-    !program.earlyBirdPrice ||
-    !program.originalPrice ||
+    program.earlyBirdPrice == null ||
+    program.originalPrice == null ||
     !program.earlyBirdEndDate) {
     return false;
   }

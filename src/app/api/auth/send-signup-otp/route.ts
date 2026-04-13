@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
 
     // Send OTP via email + SMS in parallel
     const sendPromises: Promise<any>[] = [
-      sendOTPEmail(email, otp, name),
+      sendOTPEmail(email, otp, name, 'signup'),
     ];
 
     if (phone && isSMSConfigured()) {

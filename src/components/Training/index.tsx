@@ -237,7 +237,7 @@ const TrainingPrograms = () => {
                         </div>
                       ) : (
                         <div className="text-2xl md:text-3xl font-bold text-green-600">
-                          ₹{(program.originalPrice || program.price).toLocaleString()}
+                          ₹{(program.originalPrice ?? program.price).toLocaleString()}
                         </div>
                       )}
                       <div className="text-sm text-gray-500">

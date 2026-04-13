@@ -515,6 +515,62 @@ describe('ShippingNew', () => {
       });
     });
 
+    it('should validate street address', async () => {
+      (global.fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        json: async () => ({ addresses: [] })
+      });
+
+      render(
+        <ShippingNew
+          billingAddress={mockBillingAddress}
+          onAddressChange={mockOnAddressChange}
+        />
+      );
+
+      const checkbox = await screen.findByRole('checkbox', { name: /Ship to billing address/i });
+      fireEvent.click(checkbox);
+
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText(/House number and street name/i)).toBeInTheDocument();
+      });
+
+      const streetInput = screen.getByPlaceholderText(/House number and street name/i);
+      await userEvent.type(streetInput, 'Hi');
+
+      await waitFor(() => {
+        expect(screen.getByText(/Please enter a complete street address/i)).toBeInTheDocument();
+      });
+    });
+
+    it('should validate city name', async () => {
+      (global.fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        json: async () => ({ addresses: [] })
+      });
+
+      render(
+        <ShippingNew
+          billingAddress={mockBillingAddress}
+          onAddressChange={mockOnAddressChange}
+        />
+      );
+
+      const checkbox = await screen.findByRole('checkbox', { name: /Ship to billing address/i });
+      fireEvent.click(checkbox);
+
+      await waitFor(() => {
+        expect(screen.getByLabelText(/City/i)).toBeInTheDocument();
+      });
+
+      const cityInput = screen.getByLabelText(/City/i);
+      await userEvent.type(cityInput, 'City123');
+
+      await waitFor(() => {
+        expect(screen.getByText(/City contains invalid characters/i)).toBeInTheDocument();
+      });
+    });
+
     it('should validate PIN code format', async () => {
       (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,

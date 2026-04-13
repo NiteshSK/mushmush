@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import AddressFormModal from "./AddressFormModal";
 import Link from "next/link";
 import { INDIAN_STATES } from "@/lib/constants";
+import { validateName, validateStreet, validateCity } from "@/lib/validation";
 
 interface Address {
   id: string;
@@ -116,6 +117,30 @@ const BillingNew: React.FC<BillingNewProps> = ({ onAddressChange }) => {
     setErrors(prev => ({ ...prev, email: error }));
   };
 
+  const handleFirstNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const error = validateName(value, 'First name');
+    setErrors(prev => ({ ...prev, firstName: value ? (error || '') : '' }));
+  };
+
+  const handleLastNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const error = validateName(value, 'Last name');
+    setErrors(prev => ({ ...prev, lastName: value ? (error || '') : '' }));
+  };
+
+  const handleStreetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const error = validateStreet(value);
+    setErrors(prev => ({ ...prev, street: value ? (error || '') : '' }));
+  };
+
+  const handleCityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const error = validateCity(value);
+    setErrors(prev => ({ ...prev, city: value ? (error || '') : '' }));
+  };
+
   if (loading) {
     return (
       <div className="mt-9">
@@ -153,8 +178,12 @@ const BillingNew: React.FC<BillingNewProps> = ({ onAddressChange }) => {
                   id="firstName"
                   required
                   placeholder="Your first name"
-                  className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
+                  onChange={handleFirstNameChange}
+                  className={`rounded-md border ${errors.firstName ? 'border-red-500' : 'border-gray-3'} bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20`}
                 />
+                {errors.firstName && (
+                  <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>
+                )}
               </div>
               <div className="w-full">
                 <label htmlFor="lastName" className="block mb-2.5">
@@ -166,8 +195,12 @@ const BillingNew: React.FC<BillingNewProps> = ({ onAddressChange }) => {
                   id="lastName"
                   required
                   placeholder="Your last name"
-                  className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
+                  onChange={handleLastNameChange}
+                  className={`rounded-md border ${errors.lastName ? 'border-red-500' : 'border-gray-3'} bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20`}
                 />
+                {errors.lastName && (
+                  <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>
+                )}
               </div>
             </div>
 
@@ -317,8 +350,12 @@ const BillingNew: React.FC<BillingNewProps> = ({ onAddressChange }) => {
                     id="billingAddress"
                     required
                     placeholder="House number and street name"
-                    className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
+                    onChange={handleStreetChange}
+                    className={`rounded-md border ${errors.street ? 'border-red-500' : 'border-gray-3'} bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20`}
                   />
+                  {errors.street && (
+                    <p className="text-red-500 text-xs mt-1">{errors.street}</p>
+                  )}
                 </div>
 
                 <div className="flex flex-col lg:flex-row gap-5 sm:gap-8">
@@ -332,8 +369,12 @@ const BillingNew: React.FC<BillingNewProps> = ({ onAddressChange }) => {
                       id="billingCity"
                       required
                       placeholder="Enter city name"
-                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
+                      onChange={handleCityChange}
+                      className={`rounded-md border ${errors.city ? 'border-red-500' : 'border-gray-3'} bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20`}
                     />
+                    {errors.city && (
+                      <p className="text-red-500 text-xs mt-1">{errors.city}</p>
+                    )}
                   </div>
                   <div className="w-full">
                     <label htmlFor="billingState" className="block mb-2.5">

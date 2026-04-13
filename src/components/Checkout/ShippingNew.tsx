@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import AddressFormModal from "./AddressFormModal";
 import { INDIAN_STATES } from "@/lib/constants";
+import { validateStreet, validateCity } from "@/lib/validation";
 
 interface Address {
   id: string;
@@ -105,6 +106,18 @@ const ShippingNew: React.FC<ShippingNewProps> = ({ billingAddress, onAddressChan
     e.target.value = value;
     const error = validateZip(value);
     setErrors(prev => ({ ...prev, zip: error }));
+  };
+
+  const handleStreetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const error = validateStreet(value);
+    setErrors(prev => ({ ...prev, street: value ? (error || '') : '' }));
+  };
+
+  const handleCityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const error = validateCity(value);
+    setErrors(prev => ({ ...prev, city: value ? (error || '') : '' }));
   };
 
   if (loading) {
@@ -235,8 +248,12 @@ const ShippingNew: React.FC<ShippingNewProps> = ({ billingAddress, onAddressChan
                       id="shippingAddress"
                       required
                       placeholder="House number and street name"
-                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
+                      onChange={handleStreetChange}
+                      className={`rounded-md border ${errors.street ? 'border-red-500' : 'border-gray-3'} bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20`}
                     />
+                    {errors.street && (
+                      <p className="text-red-500 text-xs mt-1">{errors.street}</p>
+                    )}
                   </div>
 
                   <div className="flex flex-col lg:flex-row gap-5 sm:gap-8">
@@ -250,8 +267,12 @@ const ShippingNew: React.FC<ShippingNewProps> = ({ billingAddress, onAddressChan
                         id="shippingCity"
                         required
                         placeholder="Enter city name"
-                        className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20"
+                        onChange={handleCityChange}
+                        className={`rounded-md border ${errors.city ? 'border-red-500' : 'border-gray-3'} bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20`}
                       />
+                      {errors.city && (
+                        <p className="text-red-500 text-xs mt-1">{errors.city}</p>
+                      )}
                     </div>
                     <div className="w-full">
                       <label htmlFor="shippingState" className="block mb-2.5">

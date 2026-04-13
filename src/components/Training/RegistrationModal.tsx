@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import { toast } from "react-hot-toast";
-import { isEarlyBirdOfferValid } from "@/lib/utils";
+import { isEarlyBirdOfferValid, getTrainingProgramPrice } from "@/lib/utils";
+import { validateName, validateEmail, validatePhone, validateRequired, validatePincode, validateCity, validateStreet } from "@/lib/validation";
 
 interface TrainingProgram {
     id: number;
@@ -47,9 +48,59 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({
         specialRequirements: "",
     });
     const [loading, setLoading] = useState(false);
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+    const handleChange = (field: string, value: string) => {
+        if (field.startsWith('address.')) {
+            const addressField = field.split('.')[1];
+            setFormData({
+                ...formData,
+                participantAddress: { ...formData.participantAddress, [addressField]: value }
+            });
+        } else {
+            setFormData({ ...formData, [field]: value });
+        }
+        if (errors[field]) {
+            setErrors(prev => ({ ...prev, [field]: '' }));
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        const newErrors: { [key: string]: string } = {};
+
+        const nameErr = validateName(formData.participantName, 'Full name');
+        if (nameErr) newErrors.participantName = nameErr;
+
+        const emailErr = validateEmail(formData.participantEmail);
+        if (emailErr) newErrors.participantEmail = emailErr;
+
+        const phoneErr = validatePhone(formData.participantPhone);
+        if (!formData.participantPhone.trim()) {
+            newErrors.participantPhone = 'Phone number is required';
+        } else if (phoneErr) {
+            newErrors.participantPhone = phoneErr;
+        }
+
+        const streetErr = validateStreet(formData.participantAddress.street);
+        if (streetErr) newErrors['address.street'] = streetErr;
+
+        const cityErr = validateCity(formData.participantAddress.city);
+        if (cityErr) newErrors['address.city'] = cityErr;
+
+        const stateErr = validateRequired(formData.participantAddress.state, 'State');
+        if (stateErr) newErrors['address.state'] = stateErr;
+
+        const pincodeErr = validatePincode(formData.participantAddress.pincode);
+        if (pincodeErr) newErrors['address.pincode'] = pincodeErr;
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
+
+        setErrors({});
         setLoading(true);
 
         try {
@@ -119,10 +170,7 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({
                                 <h3 className="font-semibold">{program.name}</h3>
                                 <p className="text-sm text-gray-600">
                                     {program.duration} days • {program.dailyHours} • ₹
-                                    {(isEarlyBirdValid
-                                        ? program.earlyBirdPrice
-                                        : program.originalPrice || program.price
-                                    )?.toLocaleString()}
+                                    {getTrainingProgramPrice(program).toLocaleString()}
                                 </p>
                             </div>
                         </div>
@@ -137,10 +185,10 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({
                                 <input
                                     type="text"
                                     value={formData.participantName}
-                                    onChange={(e) => setFormData({ ...formData, participantName: e.target.value })}
-                                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    required
+                                    onChange={(e) => handleChange('participantName', e.target.value)}
+                                    className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${errors.participantName ? 'border-red-400 focus:ring-red-200' : 'border-gray-300 focus:ring-blue-500'}`}
                                 />
+                                {errors.participantName && <p className="text-xs text-red-500 mt-1">{errors.participantName}</p>}
                             </div>
 
                             <div>
@@ -150,10 +198,10 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({
                                 <input
                                     type="email"
                                     value={formData.participantEmail}
-                                    onChange={(e) => setFormData({ ...formData, participantEmail: e.target.value })}
-                                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    required
+                                    onChange={(e) => handleChange('participantEmail', e.target.value)}
+                                    className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${errors.participantEmail ? 'border-red-400 focus:ring-red-200' : 'border-gray-300 focus:ring-blue-500'}`}
                                 />
+                                {errors.participantEmail && <p className="text-xs text-red-500 mt-1">{errors.participantEmail}</p>}
                             </div>
                         </div>
 
@@ -165,10 +213,15 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({
                                 <input
                                     type="tel"
                                     value={formData.participantPhone}
-                                    onChange={(e) => setFormData({ ...formData, participantPhone: e.target.value })}
-                                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    required
+                                    onChange={(e) => {
+                                        const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                                        handleChange('participantPhone', val);
+                                    }}
+                                    maxLength={10}
+                                    className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${errors.participantPhone ? 'border-red-400 focus:ring-red-200' : 'border-gray-300 focus:ring-blue-500'}`}
+                                    placeholder="10-digit mobile number"
                                 />
+                                {errors.participantPhone && <p className="text-xs text-red-500 mt-1">{errors.participantPhone}</p>}
                             </div>
 
                             <div>
@@ -189,51 +242,51 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({
                                 Address *
                             </label>
                             <div className="space-y-3">
-                                <input
-                                    type="text"
-                                    placeholder="Street Address"
-                                    value={formData.participantAddress.street}
-                                    onChange={(e) => setFormData({
-                                        ...formData,
-                                        participantAddress: { ...formData.participantAddress, street: e.target.value }
-                                    })}
-                                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    required
-                                />
+                                <div>
+                                    <input
+                                        type="text"
+                                        placeholder="Street Address"
+                                        value={formData.participantAddress.street}
+                                        onChange={(e) => handleChange('address.street', e.target.value)}
+                                        className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${errors['address.street'] ? 'border-red-400 focus:ring-red-200' : 'border-gray-300 focus:ring-blue-500'}`}
+                                    />
+                                    {errors['address.street'] && <p className="text-xs text-red-500 mt-1">{errors['address.street']}</p>}
+                                </div>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-3">
-                                    <input
-                                        type="text"
-                                        placeholder="City"
-                                        value={formData.participantAddress.city}
-                                        onChange={(e) => setFormData({
-                                            ...formData,
-                                            participantAddress: { ...formData.participantAddress, city: e.target.value }
-                                        })}
-                                        className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        required
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="State"
-                                        value={formData.participantAddress.state}
-                                        onChange={(e) => setFormData({
-                                            ...formData,
-                                            participantAddress: { ...formData.participantAddress, state: e.target.value }
-                                        })}
-                                        className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        required
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="PIN Code"
-                                        value={formData.participantAddress.pincode}
-                                        onChange={(e) => setFormData({
-                                            ...formData,
-                                            participantAddress: { ...formData.participantAddress, pincode: e.target.value }
-                                        })}
-                                        className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        required
-                                    />
+                                    <div>
+                                        <input
+                                            type="text"
+                                            placeholder="City"
+                                            value={formData.participantAddress.city}
+                                            onChange={(e) => handleChange('address.city', e.target.value)}
+                                            className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${errors['address.city'] ? 'border-red-400 focus:ring-red-200' : 'border-gray-300 focus:ring-blue-500'}`}
+                                        />
+                                        {errors['address.city'] && <p className="text-xs text-red-500 mt-1">{errors['address.city']}</p>}
+                                    </div>
+                                    <div>
+                                        <input
+                                            type="text"
+                                            placeholder="State"
+                                            value={formData.participantAddress.state}
+                                            onChange={(e) => handleChange('address.state', e.target.value)}
+                                            className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${errors['address.state'] ? 'border-red-400 focus:ring-red-200' : 'border-gray-300 focus:ring-blue-500'}`}
+                                        />
+                                        {errors['address.state'] && <p className="text-xs text-red-500 mt-1">{errors['address.state']}</p>}
+                                    </div>
+                                    <div>
+                                        <input
+                                            type="text"
+                                            placeholder="PIN Code"
+                                            value={formData.participantAddress.pincode}
+                                            onChange={(e) => {
+                                                const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+                                                handleChange('address.pincode', val);
+                                            }}
+                                            maxLength={6}
+                                            className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${errors['address.pincode'] ? 'border-red-400 focus:ring-red-200' : 'border-gray-300 focus:ring-blue-500'}`}
+                                        />
+                                        {errors['address.pincode'] && <p className="text-xs text-red-500 mt-1">{errors['address.pincode']}</p>}
+                                    </div>
                                 </div>
                             </div>
                         </div>

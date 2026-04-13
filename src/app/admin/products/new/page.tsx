@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import ImageUploadField from "@/components/Admin/ImageUploadField";
 
 type Category = { id: number; title: string; slug: string };
-type ImageJson = { thumbnails: string[]; previews: string[] };
 
 const NewProductPage: React.FC = () => {
   const router = useRouter();
@@ -19,7 +18,7 @@ const NewProductPage: React.FC = () => {
   const [measurementType, setMeasurementType] = useState("gm");
   const [inStock, setInStock] = useState(true);
   const [featured, setFeatured] = useState(false);
-  const [imgs, setImgs] = useState<ImageJson>({ thumbnails: [""], previews: [""] });
+  const [images, setImages] = useState<string[]>([""]);
   const [specifications, setSpecifications] = useState<string[]>([""]);
   const [howToConsume, setHowToConsume] = useState<string[]>([""]);
   const [additionalInfo, setAdditionalInfo] = useState<{ label: string; value: string }[]>([
@@ -36,16 +35,11 @@ const NewProductPage: React.FC = () => {
 
   const canSave = useMemo(() => title.trim().length > 0 && description.trim().length > 0 && price > 0, [title, description, price]);
 
-  const updateImageArray = (key: keyof ImageJson, index: number, value: string) => {
-    setImgs((prev) => {
-      const arr = [...prev[key]];
-      arr[index] = value;
-      return { ...prev, [key]: arr } as ImageJson;
-    });
+  const updateImage = (index: number, value: string) => {
+    setImages((prev) => prev.map((img, i) => (i === index ? value : img)));
   };
-  const addImageField = (key: keyof ImageJson) => setImgs((prev) => ({ ...prev, [key]: [...prev[key], ""] }));
-  const removeImageField = (key: keyof ImageJson, index: number) =>
-    setImgs((prev) => ({ ...prev, [key]: prev[key].filter((_, i) => i !== index) }));
+  const addImage = () => setImages((prev) => [...prev, ""]);
+  const removeImage = (index: number) => setImages((prev) => prev.filter((_, i) => i !== index));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,7 +57,7 @@ const NewProductPage: React.FC = () => {
           measurementType,
           inStock,
           featured,
-          imgs,
+          imgs: { thumbnails: images.filter(Boolean), previews: images.filter(Boolean) },
           specifications: specifications.filter((s) => s.trim().length > 0),
           howToConsume: howToConsume.filter((s) => s.trim().length > 0),
           additionalInfo: additionalInfo.filter((a) => a.label.trim() && a.value.trim()),
@@ -172,42 +166,23 @@ const NewProductPage: React.FC = () => {
 
         {/* Images */}
         <div className="bg-white rounded-[10px] shadow-1 p-6">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-dark-5 mb-4">Product Images</h2>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <div className="flex items-center justify-between mb-3">
-                <label className="text-sm font-medium text-dark">Thumbnails</label>
-                <button type="button" onClick={() => addImageField("thumbnails")} className="text-xs font-medium text-forest hover:text-dark transition-colors">+ Add Image</button>
-              </div>
-              <div className="space-y-3">
-                {imgs.thumbnails.map((url, i) => (
-                  <ImageUploadField
-                    key={`thumb-${i}`}
-                    url={url}
-                    type="thumbnail"
-                    onChange={(val) => updateImageArray("thumbnails", i, val)}
-                    onRemove={() => removeImageField("thumbnails", i)}
-                  />
-                ))}
-              </div>
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-dark-5">Product Images</h2>
+              <p className="text-xs text-dark-5 mt-1">Upload product photos. They&apos;ll be used across the shop, product details, and previews.</p>
             </div>
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <label className="text-sm font-medium text-dark">Previews</label>
-                <button type="button" onClick={() => addImageField("previews")} className="text-xs font-medium text-forest hover:text-dark transition-colors">+ Add Image</button>
-              </div>
-              <div className="space-y-3">
-                {imgs.previews.map((url, i) => (
-                  <ImageUploadField
-                    key={`prev-${i}`}
-                    url={url}
-                    type="preview"
-                    onChange={(val) => updateImageArray("previews", i, val)}
-                    onRemove={() => removeImageField("previews", i)}
-                  />
-                ))}
-              </div>
-            </div>
+            <button type="button" onClick={addImage} className="text-xs font-medium text-forest hover:text-dark transition-colors">+ Add Image</button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {images.map((url, i) => (
+              <ImageUploadField
+                key={`img-${i}`}
+                url={url}
+                type="preview"
+                onChange={(val) => updateImage(i, val)}
+                onRemove={() => removeImage(i)}
+              />
+            ))}
           </div>
         </div>
 

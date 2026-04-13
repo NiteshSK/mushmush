@@ -57,3 +57,25 @@ export function validateMaxLength(value: string, max: number, label = 'This fiel
   if (value.length > max) return `${label} must be at most ${max} characters`;
   return null;
 }
+
+const PINCODE_REGEX = /^\d{6}$/;
+
+export function validatePincode(pincode: string): string | null {
+  if (!pincode.trim()) return 'PIN code is required';
+  if (!PINCODE_REGEX.test(pincode.trim())) return 'PIN code must be exactly 6 digits';
+  return null;
+}
+
+const CITY_REGEX = /^[a-zA-Z\s'.,-]{2,50}$/;
+
+export function validateCity(city: string, label = 'City'): string | null {
+  if (!city.trim()) return `${label} is required`;
+  if (!CITY_REGEX.test(city.trim())) return `${label} contains invalid characters`;
+  return null;
+}
+
+export function validateStreet(street: string): string | null {
+  if (!street.trim()) return 'Street address is required';
+  if (street.trim().length < 5) return 'Please enter a complete street address';
+  return null;
+}

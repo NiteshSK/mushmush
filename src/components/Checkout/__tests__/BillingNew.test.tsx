@@ -137,6 +137,79 @@ describe('BillingNew', () => {
       expect(phoneInput.value).toBe('9876543210');
     });
 
+    it('should validate first name', async () => {
+      render(<BillingNew onAddressChange={mockOnAddressChange} />);
+
+      const firstNameInput = screen.getByLabelText(/First Name/i);
+      await userEvent.type(firstNameInput, 'A');
+      fireEvent.blur(firstNameInput);
+
+      await waitFor(() => {
+        expect(screen.getByText(/First name must be at least 2 characters/i)).toBeInTheDocument();
+      });
+    });
+
+    it('should validate first name with invalid characters', async () => {
+      render(<BillingNew onAddressChange={mockOnAddressChange} />);
+
+      const firstNameInput = screen.getByLabelText(/First Name/i);
+      await userEvent.type(firstNameInput, 'John123');
+      fireEvent.blur(firstNameInput);
+
+      await waitFor(() => {
+        expect(screen.getByText(/First name contains invalid characters/i)).toBeInTheDocument();
+      });
+    });
+
+    it('should validate last name', async () => {
+      render(<BillingNew onAddressChange={mockOnAddressChange} />);
+
+      const lastNameInput = screen.getByLabelText(/Last Name/i);
+      await userEvent.type(lastNameInput, 'B');
+      fireEvent.blur(lastNameInput);
+
+      await waitFor(() => {
+        expect(screen.getByText(/Last name must be at least 2 characters/i)).toBeInTheDocument();
+      });
+    });
+
+    it('should not show name error for valid names', async () => {
+      render(<BillingNew onAddressChange={mockOnAddressChange} />);
+
+      const firstNameInput = screen.getByLabelText(/First Name/i);
+      await userEvent.type(firstNameInput, 'John');
+
+      const lastNameInput = screen.getByLabelText(/Last Name/i);
+      await userEvent.type(lastNameInput, 'Doe');
+
+      expect(screen.queryByText(/First name must be/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/First name contains/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Last name must be/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Last name contains/i)).not.toBeInTheDocument();
+    });
+
+    it('should validate street address', async () => {
+      render(<BillingNew onAddressChange={mockOnAddressChange} />);
+
+      const streetInput = screen.getByLabelText(/Street Address/i);
+      await userEvent.type(streetInput, 'Hi');
+
+      await waitFor(() => {
+        expect(screen.getByText(/Please enter a complete street address/i)).toBeInTheDocument();
+      });
+    });
+
+    it('should validate city name', async () => {
+      render(<BillingNew onAddressChange={mockOnAddressChange} />);
+
+      const cityInput = screen.getByLabelText(/City/i);
+      await userEvent.type(cityInput, 'City123');
+
+      await waitFor(() => {
+        expect(screen.getByText(/City contains invalid characters/i)).toBeInTheDocument();
+      });
+    });
+
     it('should validate PIN code format', async () => {
       render(<BillingNew onAddressChange={mockOnAddressChange} />);
 
@@ -250,9 +323,9 @@ describe('BillingNew', () => {
       const addButton = screen.getByText('Add New Address');
       fireEvent.click(addButton);
 
-      // Modal should open (check for modal title)
+      // Modal should open - there should now be two "Add New Address" elements (button + modal title)
       await waitFor(() => {
-        expect(screen.getByText('Add New Address')).toBeInTheDocument();
+        expect(screen.getAllByText('Add New Address').length).toBeGreaterThanOrEqual(2);
       });
     });
 
