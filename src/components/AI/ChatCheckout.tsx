@@ -5,6 +5,12 @@ import { ArrowLeft, Loader2, ShieldCheck, Mail, Phone } from "lucide-react";
 import { toast } from "react-hot-toast";
 import type { ChatProduct } from "./ChatProductCard";
 
+interface UserInfo {
+  name?: string | null;
+  email?: string | null;
+  phone?: string | null;
+}
+
 interface ChatCheckoutProps {
   product: ChatProduct;
   onBack: () => void;
@@ -15,6 +21,7 @@ interface ChatCheckoutProps {
     customerName: string;
     email: string;
   }) => void;
+  userInfo?: UserInfo;
 }
 
 type Step = "details" | "otp";
@@ -22,15 +29,15 @@ type Step = "details" | "otp";
 const inputClass =
   "w-full bg-white border border-gray-200 rounded-lg py-2 px-3 text-xs text-gray-800 placeholder:text-gray-400 outline-none focus:border-forest focus:ring-1 focus:ring-forest/20 transition-colors";
 
-const ChatCheckout: React.FC<ChatCheckoutProps> = ({ product, onBack, onProceedToPayment }) => {
+const ChatCheckout: React.FC<ChatCheckoutProps> = ({ product, onBack, onProceedToPayment, userInfo }) => {
   const [step, setStep] = useState<Step>("details");
   const [loading, setLoading] = useState(false);
   const [quantity, setQuantity] = useState(1);
 
-  // Customer details
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  // Customer details — pre-fill from session
+  const [name, setName] = useState(userInfo?.name || "");
+  const [email, setEmail] = useState(userInfo?.email || "");
+  const [phone, setPhone] = useState(userInfo?.phone || "");
   const [street, setStreet] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");

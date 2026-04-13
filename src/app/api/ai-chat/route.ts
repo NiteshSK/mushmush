@@ -1,5 +1,6 @@
 import { streamText, convertToCoreMessages } from "ai";
 import { google } from "@ai-sdk/google";
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 
@@ -199,7 +200,9 @@ To order products or get in touch, users can contact us via:
 - Email: mailto:concierge@kosvana.com
 - Phone: tel:+917618362662
 
-Users can browse and buy products directly in this chat! Encourage them to tap the "Shop" tab at the top of the chat window to browse products and complete purchases with UPI payment — all without leaving the conversation.
+Users can browse and buy products directly in this chat! They can tap the "Shop" tab or ask you about products.
+
+IMPORTANT: When a user asks about products, pricing, or wants to buy something, ALWAYS use the searchProducts tool to show them interactive product cards they can purchase from. Call the tool with relevant search keywords. After calling the tool, briefly describe what you found. Do NOT repeat all product details — the cards will show that.
 
 If you don't know the answer or the context doesn't provide it, answer based on your general mushroom knowledge but clarify that for Kosvana-specific details (like exact training dates or shipping), the user should check the relevant pages or contact us.
 
@@ -211,6 +214,96 @@ Answer concisely and helpfully. Keep responses clean and professional.`;
             model: google("gemini-2.5-flash"),
             system: systemPrompt,
             messages: convertToCoreMessages(messages),
+            tools: {
+                searchProducts: {
+                    description: "Search and display product cards in the chat. Use this when the user asks about products, pricing, availability, or wants to buy something.",
+                    inputSchema: z.object({
+                        query: z.string().describe("Search keywords to find relevant products"),
+                    }),
+                    execute: async ({ query }: { query: string }) => {
+                        try {
+                            const keywords = query.toLowerCase().split(/\s+/).filter((w: string) => w.length > 2);
+                            const where: any = keywords.length > 0
+                                ? {
+                                    OR: keywords.flatMap((kw: string) => [
+                                        { title: { contains: kw, mode: "insensitive" as const } },
+                                        { description: { contains: kw, mode: "insensitive" as const } },
+                                    ]),
+                                }
+                                : {};
+
+                            let foundProducts = await prisma.product.findMany({
+                                where,
+                                include: {
+                                    reviews: { select: { rating: true } },
+                                    discounts: {
+                                        where: {
+                                            isActive: true,
+                                            OR: [{ endDate: null }, { endDate: { gte: new Date() } }],
+                                        },
+                                    },
+                                },
+                                take: 5,
+                            });
+
+                            // Fallback: if no keyword matches, show featured products
+                            if (foundProducts.length === 0) {
+                                foundProducts = await prisma.product.findMany({
+                                    where: { featured: true },
+                                    include: {
+                                        reviews: { select: { rating: true } },
+                                        discounts: {
+                                            where: {
+                                                isActive: true,
+                                                OR: [{ endDate: null }, { endDate: { gte: new Date() } }],
+                                            },
+                                        },
+                                    },
+                                    take: 5,
+                                });
+                            }
+
+                            return foundProducts.map((p) => {
+                                const avgRating = p.reviews.length > 0
+                                    ? p.reviews.reduce((sum, r) => sum + r.rating, 0) / p.reviews.length
+                                    : 0;
+
+                                let discountedPrice = null;
+                                let discountPercentage = 0;
+                                if (p.discounts && p.discounts.length > 0) {
+                                    const d = p.discounts[0];
+                                    if (d.type === "PERCENTAGE") {
+                                        discountedPrice = Math.ceil(p.price * (1 - d.value / 100));
+                                        discountPercentage = d.value;
+                                    } else if (d.type === "FIXED_AMOUNT") {
+                                        discountedPrice = Math.ceil(Math.max(0, p.price - d.value));
+                                        discountPercentage = ((p.price - discountedPrice) / p.price) * 100;
+                                    }
+                                }
+
+                                return {
+                                    id: p.id,
+                                    title: p.title,
+                                    slug: p.slug,
+                                    price: p.price,
+                                    discountedPrice,
+                                    discountPercentage: Math.round(discountPercentage),
+                                    hasDiscount: discountedPrice !== null,
+                                    inStock: p.inStock,
+                                    imgs: p.imgs as any,
+                                    averageRating: Math.round(avgRating * 10) / 10,
+                                    reviewCount: p.reviews.length,
+                                    measurementValue: p.measurementValue,
+                                    measurementType: p.measurementType,
+                                };
+                            });
+                        } catch (err) {
+                            console.error("searchProducts tool error:", err);
+                            return [];
+                        }
+                    },
+                },
+            },
         });
 
         return result.toUIMessageStreamResponse();
