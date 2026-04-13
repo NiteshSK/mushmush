@@ -57,37 +57,47 @@ export async function POST(req: Request) {
         };
 
         // Search for relevant context in the DB — each keyword matched independently
-        const [products, programs, blogs, news, featured, banners] = await Promise.all([
-            keywordList.length > 0
-                ? prisma.product.findMany({ where: buildSearch('title', 'description'), take: 5 })
-                : prisma.product.findMany({ take: 5 }),
-            keywordList.length > 0
-                ? prisma.trainingProgram.findMany({ where: buildSearch('name', 'description'), take: 3 })
-                : Promise.resolve([]),
-            keywordList.length > 0
-                ? prisma.blogPost.findMany({ where: { ...buildSearch('title', 'content'), published: true }, take: 3 })
-                : Promise.resolve([]),
-            keywordList.length > 0
-                ? prisma.news.findMany({ where: { ...buildSearch('title', 'content'), published: true }, take: 3 })
-                : Promise.resolve([]),
-            prisma.product.findMany({
-                where: { featured: true },
-                take: 3,
-            }),
-            prisma.promotionalBanner.findMany({
-                where: { isActive: true },
-                orderBy: { priority: "desc" },
-                take: 2,
-            }),
-        ]);
-
-        // Fetch settings separately to handle potential DB schema mismatches (e.g. pending migrations)
+        // Wrapped in try/catch so the chat still works when the DB is temporarily unreachable
+        let products: any[] = [];
+        let programs: any[] = [];
+        let blogs: any[] = [];
+        let news: any[] = [];
+        let featured: any[] = [];
+        let banners: any[] = [];
         let settings: any[] = [];
+
+        try {
+            [products, programs, blogs, news, featured, banners] = await Promise.all([
+                keywordList.length > 0
+                    ? prisma.product.findMany({ where: buildSearch('title', 'description'), take: 5 })
+                    : prisma.product.findMany({ take: 5 }),
+                keywordList.length > 0
+                    ? prisma.trainingProgram.findMany({ where: buildSearch('name', 'description'), take: 3 })
+                    : Promise.resolve([]),
+                keywordList.length > 0
+                    ? prisma.blogPost.findMany({ where: { ...buildSearch('title', 'content'), published: true }, take: 3 })
+                    : Promise.resolve([]),
+                keywordList.length > 0
+                    ? prisma.news.findMany({ where: { ...buildSearch('title', 'content'), published: true }, take: 3 })
+                    : Promise.resolve([]),
+                prisma.product.findMany({
+                    where: { featured: true },
+                    take: 3,
+                }),
+                prisma.promotionalBanner.findMany({
+                    where: { isActive: true },
+                    orderBy: { priority: "desc" },
+                    take: 2,
+                }),
+            ]);
+        } catch (dbError) {
+            console.warn("Could not fetch DB context for AI chat (DB may be unreachable), continuing with defaults:", dbError);
+        }
+
         try {
             settings = await prisma.globalConfig.findMany({});
         } catch (error) {
             console.warn("Could not fetch site settings (using defaults):", error);
-            // Fallback to empty array, defaults will be used below
         }
 
         // Convert settings array to object for easier access
@@ -188,6 +198,8 @@ To order products or get in touch, users can contact us via:
 - WhatsApp: https://wa.me/917618362662
 - Email: mailto:concierge@kosvana.com
 - Phone: tel:+917618362662
+
+Users can browse and buy products directly in this chat! Encourage them to tap the "Shop" tab at the top of the chat window to browse products and complete purchases with UPI payment — all without leaving the conversation.
 
 If you don't know the answer or the context doesn't provide it, answer based on your general mushroom knowledge but clarify that for Kosvana-specific details (like exact training dates or shipping), the user should check the relevant pages or contact us.
 
