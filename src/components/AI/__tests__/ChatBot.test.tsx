@@ -26,6 +26,13 @@ jest.mock('next-auth/react', () => ({
   signOut: jest.fn(),
 }));
 
+// Mock next/navigation (override jest.setup default)
+const mockPush = jest.fn();
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ push: mockPush, replace: jest.fn(), prefetch: jest.fn() }),
+  usePathname: () => '/',
+}));
+
 // Mock react-markdown
 jest.mock('react-markdown', () => {
   return function MockMarkdown({ children }: { children: string }) {
@@ -105,6 +112,7 @@ describe('ChatBot', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (global.fetch as jest.Mock).mockClear();
+    localStorage.clear();
     // Default: unauthenticated
     mockUseSession.mockReturnValue({ data: null, update: mockUpdateSession });
   });
@@ -286,7 +294,7 @@ describe('ChatBot', () => {
   });
 
   describe('Buy Flow Integration', () => {
-    it('shows auth screen when unauthenticated user clicks Buy', async () => {
+    it('redirects to signin when unauthenticated user clicks Buy', async () => {
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => mockProducts,
@@ -303,13 +311,15 @@ describe('ChatBot', () => {
       const buyButtons = screen.getAllByText('Buy');
       fireEvent.click(buyButtons[0]);
 
-      // Should show auth view, not checkout
-      await waitFor(() => {
-        expect(screen.getByText('Sign In to Continue')).toBeInTheDocument();
-      });
+      // Should redirect to signin page
+      expect(mockPush).toHaveBeenCalledWith(
+        expect.stringContaining('/auth/signin')
+      );
 
-      // Tab bar should be hidden in auth view
-      expect(screen.queryByText('Chat')).not.toBeInTheDocument();
+      // Should save product to localStorage for restore after login
+      const saved = localStorage.getItem('chatbot_pending_product');
+      expect(saved).toBeTruthy();
+      expect(JSON.parse(saved!).title).toBe('Oyster Mushroom');
     });
 
     it('goes straight to checkout when authenticated user clicks Buy', async () => {

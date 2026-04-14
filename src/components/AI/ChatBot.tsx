@@ -7,13 +7,13 @@ import { DefaultChatTransport } from "ai";
 import { useSession } from "next-auth/react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useRouter } from "next/navigation";
 import ChatProductCard, { type ChatProduct } from "./ChatProductCard";
 import ChatCheckout from "./ChatCheckout";
 import ChatPayment from "./ChatPayment";
-import ChatAuth from "./ChatAuth";
 
 // ─── Types ───────────────────────────────────────────
-type ChatView = "chat" | "shop" | "checkout" | "payment" | "auth";
+type ChatView = "chat" | "shop" | "checkout" | "payment";
 
 interface OrderData {
   orderNumber: string;
@@ -30,6 +30,7 @@ const ChatBot = () => {
   const [view, setView] = useState<ChatView>("chat");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { data: session, update: updateSession } = useSession();
+  const router = useRouter();
 
   // Shop state
   const [products, setProducts] = useState<ChatProduct[]>([]);
@@ -84,21 +85,30 @@ const ChatBot = () => {
     await sendMessage({ text: content });
   };
 
+  // On mount: check if user returned from sign-in with a pending product
+  useEffect(() => {
+    if (!session?.user) return;
+    const pending = localStorage.getItem("chatbot_pending_product");
+    if (!pending) return;
+    try {
+      const product = JSON.parse(pending) as ChatProduct;
+      localStorage.removeItem("chatbot_pending_product");
+      setSelectedProduct(product);
+      setIsOpen(true);
+      setView("checkout");
+    } catch {
+      localStorage.removeItem("chatbot_pending_product");
+    }
+  }, [session]);
+
   const handleBuy = (product: ChatProduct) => {
     setSelectedProduct(product);
     if (session?.user) {
       setView("checkout");
     } else {
-      setView("auth");
-    }
-  };
-
-  const handleAuthSuccess = async () => {
-    await updateSession();
-    if (selectedProduct) {
-      setView("checkout");
-    } else {
-      setView("shop");
+      // Save product to localStorage so we can restore after sign-in
+      localStorage.setItem("chatbot_pending_product", JSON.stringify(product));
+      router.push(`/auth/signin?callbackUrl=${encodeURIComponent(window.location.href)}`);
     }
   };
 
@@ -402,14 +412,6 @@ const ChatBot = () => {
                 )}
               </div>
             </div>
-          )}
-
-          {/* ─── Auth View ─── */}
-          {view === "auth" && (
-            <ChatAuth
-              onBack={() => setView("shop")}
-              onAuthSuccess={handleAuthSuccess}
-            />
           )}
 
           {/* ─── Checkout View ─── */}
