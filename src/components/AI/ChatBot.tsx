@@ -8,6 +8,7 @@ import { useSession } from "next-auth/react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 import ChatProductCard, { type ChatProduct } from "./ChatProductCard";
 import ChatCheckout from "./ChatCheckout";
 import ChatPayment from "./ChatPayment";
@@ -96,6 +97,7 @@ const ChatBot = () => {
       setSelectedProduct(product);
       setIsOpen(true);
       setView("checkout");
+      toast.success("Welcome back! Continue your purchase.");
     } catch {
       localStorage.removeItem("chatbot_pending_product");
     }
@@ -106,9 +108,18 @@ const ChatBot = () => {
     if (session?.user) {
       setView("checkout");
     } else {
-      // Save product to localStorage so we can restore after sign-in
+      // Save product so we can restore checkout after sign-in
       localStorage.setItem("chatbot_pending_product", JSON.stringify(product));
-      router.push(`/auth/signin?callbackUrl=${encodeURIComponent(window.location.href)}`);
+      // Close chatbox first so the redirect looks clean
+      setIsOpen(false);
+      toast("Please sign in to complete your purchase. Redirecting...", {
+        icon: "🔒",
+        duration: 2500,
+      });
+      // Brief delay so user reads the toast before navigating
+      setTimeout(() => {
+        router.push(`/auth/signin?callbackUrl=${encodeURIComponent(window.location.href)}`);
+      }, 800);
     }
   };
 

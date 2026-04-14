@@ -49,6 +49,15 @@ jest.mock('react-qr-code', () => {
   };
 });
 
+// Override toast mock to support direct function call: toast("msg")
+jest.mock('react-hot-toast', () => {
+  const mockToast: any = jest.fn();
+  mockToast.success = jest.fn();
+  mockToast.error = jest.fn();
+  mockToast.loading = jest.fn();
+  return { toast: mockToast, Toaster: () => null };
+});
+
 // Mock payment config
 jest.mock('@/lib/payment-config', () => ({
   UPI_CONFIG: { vpa: 'test@upi', merchantName: 'Test', currency: 'INR' },
@@ -311,15 +320,17 @@ describe('ChatBot', () => {
       const buyButtons = screen.getAllByText('Buy');
       fireEvent.click(buyButtons[0]);
 
-      // Should redirect to signin page
-      expect(mockPush).toHaveBeenCalledWith(
-        expect.stringContaining('/auth/signin')
-      );
-
-      // Should save product to localStorage for restore after login
+      // Should save product to localStorage immediately
       const saved = localStorage.getItem('chatbot_pending_product');
       expect(saved).toBeTruthy();
       expect(JSON.parse(saved!).title).toBe('Oyster Mushroom');
+
+      // Redirect happens after a short delay (setTimeout)
+      await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith(
+          expect.stringContaining('/auth/signin')
+        );
+      }, { timeout: 2000 });
     });
 
     it('goes straight to checkout when authenticated user clicks Buy', async () => {
