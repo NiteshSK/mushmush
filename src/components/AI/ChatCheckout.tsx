@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { ArrowLeft, Loader2, ShieldCheck, Mail, Phone } from "lucide-react";
+import React, { useState, useEffect, useCallback } from "react";
+import { ArrowLeft, Loader2, ShieldCheck, Mail, Phone, MapPin, Truck } from "lucide-react";
 import { toast } from "react-hot-toast";
 import type { ChatProduct } from "./ChatProductCard";
 
@@ -24,6 +24,16 @@ interface ChatCheckoutProps {
   userInfo?: UserInfo;
 }
 
+interface ShippingInfo {
+  deliverable: boolean;
+  shippingFee: number;
+  zoneName?: string;
+  estimatedDays?: string;
+  freeShipping?: boolean;
+  freeAbove?: number | null;
+  message?: string;
+}
+
 type Step = "details" | "otp";
 
 const inputClass =
@@ -43,6 +53,11 @@ const ChatCheckout: React.FC<ChatCheckoutProps> = ({ product, onBack, onProceedT
   const [state, setState] = useState("");
   const [zip, setZip] = useState("");
 
+  // Shipping — fetched from API based on pincode
+  const [shippingFee, setShippingFee] = useState<number | null>(null);
+  const [shippingInfo, setShippingInfo] = useState<ShippingInfo | null>(null);
+  const [checkingShipping, setCheckingShipping] = useState(false);
+
   // OTP
   const [otp, setOtp] = useState("");
   const [resendTimer, setResendTimer] = useState(0);
@@ -50,14 +65,57 @@ const ChatCheckout: React.FC<ChatCheckoutProps> = ({ product, onBack, onProceedT
   const finalPrice = product.hasDiscount && product.discountedPrice ? product.discountedPrice : product.price;
   const subtotal = finalPrice * quantity;
   const convenienceFee = 12;
-  const shippingFee = subtotal >= 499 ? 0 : 49;
-  const total = subtotal + convenienceFee + shippingFee;
+  const total = subtotal + (shippingFee ?? 0) + convenienceFee;
 
   useEffect(() => {
     if (resendTimer <= 0) return;
     const t = setTimeout(() => setResendTimer((prev) => prev - 1), 1000);
     return () => clearTimeout(t);
   }, [resendTimer]);
+
+  // Check shipping when pincode is 6 digits — same API as normal checkout
+  const checkShipping = useCallback(async (pincode: string, currentSubtotal: number) => {
+    if (!/^\d{6}$/.test(pincode)) {
+      setShippingInfo(null);
+      setShippingFee(null);
+      return;
+    }
+    setCheckingShipping(true);
+    try {
+      const res = await fetch(`/api/shipping/check?pincode=${pincode}&subtotal=${currentSubtotal}`);
+      const data = await res.json();
+      setShippingInfo(data);
+      if (data.deliverable) {
+        setShippingFee(data.shippingFee);
+      } else {
+        setShippingFee(null);
+      }
+    } catch {
+      setShippingInfo(null);
+      setShippingFee(null);
+    } finally {
+      setCheckingShipping(false);
+    }
+  }, []);
+
+  // Auto-check shipping when pincode reaches 6 digits
+  const handleZipChange = (value: string) => {
+    const digits = value.replace(/\D/g, "").slice(0, 6);
+    setZip(digits);
+    if (digits.length === 6) {
+      checkShipping(digits, subtotal);
+    } else {
+      setShippingInfo(null);
+      setShippingFee(null);
+    }
+  };
+
+  // Re-check shipping when subtotal changes (quantity change affects free-shipping threshold)
+  useEffect(() => {
+    if (/^\d{6}$/.test(zip)) {
+      checkShipping(zip, subtotal);
+    }
+  }, [subtotal, zip, checkShipping]);
 
   const validateDetails = () => {
     if (!name.trim()) { toast.error("Please enter your name"); return false; }
@@ -67,6 +125,8 @@ const ChatCheckout: React.FC<ChatCheckoutProps> = ({ product, onBack, onProceedT
     if (!city.trim()) { toast.error("Please enter your city"); return false; }
     if (!state.trim()) { toast.error("Please enter your state"); return false; }
     if (!zip.trim() || !/^\d{6}$/.test(zip)) { toast.error("Please enter a valid 6-digit pincode"); return false; }
+    if (shippingFee === null) { toast.error("Please check delivery availability first"); return false; }
+    if (shippingInfo && !shippingInfo.deliverable) { toast.error("We don't deliver to this pincode yet"); return false; }
     return true;
   };
 
@@ -150,6 +210,9 @@ const ChatCheckout: React.FC<ChatCheckoutProps> = ({ product, onBack, onProceedT
 
   const thumbnail = product.imgs?.thumbnails?.[0] || product.imgs?.previews?.[0] || "/images/placeholder.png";
 
+  // Can proceed only when shipping has been checked and is deliverable
+  const canSubmit = shippingFee !== null && shippingInfo?.deliverable && !loading;
+
   return (
     <div className="flex flex-col flex-1 min-h-0">
       {/* Header */}
@@ -216,9 +279,52 @@ const ChatCheckout: React.FC<ChatCheckoutProps> = ({ product, onBack, onProceedT
               <div className="grid grid-cols-3 gap-2">
                 <input type="text" value={city} onChange={(e) => setCity(e.target.value)} className={inputClass} placeholder="City" required />
                 <input type="text" value={state} onChange={(e) => setState(e.target.value)} className={inputClass} placeholder="State" required />
-                <input type="text" value={zip} onChange={(e) => setZip(e.target.value)} className={inputClass} placeholder="Pincode" required />
+                <input
+                  type="text"
+                  value={zip}
+                  onChange={(e) => handleZipChange(e.target.value)}
+                  className={inputClass}
+                  placeholder="Pincode"
+                  maxLength={6}
+                  required
+                />
               </div>
             </div>
+
+            {/* Shipping status — shown after pincode check */}
+            {zip.length === 6 && (
+              <div className={`rounded-lg p-2.5 text-xs flex items-start gap-2 ${
+                checkingShipping
+                  ? "bg-gray-50 text-gray-500"
+                  : shippingInfo?.deliverable
+                    ? "bg-green-50 border border-green-100 text-green-700"
+                    : shippingInfo
+                      ? "bg-red-50 border border-red-100 text-red-600"
+                      : "bg-gray-50 text-gray-500"
+              }`}>
+                {checkingShipping ? (
+                  <><Loader2 size={12} className="animate-spin mt-0.5 flex-shrink-0" /> Checking delivery...</>
+                ) : shippingInfo?.deliverable ? (
+                  <>
+                    <Truck size={12} className="mt-0.5 flex-shrink-0" />
+                    <div>
+                      {shippingInfo.freeShipping
+                        ? <span className="font-semibold">Free Delivery!</span>
+                        : <span>Delivery: <strong>₹{shippingInfo.shippingFee}</strong></span>
+                      }
+                      {shippingInfo.estimatedDays && (
+                        <span className="text-gray-500"> &middot; {shippingInfo.estimatedDays}</span>
+                      )}
+                      {!shippingInfo.freeShipping && shippingInfo.freeAbove && (
+                        <p className="text-[10px] text-gray-500 mt-0.5">Free on orders above ₹{shippingInfo.freeAbove}</p>
+                      )}
+                    </div>
+                  </>
+                ) : shippingInfo ? (
+                  <><MapPin size={12} className="mt-0.5 flex-shrink-0" /> {shippingInfo.message || "We don't deliver to this pincode yet."}</>
+                ) : null}
+              </div>
+            )}
 
             {/* Price breakdown */}
             <div className="bg-gray-50 rounded-lg p-3 space-y-1 text-xs">
@@ -226,22 +332,36 @@ const ChatCheckout: React.FC<ChatCheckoutProps> = ({ product, onBack, onProceedT
                 <span>Subtotal</span><span>₹{subtotal}</span>
               </div>
               <div className="flex justify-between text-gray-500">
-                <span>Shipping</span><span>{shippingFee === 0 ? "Free" : `₹${shippingFee}`}</span>
+                <span>Shipping</span>
+                <span>
+                  {shippingFee === null
+                    ? <span className="text-gray-400 italic">Enter pincode</span>
+                    : shippingFee === 0
+                      ? <span className="text-green-600 font-medium">Free</span>
+                      : `₹${shippingFee}`
+                  }
+                </span>
               </div>
               <div className="flex justify-between text-gray-500">
                 <span>Convenience fee</span><span>₹{convenienceFee}</span>
               </div>
               <div className="flex justify-between font-bold text-gray-900 pt-1 border-t border-gray-200">
-                <span>Total</span><span>₹{total}</span>
+                <span>Total</span>
+                <span>{shippingFee === null ? "—" : `₹${total}`}</span>
               </div>
             </div>
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={!canSubmit}
               className="w-full bg-forest text-white py-2.5 rounded-full text-xs font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              {loading ? <><Loader2 size={12} className="animate-spin" /> Sending OTP...</> : <><ShieldCheck size={12} /> Continue & Verify</>}
+              {loading
+                ? <><Loader2 size={12} className="animate-spin" /> Sending OTP...</>
+                : shippingFee === null
+                  ? "Check Delivery First"
+                  : <><ShieldCheck size={12} /> Continue & Verify</>
+              }
             </button>
           </form>
         )}

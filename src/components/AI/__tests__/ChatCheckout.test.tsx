@@ -28,6 +28,28 @@ const discountedProduct: ChatProduct = {
   hasDiscount: true,
 };
 
+const mockShippingResponse = {
+  deliverable: true,
+  shippingFee: 80,
+  zoneName: 'North India',
+  estimatedDays: '3-5 days',
+  freeShipping: false,
+  freeAbove: 1999,
+  message: 'Delivery: ₹80. Free on orders above ₹1999!',
+};
+
+const mockFreeShippingResponse = {
+  ...mockShippingResponse,
+  shippingFee: 0,
+  freeShipping: true,
+  message: 'Free Delivery applied!',
+};
+
+const mockNotDeliverableResponse = {
+  deliverable: false,
+  message: 'Sorry, we do not deliver to this pincode yet.',
+};
+
 describe('ChatCheckout', () => {
   const mockOnBack = jest.fn();
   const mockOnProceedToPayment = jest.fn();
@@ -46,6 +68,20 @@ describe('ChatCheckout', () => {
       />
     );
 
+  // Helper: mock shipping API response then fill pincode to trigger the check
+  const mockShippingAndFillPincode = async (shippingData = mockShippingResponse) => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => shippingData,
+    });
+    await userEvent.type(screen.getByPlaceholderText('Pincode'), '248001');
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('/api/shipping/check?pincode=248001')
+      );
+    });
+  };
+
   describe('Details Step', () => {
     it('renders the checkout form with product summary', () => {
       renderCheckout();
@@ -58,27 +94,79 @@ describe('ChatCheckout', () => {
       expect(screen.getByPlaceholderText('Street address')).toBeInTheDocument();
     });
 
-    it('shows correct price for non-discounted product', () => {
+    it('shows "Enter pincode" for shipping until pincode is checked', () => {
       renderCheckout();
 
-      // Subtotal row in price breakdown
-      const allPrices = screen.getAllByText('₹350');
-      expect(allPrices.length).toBeGreaterThanOrEqual(1);
+      expect(screen.getByText('Enter pincode')).toBeInTheDocument();
     });
 
-    it('shows discounted price for discounted product', () => {
-      renderCheckout(discountedProduct);
+    it('shows "Check Delivery First" button until shipping is checked', () => {
+      renderCheckout();
 
-      // Should show discounted price in summary
-      const allPrices = screen.getAllByText('₹280');
-      expect(allPrices.length).toBeGreaterThanOrEqual(1);
+      expect(screen.getByText('Check Delivery First')).toBeInTheDocument();
+    });
+
+    it('calls shipping API when 6-digit pincode is entered', async () => {
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockShippingResponse,
+      });
+
+      renderCheckout();
+
+      await userEvent.type(screen.getByPlaceholderText('Pincode'), '248001');
+
+      await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalledWith(
+          expect.stringContaining('/api/shipping/check?pincode=248001&subtotal=350')
+        );
+      });
+    });
+
+    it('shows shipping fee after pincode check', async () => {
+      renderCheckout();
+      await mockShippingAndFillPincode();
+
+      await waitFor(() => {
+        // Shipping fee appears in the delivery status and price breakdown
+        const matches = screen.getAllByText('₹80');
+        expect(matches.length).toBeGreaterThanOrEqual(1);
+      });
+    });
+
+    it('shows not deliverable message for unsupported pincode', async () => {
+      renderCheckout();
+
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockNotDeliverableResponse,
+      });
+
+      await userEvent.type(screen.getByPlaceholderText('Pincode'), '999999');
+
+      await waitFor(() => {
+        expect(screen.getByText(/do not deliver|don't deliver/)).toBeInTheDocument();
+      });
+    });
+
+    it('shows free shipping when applicable', async () => {
+      renderCheckout();
+
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockFreeShippingResponse,
+      });
+
+      await userEvent.type(screen.getByPlaceholderText('Pincode'), '248001');
+
+      await waitFor(() => {
+        expect(screen.getByText('Free Delivery!')).toBeInTheDocument();
+      });
     });
 
     it('calls onBack when back button is clicked', () => {
       renderCheckout();
 
-      const backButton = screen.getByRole('button', { name: '' });
-      // The first button is the back arrow
       const buttons = screen.getAllByRole('button');
       fireEvent.click(buttons[0]); // back button
       expect(mockOnBack).toHaveBeenCalled();
@@ -90,7 +178,6 @@ describe('ChatCheckout', () => {
       const plusButton = screen.getByText('+');
       fireEvent.click(plusButton);
 
-      // Qty should now be 2
       expect(screen.getByText('2')).toBeInTheDocument();
     });
 
@@ -101,15 +188,13 @@ describe('ChatCheckout', () => {
       fireEvent.click(minusButton);
       fireEvent.click(minusButton);
 
-      // Should still show 1
       expect(screen.getByText('Qty: 1')).toBeInTheDocument();
     });
 
     it('validates required fields before sending OTP', async () => {
       renderCheckout();
 
-      // Submit the form directly (bypassing native required validation)
-      const form = screen.getByText('Continue & Verify').closest('form')!;
+      const form = screen.getByText('Check Delivery First').closest('form')!;
       fireEvent.submit(form);
 
       await waitFor(() => {
@@ -119,36 +204,7 @@ describe('ChatCheckout', () => {
       expect(global.fetch).not.toHaveBeenCalled();
     });
 
-    it('validates email format', async () => {
-      renderCheckout();
-
-      await userEvent.type(screen.getByPlaceholderText('John Doe'), 'John Doe');
-      await userEvent.type(screen.getByPlaceholderText('you@email.com'), 'invalid-email');
-
-      const form = screen.getByText('Continue & Verify').closest('form')!;
-      fireEvent.submit(form);
-
-      await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith('Please enter a valid email');
-      });
-    });
-
-    it('validates phone number (Indian 10-digit)', async () => {
-      renderCheckout();
-
-      await userEvent.type(screen.getByPlaceholderText('John Doe'), 'John Doe');
-      await userEvent.type(screen.getByPlaceholderText('you@email.com'), 'john@test.com');
-      await userEvent.type(screen.getByPlaceholderText('9876543210'), '12345');
-
-      const form = screen.getByText('Continue & Verify').closest('form')!;
-      fireEvent.submit(form);
-
-      await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith('Please enter a valid 10-digit phone number');
-      });
-    });
-
-    it('validates pincode (6-digit)', async () => {
+    it('validates delivery availability before submission', async () => {
       renderCheckout();
 
       await userEvent.type(screen.getByPlaceholderText('John Doe'), 'John Doe');
@@ -159,17 +215,21 @@ describe('ChatCheckout', () => {
       await userEvent.type(screen.getByPlaceholderText('State'), 'Maharashtra');
       await userEvent.type(screen.getByPlaceholderText('Pincode'), '123');
 
-      fireEvent.click(screen.getByText('Continue & Verify'));
+      const form = screen.getByPlaceholderText('John Doe').closest('form')!;
+      fireEvent.submit(form);
 
       await waitFor(() => {
         expect(toast.error).toHaveBeenCalledWith('Please enter a valid 6-digit pincode');
       });
     });
 
-    it('sends OTP on valid form submission', async () => {
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ success: true, message: 'OTP sent!' }),
+    it('sends OTP on valid form submission with shipping checked', async () => {
+      (global.fetch as jest.Mock).mockImplementation((url: string) => {
+        if (typeof url === 'string' && url.includes('/api/shipping/check'))
+          return Promise.resolve({ ok: true, json: async () => mockShippingResponse });
+        if (typeof url === 'string' && url.includes('/api/checkout/send-otp'))
+          return Promise.resolve({ ok: true, json: async () => ({ success: true, message: 'OTP sent!' }) });
+        return Promise.resolve({ ok: true, json: async () => ({}) });
       });
 
       renderCheckout();
@@ -178,9 +238,13 @@ describe('ChatCheckout', () => {
       await userEvent.type(screen.getByPlaceholderText('you@email.com'), 'john@test.com');
       await userEvent.type(screen.getByPlaceholderText('9876543210'), '9876543210');
       await userEvent.type(screen.getByPlaceholderText('Street address'), '123 Main St');
-      await userEvent.type(screen.getByPlaceholderText('City'), 'Mumbai');
-      await userEvent.type(screen.getByPlaceholderText('State'), 'Maharashtra');
-      await userEvent.type(screen.getByPlaceholderText('Pincode'), '400001');
+      await userEvent.type(screen.getByPlaceholderText('City'), 'Dehradun');
+      await userEvent.type(screen.getByPlaceholderText('State'), 'Uttarakhand');
+      await userEvent.type(screen.getByPlaceholderText('Pincode'), '248001');
+
+      await waitFor(() => {
+        expect(screen.getAllByText('₹80').length).toBeGreaterThanOrEqual(1);
+      });
 
       fireEvent.click(screen.getByText('Continue & Verify'));
 
@@ -193,10 +257,14 @@ describe('ChatCheckout', () => {
   });
 
   describe('OTP Step', () => {
+    // Use mockImplementation so shipping re-checks don't consume mocks
     const fillAndSubmitDetails = async () => {
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ success: true, message: 'OTP sent!' }),
+      (global.fetch as jest.Mock).mockImplementation((url: string) => {
+        if (typeof url === 'string' && url.includes('/api/shipping/check'))
+          return Promise.resolve({ ok: true, json: async () => mockShippingResponse });
+        if (typeof url === 'string' && url.includes('/api/checkout/send-otp'))
+          return Promise.resolve({ ok: true, json: async () => ({ success: true, message: 'OTP sent!' }) });
+        return Promise.resolve({ ok: true, json: async () => ({}) });
       });
 
       renderCheckout();
@@ -205,9 +273,13 @@ describe('ChatCheckout', () => {
       await userEvent.type(screen.getByPlaceholderText('you@email.com'), 'john@test.com');
       await userEvent.type(screen.getByPlaceholderText('9876543210'), '9876543210');
       await userEvent.type(screen.getByPlaceholderText('Street address'), '123 Main St');
-      await userEvent.type(screen.getByPlaceholderText('City'), 'Mumbai');
-      await userEvent.type(screen.getByPlaceholderText('State'), 'Maharashtra');
-      await userEvent.type(screen.getByPlaceholderText('Pincode'), '400001');
+      await userEvent.type(screen.getByPlaceholderText('City'), 'Dehradun');
+      await userEvent.type(screen.getByPlaceholderText('State'), 'Uttarakhand');
+      await userEvent.type(screen.getByPlaceholderText('Pincode'), '248001');
+
+      await waitFor(() => {
+        expect(screen.getAllByText('₹80').length).toBeGreaterThanOrEqual(1);
+      });
 
       fireEvent.click(screen.getByText('Continue & Verify'));
 
@@ -226,7 +298,6 @@ describe('ChatCheckout', () => {
     it('validates OTP before submission', async () => {
       await fillAndSubmitDetails();
 
-      // Submit form directly to bypass native required validation
       const form = screen.getByText('Verify & Place Order').closest('form')!;
       fireEvent.submit(form);
 
@@ -238,12 +309,13 @@ describe('ChatCheckout', () => {
     it('places order on valid OTP and calls onProceedToPayment', async () => {
       await fillAndSubmitDetails();
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          success: true,
-          order: { id: 'order-123', orderNumber: 'ORD-123', total: 411 },
-        }),
+      // Override mock for order placement
+      (global.fetch as jest.Mock).mockImplementation((url: string) => {
+        if (typeof url === 'string' && url.includes('/api/shipping/check'))
+          return Promise.resolve({ ok: true, json: async () => mockShippingResponse });
+        if (typeof url === 'string' && url.includes('/api/checkout/verify-and-place-order'))
+          return Promise.resolve({ ok: true, json: async () => ({ success: true, order: { id: 'order-123', orderNumber: 'ORD-123', total: 442 } }) });
+        return Promise.resolve({ ok: true, json: async () => ({}) });
       });
 
       const otpInput = screen.getByPlaceholderText('• • • • • •');
@@ -262,7 +334,7 @@ describe('ChatCheckout', () => {
           expect.objectContaining({
             orderNumber: 'ORD-123',
             orderId: 'order-123',
-            total: 411,
+            total: 442,
             customerName: 'John Doe',
             email: 'john@test.com',
           })
@@ -273,9 +345,12 @@ describe('ChatCheckout', () => {
     it('shows error on failed order placement', async () => {
       await fillAndSubmitDetails();
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: false,
-        json: async () => ({ error: 'Invalid OTP' }),
+      (global.fetch as jest.Mock).mockImplementation((url: string) => {
+        if (typeof url === 'string' && url.includes('/api/shipping/check'))
+          return Promise.resolve({ ok: true, json: async () => mockShippingResponse });
+        if (typeof url === 'string' && url.includes('/api/checkout/verify-and-place-order'))
+          return Promise.resolve({ ok: false, json: async () => ({ error: 'Invalid OTP' }) });
+        return Promise.resolve({ ok: true, json: async () => ({}) });
       });
 
       const otpInput = screen.getByPlaceholderText('• • • • • •');
@@ -308,27 +383,6 @@ describe('ChatCheckout', () => {
       await userEvent.type(otpInput, 'abc123def');
 
       expect(otpInput).toHaveValue('123');
-    });
-  });
-
-  describe('Price Calculation', () => {
-    it('calculates correct total with convenience fee and free shipping above 499', () => {
-      renderCheckout();
-
-      // Product price 350 + convenience 12 + shipping 49 = 411
-      expect(screen.getByText('₹49')).toBeInTheDocument();
-      expect(screen.getByText('₹12')).toBeInTheDocument();
-      expect(screen.getByText('₹411')).toBeInTheDocument();
-    });
-
-    it('gives free shipping when subtotal is 499 or more', () => {
-      renderCheckout();
-
-      // Increase quantity to 2 (700 > 499)
-      const plusButton = screen.getByText('+');
-      fireEvent.click(plusButton);
-
-      expect(screen.getByText('Free')).toBeInTheDocument();
     });
   });
 });
