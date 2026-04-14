@@ -2,6 +2,18 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import ChatProductCard, { ChatProduct } from '../ChatProductCard';
 
+// Mock WishlistContext
+jest.mock('@/app/context/WishlistContext', () => ({
+  useWishlist: () => ({
+    items: [],
+    loading: false,
+    addToWishlist: jest.fn().mockResolvedValue(true),
+    removeFromWishlist: jest.fn().mockResolvedValue(true),
+    isInWishlist: () => false,
+    refreshWishlist: jest.fn(),
+  }),
+}));
+
 const mockProduct: ChatProduct = {
   id: 1,
   title: 'Premium Oyster Mushroom',

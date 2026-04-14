@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { MessageCircle, X, Send, User, Bot, Loader2, ShoppingBag, MessageSquare, Search } from "lucide-react";
+import { MessageCircle, X, Send, User, Bot, Loader2, ShoppingBag, MessageSquare, Search, Heart } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useSession } from "next-auth/react";
@@ -12,9 +12,10 @@ import { toast } from "react-hot-toast";
 import ChatProductCard, { type ChatProduct } from "./ChatProductCard";
 import ChatCheckout from "./ChatCheckout";
 import ChatPayment from "./ChatPayment";
+import { useWishlist } from "@/app/context/WishlistContext";
 
 // ─── Types ───────────────────────────────────────────
-type ChatView = "chat" | "shop" | "checkout" | "payment";
+type ChatView = "chat" | "shop" | "wishlist" | "checkout" | "payment";
 
 interface OrderData {
   orderNumber: string;
@@ -32,6 +33,7 @@ const ChatBot = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { data: session, update: updateSession } = useSession();
   const router = useRouter();
+  const { items: wishlistItems, loading: wishlistLoading } = useWishlist();
 
   // Shop state
   const [products, setProducts] = useState<ChatProduct[]>([]);
@@ -146,7 +148,7 @@ const ChatBot = () => {
   };
 
   const switchView = (newView: ChatView) => {
-    if (newView === "chat" || newView === "shop") {
+    if (newView === "chat" || newView === "shop" || newView === "wishlist") {
       setView(newView);
     }
   };
@@ -250,7 +252,7 @@ const ChatBot = () => {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="bg-white border border-gray-200 shadow-2xl flex flex-col overflow-hidden transition-all duration-300 fixed inset-0 w-full h-full rounded-none z-[10000] sm:static sm:w-[400px] sm:h-[620px] sm:rounded-2xl">
+        <div className="bg-white border border-gray-200 shadow-2xl flex flex-col overflow-hidden transition-all duration-300 fixed inset-0 w-full h-full rounded-none z-[100000] sm:static sm:w-[400px] sm:h-[620px] sm:rounded-2xl">
           {/* Header */}
           <div className="bg-forest px-4 py-3 flex justify-between items-center text-white flex-shrink-0">
             <div className="flex items-center gap-2.5">
@@ -270,8 +272,8 @@ const ChatBot = () => {
             </button>
           </div>
 
-          {/* Tab Bar — only show for chat/shop views */}
-          {(view === "chat" || view === "shop") && (
+          {/* Tab Bar — show for chat/shop/wishlist views */}
+          {(view === "chat" || view === "shop" || view === "wishlist") && (
             <div className="flex border-b border-gray-100 bg-white flex-shrink-0">
               <button
                 onClick={() => switchView("chat")}
@@ -292,6 +294,21 @@ const ChatBot = () => {
                 }`}
               >
                 <ShoppingBag size={13} /> Shop
+              </button>
+              <button
+                onClick={() => switchView("wishlist")}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium transition-colors relative ${
+                  view === "wishlist"
+                    ? "text-forest border-b-2 border-forest"
+                    : "text-gray-400 hover:text-gray-600"
+                }`}
+              >
+                <Heart size={13} /> Wishlist
+                {wishlistItems.length > 0 && (
+                  <span className="absolute top-1.5 right-[calc(50%-28px)] min-w-[14px] h-[14px] bg-red-500 text-white text-[8px] rounded-full flex items-center justify-center font-bold px-0.5">
+                    {wishlistItems.length}
+                  </span>
+                )}
               </button>
             </div>
           )}
@@ -454,6 +471,68 @@ const ChatBot = () => {
                   products.map((product) => (
                     <ChatProductCard key={product.id} product={product} onBuy={handleBuy} />
                   ))
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ─── Wishlist View ─── */}
+          {view === "wishlist" && (
+            <div className="flex-1 overflow-y-auto min-h-0">
+              <div className="p-3 space-y-2">
+                {!session?.user ? (
+                  <div className="text-center py-12">
+                    <Heart size={24} className="mx-auto text-gray-300 mb-2" />
+                    <p className="text-xs text-gray-500 mb-3">Sign in to view your wishlist</p>
+                    <button
+                      onClick={() => {
+                        setIsOpen(false);
+                        router.push(`/auth/signin?callbackUrl=${encodeURIComponent(window.location.href)}`);
+                      }}
+                      className="text-xs text-forest font-semibold hover:text-green-700"
+                    >
+                      Sign In
+                    </button>
+                  </div>
+                ) : wishlistLoading ? (
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <Loader2 size={20} className="animate-spin text-forest mb-2" />
+                    <span className="text-xs text-gray-400">Loading wishlist...</span>
+                  </div>
+                ) : wishlistItems.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Heart size={24} className="mx-auto text-gray-300 mb-2" />
+                    <p className="text-xs text-gray-500 mb-1">Your wishlist is empty</p>
+                    <p className="text-[10px] text-gray-400 mb-3">Tap the heart icon on products to save them here</p>
+                    <button
+                      onClick={() => switchView("shop")}
+                      className="text-xs text-forest font-semibold hover:text-green-700"
+                    >
+                      Browse Shop
+                    </button>
+                  </div>
+                ) : (
+                  wishlistItems.map((item: any) => {
+                    const p = item.product;
+                    if (!p) return null;
+                    const chatProduct: ChatProduct = {
+                      id: p.id,
+                      title: p.title,
+                      slug: p.slug,
+                      price: p.price,
+                      discountedPrice: p.discountedPrice || null,
+                      discountPercentage: p.discountedPrice ? Math.round(((p.price - p.discountedPrice) / p.price) * 100) : 0,
+                      hasDiscount: !!p.discountedPrice && p.discountedPrice < p.price,
+                      inStock: p.inStock,
+                      imgs: p.imgs || { thumbnails: [], previews: [] },
+                      averageRating: p.averageRating || 0,
+                      reviewCount: p.reviewCount || 0,
+                      measurementValue: p.measurementValue,
+                      measurementType: p.measurementType,
+                      stockQuantity: p.stockQuantity,
+                    };
+                    return <ChatProductCard key={p.id} product={chatProduct} onBuy={handleBuy} />;
+                  })
                 )}
               </div>
             </div>

@@ -42,6 +42,18 @@ jest.mock('react-markdown', () => {
 
 jest.mock('remark-gfm', () => () => {});
 
+// Mock WishlistContext
+jest.mock('@/app/context/WishlistContext', () => ({
+  useWishlist: () => ({
+    items: [],
+    loading: false,
+    addToWishlist: jest.fn().mockResolvedValue(true),
+    removeFromWishlist: jest.fn().mockResolvedValue(true),
+    isInWishlist: () => false,
+    refreshWishlist: jest.fn(),
+  }),
+}));
+
 // Mock react-qr-code
 jest.mock('react-qr-code', () => {
   return function MockQRCode() {

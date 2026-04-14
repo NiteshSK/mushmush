@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
-import { ShoppingCart, Star, Package } from "lucide-react";
+import React, { useState } from "react";
+import { ShoppingCart, Star, Package, Heart } from "lucide-react";
+import { useWishlist } from "@/app/context/WishlistContext";
 
 export interface ChatProduct {
   id: number;
@@ -28,11 +29,28 @@ interface ChatProductCardProps {
 const ChatProductCard: React.FC<ChatProductCardProps> = ({ product, onBuy }) => {
   const thumbnail = product.imgs?.thumbnails?.[0] || product.imgs?.previews?.[0] || "/images/placeholder.png";
   const finalPrice = product.hasDiscount && product.discountedPrice ? product.discountedPrice : product.price;
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const [wishlistLoading, setWishlistLoading] = useState(false);
+  const inWishlist = isInWishlist(product.id);
+
+  const toggleWishlist = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setWishlistLoading(true);
+    try {
+      if (inWishlist) {
+        await removeFromWishlist(product.id);
+      } else {
+        await addToWishlist(product.id);
+      }
+    } finally {
+      setWishlistLoading(false);
+    }
+  };
 
   return (
     <div className="flex gap-3 bg-white border border-gray-200 rounded-xl p-3 hover:shadow-sm transition-shadow">
       {/* Image */}
-      <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gray-50">
+      <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gray-50 relative">
         <img
           src={thumbnail}
           alt={product.title}
@@ -70,8 +88,22 @@ const ChatProductCard: React.FC<ChatProductCardProps> = ({ product, onBuy }) => 
         </div>
       </div>
 
-      {/* Buy Button */}
-      <div className="flex-shrink-0 flex items-center">
+      {/* Actions */}
+      <div className="flex-shrink-0 flex flex-col items-center justify-center gap-1.5">
+        {/* Wishlist heart */}
+        <button
+          onClick={toggleWishlist}
+          disabled={wishlistLoading}
+          className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50"
+          title={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
+        >
+          <Heart
+            size={14}
+            className={inWishlist ? "fill-red-500 text-red-500" : "text-gray-400"}
+          />
+        </button>
+
+        {/* Buy button */}
         {product.inStock ? (
           <button
             onClick={() => onBuy(product)}
