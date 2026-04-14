@@ -60,9 +60,15 @@ const ChatBot = () => {
   const fetchProducts = useCallback(async (query?: string) => {
     setLoadingProducts(true);
     try {
-      const params = new URLSearchParams({ limit: "20", inStock: "true" });
-      if (query) params.set("search", query);
-      const res = await fetch(`/api/products?${params}`);
+      let url: string;
+      if (query?.trim()) {
+        const params = new URLSearchParams({ q: query, limit: "20" });
+        url = `/api/products/search?${params}`;
+      } else {
+        const params = new URLSearchParams({ limit: "20", inStock: "true" });
+        url = `/api/products?${params}`;
+      }
+      const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
         setProducts(data.products || []);
