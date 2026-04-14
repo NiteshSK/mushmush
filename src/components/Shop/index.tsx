@@ -20,6 +20,7 @@ const Shop: React.FC<ShopProps> = ({ showFilters = true }) => {
   const productsPerPage = 12;
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [sortBy, setSortBy] = useState<string>("default");
 
   const [notifyModalOpen, setNotifyModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -120,6 +121,38 @@ const Shop: React.FC<ShopProps> = ({ showFilters = true }) => {
     const priceFiltered = categoryFiltered.filter(
       (product) => product.price <= priceValue
     );
+
+    // Apply sorting
+    if (sortBy !== "default") {
+      const sorted = [...priceFiltered];
+      switch (sortBy) {
+        case "price-low":
+          sorted.sort((a, b) => (a.discountedPrice || a.price) - (b.discountedPrice || b.price));
+          break;
+        case "price-high":
+          sorted.sort((a, b) => (b.discountedPrice || b.price) - (a.discountedPrice || a.price));
+          break;
+        case "discount":
+          sorted.sort((a, b) => {
+            const aDisc = a.discountedPrice ? Math.round(((a.price - a.discountedPrice) / a.price) * 100) : 0;
+            const bDisc = b.discountedPrice ? Math.round(((b.price - b.discountedPrice) / b.price) * 100) : 0;
+            return bDisc - aDisc;
+          });
+          break;
+        case "name-az":
+          sorted.sort((a, b) => a.title.localeCompare(b.title));
+          break;
+        case "rating":
+          sorted.sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0));
+          break;
+      }
+      // Still keep out-of-stock at the end
+      const inStock = sorted.filter((p) => p.inStock);
+      const outOfStock = sorted.filter((p) => !p.inStock);
+      return [...inStock, ...outOfStock];
+    }
+
+    // Default: spread by category with in-stock first
     const inStock = priceFiltered.filter((p) => p.inStock);
     const outOfStock = priceFiltered.filter((p) => !p.inStock);
 
@@ -148,7 +181,7 @@ const Shop: React.FC<ShopProps> = ({ showFilters = true }) => {
     };
 
     return [...spread(inStock), ...spread(outOfStock)];
-  }, [products, priceValue, selectedCategories]);
+  }, [products, priceValue, selectedCategories, sortBy]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -165,6 +198,7 @@ const Shop: React.FC<ShopProps> = ({ showFilters = true }) => {
   const clearFilters = () => {
     setSelectedCategories([]);
     setPriceValue(maxPrice);
+    setSortBy("default");
     setCurrentPage(1);
     if (typeof window !== "undefined") {
       router.push(window.location.pathname, { scroll: false });
@@ -208,7 +242,7 @@ const Shop: React.FC<ShopProps> = ({ showFilters = true }) => {
   }
 
   const activeFilterCount =
-    selectedCategories.length + (priceValue < maxPrice ? 1 : 0);
+    selectedCategories.length + (priceValue < maxPrice ? 1 : 0) + (sortBy !== "default" ? 1 : 0);
 
   return (
     <>
@@ -278,41 +312,57 @@ const Shop: React.FC<ShopProps> = ({ showFilters = true }) => {
               </span>
             </div>
 
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setProductStyle("grid")}
-                aria-label="Grid view"
-                className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${
-                  productStyle === "grid"
-                    ? "text-dark"
-                    : "text-gray-300 hover:text-dark"
-                }`}
+            <div className="flex items-center gap-3">
+              {/* Sort dropdown */}
+              <select
+                value={sortBy}
+                onChange={(e) => { setSortBy(e.target.value); setCurrentPage(1); }}
+                className="text-sm text-dark bg-white border border-gray-200 rounded-lg py-1.5 px-3 outline-none focus:border-forest focus:ring-1 focus:ring-forest/20 transition-colors cursor-pointer"
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="3" width="7" height="7" />
-                  <rect x="14" y="3" width="7" height="7" />
-                  <rect x="3" y="14" width="7" height="7" />
-                  <rect x="14" y="14" width="7" height="7" />
-                </svg>
-              </button>
-              <button
-                onClick={() => setProductStyle("list")}
-                aria-label="List view"
-                className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${
-                  productStyle === "list"
-                    ? "text-dark"
-                    : "text-gray-300 hover:text-dark"
-                }`}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="8" y1="6" x2="21" y2="6" />
-                  <line x1="8" y1="12" x2="21" y2="12" />
-                  <line x1="8" y1="18" x2="21" y2="18" />
-                  <line x1="3" y1="6" x2="3.01" y2="6" />
-                  <line x1="3" y1="12" x2="3.01" y2="12" />
-                  <line x1="3" y1="18" x2="3.01" y2="18" />
-                </svg>
-              </button>
+                <option value="default">Sort by</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="discount">Biggest Discount</option>
+                <option value="name-az">Name: A to Z</option>
+                <option value="rating">Top Rated</option>
+              </select>
+
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setProductStyle("grid")}
+                  aria-label="Grid view"
+                  className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${
+                    productStyle === "grid"
+                      ? "text-dark"
+                      : "text-gray-300 hover:text-dark"
+                  }`}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="3" y="3" width="7" height="7" />
+                    <rect x="14" y="3" width="7" height="7" />
+                    <rect x="3" y="14" width="7" height="7" />
+                    <rect x="14" y="14" width="7" height="7" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => setProductStyle("list")}
+                  aria-label="List view"
+                  className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${
+                    productStyle === "list"
+                      ? "text-dark"
+                      : "text-gray-300 hover:text-dark"
+                  }`}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <line x1="8" y1="6" x2="21" y2="6" />
+                    <line x1="8" y1="12" x2="21" y2="12" />
+                    <line x1="8" y1="18" x2="21" y2="18" />
+                    <line x1="3" y1="6" x2="3.01" y2="6" />
+                    <line x1="3" y1="12" x2="3.01" y2="12" />
+                    <line x1="3" y1="18" x2="3.01" y2="18" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
 
