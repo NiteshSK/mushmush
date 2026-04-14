@@ -23,8 +23,10 @@ export interface InvoiceData {
     productTitle: string;
     quantity: number;
     price: number;
+    originalPrice?: number;
     total: number;
   }>;
+  productDiscount?: number;
   orderDate: Date;
 }
 
@@ -282,9 +284,14 @@ export async function generateInvoicePDF(data: InvoiceData, userId?: string): Pr
   // Light background for totals
   const totalRows = [
     { label: 'Subtotal', value: `Rs. ${data.subtotal.toFixed(2)}` },
+  ];
+  if (data.productDiscount && data.productDiscount > 0) {
+    totalRows.push({ label: 'Product Discount', value: `- Rs. ${data.productDiscount.toFixed(2)}` });
+  }
+  totalRows.push(
     { label: 'Convenience Fee', value: `Rs. ${data.tax.toFixed(2)}` },
     { label: 'Shipping', value: data.shipping === 0 ? 'FREE' : `Rs. ${data.shipping.toFixed(2)}` },
-  ];
+  );
   if (data.couponDiscount > 0) {
     totalRows.push({ label: data.couponCode ? `Coupon (${data.couponCode})` : 'Coupon', value: `- Rs. ${data.couponDiscount.toFixed(2)}` });
   }
@@ -367,7 +374,8 @@ export async function generateInvoice(orderId: string): Promise<any> {
           include: {
             product: {
               select: {
-                title: true
+                title: true,
+                price: true
               }
             }
           }
@@ -441,8 +449,12 @@ export async function generateInvoice(orderId: string): Promise<any> {
         productTitle: item.product.title,
         quantity: item.quantity,
         price: item.price,
+        originalPrice: item.product.price,
         total: item.quantity * item.price
       })),
+      productDiscount: order.orderItems.reduce(
+        (sum, item) => sum + ((item.product.price - item.price) * item.quantity), 0
+      ),
       orderDate: order.createdAt
     };
 

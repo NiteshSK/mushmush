@@ -193,6 +193,17 @@ const OrderRow = ({
                 </div>
                 <div className="bg-gray-1 rounded-lg p-3 text-sm space-y-1">
                   <div className="flex justify-between"><span className="text-dark-5">Subtotal</span><span className="text-dark">₹{order.subtotal.toFixed(2)}</span></div>
+                  {(() => {
+                    const prodDiscount = order.orderItems.reduce((sum: number, item: any) => {
+                      if (item.product?.price && item.product.price > item.price) {
+                        return sum + (item.product.price - item.price) * item.quantity;
+                      }
+                      return sum;
+                    }, 0);
+                    return prodDiscount > 0 ? (
+                      <div className="flex justify-between"><span className="text-forest">Product Discount</span><span className="text-forest">-₹{prodDiscount.toFixed(2)}</span></div>
+                    ) : null;
+                  })()}
                   <div className="flex justify-between"><span className="text-dark-5">Shipping</span><span className="text-dark">{order.shipping === 0 ? "FREE" : `₹${order.shipping.toFixed(2)}`}</span></div>
                   {order.couponDiscount > 0 && (
                     <div className="flex justify-between"><span className="text-forest">Coupon</span><span className="text-forest">-₹{order.couponDiscount.toFixed(2)}</span></div>

@@ -710,6 +710,7 @@ export interface OrderInvoiceEmailData {
   shipping: number;
   couponDiscount?: number;
   couponCode?: string | null;
+  productDiscount?: number;
   total: number;
   shippingAddress: any;
 }
@@ -801,6 +802,10 @@ export function generateOrderInvoiceEmail(data: OrderInvoiceEmailData): string {
             <td style="padding: 8px 0; text-align: right; color: #555;">Subtotal:</td>
             <td style="padding: 8px 0; text-align: right; width: 100px; font-weight: bold;">₹${data.subtotal.toFixed(2)}</td>
           </tr>
+          ${data.productDiscount && data.productDiscount > 0 ? `<tr>
+            <td style="padding: 8px 0; text-align: right; color: #5c8e61;">Product Discount:</td>
+            <td style="padding: 8px 0; text-align: right; font-weight: bold; color: #5c8e61;">-₹${data.productDiscount.toFixed(2)}</td>
+          </tr>` : ''}
           <tr>
             <td style="padding: 8px 0; text-align: right; color: #555;">Convenience Fee:</td>
             <td style="padding: 8px 0; text-align: right; font-weight: bold;">₹${data.tax.toFixed(2)}</td>
@@ -899,10 +904,11 @@ interface OrderNotificationData {
   customerEmail: string;
   customerPhone?: string;
   orderNumber: string;
-  orderItems: Array<{ productTitle: string; quantity: number; price: number; total: number }>;
+  orderItems: Array<{ productTitle: string; quantity: number; price: number; originalPrice?: number; total: number }>;
   subtotal: number;
   shipping: number;
   couponDiscount?: number;
+  productDiscount?: number;
   total: number;
   shippingAddress: { street?: string; city?: string; state?: string; zip?: string; address?: string };
 }
@@ -954,6 +960,7 @@ function orderSummaryBlock(data: OrderNotificationData): string {
     </table>
     <div style="text-align: right; margin-top: 10px;">
       <p style="margin: 4px 0; color: #6b7280;">Subtotal: ₹${data.subtotal.toFixed(2)}</p>
+      ${data.productDiscount ? `<p style="margin: 4px 0; color: #059669;">Product Discount: -₹${data.productDiscount.toFixed(2)}</p>` : ''}
       <p style="margin: 4px 0; color: #6b7280;">Shipping: ${data.shipping === 0 ? 'FREE' : '₹' + data.shipping.toFixed(2)}</p>
       ${data.couponDiscount ? `<p style="margin: 4px 0; color: #059669;">Coupon Discount: -₹${data.couponDiscount.toFixed(2)}</p>` : ''}
       <p style="margin: 8px 0 0; font-size: 18px; font-weight: bold; color: #111;">Total: ₹${data.total.toFixed(2)}</p>
@@ -1031,6 +1038,7 @@ export async function sendPaymentReceivedEmail(data: {
   orderItems?: Array<{ productTitle: string; quantity: number; price: number; total: number }>;
   subtotal?: number;
   shipping?: number;
+  productDiscount?: number;
   shippingAddress?: { street?: string; city?: string; state?: string; zip?: string; address?: string };
 }): Promise<void> {
   const customerHtml = orderEmailWrapper(
@@ -1099,6 +1107,7 @@ export async function sendPaymentReceivedEmail(data: {
         </table>
         <div style="text-align: right; margin-top: 10px;">
           ${data.subtotal ? `<p style="margin: 4px 0; color: #6b7280;">Subtotal: ₹${data.subtotal.toFixed(2)}</p>` : ''}
+          ${data.productDiscount ? `<p style="margin: 4px 0; color: #059669;">Product Discount: -₹${data.productDiscount.toFixed(2)}</p>` : ''}
           ${data.shipping !== undefined ? `<p style="margin: 4px 0; color: #6b7280;">Shipping: ${data.shipping === 0 ? 'FREE' : '₹' + data.shipping.toFixed(2)}</p>` : ''}
           <p style="margin: 8px 0 0; font-size: 18px; font-weight: bold; color: #111;">Total: ₹${data.amount.toFixed(2)}</p>
         </div>
@@ -1139,6 +1148,7 @@ export async function sendOrderStatusEmail(data: {
   subtotal?: number;
   shipping?: number;
   couponDiscount?: number;
+  productDiscount?: number;
 }): Promise<void> {
   const statusConfig: Record<string, { title: string; message: string; color: string }> = {
     PAYMENT_RECEIVED: {
@@ -1202,6 +1212,7 @@ export async function sendOrderStatusEmail(data: {
         </table>
         <div style="text-align: right; margin-top: 10px;">
           ${data.subtotal ? `<p style="margin: 4px 0; color: #6b7280;">Subtotal: ₹${data.subtotal.toFixed(2)}</p>` : ''}
+          ${data.productDiscount ? `<p style="margin: 4px 0; color: #059669;">Product Discount: -₹${data.productDiscount.toFixed(2)}</p>` : ''}
           ${data.shipping !== undefined ? `<p style="margin: 4px 0; color: #6b7280;">Shipping: ${data.shipping === 0 ? 'FREE' : '₹' + data.shipping.toFixed(2)}</p>` : ''}
           ${data.couponDiscount ? `<p style="margin: 4px 0; color: #059669;">Coupon: -₹${data.couponDiscount.toFixed(2)}</p>` : ''}
           <p style="margin: 8px 0 0; font-size: 18px; font-weight: bold; color: #111;">Total: ₹${data.total.toFixed(2)}</p>

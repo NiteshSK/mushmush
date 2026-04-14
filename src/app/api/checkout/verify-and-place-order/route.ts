@@ -267,20 +267,28 @@ export async function POST(request: NextRequest) {
     try {
       const { sendOrderPlacedEmail, sendAdminNewOrderEmail } = await import('@/lib/email');
 
+      // Calculate product-level discount (original price vs discounted price)
+      const orderItemsWithOriginal = order.orderItems.map((item: any) => ({
+        productTitle: item.product.title,
+        quantity: item.quantity,
+        price: item.price,
+        originalPrice: item.product.price,
+        total: item.quantity * item.price,
+      }));
+      const productDiscount = orderItemsWithOriginal.reduce(
+        (sum: number, item: any) => sum + ((item.originalPrice - item.price) * item.quantity), 0
+      );
+
       const notificationData = {
         customerName: order.customerName,
         customerEmail: order.customerEmail,
         customerPhone: customerPhone || '',
         orderNumber: order.orderNumber,
-        orderItems: order.orderItems.map((item: any) => ({
-          productTitle: item.product.title,
-          quantity: item.quantity,
-          price: item.price,
-          total: item.quantity * item.price,
-        })),
+        orderItems: orderItemsWithOriginal,
         subtotal: order.subtotal,
         shipping: order.shipping,
         couponDiscount: couponDiscount || 0,
+        productDiscount: productDiscount > 0 ? productDiscount : 0,
         total: order.total,
         shippingAddress: shippingAddressJson,
       };

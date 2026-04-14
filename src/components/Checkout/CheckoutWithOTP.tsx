@@ -92,6 +92,12 @@ const CheckoutWithOTP = () => {
 
   const convenienceFee = 12;
   const couponDiscount = appliedCoupon?.discountAmount ?? 0;
+  const productDiscount = cartItems.reduce((sum, item) => {
+    if (item.discountedPrice && item.discountedPrice < item.price) {
+      return sum + (item.price - item.discountedPrice) * item.quantity;
+    }
+    return sum;
+  }, 0);
   const total = subtotal + (shippingFee ?? 0) + convenienceFee - couponDiscount;
 
   // Fetch saved addresses and user profile on mount
@@ -610,11 +616,18 @@ const CheckoutWithOTP = () => {
                     {cartItems.length > 0 ? (
                       cartItems.map((item) => {
                         const priceToDisplay = item.discountedPrice || item.price;
+                        const hasItemDiscount = item.discountedPrice && item.discountedPrice < item.price;
                         return (
                           <div key={item.id} className="flex items-center justify-between py-4 border-b border-gray-3">
                             <div className="flex-1 min-w-0 pr-4">
                               <p className="text-sm text-dark truncate">{item.title}</p>
                               <p className="text-xs text-dark-5 mt-0.5">Qty: {item.quantity}</p>
+                              {hasItemDiscount && (
+                                <p className="text-xs text-dark-5 mt-0.5">
+                                  <span className="line-through">₹{item.price}</span>
+                                  <span className="text-forest ml-1">₹{item.discountedPrice} each</span>
+                                </p>
+                              )}
                             </div>
                             <p className="text-sm font-medium text-dark text-right whitespace-nowrap">
                               &#8377;{(priceToDisplay * item.quantity).toFixed(2)}
@@ -632,6 +645,13 @@ const CheckoutWithOTP = () => {
                       <p className="font-medium text-dark">Subtotal</p>
                       <p className="font-medium text-dark text-right">&#8377;{subtotal.toFixed(2)}</p>
                     </div>
+
+                    {productDiscount > 0 && (
+                      <div className="flex items-center justify-between py-4 border-b border-gray-3">
+                        <p className="text-sm text-forest">Product Discount</p>
+                        <p className="text-sm text-forest font-medium text-right">-&#8377;{productDiscount.toFixed(2)}</p>
+                      </div>
+                    )}
 
                     {/* Pincode Delivery Check */}
                     <div className="py-5 border-b border-gray-3">

@@ -1,6 +1,6 @@
 import { selectTotalPrice } from "@/redux/features/cart-slice";
 import { useAppSelector } from "@/redux/store";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useSelector } from "react-redux";
 import Link from "next/link";
 
@@ -9,6 +9,17 @@ const CONVENIENCE_FEE = 12;
 const OrderSummary = () => {
   const cartItems = useAppSelector((state) => state.cartReducer.items);
   const totalPrice = useSelector(selectTotalPrice);
+
+  // Calculate product-level discount (original vs discounted)
+  const productDiscount = useMemo(() =>
+    cartItems.reduce((sum, item) => {
+      if (item.discountedPrice && item.discountedPrice < item.price) {
+        return sum + (item.price - item.discountedPrice) * item.quantity;
+      }
+      return sum;
+    }, 0),
+  [cartItems]);
+  const originalTotal = totalPrice + productDiscount;
 
   // Shipping estimate
   const [pincode, setPincode] = useState('');
@@ -56,18 +67,27 @@ const OrderSummary = () => {
           </div>
 
           {/* <!-- product item --> */}
-          {cartItems.map((item, key) => (
-            <div key={key} className="flex items-center justify-between py-5 border-b border-gray-3">
-              <div>
-                <p className="text-dark">{item.title}</p>
+          {cartItems.map((item, key) => {
+            const hasItemDiscount = item.discountedPrice && item.discountedPrice < item.price;
+            return (
+              <div key={key} className="flex items-center justify-between py-5 border-b border-gray-3">
+                <div>
+                  <p className="text-dark">{item.title}</p>
+                  {hasItemDiscount && (
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      <span className="line-through">₹{item.price}</span>
+                      <span className="text-forest ml-1.5">₹{item.discountedPrice} each</span>
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <p className="text-dark text-right">
+                    ₹{(item.discountedPrice || item.price) * item.quantity}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-dark text-right">
-                  ₹{(item.discountedPrice || item.price) * item.quantity}
-                </p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
 
           {/* Shipping estimate */}
           <div className="py-5 border-b border-gray-3">
@@ -108,6 +128,14 @@ const OrderSummary = () => {
               </div>
             )}
           </div>
+
+          {/* Product discount */}
+          {productDiscount > 0 && (
+            <div className="flex items-center justify-between py-3 border-b border-gray-3">
+              <p className="text-sm text-forest">Product Discount</p>
+              <p className="text-sm text-forest font-medium text-right">-₹{productDiscount.toFixed(2)}</p>
+            </div>
+          )}
 
           {/* Convenience fee */}
           <div className="flex items-center justify-between py-3 border-b border-gray-3">
