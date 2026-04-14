@@ -289,21 +289,43 @@ const ChatBot = () => {
             <>
               <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-sand min-h-0">
                 {messages.length === 0 && (
-                  <div className="flex justify-start">
-                    <div className="max-w-[90%] p-3.5 rounded-2xl rounded-tl-sm bg-white border border-gray-200">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="w-5 h-5 bg-forest/10 rounded-full flex items-center justify-center text-forest">
-                          <Bot size={11} />
+                  <>
+                    <div className="flex justify-start">
+                      <div className="max-w-[90%] p-3.5 rounded-2xl rounded-tl-sm bg-white border border-gray-200">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-5 h-5 bg-forest/10 rounded-full flex items-center justify-center text-forest">
+                            <Bot size={11} />
+                          </div>
+                          <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">Kosvana</span>
                         </div>
-                        <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">Kosvana</span>
-                      </div>
-                      <div className="leading-relaxed text-gray-600 text-xs markdown-content">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                          {"Hello! I'm your Kosvana guide.\n\nI can help you with:\n- **Browse & Buy Products** right here\n- **Premium Mushrooms & Dry Fruits**\n- **Seeds, Spices & Superfoods**\n- **Mushroom Cultivation Training**\n\nAsk me about any product or tap **Shop** above to browse!"}
-                        </ReactMarkdown>
+                        <div className="leading-relaxed text-gray-600 text-xs markdown-content">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {"Hello! I'm your Kosvana guide.\n\nI can help you with:\n- **Browse & Buy Products** right here\n- **Premium Mushrooms & Dry Fruits**\n- **Seeds, Spices & Superfoods**\n- **Mushroom Cultivation Training**\n\nAsk me about any product or tap **Shop** above to browse!"}
+                          </ReactMarkdown>
+                        </div>
                       </div>
                     </div>
-                  </div>
+
+                    {/* Quick-action chips */}
+                    <div className="flex flex-wrap gap-1.5">
+                      {[
+                        { label: "🍄 Show Mushrooms", prompt: "Show me your mushroom products" },
+                        { label: "🥜 Dry Fruits", prompt: "What dry fruits do you have?" },
+                        { label: "🌱 Seeds & Spices", prompt: "Show me seeds and spices" },
+                        { label: "🎓 Training Programs", prompt: "Tell me about mushroom cultivation training" },
+                        { label: "🔥 Best Sellers", prompt: "What are your best selling products?" },
+                        { label: "📍 Contact & Location", prompt: "Where are you located and how can I contact you?" },
+                      ].map((chip) => (
+                        <button
+                          key={chip.label}
+                          onClick={() => sendMessage({ text: chip.prompt })}
+                          className="bg-white border border-gray-200 text-gray-600 text-[11px] px-3 py-1.5 rounded-full hover:bg-forest/5 hover:border-forest/20 hover:text-forest transition-colors"
+                        >
+                          {chip.label}
+                        </button>
+                      ))}
+                    </div>
+                  </>
                 )}
 
                 {messages.map((msg) => (
