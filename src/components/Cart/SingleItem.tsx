@@ -47,6 +47,8 @@ const SingleItem = ({ item }: SingleItemProps) => {
   };
 
   const unitPrice = item.discountedPrice || item.price;
+  const maxQty = item.stockQuantity ?? Infinity;
+  const atMax = quantity >= maxQty;
 
   return (
     <>
@@ -57,9 +59,14 @@ const SingleItem = ({ item }: SingleItemProps) => {
             <div className="flex items-center justify-center rounded-lg bg-gray-1 w-[70px] h-[70px] flex-shrink-0">
               <Image width={60} height={60} src={item.imgs?.thumbnails[0] || ''} alt={item.title} className="object-contain" />
             </div>
-            <h3 className="text-sm font-medium text-dark hover:text-forest transition-colors truncate">
-              <Link href={`/shop-details/${item.slug || '#'}`}>{item.title}</Link>
-            </h3>
+            <div className="min-w-0">
+              <h3 className="text-sm font-medium text-dark hover:text-forest transition-colors truncate">
+                <Link href={`/shop-details/${item.slug || '#'}`}>{item.title}</Link>
+              </h3>
+              {item.stockQuantity !== undefined && item.stockQuantity <= 10 && (
+                <p className="text-xs text-amber-600 mt-0.5">Only {item.stockQuantity} left in stock</p>
+              )}
+            </div>
           </div>
         </div>
 
@@ -79,8 +86,9 @@ const SingleItem = ({ item }: SingleItemProps) => {
             <span className="w-9 text-center text-sm font-medium text-dark">{quantity}</span>
             <button
               onClick={handleIncreaseQuantity}
+              disabled={atMax}
               aria-label="Increase quantity"
-              className="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-dark transition-colors"
+              className="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-dark transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             >
               <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><rect y="5" width="12" height="2" rx="1" /><rect x="5" width="2" height="12" rx="1" /></svg>
             </button>
@@ -114,7 +122,10 @@ const SingleItem = ({ item }: SingleItemProps) => {
             <h3 className="text-sm font-medium text-dark truncate mb-1">
               <Link href={`/shop-details/${item.slug || '#'}`}>{item.title}</Link>
             </h3>
-            <p className="text-sm text-dark font-medium mb-3">₹{unitPrice}</p>
+            <p className="text-sm text-dark font-medium mb-1">₹{unitPrice}</p>
+            {item.stockQuantity !== undefined && item.stockQuantity <= 10 && (
+              <p className="text-xs text-amber-600 mb-2">Only {item.stockQuantity} left in stock</p>
+            )}
 
             <div className="flex items-center justify-between">
               <div className="inline-flex items-center border border-gray-200 rounded-full">
@@ -127,7 +138,8 @@ const SingleItem = ({ item }: SingleItemProps) => {
                 <span className="w-8 text-center text-xs font-medium">{quantity}</span>
                 <button
                   onClick={handleIncreaseQuantity}
-                  className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-dark"
+                  disabled={atMax}
+                  className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-dark disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect y="4" width="10" height="2" rx="1" /><rect x="4" width="2" height="10" rx="1" /></svg>
                 </button>

@@ -31,6 +31,8 @@ const SingleItem = ({ item, removeItemFromCart }: { item: any; removeItemFromCar
   };
 
   const unitPrice = item.discountedPrice || item.price;
+  const maxQty = item.stockQuantity ?? Infinity;
+  const atMax = quantity >= maxQty;
 
   return (
     <div className="flex items-start gap-4">
@@ -45,7 +47,10 @@ const SingleItem = ({ item, removeItemFromCart }: { item: any; removeItemFromCar
           </Link>
         </h3>
 
-        <p className="text-xs text-gray-500 mb-2">₹{unitPrice} each</p>
+        <p className="text-xs text-gray-500 mb-1">₹{unitPrice} each</p>
+        {item.stockQuantity !== undefined && item.stockQuantity <= 10 && (
+          <p className="text-xs text-amber-600 mb-1">Only {item.stockQuantity} left</p>
+        )}
 
         <div className="flex items-center justify-between">
           {/* Quantity controls */}
@@ -60,7 +65,8 @@ const SingleItem = ({ item, removeItemFromCart }: { item: any; removeItemFromCar
             <span className="w-7 text-center text-xs font-medium text-dark">{quantity}</span>
             <button
               onClick={handleIncrease}
-              className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-dark transition-colors"
+              disabled={atMax}
+              className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-dark transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               aria-label="Increase quantity"
             >
               <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect y="4" width="10" height="2" rx="1" /><rect x="4" width="2" height="10" rx="1" /></svg>
