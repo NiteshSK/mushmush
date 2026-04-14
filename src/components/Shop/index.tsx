@@ -312,22 +312,7 @@ const Shop: React.FC<ShopProps> = ({ showFilters = true }) => {
               </span>
             </div>
 
-            <div className="flex items-center gap-3">
-              {/* Sort dropdown */}
-              <select
-                value={sortBy}
-                onChange={(e) => { setSortBy(e.target.value); setCurrentPage(1); }}
-                className="text-sm text-dark bg-white border border-gray-200 rounded-lg py-1.5 px-3 outline-none focus:border-forest focus:ring-1 focus:ring-forest/20 transition-colors cursor-pointer"
-              >
-                <option value="default">Sort by</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-                <option value="discount">Biggest Discount</option>
-                <option value="name-az">Name: A to Z</option>
-                <option value="rating">Top Rated</option>
-              </select>
-
-              <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1">
                 <button
                   onClick={() => setProductStyle("grid")}
                   aria-label="Grid view"
@@ -362,7 +347,6 @@ const Shop: React.FC<ShopProps> = ({ showFilters = true }) => {
                     <line x1="3" y1="18" x2="3.01" y2="18" />
                   </svg>
                 </button>
-              </div>
             </div>
           </div>
 
@@ -432,6 +416,40 @@ const Shop: React.FC<ShopProps> = ({ showFilters = true }) => {
                     <div className="flex items-center justify-between mt-2">
                       <span className="text-xs text-gray-5">&#8377;0</span>
                       <span className="text-xs font-medium text-dark">&#8377;{priceValue}</span>
+                    </div>
+                  </div>
+
+                  {/* Sort By */}
+                  <div>
+                    <h4 className="text-xs font-medium uppercase tracking-[0.15em] text-dark mb-4">
+                      Sort By
+                    </h4>
+                    <div className="flex flex-col gap-2">
+                      {[
+                        { value: "default", label: "Default" },
+                        { value: "price-low", label: "Price: Low to High" },
+                        { value: "price-high", label: "Price: High to Low" },
+                        { value: "discount", label: "Biggest Discount" },
+                        { value: "name-az", label: "Name: A to Z" },
+                        { value: "rating", label: "Top Rated" },
+                      ].map((option) => (
+                        <label
+                          key={option.value}
+                          className="flex items-center gap-3 cursor-pointer group"
+                        >
+                          <input
+                            type="radio"
+                            name="sortBy"
+                            value={option.value}
+                            checked={sortBy === option.value}
+                            onChange={() => { setSortBy(option.value); setCurrentPage(1); }}
+                            className="w-4 h-4 text-forest accent-forest focus:ring-forest"
+                          />
+                          <span className={`text-sm transition-colors ${sortBy === option.value ? "text-dark font-medium" : "text-gray-5 group-hover:text-dark"}`}>
+                            {option.label}
+                          </span>
+                        </label>
+                      ))}
                     </div>
                   </div>
 
