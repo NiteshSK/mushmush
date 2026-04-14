@@ -62,10 +62,12 @@ const ChatCheckout: React.FC<ChatCheckoutProps> = ({ product, onBack, onProceedT
   const [otp, setOtp] = useState("");
   const [resendTimer, setResendTimer] = useState(0);
 
-  const finalPrice = product.hasDiscount && product.discountedPrice ? product.discountedPrice : product.price;
-  const subtotal = finalPrice * quantity;
+  const originalSubtotal = product.price * quantity;
+  const hasDiscount = product.hasDiscount && product.discountedPrice;
+  const discountedSubtotal = hasDiscount ? product.discountedPrice! * quantity : originalSubtotal;
+  const productDiscount = originalSubtotal - discountedSubtotal;
   const convenienceFee = 12;
-  const total = subtotal + (shippingFee ?? 0) + convenienceFee;
+  const total = discountedSubtotal + (shippingFee ?? 0) + convenienceFee;
 
   useEffect(() => {
     if (resendTimer <= 0) return;
@@ -103,7 +105,7 @@ const ChatCheckout: React.FC<ChatCheckoutProps> = ({ product, onBack, onProceedT
     const digits = value.replace(/\D/g, "").slice(0, 6);
     setZip(digits);
     if (digits.length === 6) {
-      checkShipping(digits, subtotal);
+      checkShipping(digits, discountedSubtotal);
     } else {
       setShippingInfo(null);
       setShippingFee(null);
@@ -113,9 +115,9 @@ const ChatCheckout: React.FC<ChatCheckoutProps> = ({ product, onBack, onProceedT
   // Re-check shipping when subtotal changes (quantity change affects free-shipping threshold)
   useEffect(() => {
     if (/^\d{6}$/.test(zip)) {
-      checkShipping(zip, subtotal);
+      checkShipping(zip, discountedSubtotal);
     }
-  }, [subtotal, zip, checkShipping]);
+  }, [discountedSubtotal, zip, checkShipping]);
 
   const validateDetails = () => {
     if (!name.trim()) { toast.error("Please enter your name"); return false; }
@@ -180,7 +182,7 @@ const ChatCheckout: React.FC<ChatCheckoutProps> = ({ product, onBack, onProceedT
           billingAddress: address,
           shippingAddress: address,
           cartItems: [{ id: product.id, quantity, price: product.price, discountedPrice: product.discountedPrice }],
-          subtotal,
+          subtotal: discountedSubtotal,
           shippingFee,
           convenienceFee,
           total,
@@ -256,9 +258,14 @@ const ChatCheckout: React.FC<ChatCheckoutProps> = ({ product, onBack, onProceedT
             </div>
           </div>
           <div className="text-right flex-shrink-0">
-            <p className="text-sm font-bold text-gray-900">₹{subtotal}</p>
-            {product.hasDiscount && product.discountedPrice && (
-              <p className="text-[10px] text-gray-400 line-through">₹{product.price * quantity}</p>
+            {hasDiscount ? (
+              <>
+                <p className="text-[10px] text-gray-400 line-through">₹{originalSubtotal}</p>
+                <p className="text-sm font-bold text-gray-900">₹{discountedSubtotal}</p>
+                <p className="text-[10px] text-green-600 font-medium">{product.discountPercentage}% off</p>
+              </>
+            ) : (
+              <p className="text-sm font-bold text-gray-900">₹{originalSubtotal}</p>
             )}
           </div>
         </div>
@@ -336,8 +343,15 @@ const ChatCheckout: React.FC<ChatCheckoutProps> = ({ product, onBack, onProceedT
             {/* Price breakdown */}
             <div className="bg-gray-50 rounded-lg p-3 space-y-1 text-xs">
               <div className="flex justify-between text-gray-500">
-                <span>Subtotal</span><span>₹{subtotal}</span>
+                <span>Subtotal ({quantity} item{quantity > 1 ? "s" : ""})</span>
+                <span>₹{originalSubtotal}</span>
               </div>
+              {productDiscount > 0 && (
+                <div className="flex justify-between text-green-600">
+                  <span>Product Discount ({product.discountPercentage}%)</span>
+                  <span>-₹{productDiscount}</span>
+                </div>
+              )}
               <div className="flex justify-between text-gray-500">
                 <span>Shipping</span>
                 <span>
@@ -356,6 +370,9 @@ const ChatCheckout: React.FC<ChatCheckoutProps> = ({ product, onBack, onProceedT
                 <span>Total</span>
                 <span>{shippingFee === null ? "—" : `₹${total}`}</span>
               </div>
+              {productDiscount > 0 && (
+                <p className="text-[10px] text-green-600 text-right pt-0.5">You save ₹{productDiscount}!</p>
+              )}
             </div>
 
             <button
