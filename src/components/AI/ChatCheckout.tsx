@@ -151,7 +151,7 @@ const ChatCheckout: React.FC<ChatCheckoutProps> = ({ product, onBack, onProceedT
   const thumbnail = product.imgs?.thumbnails?.[0] || product.imgs?.previews?.[0] || "/images/placeholder.png";
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col flex-1 min-h-0">
       {/* Header */}
       <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
         <button onClick={onBack} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">

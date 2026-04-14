@@ -79,7 +79,7 @@ const ChatPayment: React.FC<ChatPaymentProps> = ({
 
   if (success) {
     return (
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col flex-1 min-h-0">
         <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
             <CheckCircle2 size={32} className="text-green-600" />
@@ -101,7 +101,7 @@ const ChatPayment: React.FC<ChatPaymentProps> = ({
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col flex-1 min-h-0">
       {/* Header */}
       <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
         <button onClick={onBack} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
