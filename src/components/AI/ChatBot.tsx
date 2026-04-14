@@ -173,15 +173,24 @@ const ChatBot = () => {
           </ReactMarkdown>
         );
       }
-      // Render tool results as product cards
-      if (part.type === "tool-invocation" && part.toolInvocation?.toolName === "searchProducts" && part.toolInvocation?.state === "result") {
-        const toolProducts: ChatProduct[] = part.toolInvocation.result || [];
+      // AI SDK v5: tool parts have type "tool-{toolName}" and state "output-available"
+      if (part.type === "tool-searchProducts" && part.state === "output-available") {
+        const toolProducts: ChatProduct[] = part.output || [];
         if (toolProducts.length === 0) return null;
         return (
           <div key={i} className="mt-2 space-y-2">
             {toolProducts.map((product) => (
               <ChatProductCard key={product.id} product={product} onBuy={handleBuy} />
             ))}
+          </div>
+        );
+      }
+      // Fallback: handle tool parts in loading/streaming state
+      if (typeof part.type === "string" && part.type.startsWith("tool-") && part.state !== "output-available") {
+        return (
+          <div key={i} className="flex items-center gap-2 mt-1 text-xs text-gray-400">
+            <Loader2 size={12} className="animate-spin text-forest" />
+            <span>Searching products...</span>
           </div>
         );
       }

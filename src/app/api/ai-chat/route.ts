@@ -1,4 +1,4 @@
-import { streamText, convertToCoreMessages } from "ai";
+import { streamText, convertToCoreMessages, stepCountIs } from "ai";
 import { google } from "@ai-sdk/google";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
@@ -304,6 +304,7 @@ Answer concisely and helpfully. Keep responses clean and professional.`;
                     },
                 },
             },
+            stopWhen: stepCountIs(3),
         });
 
         return result.toUIMessageStreamResponse();
