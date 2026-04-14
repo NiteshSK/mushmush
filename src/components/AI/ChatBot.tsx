@@ -203,6 +203,12 @@ const ChatBot = () => {
             {toolProducts.map((product) => (
               <ChatProductCard key={product.id} product={product} onBuy={handleBuy} />
             ))}
+            <button
+              onClick={() => switchView("shop")}
+              className="w-full text-center text-[11px] text-forest font-medium py-1.5 border border-forest/20 rounded-full hover:bg-forest/5 transition-colors"
+            >
+              Browse all products in Shop →
+            </button>
           </div>
         );
       }

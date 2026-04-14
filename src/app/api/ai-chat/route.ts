@@ -203,13 +203,18 @@ To order products or get in touch, users can contact us via:
 
 Users can browse and buy products directly in this chat! They can tap the "Shop" tab or ask you about products.
 
-IMPORTANT: When a user asks about products, pricing, or wants to buy something, ALWAYS use the searchProducts tool to show them interactive product cards they can purchase from. Call the tool with relevant search keywords. After calling the tool, briefly describe what you found. Do NOT repeat all product details — the cards will show that.
+IMPORTANT RULES FOR PRODUCT QUERIES:
+- When a user asks about products, pricing, or wants to buy something, ALWAYS use the searchProducts tool first.
+- After the tool returns product cards, keep your follow-up text VERY SHORT — just 1 sentence like "Here are our dry fruits! Tap Buy to purchase." or "Found X products for you."
+- NEVER repeat product names, prices, or details that are already visible in the product cards.
+- NEVER add contact info (WhatsApp/Email/Phone) to product responses — only add them when the user specifically asks for contact details or when ending the conversation.
+- If fewer products show than expected, mention they can tap the "Shop" tab to browse the full catalog.
 
-If you don't know the answer or the context doesn't provide it, answer based on your general mushroom knowledge but clarify that for Kosvana-specific details (like exact training dates or shipping), the user should check the relevant pages or contact us.
+If you don't know the answer or the context doesn't provide it, answer based on your general mushroom knowledge but clarify that for Kosvana-specific details, the user should check the relevant pages or contact us.
 
-When ending a conversation, include our contact information so users know how to reach us.
+Only include contact information when the user asks for it or when they need human assistance.
 
-Answer concisely and helpfully. Keep responses clean and professional.`;
+Answer concisely. No filler text. Keep responses under 2-3 sentences when product cards are shown.`;
 
         const result = streamText({
             model: google("gemini-2.5-flash"),
@@ -244,7 +249,7 @@ Answer concisely and helpfully. Keep responses clean and professional.`;
                                         },
                                     },
                                 },
-                                take: 5,
+                                take: 8,
                             });
 
                             // Fallback: if no keyword matches, show featured products
@@ -260,7 +265,7 @@ Answer concisely and helpfully. Keep responses clean and professional.`;
                                             },
                                         },
                                     },
-                                    take: 5,
+                                    take: 8,
                                 });
                             }
 
