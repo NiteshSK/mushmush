@@ -235,7 +235,7 @@ const ChatBot = () => {
 
   // ─── Render ────────────────────────────────────────
   return (
-    <div className="fixed bottom-6 right-6 z-[9999]">
+    <div className={`fixed bottom-6 right-6 ${isOpen ? 'z-[100000]' : 'z-[9999]'}`}>
       {/* Floating Button */}
       {!isOpen && (
         <button
