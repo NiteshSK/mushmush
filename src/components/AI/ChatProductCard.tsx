@@ -17,6 +17,7 @@ export interface ChatProduct {
   reviewCount: number;
   measurementValue: number;
   measurementType: string;
+  stockQuantity?: number;
 }
 
 interface ChatProductCardProps {

@@ -28,6 +28,11 @@ const discountedProduct: ChatProduct = {
   hasDiscount: true,
 };
 
+const lowStockProduct: ChatProduct = {
+  ...mockProduct,
+  stockQuantity: 3,
+};
+
 const mockShippingResponse = {
   deliverable: true,
   shippingFee: 80,
@@ -189,6 +194,39 @@ describe('ChatCheckout', () => {
       fireEvent.click(minusButton);
 
       expect(screen.getByText('Qty: 1')).toBeInTheDocument();
+    });
+
+    it('prevents quantity from exceeding stock limit', () => {
+      render(
+        <ChatCheckout
+          product={lowStockProduct}
+          onBack={mockOnBack}
+          onProceedToPayment={mockOnProceedToPayment}
+        />
+      );
+
+      const plusButton = screen.getByText('+');
+      // Stock is 3, start at 1, click + twice to reach 3
+      fireEvent.click(plusButton); // 2
+      fireEvent.click(plusButton); // 3
+      fireEvent.click(plusButton); // should stay at 3
+      fireEvent.click(plusButton); // should stay at 3
+
+      expect(screen.getByText('3')).toBeInTheDocument();
+      // + button should be disabled at max
+      expect(plusButton).toBeDisabled();
+    });
+
+    it('shows low stock warning when stock is 10 or less', () => {
+      render(
+        <ChatCheckout
+          product={lowStockProduct}
+          onBack={mockOnBack}
+          onProceedToPayment={mockOnProceedToPayment}
+        />
+      );
+
+      expect(screen.getByText('Only 3 left')).toBeInTheDocument();
     });
 
     it('validates required fields before sending OTP', async () => {

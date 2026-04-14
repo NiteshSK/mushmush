@@ -36,6 +36,7 @@ const SingleGridItem = ({ item, priority = false, onNotifyMe }: Props) => {
         price: item.price,
         discountedPrice: item.discountedPrice,
         quantity: 1,
+        stockQuantity: item.stockQuantity,
         imgs: item.imgs,
       })
     );

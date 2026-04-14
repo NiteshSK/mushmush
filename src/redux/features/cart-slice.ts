@@ -59,7 +59,8 @@ export const cart = createSlice({
       const existingItem = state.items.find((item) => item.id === id);
 
       if (existingItem) {
-        existingItem.quantity = quantity;
+        const maxQty = existingItem.stockQuantity ?? Infinity;
+        existingItem.quantity = Math.min(Math.max(1, quantity), maxQty);
       }
     },
 

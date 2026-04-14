@@ -3,6 +3,7 @@ import { google } from "@ai-sdk/google";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
+import { availablePacks } from "@/lib/inventory";
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -295,6 +296,7 @@ Answer concisely and helpfully. Keep responses clean and professional.`;
                                     reviewCount: p.reviews.length,
                                     measurementValue: p.measurementValue,
                                     measurementType: p.measurementType,
+                                    stockQuantity: availablePacks(p.quantity, p.measurementValue, p.measurementType),
                                 };
                             });
                         } catch (err) {

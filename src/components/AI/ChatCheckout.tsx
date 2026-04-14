@@ -242,10 +242,17 @@ const ChatCheckout: React.FC<ChatCheckoutProps> = ({ product, onBack, onProceedT
                 <span className="px-2 text-xs font-medium">{quantity}</span>
                 <button
                   type="button"
-                  onClick={() => setQuantity(quantity + 1)}
-                  className="px-1.5 py-0.5 text-xs text-gray-600 hover:bg-gray-100 rounded-r-md"
+                  onClick={() => {
+                    const maxQty = product.stockQuantity ?? Infinity;
+                    if (quantity < maxQty) setQuantity(quantity + 1);
+                  }}
+                  disabled={product.stockQuantity !== undefined && quantity >= product.stockQuantity}
+                  className="px-1.5 py-0.5 text-xs text-gray-600 hover:bg-gray-100 rounded-r-md disabled:opacity-30 disabled:cursor-not-allowed"
                 >+</button>
               </div>
+              {product.stockQuantity !== undefined && product.stockQuantity <= 10 && (
+                <span className="text-[10px] text-amber-600 font-medium">Only {product.stockQuantity} left</span>
+              )}
             </div>
           </div>
           <div className="text-right flex-shrink-0">

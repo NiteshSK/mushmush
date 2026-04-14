@@ -141,6 +141,45 @@ describe('cart-slice', () => {
       );
       expect(next.items[0].quantity).toBe(1);
     });
+
+    it('caps quantity at stockQuantity', () => {
+      const state = cartReducer(
+        emptyState,
+        addItemToCart(makeItem({ stockQuantity: 3 }))
+      );
+      const next = cartReducer(
+        state,
+        updateCartItemQuantity({ id: 1, quantity: 10 })
+      );
+      expect(next.items[0].quantity).toBe(3);
+    });
+
+    it('prevents quantity below 1', () => {
+      const state = cartReducer(emptyState, addItemToCart(makeItem()));
+      const next = cartReducer(
+        state,
+        updateCartItemQuantity({ id: 1, quantity: 0 })
+      );
+      expect(next.items[0].quantity).toBe(1);
+    });
+
+    it('prevents negative quantity', () => {
+      const state = cartReducer(emptyState, addItemToCart(makeItem()));
+      const next = cartReducer(
+        state,
+        updateCartItemQuantity({ id: 1, quantity: -5 })
+      );
+      expect(next.items[0].quantity).toBe(1);
+    });
+
+    it('allows any quantity when stockQuantity is not set', () => {
+      const state = cartReducer(emptyState, addItemToCart(makeItem()));
+      const next = cartReducer(
+        state,
+        updateCartItemQuantity({ id: 1, quantity: 999 })
+      );
+      expect(next.items[0].quantity).toBe(999);
+    });
   });
 
   // ─── removeAllItemsFromCart ───────────────────────────────
