@@ -1,5 +1,5 @@
 "use client";
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
@@ -11,6 +11,12 @@ interface AdminLayoutProps {
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Close sidebar on route change (mobile)
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname]);
 
   const navGroups = [
     {
@@ -72,12 +78,29 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-gray-1">
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-2">
-        <div className="flex h-16 items-center justify-center border-b border-gray-3">
+      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-2 transform transition-transform duration-200 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
+        <div className="flex h-16 items-center justify-between border-b border-gray-3 px-4">
           <h1 className="text-xl font-semibold text-dark">MushMush Admin</h1>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="lg:hidden w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-2 text-gray-6"
+            aria-label="Close sidebar"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
         </div>
-        
+
         <nav className="mt-4 px-3 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 180px)' }}>
           {navGroups.map((group, gi) => (
             <div key={gi} className={gi > 0 ? 'mt-5' : ''}>
@@ -134,20 +157,38 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       </div>
 
       {/* Main Content */}
-      <div className="pl-64">
+      <div className="lg:pl-64">
         {/* Header */}
         <header className="bg-white shadow-1 border-b border-gray-3">
-          <div className="px-6 py-4">
+          <div className="px-4 py-4 sm:px-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-semibold text-dark">
-                {navigation.find(item => isActive(item.href))?.name || 'Dashboard'}
-              </h2>
+              <div className="flex items-center gap-3">
+                {/* Hamburger menu button — mobile only */}
+                <button
+                  onClick={() => setSidebarOpen(true)}
+                  className="lg:hidden w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-2 text-gray-6 -ml-2"
+                  aria-label="Open sidebar"
+                >
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 12h18M3 6h18M3 18h18" />
+                  </svg>
+                </button>
+                <h2 className="text-xl sm:text-2xl font-semibold text-dark">
+                  {navigation.find(item => isActive(item.href))?.name || 'Dashboard'}
+                </h2>
+              </div>
               <div className="flex items-center gap-4">
                 <Link
                   href="/"
-                  className="text-sm text-blue hover:text-blue-dark font-medium"
+                  className="text-sm text-blue hover:text-blue-dark font-medium hidden sm:inline"
                 >
                   ← Back to Website
+                </Link>
+                <Link
+                  href="/"
+                  className="text-sm text-blue hover:text-blue-dark font-medium sm:hidden"
+                >
+                  ← Site
                 </Link>
               </div>
             </div>
@@ -155,7 +196,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         </header>
 
         {/* Page Content */}
-        <main className="p-6">
+        <main className="p-3 sm:p-6">
           {children}
         </main>
       </div>
