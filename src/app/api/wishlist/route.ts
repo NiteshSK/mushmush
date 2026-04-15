@@ -50,6 +50,10 @@ export async function GET() {
       orderBy: { createdAt: 'desc' }
     });
 
+    // Products added within the last 14 days are automatically tagged "New"
+    const newThreshold = new Date();
+    newThreshold.setDate(newThreshold.getDate() - 14);
+
     // Transform the data to include discount calculations
     const transformedItems = wishlistItems.map(item => {
       const product = item.product;
@@ -84,7 +88,8 @@ export async function GET() {
           hasDiscount,
           averageRating,
           reviewCount: product.reviews?.length || 0,
-          reviews: product.reviews?.length || 0
+          reviews: product.reviews?.length || 0,
+          isNew: product.createdAt >= newThreshold
         }
       };
     });

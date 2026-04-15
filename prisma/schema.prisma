@@ -21,6 +21,7 @@ model User {
   password              String?
   resetToken            String?
   resetTokenExpiry      DateTime?
+  lastLoginAt           DateTime?
   accounts              Account[]
   addresses             addresses[]
   orders                Order[]

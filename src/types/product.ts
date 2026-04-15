@@ -11,6 +11,7 @@ export type Product = {
   stockQuantity?: number;
   inStock: boolean;
   featured: boolean;
+  isNew?: boolean;
   isOutOfStock?: boolean;
   hasDiscount?: boolean;
   discountPercentage?: number;

@@ -314,6 +314,48 @@ export const emailTemplates = {
     text: `New User Signup\n\nName: ${userName}\nEmail: ${userEmail}\nSigned up at: ${signupDate.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}\n\nView in admin panel: ${getAppUrl()}/admin/users`
   }),
 
+  userLogin: (userName: string, userEmail: string, loginDate: Date, method: string) => ({
+    subject: `Login Alert: ${userName} (${userEmail})`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h1 style="color: #5c8e61; margin: 0;">User Login</h1>
+          <p style="color: #666; font-size: 16px;">Someone just logged in to Kosvana</p>
+        </div>
+
+        <div style="background: #f8f9fa; padding: 30px; border-radius: 10px; margin-bottom: 30px;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 10px 0; color: #666; font-size: 14px; border-bottom: 1px solid #eee;">Name</td>
+              <td style="padding: 10px 0; color: #333; font-size: 14px; font-weight: bold; text-align: right; border-bottom: 1px solid #eee;">${userName}</td>
+            </tr>
+            <tr>
+              <td style="padding: 10px 0; color: #666; font-size: 14px; border-bottom: 1px solid #eee;">Email</td>
+              <td style="padding: 10px 0; color: #333; font-size: 14px; font-weight: bold; text-align: right; border-bottom: 1px solid #eee;">
+                <a href="mailto:${userEmail}" style="color: #5c8e61; text-decoration: none;">${userEmail}</a>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 10px 0; color: #666; font-size: 14px; border-bottom: 1px solid #eee;">Method</td>
+              <td style="padding: 10px 0; color: #333; font-size: 14px; font-weight: bold; text-align: right; border-bottom: 1px solid #eee;">${method}</td>
+            </tr>
+            <tr>
+              <td style="padding: 10px 0; color: #666; font-size: 14px;">Time</td>
+              <td style="padding: 10px 0; color: #333; font-size: 14px; font-weight: bold; text-align: right;">${loginDate.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' })}</td>
+            </tr>
+          </table>
+        </div>
+
+        <div style="border-top: 1px solid #eee; padding-top: 20px; text-align: center;">
+          <p style="color: #666; font-size: 12px; margin: 0;">
+            This is an automated login notification from Kosvana.
+          </p>
+        </div>
+      </div>
+    `,
+    text: `User Login\n\nName: ${userName}\nEmail: ${userEmail}\nMethod: ${method}\nTime: ${loginDate.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`
+  }),
+
   restockNotification: (productTitle: string, productUrl: string, productImage: string) => ({
     subject: `🎉 ${productTitle} is Back in Stock!`,
     html: `

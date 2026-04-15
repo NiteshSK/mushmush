@@ -85,8 +85,17 @@ export async function GET(request: NextRequest) {
       prisma.product.count({ where }),
     ]);
 
+    // Products added within the last 14 days are automatically tagged "New"
+    const newThreshold = new Date();
+    newThreshold.setDate(newThreshold.getDate() - 14);
+
+    const enrichedProducts = products.map(product => ({
+      ...product,
+      isNew: product.createdAt >= newThreshold,
+    }));
+
     return NextResponse.json({
-      products,
+      products: enrichedProducts,
       pagination: {
         page,
         limit,

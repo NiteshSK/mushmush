@@ -52,7 +52,7 @@ const SingleItem = ({
           </span>
         ) : !item.inStock ? (
           <div className="sold-out-overlay"><span>Sold Out</span></div>
-        ) : item.featured ? (
+        ) : item.isNew ? (
           <span className="absolute top-3 left-3 text-[10px] font-medium uppercase tracking-wider text-blue border border-blue-light-4 bg-white px-2.5 py-1 rounded-full z-10">
             New
           </span>

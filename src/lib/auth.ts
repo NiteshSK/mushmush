@@ -86,6 +86,43 @@ export const authOptions: NextAuthOptions = {
         console.error('Failed to send admin notification for OAuth signup:', error);
       }
     },
+    signIn: async ({ user, account }) => {
+      try {
+        if (user?.id) {
+          const now = new Date();
+
+          // Update lastLoginAt in database
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { lastLoginAt: now },
+          });
+
+          // Send admin notification email
+          if (user.email) {
+            const { sendEmail, emailTemplates, getConciergeEmails } = await import('./email');
+            const recipients = getConciergeEmails();
+            if (recipients.length > 0) {
+              const method = account?.provider === 'google' ? 'Google' : 'Email/Password';
+              const notification = emailTemplates.userLogin(
+                user.name || 'User',
+                user.email,
+                now,
+                method,
+              );
+              await sendEmail({
+                to: recipients,
+                subject: notification.subject,
+                html: notification.html,
+                text: notification.text,
+              });
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Failed to track login:', error);
+        // Don't block login if tracking fails
+      }
+    },
   },
   callbacks: {
     async signIn({ user, account, profile, email, credentials }) {

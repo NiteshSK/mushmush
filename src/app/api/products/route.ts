@@ -117,6 +117,10 @@ export async function GET(request: NextRequest) {
       }));
     }
 
+    // Products added within the last 14 days are automatically tagged "New"
+    const newThreshold = new Date();
+    newThreshold.setDate(newThreshold.getDate() - 14);
+
     // Calculate average rating, stock status, and dynamic pricing for each product
     const productsWithRatings = products.map(product => {
       // Calculate average rating
@@ -153,7 +157,8 @@ export async function GET(request: NextRequest) {
         bulkDisplay: formatBulkQuantity(product.quantity, product.measurementType),
         discountedPrice,
         discountPercentage: Math.round(discountPercentage),
-        hasDiscount: discountedPrice !== null
+        hasDiscount: discountedPrice !== null,
+        isNew: product.createdAt >= newThreshold
       };
     })
 
