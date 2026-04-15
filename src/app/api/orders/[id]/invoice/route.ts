@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { getInvoiceByOrderId, generateInvoice } from '@/lib/invoice';
+import { prisma } from '@/lib/prisma';
 
 /**
  * GET /api/orders/[id]/invoice
- * Get invoice by order ID — generates on-demand if not yet created
+ * Get invoice by order ID — generates on-demand only if payment is verified
  */
 export async function GET(
   request: NextRequest,
@@ -25,14 +26,26 @@ export async function GET(
 
     let invoice = await getInvoiceByOrderId(orderId);
 
-    // If no invoice exists, generate it on demand
+    // If no invoice exists, only generate if payment is verified
     if (!invoice) {
+      // SECURITY: Check payment is verified before generating invoice
+      const verifiedPayment = await prisma.upi_payments.findFirst({
+        where: { orderId, status: 'VERIFIED' },
+      });
+
+      if (!verifiedPayment) {
+        return NextResponse.json(
+          { error: 'Invoice is not available yet. Payment must be verified first.' },
+          { status: 403 }
+        );
+      }
+
       try {
         invoice = await generateInvoice(orderId);
-      } catch (genError) {
+      } catch (genError: any) {
         console.error('Invoice generation failed:', genError);
         return NextResponse.json(
-          { error: 'Failed to generate invoice' },
+          { error: genError.message || 'Failed to generate invoice' },
           { status: 500 }
         );
       }

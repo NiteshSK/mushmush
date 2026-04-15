@@ -392,6 +392,18 @@ export async function generateInvoice(orderId: string): Promise<any> {
       throw new Error('Order not found');
     }
 
+    // SECURITY: Only generate invoices for orders with verified payment
+    const verifiedPayment = await prisma.upi_payments.findFirst({
+      where: {
+        orderId,
+        status: 'VERIFIED',
+      },
+    });
+
+    if (!verifiedPayment) {
+      throw new Error('Invoice cannot be generated: payment not verified');
+    }
+
     // Check if invoice already exists
     const existingInvoice = await prisma.invoice.findUnique({
       where: { orderId }

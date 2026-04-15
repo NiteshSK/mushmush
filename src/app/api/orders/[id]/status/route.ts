@@ -211,7 +211,18 @@ export async function PUT(
     // Don't await — let them run in the background
     sendEmails();
     if (['CONFIRMED', 'DELIVERED', 'COMPLETED'].includes(status)) {
-      sendInvoice();
+      // Only send invoice if payment has been verified
+      prisma.upi_payments.findFirst({
+        where: { orderId: order.id, status: 'VERIFIED' },
+      }).then(verifiedPayment => {
+        if (verifiedPayment) {
+          sendInvoice();
+        } else {
+          console.warn(`Skipping invoice for order ${order.orderNumber}: payment not verified`);
+        }
+      }).catch(err => {
+        console.error('Payment verification check error:', err);
+      });
     }
 
     return NextResponse.json({
