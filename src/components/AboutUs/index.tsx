@@ -284,7 +284,7 @@ const AboutUs = () => {
                 </p>
               </div>
               <a
-                href="https://www.google.com/maps/place/MushMush+by+MushAgroProducts/"
+                href="https://www.google.com/maps/place/Kosvana+by+MushAgroProducts/data=!4m2!3m1!1s0x0:0xc1d016cb5b5c812a?sa=X&ved=1t:2428&ictx=111"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-sm font-medium text-forest border-b border-forest pb-0.5 hover:text-dark hover:border-dark transition-colors"

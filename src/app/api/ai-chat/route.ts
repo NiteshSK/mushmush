@@ -112,7 +112,7 @@ export async function POST(req: Request) {
         const companyInfo = {
             name: settingsMap.company_name || "Kosvana by Mush Agro Products",
             address: settingsMap.company_address || "Kosvana, Herbertpur, Dehradun, Uttarakhand, India",
-            mapLink: settingsMap.google_maps_link || "https://www.google.com/maps/search/Mush+Agro+Products+Herbertpur",
+            mapLink: settingsMap.google_maps_link || "https://www.google.com/maps/place/Kosvana+by+MushAgroProducts/data=!4m2!3m1!1s0x0:0xc1d016cb5b5c812a?sa=X&ved=1t:2428&ictx=111",
             email: settingsMap.contact_email || "concierge@kosvana.com",
             phone: settingsMap.contact_phone || "+91-7618362662",
             hours: settingsMap.business_hours || "Monday - Saturday: 9:00 AM - 6:00 PM\n  * Sunday: 9:00 AM - 3:00 PM",
