@@ -219,7 +219,7 @@ export default function OrdersPage() {
                           </button>
                         ) : (
                           <span className="text-[10px] text-gray-400 italic">
-                            Invoice after payment
+                            Invoice available once payment is verified
                           </span>
                         )}
                       </div>
@@ -272,7 +272,7 @@ export default function OrdersPage() {
                           </button>
                         ) : (
                           <span className="text-xs text-gray-400 italic py-2.5 px-5">
-                            Invoice after payment
+                            Invoice available once payment is verified
                           </span>
                         )}
                       </div>
