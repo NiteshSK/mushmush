@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getAppUrl } from "@/lib/get-base-url";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -34,7 +35,7 @@ export async function GET(request: Request) {
 }
 
 function unsubscribePage(message: string, requestUrl?: string): string {
-  let baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+  let baseUrl = getAppUrl();
   if (requestUrl) {
     try { const u = new URL(requestUrl); baseUrl = u.origin; } catch {}
   }

@@ -4,6 +4,14 @@ import { headers } from 'next/headers';
 const ALLOWED_HOSTS = ['www.kosvana.com', 'kosvana.com', 'www.mushmush.in', 'mushmush.in'];
 
 /**
+ * Static fallback URL for non-request contexts (emails, background jobs).
+ * Prefers NEXT_PUBLIC_APP_URL so we can remove NEXTAUTH_URL without breaking email links.
+ */
+export function getAppUrl(): string {
+  return process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000';
+}
+
+/**
  * Get the base URL from the current request headers (server-side only).
  * Falls back to NEXTAUTH_URL or localhost.
  */
@@ -20,7 +28,7 @@ export async function getBaseUrl(): Promise<string> {
     // headers() throws outside of request context (e.g., module-level code)
   }
 
-  return process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  return getAppUrl();
 }
 
 /**
@@ -35,5 +43,5 @@ export function getBaseUrlFromRequest(request: Request): string {
     return `${proto}://${host}`;
   }
 
-  return process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  return getAppUrl();
 }

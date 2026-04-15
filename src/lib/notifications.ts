@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { sendEmail, emailTemplates } from '@/lib/email';
+import { getAppUrl } from '@/lib/get-base-url';
 import { Product } from '@/types/product';
 
 export async function sendRestockNotifications(productId: number) {
@@ -38,7 +39,7 @@ export async function sendRestockNotifications(productId: number) {
       return { success: true, message: 'No notifications to send' };
     }
 
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+    const baseUrl = getAppUrl();
     const productUrl = `${baseUrl}/shop-details/${product.slug}`;
     const productImage = (product.imgs as Product['imgs'])?.previews?.[0] || `${baseUrl}/images/placeholder.jpg`;
 

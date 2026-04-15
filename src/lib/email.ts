@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import { escapeHtml } from './sanitize';
+import { getAppUrl } from './get-base-url';
 
 // ─── Gmail transporter (primary) ────────────────────────────────────────
 const transporter = nodemailer.createTransport({
@@ -133,7 +134,7 @@ export const emailTemplates = {
         </div>
         
         <div style="text-align: center; margin-bottom: 30px;">
-          <a href="${process.env.NEXTAUTH_URL || 'http://localhost:3000'}" 
+          <a href="${getAppUrl()}" 
              style="background: #5c8e61; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
             Start Shopping
           </a>
@@ -157,7 +158,7 @@ export const emailTemplates = {
       
       You can now browse our premium collection of mushrooms, dry fruits, seeds & spices, add items to your wishlist, and track your orders.
       
-      Visit us at: ${process.env.NEXTAUTH_URL || 'http://localhost:3000'}
+      Visit us at: ${getAppUrl()}
       
       If you have any questions, contact us at concierge@kosvana.com
       
@@ -225,7 +226,7 @@ export const emailTemplates = {
         </div>
         
         <div style="text-align: center; margin-bottom: 30px;">
-          <a href="${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/auth/reset-password?token=${resetToken}" 
+          <a href="${getAppUrl()}/auth/reset-password?token=${resetToken}" 
              style="background: #dc3545; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
             Reset Password
           </a>
@@ -256,7 +257,7 @@ export const emailTemplates = {
       We received a request to reset your password for your Kosvana account.
       
       Reset your password by visiting this link:
-      ${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/auth/reset-password?token=${resetToken}
+      ${getAppUrl()}/auth/reset-password?token=${resetToken}
       
       This link will expire in 1 hour for security reasons.
       
@@ -297,7 +298,7 @@ export const emailTemplates = {
         </div>
 
         <div style="text-align: center; margin-bottom: 30px;">
-          <a href="${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/admin/users"
+          <a href="${getAppUrl()}/admin/users"
              style="background: #5c8e61; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
             View in Admin Panel
           </a>
@@ -310,7 +311,7 @@ export const emailTemplates = {
         </div>
       </div>
     `,
-    text: `New User Signup\n\nName: ${userName}\nEmail: ${userEmail}\nSigned up at: ${signupDate.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}\n\nView in admin panel: ${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/admin/users`
+    text: `New User Signup\n\nName: ${userName}\nEmail: ${userEmail}\nSigned up at: ${signupDate.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}\n\nView in admin panel: ${getAppUrl()}/admin/users`
   }),
 
   restockNotification: (productTitle: string, productUrl: string, productImage: string) => ({
@@ -463,7 +464,7 @@ export function generateRegistrationConfirmationEmail(data: RegistrationEmailDat
       </div>
       
       <div style="text-align: center; margin-bottom: 30px;">
-        <a href="${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/training" 
+        <a href="${getAppUrl()}/training" 
            style="background: #5c8e61; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
           View Training Programs
         </a>
@@ -599,7 +600,7 @@ export function generatePaymentConfirmationEmail(data: PaymentEmailData): string
       </div>
       
       <div style="text-align: center; margin-bottom: 30px;">
-        <a href="${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/training" 
+        <a href="${getAppUrl()}/training" 
            style="background: #28a745; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
           View Training Schedule
         </a>
@@ -724,7 +725,7 @@ export function generateOrderInvoiceEmail(data: OrderInvoiceEmailData): string {
 
   if (!invoiceDownloadUrl.startsWith('http://') && !invoiceDownloadUrl.startsWith('https://')) {
     // It's a relative path, prepend the base URL
-    let baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+    let baseUrl = getAppUrl();
     if (baseUrl && !baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
       baseUrl = `https://${baseUrl}`;
     }
@@ -1118,7 +1119,7 @@ export async function sendPaymentReceivedEmail(data: {
           <p style="margin: 5px 0 0; color: #374151;">${formatAddress(data.shippingAddress)}</p>
         </div>
       ` : ''}
-      <p style="margin-top: 20px; color: #374151;">Please verify this payment in the <a href="${process.env.NEXTAUTH_URL || ''}/admin/payment-verification" style="color: #d97706; font-weight: 600;">admin dashboard</a>.</p>
+      <p style="margin-top: 20px; color: #374151;">Please verify this payment in the <a href="${getAppUrl()}/admin/payment-verification" style="color: #d97706; font-weight: 600;">admin dashboard</a>.</p>
     `
   );
 

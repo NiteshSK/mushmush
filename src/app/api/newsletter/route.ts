@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
+import { getAppUrl } from "@/lib/get-base-url";
 import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
@@ -39,7 +40,7 @@ export async function POST(request: Request) {
     });
 
     // Send welcome email (non-blocking)
-    const baseUrl = request.headers.get('origin') || process.env.NEXTAUTH_URL || "http://localhost:3000";
+    const baseUrl = request.headers.get('origin') || getAppUrl();
     sendEmail({
       to: normalizedEmail,
       subject: "Welcome to the Kosvana Newsletter!",
