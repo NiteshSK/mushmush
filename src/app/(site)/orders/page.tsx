@@ -42,6 +42,8 @@ const STATUS_CONFIG: Record<string, { label: string; style: string }> = {
 
 const getStatus = (status: string) => STATUS_CONFIG[status] || { label: status, style: "text-dark-5 bg-gray-1" };
 
+const INVOICE_ALLOWED_STATUSES = ['CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'COMPLETED'];
+
 export default function OrdersPage() {
   const { data: session, status } = useSession();
   const [orders, setOrders] = useState<Order[]>([]);
@@ -192,53 +194,34 @@ export default function OrdersPage() {
                         <p className="text-lg font-semibold text-dark">
                           &#8377;{order.total.toFixed(2)}
                         </p>
-                        <button
-                          onClick={() => handleDownloadInvoice(order.id)}
-                          disabled={downloadingInvoice === order.id}
-                          className="inline-flex items-center gap-1.5 text-xs font-medium text-forest bg-forest/10 py-1.5 px-3 rounded-md hover:bg-forest/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {downloadingInvoice === order.id ? (
-                            <>
-                              <svg
-                                className="animate-spin h-3 w-3"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                              >
-                                <circle
-                                  className="opacity-25"
-                                  cx="12"
-                                  cy="12"
-                                  r="10"
-                                  stroke="currentColor"
-                                  strokeWidth="4"
-                                />
-                                <path
-                                  className="opacity-75"
-                                  fill="currentColor"
-                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                />
-                              </svg>
-                              Loading...
-                            </>
-                          ) : (
-                            <>
-                              <svg
-                                className="h-3 w-3"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                />
-                              </svg>
-                              Invoice
-                            </>
-                          )}
-                        </button>
+                        {INVOICE_ALLOWED_STATUSES.includes(order.status) ? (
+                          <button
+                            onClick={() => handleDownloadInvoice(order.id)}
+                            disabled={downloadingInvoice === order.id}
+                            className="inline-flex items-center gap-1.5 text-xs font-medium text-forest bg-forest/10 py-1.5 px-3 rounded-md hover:bg-forest/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {downloadingInvoice === order.id ? (
+                              <>
+                                <svg className="animate-spin h-3 w-3" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                </svg>
+                                Loading...
+                              </>
+                            ) : (
+                              <>
+                                <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Invoice
+                              </>
+                            )}
+                          </button>
+                        ) : (
+                          <span className="text-[10px] text-gray-400 italic">
+                            Invoice after payment
+                          </span>
+                        )}
                       </div>
                     </div>
 
@@ -264,53 +247,34 @@ export default function OrdersPage() {
                             {getStatus(order.status).label}
                           </span>
                         </div>
-                        <button
-                          onClick={() => handleDownloadInvoice(order.id)}
-                          disabled={downloadingInvoice === order.id}
-                          className="inline-flex items-center gap-2 text-sm font-medium text-forest bg-forest/10 py-2.5 px-5 rounded-md hover:bg-forest/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {downloadingInvoice === order.id ? (
-                            <>
-                              <svg
-                                className="animate-spin h-4 w-4"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                              >
-                                <circle
-                                  className="opacity-25"
-                                  cx="12"
-                                  cy="12"
-                                  r="10"
-                                  stroke="currentColor"
-                                  strokeWidth="4"
-                                />
-                                <path
-                                  className="opacity-75"
-                                  fill="currentColor"
-                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                />
-                              </svg>
-                              Loading...
-                            </>
-                          ) : (
-                            <>
-                              <svg
-                                className="h-4 w-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                />
-                              </svg>
-                              Invoice
-                            </>
-                          )}
-                        </button>
+                        {INVOICE_ALLOWED_STATUSES.includes(order.status) ? (
+                          <button
+                            onClick={() => handleDownloadInvoice(order.id)}
+                            disabled={downloadingInvoice === order.id}
+                            className="inline-flex items-center gap-2 text-sm font-medium text-forest bg-forest/10 py-2.5 px-5 rounded-md hover:bg-forest/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {downloadingInvoice === order.id ? (
+                              <>
+                                <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                </svg>
+                                Loading...
+                              </>
+                            ) : (
+                              <>
+                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Invoice
+                              </>
+                            )}
+                          </button>
+                        ) : (
+                          <span className="text-xs text-gray-400 italic py-2.5 px-5">
+                            Invoice after payment
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
