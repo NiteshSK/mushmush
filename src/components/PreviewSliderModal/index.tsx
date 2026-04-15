@@ -64,10 +64,10 @@ export const PreviewSliderModal = () => {
       {/* Close button */}
       <button
         onClick={(e) => { e.stopPropagation(); closePreviewModal(); }}
-        className="absolute top-5 right-5 z-20 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
+        className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-100 transition-colors"
         aria-label="Close preview"
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <line x1="18" y1="6" x2="6" y2="18" />
           <line x1="6" y1="6" x2="18" y2="18" />
         </svg>
@@ -92,15 +92,16 @@ export const PreviewSliderModal = () => {
         >
           {allImages.map((img, index) => (
             <SwiperSlide key={index}>
-              <div className="flex items-center justify-center h-[75vh] sm:h-[80vh]">
+              <div className="relative h-[75vh] sm:h-[80vh] w-full">
                 <Image
                   src={img}
                   alt={`${previewProduct.title} - Image ${index + 1}`}
-                  width={1000}
-                  height={1000}
-                  className="object-contain max-h-full max-w-full select-none"
+                  fill
+                  className="object-contain select-none"
+                  sizes="(max-width: 768px) 100vw, 900px"
                   priority={index === 0}
                   draggable={false}
+                  unoptimized
                 />
               </div>
             </SwiperSlide>

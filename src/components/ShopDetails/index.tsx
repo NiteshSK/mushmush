@@ -572,7 +572,7 @@ const ShopDetails = () => {
                       )}
                     </div>
                     {displayProduct?.stockQuantity !== undefined && displayProduct.stockQuantity > 0 && displayProduct.stockQuantity <= 10 && (
-                      <p className="text-sm text-red font-medium mt-3">Only {displayProduct.stockQuantity} left in stock</p>
+                      <p className="text-sm text-red font-medium mt-3">Only {displayProduct.stockQuantity} left in stock!</p>
                     )}
                   </form>
 

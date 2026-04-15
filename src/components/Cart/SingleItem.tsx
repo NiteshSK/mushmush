@@ -64,7 +64,7 @@ const SingleItem = ({ item }: SingleItemProps) => {
                 <Link href={`/shop-details/${item.slug || '#'}`}>{item.title}</Link>
               </h3>
               {item.stockQuantity !== undefined && item.stockQuantity <= 10 && (
-                <p className="text-xs text-amber-600 mt-0.5">Only {item.stockQuantity} left in stock</p>
+                <p className="text-xs text-amber-600 mt-0.5">Only {item.stockQuantity} left in stock!</p>
               )}
             </div>
           </div>
@@ -124,7 +124,7 @@ const SingleItem = ({ item }: SingleItemProps) => {
             </h3>
             <p className="text-sm text-dark font-medium mb-1">₹{unitPrice}</p>
             {item.stockQuantity !== undefined && item.stockQuantity <= 10 && (
-              <p className="text-xs text-amber-600 mb-2">Only {item.stockQuantity} left in stock</p>
+              <p className="text-xs text-amber-600 mb-2">Only {item.stockQuantity} left in stock!</p>
             )}
 
             <div className="flex items-center justify-between">
