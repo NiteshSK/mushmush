@@ -295,7 +295,7 @@ const AboutUs = () => {
             </div>
             <div className="rounded-2xl overflow-hidden h-[400px]">
               <iframe
-                src="google.com/maps/place/Kosvana+by+MushAgroProducts/data=!4m2!3m1!1s0x0:0xc1d016cb5b5c812a?sa=X&ved=1t:2428&ictx=111"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3440.5!2d77.7914!3d30.4636!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0xc1d016cb5b5c812a!2sKosvana%20by%20MushAgroProducts!5e0!3m2!1sen!2sin!4v1"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
