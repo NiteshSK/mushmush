@@ -1,19 +1,13 @@
 "use client";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Testimonial } from "@/types/testimonial";
-import testimonialsData from "./testimonialsData";
 
-import { Pagination, Navigation } from "swiper/modules";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
+import { Autoplay } from "swiper/modules";
 import "swiper/css";
 import SingleItem from "./SingleItem";
 
 const Testimonials = () => {
-  const [prevEl, setPrevEl] = useState<HTMLElement | null>(null);
-  const [nextEl, setNextEl] = useState<HTMLElement | null>(null);
-  const [paginationEl, setPaginationEl] = useState<HTMLElement | null>(null);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [loaded, setLoaded] = useState(false);
 
@@ -23,17 +17,10 @@ const Testimonials = () => {
         const res = await fetch("/api/testimonials");
         if (res.ok) {
           const data = await res.json();
-          if (data.testimonials && data.testimonials.length > 0) {
-            setTestimonials(data.testimonials);
-          } else {
-            // Fall back to hardcoded data if no DB reviews yet
-            setTestimonials(testimonialsData);
-          }
-        } else {
-          setTestimonials(testimonialsData);
+          setTestimonials(data.testimonials || []);
         }
       } catch {
-        setTestimonials(testimonialsData);
+        setTestimonials([]);
       } finally {
         setLoaded(true);
       }
@@ -42,15 +29,17 @@ const Testimonials = () => {
     fetchTestimonials();
   }, []);
 
-  // Don't render the section at all if no testimonials
-  if (loaded && testimonials.length === 0) {
+  if (!loaded || testimonials.length === 0) {
     return null;
   }
 
-  // Don't render until loaded to avoid layout shift
-  if (!loaded) {
-    return null;
-  }
+  // For a smooth continuous loop, Swiper needs at least slidesPerView * 2 slides.
+  // If we have fewer testimonials, duplicate the array so the marquee can scroll seamlessly.
+  const minForLoop = 6;
+  const slides =
+    testimonials.length < minForLoop
+      ? Array.from({ length: Math.ceil(minForLoop / testimonials.length) }, () => testimonials).flat()
+      : testimonials;
 
   return (
     <section className="py-12 sm:py-16 bg-cream">
@@ -66,83 +55,37 @@ const Testimonials = () => {
         </div>
 
         <Swiper
-          modules={[Navigation, Pagination]}
+          modules={[Autoplay]}
           slidesPerView={3}
           spaceBetween={20}
+          loop={true}
+          speed={6000}
+          autoplay={{
+            delay: 0,
+            disableOnInteraction: false,
+            pauseOnMouseEnter: true,
+          }}
+          allowTouchMove={true}
           breakpoints={{
             0: { slidesPerView: 1, spaceBetween: 16 },
             640: { slidesPerView: 2, spaceBetween: 16 },
             1024: { slidesPerView: 3, spaceBetween: 20 },
           }}
-          pagination={{
-            clickable: true,
-            el: paginationEl,
-          }}
-          navigation={{
-            prevEl,
-            nextEl,
-          }}
-          onBeforeInit={(swiper) => {
-            if (typeof swiper.params.navigation !== "boolean") {
-              swiper.params.navigation!.prevEl = prevEl;
-              swiper.params.navigation!.nextEl = nextEl;
-            }
-            if (typeof swiper.params.pagination !== "boolean") {
-              swiper.params.pagination!.el = paginationEl;
-            }
-          }}
+          className="testimonials-marquee"
         >
-          {testimonials.map((item, key) => (
-            <SwiperSlide key={item.id ?? key}>
+          {slides.map((item, key) => (
+            <SwiperSlide key={`${item.id ?? "t"}-${key}`}>
               <SingleItem testimonial={item} />
             </SwiperSlide>
           ))}
         </Swiper>
-
-        {/* Navigation Controls */}
-        <div className="flex items-center justify-center gap-4 mt-8">
-          <button
-            ref={setPrevEl}
-            className="custom-prev w-8 h-8 flex items-center justify-center rounded-full border border-transparent hover:border-dark hover:bg-transparent transition-all text-dark hover:text-black disabled:opacity-30"
-          >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M15 18l-6-6 6-6" />
-            </svg>
-          </button>
-
-          <div
-            ref={setPaginationEl}
-            className="custom-pagination !static !w-auto !transform-none flex gap-2 items-center"
-          />
-
-          <button
-            ref={setNextEl}
-            className="custom-next w-8 h-8 flex items-center justify-center rounded-full border border-transparent hover:border-dark hover:bg-transparent transition-all text-dark hover:text-black disabled:opacity-30"
-          >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M9 18l6-6-6-6" />
-            </svg>
-          </button>
-        </div>
       </div>
+
+      <style jsx global>{`
+        .testimonials-marquee .swiper-wrapper {
+          transition-timing-function: linear !important;
+        }
+      `}</style>
     </section>
   );
 };
