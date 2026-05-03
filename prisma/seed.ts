@@ -10,13 +10,13 @@ async function main() {
     prisma.category.upsert({
       where: { slug: 'edible' },
       update: {
-        title: 'Edible',
+        title: 'Edible Mushrooms',
         img: '/images/categories/edible_mushrooms.png',
         path: '/shop?category=edible',
         description: 'Fresh edible mushrooms for culinary use'
       },
       create: {
-        title: 'Edible',
+        title: 'Edible Mushrooms',
         slug: 'edible',
         img: '/images/categories/edible_mushrooms.png',
         path: '/shop?category=edible',
@@ -26,13 +26,13 @@ async function main() {
     prisma.category.upsert({
       where: { slug: 'medicinal' },
       update: {
-        title: 'Medicinal',
+        title: 'Medicinal Mushrooms',
         img: '/images/categories/medicinal_mushrooms.png',
         path: '/shop?category=medicinal',
         description: 'Medicinal mushrooms for health and wellness'
       },
       create: {
-        title: 'Medicinal',
+        title: 'Medicinal Mushrooms',
         slug: 'medicinal',
         img: '/images/categories/medicinal_mushrooms.png',
         path: '/shop?category=medicinal',

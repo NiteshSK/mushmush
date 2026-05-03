@@ -65,7 +65,8 @@
     "test:integration": "jest --testPathPattern=integration",
     "test:checkout": "jest --testPathPattern=Checkout",
     "fix:order-status-enum": "tsx scripts/fix-order-status-enum.ts",
-    "fix:production-order-status": "tsx scripts/fix-production-order-status.ts"
+    "fix:production-order-status": "tsx scripts/fix-production-order-status.ts",
+    "rename:mushroom-categories": "tsx scripts/rename-mushroom-categories.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.51",
