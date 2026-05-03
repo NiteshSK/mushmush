@@ -15,13 +15,13 @@ export const categoryData: Category[] = [
     path: "/shop",
   },
   {
-    title: "Edible",
+    title: "Edible Mushrooms",
     id: 2,
     img: "/images/categories/edible_mushrooms.png",
     path: "/shop?category=edible",
   },
   {
-    title: "Medicinal",
+    title: "Medicinal Mushrooms",
     id: 3,
     img: "/images/categories/medicinal_mushrooms.png",
     path: "/shop?category=medicinal",
