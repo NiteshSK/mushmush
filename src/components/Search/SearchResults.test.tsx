@@ -4,6 +4,7 @@ import { Provider } from "react-redux";
 import cartReducer from "@/redux/features/cart-slice";
 import { useProducts } from "@/hooks/useProducts";
 import { loadListings } from "../Training/programme";
+import { OPEN_CHAT_EVENT } from "../AI/open-chat";
 import SearchResults from "./SearchResults";
 
 let query = "";
@@ -44,6 +45,36 @@ function search(value: string, state: Partial<{ loading: boolean; error: string 
 const field = () => screen.getByRole("searchbox", { name: "Product or ingredient" }) as HTMLInputElement;
 
 describe("Himalayan pantry search", () => {
+  it("opens Ask Kosvana from the search form without submitting the query", () => {
+    const open = jest.fn();
+    window.addEventListener(OPEN_CHAT_EVENT, open, { once: true });
+    try {
+      search("search=cumin");
+      const form = screen.getByRole("search");
+      const submit = jest.fn();
+      form.addEventListener("submit", submit);
+      fireEvent.click(within(form).getByRole("button", { name: /Ask Kosvana about “cumin”/ }));
+      expect(open).toHaveBeenCalledTimes(1);
+      expect((open.mock.calls[0][0] as CustomEvent).detail).toEqual({ draft: "I'm looking for cumin" });
+      expect(submit).not.toHaveBeenCalled();
+      expect(field().value).toBe("cumin");
+    } finally {
+      window.removeEventListener(OPEN_CHAT_EVENT, open);
+    }
+  });
+
+  it("offers Ask Kosvana with no draft when nothing is typed", () => {
+    const open = jest.fn();
+    window.addEventListener(OPEN_CHAT_EVENT, open, { once: true });
+    try {
+      search("");
+      fireEvent.click(within(screen.getByRole("search")).getByRole("button", { name: /Not sure what to search for/ }));
+      expect((open.mock.calls[0][0] as CustomEvent).detail).toBeNull();
+    } finally {
+      window.removeEventListener(OPEN_CHAT_EVENT, open);
+    }
+  });
+
   it("keeps the query, ranks name matches first and shows pack, price and delivery", () => {
     search("search=cumin");
     expect(field().value).toBe("cumin");

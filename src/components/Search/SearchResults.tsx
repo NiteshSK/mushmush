@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useProducts } from "@/hooks/useProducts";
@@ -13,16 +13,11 @@ import { loadListings, type Listing } from "../Training/programme";
 import styles from "../Pantry/pantry.module.css";
 import search from "./search.module.css";
 import TrainingResults from "./TrainingResults";
+import SearchForm from "./SearchForm";
 import { couldMatchTraining, matchesTraining } from "./training-match";
 
 const examples = ["Walnuts", "Cumin", "Dried mushrooms"];
 const browse = [{ slug: "spices", label: "Spices" }, { slug: "dry-fruits", label: "Dry fruits" }, { slug: "seeds", label: "Seeds" }];
-
-function trimOrBlock(event: FormEvent<HTMLFormElement>) {
-  const field = event.currentTarget.elements.namedItem("search") as HTMLInputElement;
-  field.value = field.value.trim();
-  if (!field.value) { event.preventDefault(); field.reportValidity(); }
-}
 
 function Suggestions() {
   return <div className={styles.suggestions}>
@@ -72,13 +67,7 @@ export default function SearchResults() {
       </p>
     </div>
 
-    <form action="/search" role="search" className={styles.searchForm} onSubmit={trimOrBlock} key={query}>
-      <label htmlFor="search-page-field">Product or ingredient</label>
-      <div className={styles.field}>
-        <input id="search-page-field" type="search" name="search" required defaultValue={query} placeholder="Try walnuts or cumin" autoComplete="off" />
-        <button>Search</button>
-      </div>
-    </form>
+    <SearchForm id="search-page-field" query={query} className={search.pageForm} key={query} />
 
     <section id="results" aria-label="Search results" className={styles.results}>
       {!query ? <div className={styles.recovery}>

@@ -16,7 +16,7 @@ import ChatProductCard, { type ChatProduct } from "./ChatProductCard";
 import ChatCheckout from "./ChatCheckout";
 import ChatPayment from "./ChatPayment";
 import { useWishlist } from "@/app/context/WishlistContext";
-import { OPEN_CHAT_EVENT } from "./open-chat";
+import { MAX_CHAT_DRAFT, OPEN_CHAT_EVENT } from "./open-chat";
 import s from "../Pantry/chat.module.css";
 
 // ─── Types ───────────────────────────────────────────
@@ -271,9 +271,16 @@ const ChatBot = () => {
     setIsOpen(true);
   }, [dismissNudge]);
 
-  // Any page can open the chat with openChat() from ./open-chat.
+  // Any page can open the chat with openChat() from ./open-chat. A draft only fills the message box.
   useEffect(() => {
-    const onOpen = () => { if (!isOpen) open(); };
+    const onOpen = (event: Event) => {
+      const draft = (event as CustomEvent<{ draft?: unknown } | undefined>).detail?.draft;
+      if (typeof draft === "string" && draft.trim()) {
+        setView("chat");
+        setInput(draft.trim().slice(0, MAX_CHAT_DRAFT));
+      }
+      if (!isOpen) open();
+    };
     window.addEventListener(OPEN_CHAT_EVENT, onOpen);
     return () => window.removeEventListener(OPEN_CHAT_EVENT, onOpen);
   }, [isOpen, open]);

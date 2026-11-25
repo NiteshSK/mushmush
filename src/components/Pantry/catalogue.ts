@@ -14,11 +14,11 @@ export function packLabel(product: Pick<Product, "measurementValue" | "measureme
   return `${product.measurementValue} ${unit}`;
 }
 
-export function productCover({ slug, imgs }: Pick<Product, "slug"> & {
+export function productCover({ imgs }: {
   imgs?: { cover?: string; previews?: string[]; thumbnails?: string[] };
 }) {
-  return imgs?.cover || (slug === "dried-turkey-tail-mushroom" && imgs?.previews?.[1]) ||
-    imgs?.previews?.[0] || imgs?.thumbnails?.[0];
+  // The first photo in admin is the card photo. No per-product overrides: photo order differs between databases.
+  return imgs?.cover || imgs?.previews?.[0] || imgs?.thumbnails?.[0];
 }
 
 export function sentenceCase(text: string) {

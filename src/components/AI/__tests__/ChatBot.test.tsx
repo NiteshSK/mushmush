@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, within, fireEvent, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
@@ -232,6 +232,15 @@ describe('ChatBot', () => {
       opener.remove();
       fireEvent.keyDown(document, { key: 'Escape' });
       expect(launcher()).toHaveFocus();
+    });
+
+    it('puts a draft from another page in the message box without sending it', () => {
+      renderChat();
+      mockSendMessage.mockClear();
+      act(() => openChatFromPage("I'm looking for cumin"));
+      const dialog = screen.getByRole('dialog', { name: 'Ask Kosvana' });
+      expect(within(dialog).getByDisplayValue("I'm looking for cumin")).toBeInTheDocument();
+      expect(mockSendMessage).not.toHaveBeenCalled();
     });
   });
 

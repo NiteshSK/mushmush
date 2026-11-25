@@ -112,7 +112,7 @@ export default function PantryShell({ children, current, skipTo = { href: "#main
               <h2>Help</h2>
               <ul>
                 <li><button type="button" onClick={() => openPanel("delivery")}>Delivery</button></li>
-                <li><button type="button" onClick={openChat}>Ask Kosvana</button></li>
+                <li><button type="button" onClick={() => openChat()}>Ask Kosvana</button></li>
                 <li><Link href="/faqs">FAQs</Link></li>
                 <li><Link href="/contact">Contact</Link></li>
               </ul>

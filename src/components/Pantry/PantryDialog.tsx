@@ -4,6 +4,8 @@ import { pinDelivery } from "./delivery";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
+import { openChat } from "../AI/open-chat";
+import SearchForm from "../Search/SearchForm";
 import styles from "./pantry.module.css";
 
 export type Panel = "search" | "menu" | "delivery";
@@ -89,14 +91,11 @@ export default function PantryDialog({ panel, onClose, browseHref, signedIn = fa
             <Link href="/shop">Shop all products</Link><Link href="/training">Training courses</Link><Link href="/about-us">Our story</Link>{signedIn && <Link href="/account">My account</Link>}<Link href="/contact">Contact</Link>
           </nav>
         </>}
-        {panel === "search" && <form action="/search" role="search" onSubmit={(event) => {
-          const field = event.currentTarget.elements.namedItem("search") as HTMLInputElement;
-          field.value = field.value.trim();
-          if (!field.value) { event.preventDefault(); field.reportValidity(); }
-        }}>
-          <label htmlFor="pantry-search">Product or ingredient</label>
-          <div className={styles.field}><input autoFocus id="pantry-search" type="search" name="search" required placeholder="Try walnuts or cumin" /><button>Search</button></div>
-        </form>}
+        {panel === "search" && <SearchForm id="pantry-search" autoFocus onAsk={draft => {
+          // Close this dialog first: the chat stays hidden while another dialog is open.
+          onClose();
+          window.requestAnimationFrame(() => openChat(draft));
+        }} />}
         {panel === "delivery" && <>
           <p>Dried mushrooms, spices, dry fruits and seeds ship across India. Our fresh mushroom harvest is available in Dehradun.</p>
           <form onSubmit={checkPin}><label htmlFor="pantry-pin">Delivery PIN code</label>

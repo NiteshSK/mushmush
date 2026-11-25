@@ -1,3 +1,24 @@
+/* The search page and header dialog share these controls. */
+.pageForm { max-width: 36rem; margin: 1.4rem 0 1rem; }
+.searchLabel { display: block; margin-bottom: .4rem; font-size: .875rem; color: #46523f; }
+.searchField { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: .75rem; }
+.searchField :is(input, button) { min-height: 46px; border: 1px solid transparent; border-radius: 4px; }
+.searchField input { min-width: 0; width: 100%; padding: .65rem .75rem; border-color: #939b87; color: var(--ink); background: #fffdf6; font-size: 1rem; }
+.searchField button { padding: .55rem .9rem; color: #fff8e9; background: var(--forest); font-weight: 500; white-space: nowrap; }
+.searchField button:hover { background: #132119; }
+/* "Ask Kosvana": a second way in under the search field, styled like the shop's filter tray. */
+.ask { display: flex; align-items: center; gap: .85rem; width: 100%; margin-top: 1rem; padding: .75rem 1rem .75rem .75rem; text-align: left; color: var(--ink);
+  background: #f1ecdf; border: 1px solid #e3dcc8; border-radius: 14px; transition: background-color .15s ease, border-color .15s ease; }
+.ask:hover { background: #ece5d2; border-color: #c9c0a5; }
+.askIcon { flex: none; display: grid; place-items: center; width: 2.5rem; height: 2.5rem; color: var(--gold); background: var(--forest); border-radius: 50%; }
+.askIcon svg { width: 18px; height: 18px; stroke-width: 1.7; }
+.askText { display: grid; gap: .1rem; min-width: 0; }
+.askText strong { font-size: .95rem; font-weight: 500; line-height: 1.3; overflow-wrap: anywhere; }
+.askText span { font-size: .8125rem; line-height: 1.4; color: #5c614f; }
+.askArrow { flex: none; width: 18px; height: 18px; margin-left: auto; color: var(--brass); transition: transform .15s ease; }
+.ask:hover .askArrow { transform: translateX(3px); }
+@media (prefers-reduced-motion: reduce) { .ask, .askArrow { transition: none; } }
+
 /* Training courses in search results. The colour and font tokens come from the .pantry page wrapper. */
 .training { margin-bottom: clamp(2rem,3.5vw,3rem); }
 .trainingHead { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: .25rem 1.5rem; padding-bottom: .9rem; border-bottom: 1px solid var(--line); }
