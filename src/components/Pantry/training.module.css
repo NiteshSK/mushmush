@@ -58,7 +58,7 @@
 .growSkeletonCopy p, .growSkeletonCard p { height: 1rem; width: 30%; background: #ede9dd; }
 .growSkeletonCopy p + p { height: 2.4rem; width: 70%; }
 .growSkeletonCopy p + p + p { height: 3.5rem; width: 100%; }
-.growSkeletonCard p:first-child { height: auto; width: 100%; aspect-ratio: 1.27; }
+.growSkeletonCard p:first-child { height: auto; width: 100%; aspect-ratio: 4 / 5; }
 .growSkeletonCard p + p { width: 40%; }
 .growSkeletonCard p + p + p { height: 1.8rem; width: 80%; }
 
