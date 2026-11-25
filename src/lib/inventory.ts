@@ -30,7 +30,9 @@ export function toBaseUnits(value: number, unit: string): number {
 
 /** Convert base units back to a human-friendly display string. */
 export function formatBulkQuantity(baseUnits: number, measurementType: string): string {
-  const isVolume = ['ml', 'l', 'litre', 'litres'].includes(measurementType.toLowerCase());
+  const unit = measurementType.toLowerCase();
+  const isVolume = ['ml', 'l', 'litre', 'litres'].includes(unit);
+  if (!isVolume && !['kg','g','gm'].includes(unit)) return baseUnits + ' ' + measurementType;
 
   if (isVolume) {
     if (baseUnits >= 1000) {

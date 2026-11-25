@@ -18,6 +18,7 @@ export type Product = {
   imgs: {
     thumbnails: string[];
     previews: string[];
+    cover?: string;
   };
   specifications: string[];
   howToConsume: string[];

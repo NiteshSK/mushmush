@@ -1,0 +1,46 @@
+.wrap { max-width: 82rem; margin-inline: auto; display: grid; gap: 1rem; color: #24382c; }
+.head { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: .65rem 1rem; }
+.head h1 { font-size: clamp(1.7rem, 3vw, 2.45rem); font-weight: 650; line-height: 1.13; letter-spacing: -.03em; overflow-wrap: anywhere; }
+.head p, .muted { margin-top: .35rem; color: #4b5c50; }
+.card, .metrics > div, .summary > div { min-width: 0; padding: clamp(.85rem, 2vw, 1.2rem); background: white; border: 1px solid #dce3da; border-radius: 8px; }
+.card h2 { font-size: 1.12rem; font-weight: 650; }
+.metrics, .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(9.5rem, 100%), 1fr)); gap: .65rem; }
+.metrics dt, .summary dt, .note, .visit small, .timeline time { color: #4b5c50; font-size: .875rem; }
+.metrics dd { margin-top: .35rem; font-size: 1.8rem; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+.summary dd { margin-top: .4rem; }
+.insights { display: grid; grid-template-columns: 1fr 1fr; gap: .65rem; }
+.paths { margin-top: .45rem; }
+.paths li { display: flex; justify-content: space-between; align-items: baseline; gap: .5rem; padding: .55rem 0; border-bottom: 1px solid #e8ece4; }
+.paths li span { font-variant-numeric: tabular-nums; }
+.note { margin-top: .6rem; }
+.paths code, .visit code, .timeline code, .summary code { overflow-wrap: anywhere; color: #385343; font-size: .85rem; }
+.filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .65rem; margin-top: .8rem; }
+.filters label { min-width: min(100%, 10rem); display: grid; gap: .25rem; color: #24382c; font-size: .85rem; font-weight: 550; }
+.filters :is(input, select) { width: 100%; min-height: 44px; padding: .5rem .65rem; border: 1px solid #8c9e8f; border-radius: 5px; font-size: 1rem; font-weight: 400; color: #24382c; background: #fff; }
+.primary, .secondary, .back { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; border-radius: 5px; font-size: .875rem; font-weight: 550; }
+.primary, .secondary { padding-inline: .9rem; }
+.primary { background: #233e30; color: white; }
+.primary:hover { background: #173024; }
+.secondary { border: 1px solid #8c9e8f; background: white; }
+.secondary:hover, .visit:hover { background: #edf3ec; }
+.back { justify-self: start; text-decoration: underline; text-underline-offset: .22em; }
+.visits, .timeline { margin-top: .9rem; border-top: 1px solid #dce3da; }
+.visit { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, .8fr) auto; align-items: center; gap: .4rem .7rem; min-height: 66px; padding: .55rem .25rem; border-bottom: 1px solid #e2e7df; }
+.visit > div { min-width: 0; display: grid; gap: .05rem; overflow-wrap: anywhere; }
+.visit strong, .timeline strong { font-size: .94rem; font-weight: 600; }
+.status { padding: .24rem .55rem; border: 1px solid #a9beaa; background: #edf3ec; border-radius: 99px; font-size: .85rem; }
+.timeline li { position: relative; display: grid; grid-template-columns: minmax(9rem, .25fr) 1fr; gap: .5rem 1.1rem; padding: .75rem .75rem .75rem 1.1rem; border-bottom: 1px solid #e2e7df; }
+.timeline li::before { content: ""; position: absolute; top: 1.15rem; left: .1rem; width: 6px; height: 6px; border-radius: 50%; background: #496b54; }
+.timeline li div { min-width: 0; display: grid; gap: .15rem; }
+.timeline small { font-size: .85rem; color: #4b5c50; }
+.empty { margin: .85rem 0 .35rem; color: #4b5c50; }
+.pager { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem; margin-top: 1rem; }
+.wrap :is(button,a,input,select):focus-visible { outline: 2px solid #895c2d; outline-offset: 2px; }
+@media(max-width: 680px) {
+  .insights { grid-template-columns: 1fr; }
+  .visit { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; padding: .6rem .2rem; }
+  .visit > div:first-child { grid-column: 1 / 3; }
+  .visit > div:last-of-type { grid-column: 1 / 3; }
+  .visit > span { grid-row: 1; grid-column: 3; align-self: start; }
+  .timeline li { grid-template-columns: 1fr; gap: .2rem; }
+}

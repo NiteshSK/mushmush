@@ -1,17 +1,16 @@
-import { Suspense } from "react";
+import type { Metadata } from "next";
 import TrainingPrograms from "@/components/Training";
+import PantryShell from "@/components/Pantry/PantryShell";
 
-export const metadata = {
-  title: "Cultivation Training Programs | Kosvana",
-  description: "Learn mushroom cultivation with our comprehensive training programs. Expert-led courses in Oyster, Button, Shiitake, and Ganoderma cultivation.",
+export const metadata: Metadata = {
+  title: "Mushroom cultivation training | Kosvana",
+  description: "Dates, fees and registration for Kosvana’s mushroom cultivation courses.",
 };
 
 export default function TrainingPage() {
   return (
-    <div className="min-h-screen">
-      <Suspense fallback={<div className="flex justify-center items-center h-64">Loading...</div>}>
-        <TrainingPrograms />
-      </Suspense>
-    </div>
+    <PantryShell browseHref="/shop">
+      <TrainingPrograms />
+    </PantryShell>
   );
 }

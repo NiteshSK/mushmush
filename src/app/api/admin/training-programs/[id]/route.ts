@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { staffSession } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 
 // GET /api/admin/training-programs/[id] - Get specific training program (admin only)
@@ -9,9 +8,9 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await staffSession("trainer");
     
-    if (!session?.user || session.user.role !== "ADMIN") {
+    if (!session?.user) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
@@ -67,9 +66,9 @@ export async function PUT(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await staffSession("trainer");
     
-    if (!session?.user || session.user.role !== "ADMIN") {
+    if (!session?.user) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
@@ -87,6 +86,8 @@ export async function PUT(
     }
 
     const body = await request.json();
+    const seats = body.seatsPerDate;
+    if (seats != null && (!Number.isSafeInteger(seats) || seats < 1)) return NextResponse.json({error:"Enter a positive whole seat count."},{status:400});
     const { name, description, price, duration, dailyHours, type, isActive, hasEarlyBirdOffer, earlyBirdPrice, originalPrice, earlyBirdEndDate } = body;
 
     // Generate slug from name if name is updated
@@ -96,6 +97,7 @@ export async function PUT(
       updateData.name = name;
       updateData.slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     }
+    if (seats !== undefined) updateData.seatsPerDate = seats;
     if (description !== undefined) updateData.description = description;
     if (price !== undefined) updateData.price = parseFloat(price);
     if (duration !== undefined) updateData.duration = parseInt(duration);
@@ -159,9 +161,9 @@ export async function DELETE(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await staffSession("trainer");
     
-    if (!session?.user || session.user.role !== "ADMIN") {
+    if (!session?.user) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { staffSession } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 
 // GET /api/admin/training-registrations/[id] - Get specific training registration (admin only)
@@ -9,9 +8,9 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await staffSession("trainer");
     
-    if (!session?.user || session.user.role !== "ADMIN") {
+    if (!session?.user) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
@@ -56,9 +55,9 @@ export async function PUT(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await staffSession("trainer");
     
-    if (!session?.user || session.user.role !== "ADMIN") {
+    if (!session?.user) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
@@ -76,21 +75,15 @@ export async function PUT(
       );
     }
 
-    const registration = await prisma.trainingRegistration.update({
-      where: { id: params.id },
-      data: { status },
-      include: {
-        trainingProgram: true,
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
+    const from: Record<string,string[]> = { IN_PROGRESS: ["CONFIRMED"], COMPLETED: ["IN_PROGRESS"], CANCELLED: ["PENDING","PAYMENT_RECEIVED","CONFIRMED"] };
+    if (!from[status]) return NextResponse.json({ error: "Review the payment in Training payments to confirm this seat." }, { status: 409 });
+    const changed = await prisma.$transaction(async tx => {
+      const updated = await tx.trainingRegistration.updateMany({ where: { id: params.id, status: { in: from[status] as any } }, data: { status } });
+      if (updated.count) await tx.staffEvent.create({data:{actorId:session.user.id,resource:"registration",recordId:params.id,action:status}});
+      return updated;
     });
-
+    if (!changed.count) return NextResponse.json({ error: "This transition is unavailable. Refresh the registration." }, { status: 409 });
+    const registration = await prisma.trainingRegistration.findUnique({ where: { id: params.id }, include: { trainingProgram: true } });
     return NextResponse.json(registration);
   } catch (error) {
     console.error("Error updating training registration:", error);

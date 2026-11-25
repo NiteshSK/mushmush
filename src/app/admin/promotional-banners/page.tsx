@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import AdminAuthWrapper from '@/components/Admin/AdminAuthWrapper';
 import { PromotionalBanner } from '@/types/promotional-banner';
 import { Edit, Trash2, Plus, Eye, EyeOff, Calendar, Target } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -91,12 +90,12 @@ const PromotionalBannersContent: React.FC = () => {
   const toggleBannerStatus = async (banner: PromotionalBanner) => {
     try {
       const response = await fetch(`/api/admin/promotional-banners/${banner.id}`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          ...banner,
+          expectedUpdatedAt: banner.updatedAt,
           isActive: !banner.isActive
         })
       });
@@ -116,7 +115,8 @@ const PromotionalBannersContent: React.FC = () => {
   };
 
   const formatDate = (date: Date | string) => {
-    return new Date(date).toLocaleDateString('en-US', {
+    return new Date(date).toLocaleDateString('en-IN', {
+      timeZone:'Asia/Kolkata',
       year: 'numeric',
       month: 'short',
       day: 'numeric'
@@ -124,7 +124,7 @@ const PromotionalBannersContent: React.FC = () => {
   };
 
   const getBannerStatus = (banner: PromotionalBanner) => {
-    if (!banner.isActive) return { status: 'Inactive', color: 'bg-gray-100 text-gray-600' };
+    if (!banner.isActive) return { status:'Disabled', color: 'bg-gray-100 text-gray-600' };
     
     const now = new Date();
     const startDate = new Date(banner.startDate);
@@ -132,7 +132,7 @@ const PromotionalBannersContent: React.FC = () => {
     
     if (startDate > now) return { status: 'Scheduled', color: 'bg-blue-100 text-blue-600' };
     if (endDate && endDate < now) return { status: 'Expired', color: 'bg-red-100 text-red-600' };
-    return { status: 'Active', color: 'bg-green-100 text-green-600' };
+    return { status:'Live', color: 'bg-green-100 text-green-600' };
   };
 
   if (loading) {
@@ -364,8 +364,8 @@ const PromotionalBannersContent: React.FC = () => {
 
 export default function PromotionalBannersPage() {
   return (
-    <AdminAuthWrapper>
+    <>
       <PromotionalBannersContent />
-    </AdminAuthWrapper>
+    </>
   );
 }

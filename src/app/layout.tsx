@@ -5,7 +5,7 @@ import ClientRootLayout from "@/components/ClientRootLayout";
 
 export const metadata = {
   title: 'Kosvana - Premium Natural Products & Superfoods',
-  description: 'Naturally grown mushrooms, dry fruits, seeds & spices from Dehradun, India. Farm fresh, 100% organic, zero chemicals.',
+  description: 'Naturally grown mushrooms, dry fruits, seeds & spices from Dehradun, India. Grown by hand in Herbertpur.',
 }
 
 export default function RootLayout({

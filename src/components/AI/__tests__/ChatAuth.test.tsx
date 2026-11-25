@@ -103,14 +103,10 @@ describe('ChatAuth', () => {
       expect(passwordInput).toHaveAttribute('type', 'password');
 
       // Click eye button to show password
-      const toggleButtons = screen.getAllByRole('button');
-      const eyeButton = toggleButtons.find(btn => {
-        const parent = btn.closest('.relative');
-        return parent?.contains(passwordInput);
-      });
-      if (eyeButton) fireEvent.click(eyeButton);
+      fireEvent.click(screen.getByRole('button', { name: 'Show password' }));
 
       expect(passwordInput).toHaveAttribute('type', 'text');
+      expect(screen.getByRole('button', { name: 'Hide password' })).toHaveAttribute('aria-pressed', 'true');
     });
 
     it('calls onBack when back button is clicked', () => {

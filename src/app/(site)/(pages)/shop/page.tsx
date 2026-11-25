@@ -1,21 +1,22 @@
-import React, { Suspense } from "react";
+import ShopOffers from "@/components/Pantry/ShopOffers";
+import { Suspense } from "react";
+import type { Metadata } from "next";
 import Shop from "@/components/Shop";
+import PantryShell from "@/components/Pantry/PantryShell";
+import PantryLoader from "@/components/Pantry/PantryLoader";
 
-import { Metadata } from "next";
 export const metadata: Metadata = {
-  title: "Shop | Kosvana",
-  description: "Browse our complete collection of premium mushrooms, dry fruits, seeds & spices with advanced filters",
-  // other metadata
+  title: "Shop the pantry | Kosvana",
+  description: "Shop Kosvana’s Himalayan pantry: dried mushrooms, spices, dry fruits and seeds delivered across India, with fresh mushrooms in Dehradun.",
 };
 
-const ShopPage = () => {
+export default function ShopPage() {
   return (
-    <main>
-      <Suspense fallback={<div>Loading...</div>}>
-        <Shop showFilters={true} />
+    <PantryShell current="shop" skipTo={{ href: "#products", label: "Skip to products" }}>
+      <Suspense fallback={<main id="main" aria-busy="true"><PantryLoader /></main>}>
+        <Shop />
       </Suspense>
-    </main>
+      <ShopOffers/>
+    </PantryShell>
   );
-};
-
-export default ShopPage;
+}

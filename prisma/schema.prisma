@@ -18,6 +18,7 @@ model User {
   image                 String?
   phone                 String?
   role                  UserRole               @default(CUSTOMER)
+  staffDuties           String[] @default([])
   password              String?
   resetToken            String?
   resetTokenExpiry      DateTime?
@@ -31,6 +32,7 @@ model User {
   trainingRegistrations TrainingRegistration[]
   upi_payments          upi_payments[]
   wishlist              WishlistItem[]
+  storefrontVisits      StorefrontVisit[]
 
   @@map("users")
 }
@@ -106,6 +108,8 @@ model Product {
   howToConsume       Json
   additionalInfo     Json
   benefits           Json?
+  archivedAt         DateTime?
+  fulfillmentClass   String?
   orderItems         OrderItem[]
   categories         ProductCategory[]
   discounts          ProductDiscount[]
@@ -171,17 +175,20 @@ model Order {
   user                                          User?          @relation(fields: [userId], references: [id])
   upi_payments                                  upi_payments[]
 
+  @@index([billingAddressId])
+  @@index([shippingAddressId])
   @@map("orders")
 }
 
 model OrderItem {
   id        String  @id @default(cuid())
+  reservedUnits Float?
   quantity  Int
   price     Float
   orderId   String
   productId Int
   order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
 
   @@map("order_items")
 }
@@ -357,6 +364,7 @@ model TrainingProgram {
   description       String
   price             Float
   duration          Int
+  seatsPerDate      Int?
   dailyHours        String                 @default("5-6 hours")
   type              TrainingType
   isActive          Boolean                @default(true)
@@ -475,6 +483,8 @@ model addresses {
   updatedAt                                  DateTime
   userId                                     String
   users                                      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
   orders_orders_billingAddressIdToaddresses  Order[]     @relation("orders_billingAddressIdToaddresses")
   orders_orders_shippingAddressIdToaddresses Order[]     @relation("orders_shippingAddressIdToaddresses")
 }
@@ -489,6 +499,8 @@ model upi_payments {
   updatedAt              DateTime
   orderId                String?
   trainingRegistrationId String?
+  decisionNotes          String?
+  proof                  PaymentProof?
   verifiedByUserId       String?
   orders                 Order?                @relation(fields: [orderId], references: [id], onDelete: Cascade)
   training_registrations TrainingRegistration? @relation(fields: [trainingRegistrationId], references: [id], onDelete: Cascade)
@@ -496,6 +508,7 @@ model upi_payments {
 }
 
 enum UserRole {
+  STAFF
   CUSTOMER
   ADMIN
 }
@@ -614,4 +627,76 @@ model NewsletterSubscriber {
   updatedAt    DateTime  @updatedAt
 
   @@map("newsletter_subscribers")
+}
+
+
+model StaffEvent {
+  id        String   @id @default(cuid())
+  actorId   String
+  resource  String
+  recordId  String
+  action    String
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@index([resource, recordId, createdAt])
+  @@map("staff_events")
+}
+
+model StaffJob {
+  key       String   @id
+  resourceId String
+  kind      String
+  action    String
+  state     String   @default("pending")
+  attempts  Int      @default(0)
+  lastError String?
+  nextRun   DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  @@index([state, nextRun])
+  @@map("staff_jobs")
+}
+
+model PaymentProof {
+  paymentId String @id
+  mime      String
+  data      Bytes
+  createdAt DateTime @default(now())
+  payment   upi_payments @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  @@map("payment_proofs")
+}
+
+model StorefrontVisit {
+  id          String               @id
+  userId      String?
+  user        User?                @relation(fields: [userId], references: [id], onDelete: SetNull)
+  source      String
+  entryPath   String
+  lastPath    String
+  startedAt   DateTime
+  lastSeenAt  DateTime
+  firstIndex  Int
+  lastIndex   Int
+  events      StorefrontVisitEvent[]
+
+  @@index([startedAt])
+  @@index([lastSeenAt, id])
+  @@index([userId])
+  @@map("storefront_visits")
+}
+
+model StorefrontVisitEvent {
+  visitId    String
+  sequence   Int
+  kind       String
+  path       String
+  detail     String?
+  observedAt DateTime
+  visit      StorefrontVisit @relation(fields: [visitId], references: [id], onDelete: Cascade)
+
+  @@id([visitId, sequence])
+  @@index([kind, path, visitId])
+  @@map("storefront_visit_events")
 }

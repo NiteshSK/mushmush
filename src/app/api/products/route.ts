@@ -1,8 +1,9 @@
+import { staffSession } from "@/lib/admin";
+import { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { availablePacks, formatBulkQuantity } from '@/lib/inventory'
+import { activeDiscountsInclude, computeProductDiscount } from '@/lib/product-pricing'
 
 // GET /api/products - Fetch all products with optional filtering
 export async function GET(request: NextRequest) {
@@ -17,7 +18,7 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '10')))
     const skip = (page - 1) * limit
 
-    const where: any = {}
+    const where: any = { archivedAt: null }
     
     // If ID is provided, fetch single product
     if (id) {
@@ -65,15 +66,8 @@ export async function GET(request: NextRequest) {
                 rating: true
               }
             },
-            discounts: {
-              where: {
-                isActive: true,
-                OR: [
-                  { endDate: null },
-                  { endDate: { gte: new Date() } }
-                ]
-              }
-            }
+            // Same active-discount rule as server-side order pricing
+            discounts: activeDiscountsInclude()
           },
           skip,
           take: limit,
@@ -128,22 +122,9 @@ export async function GET(request: NextRequest) {
         ? product.reviews.reduce((sum, review) => sum + review.rating, 0) / product.reviews.length
         : 0;
 
-      // Calculate discounted price ONLY if active discount records exist
-      let discountedPrice = null;
-      let discountPercentage = 0;
-      
-      if (product.discounts && product.discounts.length > 0) {
-        const activeDiscount = product.discounts[0]; // Get the first active discount
-        
-        if (activeDiscount.type === 'PERCENTAGE') {
-          discountedPrice = Math.ceil(product.price * (1 - activeDiscount.value / 100));
-          discountPercentage = activeDiscount.value;
-        } else if (activeDiscount.type === 'FIXED_AMOUNT') {
-          discountedPrice = Math.ceil(Math.max(0, product.price - activeDiscount.value));
-          discountPercentage = ((product.price - discountedPrice) / product.price) * 100;
-        }
-      }
-      // Removed fallback to old discountedPrice field - only use active discount records
+      // Calculate discounted price ONLY if active discount records exist.
+      // Shared with server-side order pricing (src/lib/product-pricing.ts).
+      const { discountedPrice, discountPercentage } = computeProductDiscount(product.price, product.discounts);
 
       const packs = availablePacks(product.quantity, product.measurementValue, product.measurementType);
 
@@ -184,8 +165,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Verify admin authentication
-    const session = await getServerSession(authOptions);
-    if (!session?.user || (session.user as any).role !== 'ADMIN') {
+    const session = await staffSession("fulfillment");
+    if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -196,7 +177,6 @@ export async function POST(request: NextRequest) {
       price,
       measurementValue,
       measurementType,
-      inStock,
       featured,
       imgs,
       specifications,
@@ -206,43 +186,51 @@ export async function POST(request: NextRequest) {
       categories
     } = body
 
+    if (typeof title !== "string" || !title.trim() || typeof description !== "string" || !description.trim()) {
+      return NextResponse.json({ error: "Enter a product name and description." }, { status: 400 });
+    }
+    if (!Number.isFinite(price) || price <= 0 || !Number.isInteger(measurementValue) ||
+        measurementValue <= 0 || measurementValue > 2147483647 || typeof measurementType !== "string" || !measurementType.trim()) {
+      return NextResponse.json({ error: "Enter a positive price and a whole-number pack size with a unit." }, { status: 400 });
+    }
+    if (categories !== undefined && (!Array.isArray(categories) || !categories.every(Number.isSafeInteger))) {
+      return NextResponse.json({ error: "Check the selected shop categories." }, { status: 400 });
+    }
     // Generate slug from title
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+    if (!slug) return NextResponse.json({ error: "Include a letter from A to Z or a number in the product name to create its shop link." }, { status: 400 });
 
+    if (!["fresh", "national"].includes(body.fulfillmentClass)) return NextResponse.json({ error: "Choose a delivery class" }, { status: 400 })
     const product = await prisma.product.create({
       data: {
+        fulfillmentClass: body.fulfillmentClass,
         title,
         slug,
         description,
         price,
         measurementValue,
         measurementType,
-        inStock,
+        inStock: false,
         featured,
         imgs,
         specifications,
         howToConsume,
         additionalInfo,
-        benefits
+        benefits,
+        categories: categories?.length ? { createMany: { data: categories.map((categoryId:number)=>({categoryId})), skipDuplicates:true } } : undefined
       }
     })
 
-    // Connect categories if provided
-    if (categories && categories.length > 0) {
-      await Promise.all(
-        categories.map((categoryId: number) =>
-          prisma.productCategory.create({
-            data: {
-              productId: product.id,
-              categoryId
-            }
-          })
-        )
-      )
-    }
-
     return NextResponse.json(product, { status: 201 })
   } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2002") {
+        return NextResponse.json({ error: "That name is already used in a shop link. Choose a distinct name, such as one that includes the pack size." }, { status: 409 });
+      }
+      if (error.code === "P2003") {
+        return NextResponse.json({ error: "A selected shop category is no longer available. Reload the form and choose again." }, { status: 409 });
+      }
+    }
     console.error('Error creating product:', error)
     return NextResponse.json(
       { error: 'Failed to create product' },

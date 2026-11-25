@@ -1,19 +1,18 @@
-import React from "react";
+import type { Metadata } from "next";
 import ShopDetails from "@/components/ShopDetails";
-import { Metadata } from "next";
+import PantryShell from "@/components/Pantry/PantryShell";
 
 export const metadata: Metadata = {
-  title: "Shop Details Page | Kosvana",
-  description: "This is Shop Details Page for Kosvana",
-  // other metadata
+  title: "Product details | Kosvana",
+  description: "Choose a product from Kosvana’s Himalayan pantry to see its pack size, price and delivery.",
+  robots: { index: false },
 };
 
-const ShopDetailsPage = () => {
+/** The older entry without a slug. It forwards to the product chosen on a legacy page, or offers ways to find one. */
+export default function ShopDetailsEntry() {
   return (
-    <main>
-      <ShopDetails key="shop-details" />
-    </main>
+    <PantryShell current="shop">
+      <ShopDetails />
+    </PantryShell>
   );
-};
-
-export default ShopDetailsPage;
+}

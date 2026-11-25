@@ -1,4 +1,6 @@
 "use client";
+import ArticlePreview from "./ArticlePreview";
+import { useUnsavedDraft } from "./useUnsavedDraft";
 import React, { useState, useEffect } from 'react';
 import { generateSlug } from "@/lib/utils";
 
@@ -37,6 +39,7 @@ const NewsEditor: React.FC<NewsEditorProps> = ({
     metaDescription: '',
   });
 
+  const draft = useUnsavedDraft();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
@@ -104,7 +107,7 @@ const NewsEditor: React.FC<NewsEditorProps> = ({
     if (name === 'title') {
       // Auto-generate slug from title if slug is empty or matches the previous title
       const currentTitle = formData.title;
-      if (!formData.slug || formData.slug === generateSlug(currentTitle)) {
+      if (!initialData && (!formData.slug || formData.slug === generateSlug(currentTitle))) {
         setFormData(prev => ({
           ...prev,
           [name]: value,
@@ -132,9 +135,9 @@ const NewsEditor: React.FC<NewsEditorProps> = ({
     
     try {
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('image', file);
       
-      const response = await fetch('/api/upload', {
+      const response = await fetch('/api/admin/blogs/upload', {
         method: 'POST',
         body: formData,
       });
@@ -206,6 +209,7 @@ const NewsEditor: React.FC<NewsEditorProps> = ({
   };
 
   const toggleTag = (tagId: number) => {
+    draft.markDirty();
     setSelectedTags(prev => 
       prev.includes(tagId) 
         ? prev.filter(id => id !== tagId)
@@ -247,7 +251,7 @@ const NewsEditor: React.FC<NewsEditorProps> = ({
   );
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onChange={draft.markDirty} onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           {/* Title */}
@@ -566,7 +570,7 @@ const NewsEditor: React.FC<NewsEditorProps> = ({
       <div className="flex justify-end space-x-3 pt-6 border-t">
         <button
           type="button"
-          onClick={onCancel}
+          onClick={()=>{if(draft.leave())onCancel();}}
           className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           Cancel
@@ -579,6 +583,7 @@ const NewsEditor: React.FC<NewsEditorProps> = ({
           {isSubmitting ? 'Saving...' : 'Save News Article'}
         </button>
       </div>
+      <ArticlePreview title={formData.title} excerpt={formData.excerpt} content={formData.content}/>
     </form>
   );
 };

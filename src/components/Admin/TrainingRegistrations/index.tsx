@@ -1,4 +1,5 @@
 "use client";
+import { canWork } from "@/lib/staff-permissions";
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
@@ -128,7 +129,7 @@ const RegistrationRow = ({
             <p className="text-xs text-dark-5">
               {registration.participantName} &middot;{" "}
               {registration.trainingProgram.name} &middot;{" "}
-              {new Date(registration.createdAt).toLocaleDateString("en-IN", {
+              {new Date(registration.createdAt).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata",
                 day: "numeric",
                 month: "short",
                 year: "numeric",
@@ -190,7 +191,7 @@ const RegistrationRow = ({
                       Preferred start:{" "}
                       {new Date(
                         registration.preferredStartDate
-                      ).toLocaleDateString("en-IN")}
+                      ).toLocaleDateString("en-IN",{timeZone:"Asia/Kolkata"})}
                     </p>
                   )}
                   {registration.specialRequirements && (
@@ -224,12 +225,13 @@ const RegistrationRow = ({
                 <h4 className="text-xs font-semibold uppercase tracking-wider text-dark-5 mb-3">
                   Registration Workflow
                 </h4>
+                {["PENDING","PAYMENT_RECEIVED"].includes(registration.status) && <p className="mb-2">Finance reviews submitted UPI references in Training payments.</p>}
                 <WorkflowStepper
                   pipeline={REG_PIPELINE}
                   statusMeta={REG_STATUS_META}
                   currentStatus={registration.status}
-                  onAdvance={(next) => setConfirmTarget(next)}
-                  onCancel={() => setConfirmTarget("CANCELLED")}
+                  onAdvance={["CONFIRMED","IN_PROGRESS"].includes(registration.status) ? setConfirmTarget : undefined}
+                  onCancel={["PENDING","PAYMENT_RECEIVED","CONFIRMED"].includes(registration.status) ? () => setConfirmTarget("CANCELLED") : undefined}
                   completedMessage="Training completed successfully! Certificate can now be issued to the participant."
                   cancelledMessage="This registration has been cancelled."
                 />
@@ -305,10 +307,11 @@ const TrainingRegistrationsAdmin = () => {
   const [registrations, setRegistrations] = useState<TrainingRegistration[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedStatus, setSelectedStatus] = useState("");
+  const [page,setPage]=useState(1),[more,setMore]=useState(false),[error,setError]=useState("");
 
   useEffect(() => {
     if (status === "loading") return;
-    if (!session || session.user?.role !== "ADMIN") {
+    if (!session || !canWork(session.user,"trainer")) {
       router.push("/");
     }
   }, [session, status, router]);
@@ -316,29 +319,31 @@ const TrainingRegistrationsAdmin = () => {
   const fetchRegistrations = async () => {
     try {
       setLoading(true);
-      const params = new URLSearchParams();
+      setError("");
+      const params = new URLSearchParams({page:String(page)});
       if (selectedStatus) params.append("status", selectedStatus);
       const url = `/api/admin/training-registrations${params.toString() ? `?${params}` : ""}`;
 
       const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
-        setRegistrations(data);
+        setRegistrations(data.rows);
+        setMore(data.more);
       } else {
-        toast.error("Failed to fetch registrations");
+        setError("Registrations could not be loaded.");
       }
     } catch {
-      toast.error("Error fetching registrations");
+      setError("Registrations could not be loaded.");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (session?.user?.role === "ADMIN") {
+    if (canWork(session?.user,"trainer")) {
       fetchRegistrations();
     }
-  }, [session, selectedStatus]);
+  }, [session, selectedStatus, page]);
 
   if (status === "loading" || (loading && registrations.length === 0)) {
     return (
@@ -348,8 +353,9 @@ const TrainingRegistrationsAdmin = () => {
     );
   }
 
-  if (!session || session.user?.role !== "ADMIN") return null;
+  if (!session || !canWork(session.user,"trainer")) return null;
 
+  if(error) return <p role="alert">{error} <button onClick={fetchRegistrations}>Retry</button></p>;
   const statusCounts = registrations.reduce((acc, r) => {
     acc[r.status] = (acc[r.status] || 0) + 1;
     return acc;
@@ -394,7 +400,7 @@ const TrainingRegistrationsAdmin = () => {
       {/* Status filter tabs */}
       <div className="flex flex-wrap gap-2">
         <button
-          onClick={() => setSelectedStatus("")}
+          onClick={() => {setSelectedStatus("");setPage(1);}}
           className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors ${
             !selectedStatus
               ? "bg-forest text-white"
@@ -406,7 +412,7 @@ const TrainingRegistrationsAdmin = () => {
         {Object.keys(REG_STATUS_META).map((s) => (
           <button
             key={s}
-            onClick={() => setSelectedStatus(s)}
+            onClick={() => {setSelectedStatus(s);setPage(1);}}
             className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors ${
               selectedStatus === s
                 ? "bg-forest text-white"
@@ -447,6 +453,7 @@ const TrainingRegistrationsAdmin = () => {
           ))}
         </div>
       )}
+      <div className="flex gap-4">{page>1 && <button onClick={()=>setPage(page-1)}>Previous page</button>}{more && <button onClick={()=>setPage(page+1)}>Next page</button>}</div>
     </div>
   );
 };

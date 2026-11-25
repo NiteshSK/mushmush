@@ -22,7 +22,7 @@ const Footer = () => {
               />
             </Link>
             <p className="text-white/50 text-sm leading-relaxed mb-6 max-w-xs">
-              Premium mushrooms, dry fruits, seeds & spices from Dehradun, India. Naturally sourced, 100% organic.
+              Premium mushrooms, dry fruits, seeds & spices from Dehradun, India. Grown by hand in Herbertpur.
             </p>
 
             {/* Social links */}

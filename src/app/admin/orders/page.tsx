@@ -1,7 +1,10 @@
 "use client";
+import { useSession } from "next-auth/react";
+import { canWork } from "@/lib/staff-permissions";
+import { useSearchParams, useRouter } from "next/navigation";
+import OrderHistory from "@/components/Admin/OrderHistory";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
-import AdminAuthWrapper from "@/components/Admin/AdminAuthWrapper";
 import {
   WorkflowStepper,
   ConfirmStatusModal,
@@ -25,13 +28,15 @@ interface Order {
     id: string;
     quantity: number;
     price: number;
-    product: { id: number; title: string; imgs: any };
+    reservedUnits?: number | null;
+    product: { id: number; title: string; imgs: any; fulfillmentClass?: string | null; measurementType?: string };
   }[];
   user: { id: string; name: string | null; email: string } | null;
   upi_payments?: {
     id: string;
     status: string;
     amount: number;
+    proof?: { paymentId: string } | null;
     transactionId: string | null;
     createdAt: string;
   }[];
@@ -64,7 +69,7 @@ const ORDER_WARNINGS: Record<string, string> = {
   PROCESSING: "This will notify the customer that their order is being packed.",
   SHIPPED: "This will notify the customer that their order is on its way.",
   DELIVERED: "This will notify the customer that their order has been delivered.",
-  COMPLETED: "This will generate the invoice and email it to the customer.",
+  COMPLETED: "This will mark fulfillment complete.",
   CANCELLED: "This will cancel the order and restore stock if it was decremented.",
 };
 
@@ -76,8 +81,10 @@ const OrderRow = ({
   order: Order;
   onStatusChange: () => void;
 }) => {
+  const {data:session} = useSession();
   const [expanded, setExpanded] = useState(false);
   const [confirmTarget, setConfirmTarget] = useState<string | null>(null);
+  const [actionError, setActionError] = useState("");
   const [updating, setUpdating] = useState(false);
   const [verificationNotes, setVerificationNotes] = useState("");
   const [verificationChecked, setVerificationChecked] = useState(false);
@@ -88,27 +95,28 @@ const OrderRow = ({
   const handleConfirm = async () => {
     if (!confirmTarget) return;
     if (isPaymentVerification && !verificationChecked) return;
+    setActionError("");
     setUpdating(true);
     try {
       const response = await fetch(`/api/orders/${order.id}/status`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: confirmTarget, verificationNotes: isPaymentVerification ? verificationNotes : undefined }),
+        body: JSON.stringify({ status: confirmTarget, expectedStatus: order.status, paymentId: order.upi_payments?.[0]?.id, verificationNotes: isPaymentVerification ? verificationNotes : undefined }),
       });
       if (response.ok) {
         toast.success(`Order moved to ${STATUS_META[confirmTarget]?.label}`);
+        setConfirmTarget(null);
+        setVerificationNotes("");
+        setVerificationChecked(false);
         onStatusChange();
       } else {
         const data = await response.json();
-        toast.error(data.error || "Failed to update order status");
+        setActionError(data.error || "Failed to update order status");
       }
     } catch {
-      toast.error("Failed to update order status");
+      setActionError("Failed to update order status");
     } finally {
       setUpdating(false);
-      setConfirmTarget(null);
-      setVerificationNotes("");
-      setVerificationChecked(false);
     }
   };
 
@@ -183,7 +191,7 @@ const OrderRow = ({
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm text-dark truncate">{item.product.title}</p>
+                          <p className="text-sm text-dark truncate">{item.product.title}{item.reservedUnits!=null && <small className="block">Reserved {item.reservedUnits} {["ml","l","litre","litres"].includes(item.product.measurementType?.toLowerCase() || "")?"ml":"base units"}</small>}</p>
                           <p className="text-xs text-dark-5">Qty: {item.quantity} × ₹{item.price}</p>
                         </div>
                         <p className="text-sm font-medium text-dark">₹{(item.quantity * item.price).toFixed(2)}</p>
@@ -272,6 +280,8 @@ const OrderRow = ({
                   })()}
                 </div>
 
+                <p><strong>Delivery</strong> · {order.orderItems.some(i=>i.product.fulfillmentClass==="fresh") ? "Local fresh delivery · Dehradun" : "Pantry shipment"}</p>
+                <OrderHistory id={order.id} status={order.status}/>
                 {/* Workflow */}
                 <div>
                 <h4 className="text-xs font-semibold uppercase tracking-wider text-dark-5 mb-3">Order Workflow</h4>
@@ -279,9 +289,9 @@ const OrderRow = ({
                   pipeline={PIPELINE}
                   statusMeta={STATUS_META}
                   currentStatus={order.status}
-                  onAdvance={(next) => setConfirmTarget(next)}
-                  onCancel={() => setConfirmTarget("CANCELLED")}
-                  completedMessage="Order completed successfully! Invoice has been generated and emailed to the customer."
+                  onAdvance={order.status !== "PENDING" && canWork(session?.user,order.status === "PAYMENT_RECEIVED" ? "finance" : "fulfillment") ? setConfirmTarget : undefined}
+                  onCancel={canWork(session?.user,"finance") && ["PENDING","PAYMENT_RECEIVED","CONFIRMED","PROCESSING"].includes(order.status) ? () => setConfirmTarget("CANCELLED") : undefined}
+                  completedMessage="Fulfillment complete."
                   cancelledMessage="This order has been cancelled. Stock has been restored if applicable."
                 />
                 </div>
@@ -299,10 +309,11 @@ const OrderRow = ({
         statusMeta={STATUS_META}
         warnings={ORDER_WARNINGS}
         onConfirm={handleConfirm}
-        onClose={() => { setConfirmTarget(null); setVerificationNotes(""); setVerificationChecked(false); }}
+        onClose={() => { setActionError(""); setConfirmTarget(null); setVerificationNotes(""); setVerificationChecked(false); }}
         loading={updating}
         confirmDisabled={isPaymentVerification && !verificationChecked}
       >
+        {actionError && <p role="alert" className="p-3 text-red">{actionError}</p>}
         {isPaymentVerification && (() => {
           const payment = order.upi_payments?.[0];
           return (
@@ -323,15 +334,17 @@ const OrderRow = ({
                 {payment?.createdAt && (
                   <div className="flex justify-between">
                     <span className="text-dark-5">Submitted</span>
-                    <span className="text-dark">{new Date(payment.createdAt).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                    <span className="text-dark">{new Date(payment.createdAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
                   </div>
                 )}
               </div>
 
+              {payment?.proof && <a className="underline" href={"/api/admin/payment-proofs/" + payment.id}>Download payment proof</a>}
               {/* Admin notes */}
               <div>
-                <label className="block text-sm font-medium text-dark mb-1.5">Verification Notes (optional)</label>
+                <label htmlFor={"verification-notes-"+order.id} className="block text-sm font-medium text-dark mb-1.5">Verification Notes (optional)</label>
                 <textarea
+                  id={"verification-notes-"+order.id}
                   value={verificationNotes}
                   onChange={(e) => setVerificationNotes(e.target.value)}
                   placeholder="e.g. Verified via bank statement, UPI ref matched..."
@@ -364,27 +377,39 @@ const OrderRow = ({
 const OrdersPage: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedStatus, setSelectedStatus] = useState<string>("");
-  const [page, setPage] = useState(1);
+  const search = useSearchParams();
+  const router = useRouter();
+  const selectedStatus = search.get("status") || "";
+  const page = Math.max(1, Number(search.get("page")) || 1);
+  const [error, setError] = useState("");
+  function filter(values: Record<string,string>) {
+    const params = new URLSearchParams(search.toString());
+    for (const [key, value] of Object.entries(values)) value ? params.set(key,value) : params.delete(key);
+    router.push("/admin/orders?" + params.toString());
+  }
   const [totalPages, setTotalPages] = useState(1);
 
-  useEffect(() => { fetchOrders(); }, [page, selectedStatus]);
+  useEffect(() => { fetchOrders(); }, [search]);
 
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const params = new URLSearchParams({ page: page.toString(), limit: "20" });
+      setError("");
+      const params = new URLSearchParams(search.toString());
+      params.set("limit", "20");
       if (selectedStatus) params.append("status", selectedStatus);
       const response = await fetch(`/api/orders?${params}`);
-      if (response.ok) {
+      if (!response.ok) throw new Error();
+      {
         const data = await response.json();
         setOrders(data.orders || []);
         setTotalPages(data.pagination?.totalPages || 1);
       }
-    } catch { toast.error("Failed to fetch orders"); }
+    } catch { setError("Orders could not be loaded."); }
     finally { setLoading(false); }
   };
 
+  if (error) return <div role="alert">{error} <button onClick={fetchOrders}>Retry</button></div>;
   if (loading && orders.length === 0) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -404,7 +429,7 @@ const OrdersPage: React.FC = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold text-dark mb-1">Order Management</h1>
-            <p className="text-dark-5 text-sm">Manage and track all customer orders</p>
+            <p className="text-dark-5 text-sm">{search.get("delivery") === "fresh" ? "Fresh deliveries in Dehradun" : "Track payments, packing and delivery"}</p>
           </div>
           <button onClick={fetchOrders} className="inline-flex items-center gap-2 text-sm font-medium bg-forest text-white px-5 py-2.5 rounded-md hover:bg-dark transition-colors">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
@@ -413,12 +438,15 @@ const OrdersPage: React.FC = () => {
         </div>
       </div>
 
+      <form className="flex flex-wrap gap-3" onSubmit={e => { e.preventDefault(); filter({q:String(new FormData(e.currentTarget).get("q") || ""),page:"1"}); }}>
+        <input aria-label="Order or payment reference" name="q" defaultValue={search.get("q") || ""} placeholder="Order or payment reference" className="border rounded px-3 py-2" /><button>Search</button>
+      </form>
       <div className="flex flex-wrap gap-2">
-        <button onClick={() => { setSelectedStatus(""); setPage(1); }} className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors ${!selectedStatus ? "bg-forest text-white" : "bg-white shadow-1 text-dark-5 hover:text-dark"}`}>
+        <button onClick={() => { filter({status:"", page:"1", delivery:""}); }} className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors ${!selectedStatus ? "bg-forest text-white" : "bg-white shadow-1 text-dark-5 hover:text-dark"}`}>
           All Orders
         </button>
         {Object.keys(STATUS_META).map((status) => (
-          <button key={status} onClick={() => { setSelectedStatus(status); setPage(1); }} className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors ${selectedStatus === status ? "bg-forest text-white" : "bg-white shadow-1 text-dark-5 hover:text-dark"}`}>
+          <button key={status} onClick={() => { filter({status, page:"1"}); }} className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors ${selectedStatus === status ? "bg-forest text-white" : "bg-white shadow-1 text-dark-5 hover:text-dark"}`}>
             {STATUS_META[status].label}
             {(statusCounts[status] || 0) > 0 && <span className="ml-1.5 opacity-60">({statusCounts[status]})</span>}
           </button>
@@ -443,9 +471,9 @@ const OrdersPage: React.FC = () => {
 
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-3">
-          <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="text-sm font-medium text-dark-5 py-2 px-4 rounded-md border border-gray-3 hover:bg-gray-1 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">Previous</button>
+          <button onClick={() => filter({page:String(page - 1)})} disabled={page === 1} className="text-sm font-medium text-dark-5 py-2 px-4 rounded-md border border-gray-3 hover:bg-gray-1 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">Previous</button>
           <span className="text-sm text-dark-5">Page <span className="font-medium text-dark">{page}</span> of {totalPages}</span>
-          <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="text-sm font-medium text-dark-5 py-2 px-4 rounded-md border border-gray-3 hover:bg-gray-1 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">Next</button>
+          <button onClick={() => filter({page:String(page + 1)})} disabled={page === totalPages} className="text-sm font-medium text-dark-5 py-2 px-4 rounded-md border border-gray-3 hover:bg-gray-1 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">Next</button>
         </div>
       )}
     </div>
@@ -453,5 +481,5 @@ const OrdersPage: React.FC = () => {
 };
 
 export default function ProtectedOrdersPage() {
-  return <AdminAuthWrapper><OrdersPage /></AdminAuthWrapper>;
+  return <><OrdersPage /></>;
 }

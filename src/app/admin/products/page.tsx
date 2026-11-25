@@ -1,10 +1,9 @@
 "use client";
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useSearchParams,useRouter } from "next/navigation";
 import Link from 'next/link';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
-import AdminAuthWrapper from '@/components/Admin/AdminAuthWrapper';
-
 type Product = {
   id: number;
   title: string;
@@ -31,19 +30,43 @@ type SortKey = 'newest' | 'oldest' | 'price-asc' | 'price-desc' | 'name' | 'stoc
 const ProductsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<Product[]>([]);
-  const [query, setQuery] = useState("");
-  const [activeTab, setActiveTab] = useState<FilterTab>('all');
-  const [sortBy, setSortBy] = useState<SortKey>('newest');
+  const search=useSearchParams(), router=useRouter();
+  const params=search.toString();
+  const page=Math.max(1,Number(search.get("page"))||1);
+  const activeTab=(search.get("tab")||"all") as FilterTab, sortBy=(search.get("sortBy")||"newest") as SortKey;
+  const query=search.get("q")||"";
+  const [total,setTotal]=useState(0), [pages,setPages]=useState(1), [error,setError]=useState(""), [revision,reload]=useState(0);
   const [togglingFeatured, setTogglingFeatured] = useState<number | null>(null);
-
-  useEffect(() => {
-    setLoading(true);
-    fetch('/api/admin/products')
-      .then(r => r.json())
-      .then(data => setProducts(Array.isArray(data) ? data : []))
-      .catch(() => toast.error('Failed to load products'))
-      .finally(() => setLoading(false));
-  }, []);
+  function filter(key:string,value:string) {
+    const next=new URLSearchParams(params);
+    if(key!=="page") next.delete("page");
+    if(value) next.set(key,value); else next.delete(key);
+    router.replace("/admin/products?"+next.toString(),{scroll:false});
+  }
+  useEffect(()=>{
+    const controller=new AbortController();
+    setLoading(true); setError("");
+    const request=new URLSearchParams({page:String(page),limit:"25",q:query});
+    if(activeTab==="in-stock"||activeTab==="out-of-stock") request.set("stock",activeTab==="in-stock"?"in":"out");
+    if(activeTab==="featured") request.set("featured","1");
+    if(activeTab==="discounted") request.set("discount","1");
+    const sort=sortBy.startsWith("price")?"price":sortBy==="name"?"title":sortBy==="stock-low"?"stock":"createdAt";
+    request.set("sort",sort); request.set("direction",sortBy==="newest"||sortBy==="price-desc"?"desc":"asc");
+    fetch("/api/admin/products?"+request.toString(),{signal:controller.signal}).then(async r=>{
+      if(!r.ok) throw Error("Could not load products.");
+      const data=await r.json();
+      if(!controller.signal.aborted){setProducts(data.products);setTotal(data.total);setPages(data.totalPages);}
+    }).catch(e=>{if(!controller.signal.aborted)setError(e.message);}).finally(()=>{if(!controller.signal.aborted)setLoading(false);});
+    return ()=>controller.abort();
+  },[activeTab,sortBy,query,page,revision]);
+  async function archiveProduct(p:Product) {
+    if(!window.confirm("Archive “"+p.title+"” and remove it from shopping? Existing order lines will be kept.")) return;
+    try{
+      const r=await fetch("/api/products/"+p.id,{method:"DELETE"});
+      if(!r.ok) throw Error("Could not archive this product.");
+      if(products.length===1 && page>1) filter("page",String(page-1)); else reload(n=>n+1);
+    }catch(e){setError(e instanceof Error?e.message:"Archive failed.");}
+  }
 
   const toggleFeatured = useCallback(async (productId: number, current: boolean) => {
     setTogglingFeatured(productId);
@@ -66,55 +89,11 @@ const ProductsPage: React.FC = () => {
     }
   }, []);
 
-  const stats = useMemo(() => ({
-    total: products.length,
-    inStock: products.filter(p => p.inStock).length,
-    outOfStock: products.filter(p => !p.inStock).length,
-    featured: products.filter(p => p.featured).length,
-  }), [products]);
-
-  const filtered = useMemo(() => {
-    let list = products;
-
-    // Tab filter
-    switch (activeTab) {
-      case 'in-stock': list = list.filter(p => p.inStock); break;
-      case 'out-of-stock': list = list.filter(p => !p.inStock); break;
-      case 'featured': list = list.filter(p => p.featured); break;
-      case 'discounted': list = list.filter(p => p.hasActiveDiscount); break;
-    }
-
-    // Search
-    if (query.trim()) {
-      const q = query.toLowerCase();
-      list = list.filter(p =>
-        p.title.toLowerCase().includes(q) ||
-        p.categoryNames.some(c => c.toLowerCase().includes(q))
-      );
-    }
-
-    // Sort
-    const sorted = [...list];
-    switch (sortBy) {
-      case 'newest': sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()); break;
-      case 'oldest': sorted.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()); break;
-      case 'price-asc': sorted.sort((a, b) => a.price - b.price); break;
-      case 'price-desc': sorted.sort((a, b) => b.price - a.price); break;
-      case 'name': sorted.sort((a, b) => a.title.localeCompare(b.title)); break;
-      case 'stock-low': sorted.sort((a, b) => a.stockQuantity - b.stockQuantity); break;
-    }
-
-    return sorted;
-  }, [products, query, activeTab, sortBy]);
-
-  const tabs: { key: FilterTab; label: string; count: number }[] = [
-    { key: 'all', label: 'All', count: stats.total },
-    { key: 'in-stock', label: 'In Stock', count: stats.inStock },
-    { key: 'out-of-stock', label: 'Out of Stock', count: stats.outOfStock },
-    { key: 'featured', label: 'Featured', count: stats.featured },
-    { key: 'discounted', label: 'Discounted', count: products.filter(p => p.hasActiveDiscount).length },
+  const filtered=products;
+  const tabs: {key:FilterTab; label:string}[] = [
+    {key:"all",label:"All"},{key:"in-stock",label:"In stock"},{key:"out-of-stock",label:"Out of stock"},
+    {key:"featured",label:"Featured"},{key:"discounted",label:"Discounted"}
   ];
-
   const isNew = (date: string) => {
     const diff = Date.now() - new Date(date).getTime();
     return diff < 14 * 24 * 60 * 60 * 1000;
@@ -139,21 +118,7 @@ const ProductsPage: React.FC = () => {
         </Link>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {[
-          { label: 'Total Products', value: stats.total, color: 'bg-blue/10 text-blue' },
-          { label: 'In Stock', value: stats.inStock, color: 'bg-green/10 text-green' },
-          { label: 'Out of Stock', value: stats.outOfStock, color: 'bg-red/10 text-red' },
-          { label: 'Featured', value: stats.featured, color: 'bg-yellow/10 text-yellow' },
-        ].map(s => (
-          <div key={s.label} className="bg-white rounded-xl shadow-1 p-4">
-            <p className="text-xs font-medium text-gray-6 uppercase tracking-wide">{s.label}</p>
-            <p className={`text-2xl font-bold mt-1 ${s.color.split(' ')[1]}`}>{loading ? '-' : s.value}</p>
-          </div>
-        ))}
-      </div>
-
+      {pages>1 && <nav aria-label="Catalog pages" className="flex gap-4"><button disabled={page<=1} onClick={()=>filter("page",String(page-1))}>Previous</button><button disabled={page>=pages} onClick={()=>filter("page",String(page+1))}>Next</button></nav>}
       {/* Filters + Search Bar */}
       <div className="bg-white rounded-xl shadow-1">
         {/* Tabs */}
@@ -161,7 +126,7 @@ const ProductsPage: React.FC = () => {
           {tabs.map(tab => (
             <button
               key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
+              onClick={() => filter("tab",tab.key)}
               className={`px-3 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-colors ${
                 activeTab === tab.key
                   ? 'bg-forest text-white'
@@ -169,9 +134,6 @@ const ProductsPage: React.FC = () => {
               }`}
             >
               {tab.label}
-              <span className={`ml-1.5 text-xs ${activeTab === tab.key ? 'text-white/70' : 'text-gray-5'}`}>
-                {tab.count}
-              </span>
             </button>
           ))}
         </div>
@@ -184,15 +146,15 @@ const ProductsPage: React.FC = () => {
               <path d="M21 21l-4.35-4.35" />
             </svg>
             <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search products or categories..."
+              key={query} defaultValue={query} aria-label="Search products"
+              onKeyDown={e=>{if(e.key==="Enter")filter("q",e.currentTarget.value.trim());}}
+              placeholder="Search products, then press Enter"
               className="w-full pl-10 pr-4 py-2 text-sm border border-gray-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest"
             />
           </div>
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as SortKey)}
+            onChange={(e) => filter("sortBy",e.target.value)}
             className="px-3 py-2 text-sm border border-gray-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest bg-white"
           >
             <option value="newest">Newest First</option>
@@ -214,7 +176,7 @@ const ProductsPage: React.FC = () => {
               <p className="text-sm text-gray-6">Loading products...</p>
             </div>
           </div>
-        ) : filtered.length === 0 ? (
+        ) : error ? <p role="alert" className="p-4">{error} <button onClick={()=>reload(n=>n+1)}>Retry</button></p> : filtered.length === 0 ? (
           <div className="text-center py-16">
             <div className="text-4xl mb-3">
               {query ? '🔍' : '📦'}
@@ -223,7 +185,7 @@ const ProductsPage: React.FC = () => {
               {query ? 'No products match your search' : 'No products found'}
             </p>
             {query && (
-              <button onClick={() => setQuery('')} className="text-sm text-forest mt-2 hover:underline">
+              <button onClick={() => filter('q','')} className="text-sm text-forest mt-2 hover:underline">
                 Clear search
               </button>
             )}
@@ -298,7 +260,7 @@ const ProductsPage: React.FC = () => {
                         ₹{p.price}
                       </div>
                       {p.hasActiveDiscount && (
-                        <span className="text-[10px] font-semibold text-green">{p.activeDiscountValue}% OFF</span>
+                        <span className="text-[10px] font-semibold text-green">Discount live</span>
                       )}
                     </td>
 
@@ -363,6 +325,7 @@ const ProductsPage: React.FC = () => {
                         >
                           Edit
                         </Link>
+                        <button className="text-sm underline ml-2" onClick={()=>archiveProduct(p)}>Archive</button>
                         <Link
                           href={`/shop-details/${p.slug}`}
                           target="_blank"
@@ -383,7 +346,7 @@ const ProductsPage: React.FC = () => {
         {!loading && filtered.length > 0 && (
           <div className="px-4 py-3 border-t border-gray-3 bg-gray-1">
             <p className="text-xs text-gray-5">
-              Showing {filtered.length} of {products.length} products
+              {total} products · Page {page} of {Math.max(1,pages)}
             </p>
           </div>
         )}
@@ -393,5 +356,5 @@ const ProductsPage: React.FC = () => {
 };
 
 export default function ProtectedProductsPage() {
-  return <AdminAuthWrapper><ProductsPage /></AdminAuthWrapper>;
+  return <><ProductsPage /></>;
 }

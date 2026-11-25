@@ -1,0 +1,168 @@
+/*
+ * Learn-and-get-help pages: /about-us, /faqs, /contact, /mail-success and /error.
+ * These pages sit inside <PantryShell>, so the tokens (--forest, --paper, --ink, --line,
+ * --brass, --gold, --serif, --sans, --gutter) come from .pantry in pantry.module.css.
+ * Shared pieces (.page, .pageHead, .kicker, .primaryAction, .textAction, .field,
+ * .searchForm) also stay in pantry.module.css.
+ */
+.help { --muted: #46523f; --soft: #5c614f; --alert: #9c2f24; }
+.help h2 { letter-spacing: -.03em; line-height: 1.05; }
+.help address { font-style: normal; line-height: 1.6; }
+
+/* Short pages (message sent, error) keep the paper background down to the footer. */
+.fill { min-height: calc(100dvh - 14rem); }
+
+/* Opening */
+.lead { max-width: 40rem; margin-top: 1.1rem; font-size: clamp(1.03rem,1.25vw,1.2rem); line-height: 1.6; color: var(--muted); }
+.lead a { text-decoration: underline; text-underline-offset: 4px; text-decoration-color: #9d926e; }
+.headActions { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem 1.75rem; margin-top: .9rem; }
+.headActions > :first-child { margin-top: 0; }
+
+/* Two columns: content and a help aside. One column at tablet and phone widths. */
+.columns { display: grid; grid-template-columns: minmax(0,1.65fr) minmax(17rem,1fr); gap: clamp(2.25rem,6vw,7rem); align-items: start; margin-top: clamp(2rem,4vw,3.5rem); }
+.asideFirst { grid-template-columns: minmax(17rem,1fr) minmax(0,1.65fr); }
+.aside { border-top: 2px solid var(--forest); padding-top: 1.1rem; }
+.aside h2 { font-size: clamp(1.75rem,2.4vw,2.25rem); }
+.aside > p { margin-top: .5rem; color: var(--muted); font-size: .9375rem; }
+.sticky { position: sticky; top: 100px; }
+
+/* Reading column */
+.prose { max-width: 40rem; }
+.prose p { font-size: 1.0625rem; line-height: 1.72; color: #2f4537; }
+.prose p + p { margin-top: 1rem; }
+.prose p a { text-decoration: underline; text-underline-offset: 4px; text-decoration-color: #9d926e; }
+.section { margin-top: clamp(2.25rem,4vw,3.5rem); padding-top: clamp(1.5rem,2.5vw,2.25rem); border-top: 1px solid var(--line); }
+.section h2 { font-size: clamp(2.1rem,3.4vw,3.1rem); margin-bottom: 1rem; }
+.section h2 em { color: var(--forest); }
+
+/* Facts list (About) */
+.facts { display: grid; margin-top: 1rem; }
+.facts > div { display: grid; grid-template-columns: 8.5rem minmax(0,1fr); gap: .25rem 1rem; padding: .9rem 0; border-bottom: 1px solid var(--line); }
+.facts > div:first-child { padding-top: 0; }
+.facts dt { font-size: .75rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); padding-top: .2rem; }
+.facts dd { font-size: .9688rem; line-height: 1.5; }
+
+/* Contact options: WhatsApp, phone, email, address, hours */
+.contactList { display: grid; margin-top: .75rem; }
+.contactList > li { display: grid; gap: .1rem; padding: .7rem 0; border-bottom: 1px solid var(--line); }
+.contactList > li:last-child { border-bottom: 0; }
+.label { font-size: .75rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); }
+.contactList a { display: inline-flex; align-items: center; gap: .5rem; min-height: 44px; width: fit-content; font-size: 1rem; text-decoration: underline; text-underline-offset: 5px; text-decoration-color: #9d926e; overflow-wrap: anywhere; }
+.contactList a:hover { text-decoration-thickness: 2px; }
+.contactList svg { width: 17px; height: 17px; stroke-width: 1.6; flex: none; color: var(--forest); }
+.contactList address { font-style: normal; line-height: 1.55; }
+.hours { font-size: .9375rem; line-height: 1.6; }
+
+/* Short delivery answer that appears on several help pages */
+.deliveryBox { margin-top: 1.5rem; padding: 1.1rem 1.2rem 1.2rem; background: #f1eee2; border: 1px solid var(--line); }
+.deliveryBox h2, .deliveryBox h3 { font-size: 1.6rem; }
+.deliveryBox ul { margin-top: .6rem; display: grid; gap: .35rem; font-size: .9375rem; color: #33473a; }
+.deliveryBox li { display: flex; gap: .55rem; align-items: baseline; }
+.deliveryBox li::before { content: ""; flex: none; width: 5px; height: 5px; transform: translateY(-2px) rotate(45deg); background: var(--brass); }
+.deliveryBox .headActions { margin-top: .4rem; }
+
+/* FAQs */
+.groupNav { display: flex; flex-wrap: wrap; gap: 0 1.5rem; margin: -.6rem 0 1.25rem; font-size: .9375rem; }
+.groupNav a { display: inline-flex; align-items: center; min-height: 44px; text-decoration: underline; text-underline-offset: 5px; text-decoration-color: #9d926e; }
+.groupNav a:hover { text-decoration-thickness: 2px; }
+.group { scroll-margin-top: 96px; }
+.group + .group { margin-top: clamp(2.25rem,4vw,3.5rem); }
+.group h2 { font-size: clamp(2rem,3vw,2.75rem); padding-bottom: .6rem; border-bottom: 1px solid var(--ink); }
+.faq { border-bottom: 1px solid var(--line); }
+.faq summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 56px; padding: .8rem 0; cursor: pointer; list-style: none;
+  font-family: var(--serif); font-weight: 500; font-size: clamp(1.3rem,1.7vw,1.55rem); line-height: 1.2; letter-spacing: -.01em; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: ""; flex: none; width: 11px; height: 11px; margin-right: .3rem; border-right: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink); transform: translateY(-3px) rotate(45deg); transition: transform .2s ease; }
+.faq[open] summary::after { transform: translateY(2px) rotate(-135deg); }
+.faq summary:hover { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .18em; }
+.answer { max-width: 42rem; padding: 0 0 1.35rem; color: var(--muted); line-height: 1.7; }
+.answer p + p { margin-top: .6rem; }
+.answer a { text-decoration: underline; text-underline-offset: 4px; text-decoration-color: #9d926e; }
+
+/* Contact form */
+.form { display: grid; gap: 1.15rem; margin-top: 1rem; }
+.formIntro { font-size: .875rem; color: var(--soft); }
+.formRow { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 1.15rem; }
+.formField label { display: block; margin-bottom: .4rem; font-size: .875rem; font-weight: 500; }
+.formField input, .formField textarea { display: block; width: 100%; min-height: 46px; padding: .7rem .8rem; font-size: 1rem; color: var(--ink); background: #fffdf6; border: 1px solid #939b87; border-radius: 0; }
+.formField textarea { min-height: 9.5rem; resize: vertical; line-height: 1.5; }
+.formField :is(input,textarea)::placeholder { color: #848a7a; }
+.formField :is(input,textarea)[aria-invalid="true"] { border-color: var(--alert); box-shadow: inset 0 0 0 1px var(--alert); }
+.fieldError { margin-top: .35rem; font-size: .8125rem; color: var(--alert); }
+.hint { margin-top: .35rem; font-size: .8125rem; color: var(--soft); }
+.formEnd { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1.5rem; }
+.formEnd > .submit { margin-top: 0; }
+.alert { padding: .9rem 1rem; border: 1px solid #d9b2a8; border-left: 3px solid var(--alert); background: #fbf0ea; color: #5b241c; font-size: .9375rem; line-height: 1.55; }
+.alert a { text-decoration: underline; text-underline-offset: 3px; }
+
+/* Message sent (contact form and /mail-success) and the error page */
+.notice { max-width: 40rem; }
+.notice h1, .notice h2 { font-size: clamp(2.6rem,4.6vw,4.75rem); line-height: .98; letter-spacing: -.045em; margin-top: .4rem; overflow-wrap: anywhere; }
+.notice :is(h1, h2) em { color: var(--forest); }
+.notice h2:focus { outline: none; }
+.notice h2:focus-visible { outline: 3px solid #a7803c; outline-offset: 3px; }
+.notice > p:not(:first-child) { margin-top: 1rem; font-size: 1.0625rem; line-height: 1.65; color: var(--muted); }
+.next { margin-top: 2rem; padding-top: 1.25rem; border-top: 1px solid var(--line); }
+.next h2 { font-size: 1.6rem; }
+.next ul { display: grid; margin-top: .25rem; }
+.next li a { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .1rem 1rem; min-height: 52px; padding: .55rem 0; border-bottom: 1px solid var(--line); }
+.next li a:hover { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+.next li span { display: inline-flex; align-items: center; gap: .5rem; font-size: .875rem; color: var(--soft); }
+.next svg { width: 17px; height: 17px; flex: none; stroke-width: 1.6; }
+.sentPanel { margin-top: 1rem; padding: clamp(1.25rem,3vw,2rem); border: 1px solid var(--line); background: #fffdf6; }
+.sentPanel .notice h2 { font-size: clamp(2.2rem,3.6vw,3.4rem); }
+
+@media (max-width: 900px) {
+  .columns { grid-template-columns: minmax(0,1fr); }
+  .sticky { position: static; }
+}
+@media (max-width: 640px) {
+  .lead { font-size: 1rem; }
+  .facts > div { grid-template-columns: minmax(0,1fr); }
+  .formRow { grid-template-columns: minmax(0,1fr); }
+  .faq summary { min-height: 52px; font-size: 1.28rem; }
+  .group { scroll-margin-top: 76px; }
+  /* globals.css gives unclassed phone buttons min-height: 40px at specificity (0,2,1); keep help targets at 44px. */
+  .help.help.help button { min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .faq summary::after { transition: none; }
+}
+.target { scroll-margin-top: 96px; }
+
+/* About: clear actions. Solid forest for the main action, outlined forest for the others,
+   underlined text links with an arrow. Hover fills or thickens; focus uses the pantry outline. */
+.solid, .outline { display: inline-flex; align-items: center; justify-content: center; gap: .55rem; min-height: 46px; padding: .65rem 1.25rem;
+  font-size: .94rem; font-weight: 500; line-height: 1.25; text-align: left; border: 1px solid var(--forest); border-radius: 2px; transition: background .15s ease, color .15s ease; }
+.solid { color: #fff8e9; background: var(--forest); }
+.solid:hover { background: #132119; }
+.outline { color: var(--forest); background: transparent; }
+.outline:hover { color: #fff8e9; background: var(--forest); }
+.solid svg, .outline svg, .inlineLink svg { width: 17px; height: 17px; flex: none; stroke-width: 1.7; }
+.section > .outline { margin-top: 1.1rem; }
+.inlineLink { display: inline-flex; align-items: center; gap: .35rem; min-height: 44px; margin-top: .5rem; color: var(--forest); font-weight: 500;
+  text-decoration: underline; text-underline-offset: 5px; text-decoration-color: var(--forest); text-decoration-thickness: 1px; }
+.inlineLink:hover { text-decoration-thickness: 2px; }
+.shelves { display: grid; border-top: 1px solid var(--line); }
+.shelves a { display: grid; grid-template-columns: minmax(0,1fr) auto 20px; align-items: center; gap: .15rem 1rem; min-height: 56px; padding: .6rem .5rem; border-bottom: 1px solid var(--line); transition: background .15s ease; }
+.shelves b { font-weight: 500; color: var(--forest); text-decoration: underline; text-underline-offset: 5px; text-decoration-color: var(--forest); text-decoration-thickness: 1px; }
+.shelves span { font-size: .875rem; color: var(--soft); }
+.shelves svg { width: 18px; height: 18px; stroke-width: 1.7; color: var(--forest); transition: transform .15s ease; }
+.shelves a:hover { background: #f1eee2; }
+.shelves a:hover b { text-decoration-thickness: 2px; }
+.shelves a:hover svg { transform: translateX(3px); }
+.nextSteps { border-top: 2px solid var(--forest); }
+.nextSteps ul { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 1.5rem 2rem; margin-top: .5rem; }
+.nextSteps li { display: grid; justify-items: start; gap: .5rem; align-content: start; }
+.nextSteps li p { font-size: .9rem; line-height: 1.5; color: var(--soft); }
+.nextSteps :is(.solid, .outline) { width: 100%; justify-content: space-between; }
+@media (max-width: 640px) {
+  .shelves a { grid-template-columns: minmax(0,1fr) 20px; padding-inline: 0; }
+  .shelves span { grid-column: 1; grid-row: 2; }
+  .shelves svg { grid-column: 2; grid-row: 1 / span 2; }
+  .nextSteps ul { grid-template-columns: minmax(0,1fr); gap: 1.25rem; }
+  .help.help.help :is(.solid, .outline) { min-height: 46px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .solid, .outline, .shelves a, .shelves svg { transition: none; }
+}

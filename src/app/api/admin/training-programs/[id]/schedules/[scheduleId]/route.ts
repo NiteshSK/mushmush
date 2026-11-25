@@ -1,16 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { staffSession } from "@/lib/admin";
 
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string; scheduleId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await staffSession("trainer");
     
-    if (!session || session.user?.role !== "ADMIN") {
+    if (!session?.user) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
@@ -30,7 +29,7 @@ export async function PUT(
       theoreticalSessions,
       learningObjectives,
       materials,
-      instructor,
+      instructorId,
       startTime,
       endTime,
       isActive
@@ -82,7 +81,7 @@ export async function PUT(
         ...(theoreticalSessions && { theoreticalSessions }),
         ...(learningObjectives && { learningObjectives }),
         ...(materials && { materials }),
-        ...(instructor !== undefined && { instructor }),
+        ...(instructorId !== undefined && { instructorId }),
         ...(startTime && { startTime }),
         ...(endTime && { endTime }),
         ...(isActive !== undefined && { isActive })
@@ -104,9 +103,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string; scheduleId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await staffSession("trainer");
     
-    if (!session || session.user?.role !== "ADMIN") {
+    if (!session?.user) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }

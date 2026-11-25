@@ -1,20 +1,20 @@
-import React, { Suspense } from "react";
+import { Suspense } from "react";
+import type { Metadata } from "next";
 import SearchResults from "@/components/Search/SearchResults";
+import PantryShell from "@/components/Pantry/PantryShell";
+import PantryLoader from "@/components/Pantry/PantryLoader";
 
-import { Metadata } from "next";
 export const metadata: Metadata = {
-  title: "Search Results | Kosvana",
-  description: "Search results for Kosvana products",
+  title: "Search the pantry | Kosvana",
+  description: "Search Kosvana’s dried mushrooms, spices, dry fruits and seeds.",
 };
 
-const SearchPage = () => {
+export default function SearchPage() {
   return (
-    <main>
-      <Suspense fallback={<div>Loading search results...</div>}>
+    <PantryShell skipTo={{ href: "#results", label: "Skip to results" }} browseHref="/shop">
+      <Suspense fallback={<main id="main" aria-busy="true"><PantryLoader /></main>}>
         <SearchResults />
       </Suspense>
-    </main>
+    </PantryShell>
   );
-};
-
-export default SearchPage;
+}

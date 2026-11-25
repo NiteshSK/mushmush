@@ -1,68 +1,112 @@
 "use client";
-import React from "react";
-import Breadcrumb from "../Common/Breadcrumb";
-import { useWishlist } from "@/app/context/WishlistContext";
-import SingleItem from "./SingleItem";
+
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { X } from "lucide-react";
+import type { Product } from "@/types/product";
+import { useOptionalWishlist } from "@/app/context/WishlistContext";
+import NotifyMeModal from "../NotifyMeModal";
+import AccountFrame, { useAccountSession } from "../MyAccount/AccountFrame";
+import ProductCard from "../Pantry/ProductCard";
+import { deliveryScope, productKind } from "../Pantry/catalogue";
+import styles from "../Pantry/pantry.module.css";
+import a from "../Pantry/account.module.css";
 
+type Load = "loading" | "ready" | "error";
+
+/**
+ * Saved products. Each card is the shared pantry card (Add adds slug, stock limit and sale price to the bag);
+ * Remove sits beside the card, outside its product link.
+ */
 export const Wishlist = () => {
-  const { items: wishlistItems, loading, removeFromWishlist } = useWishlist();
+  const { status } = useAccountSession("/wishlist");
+  const wishlist = useOptionalWishlist();
+  const refreshWishlist = () => { wishlist?.refreshWishlist(); };
+  const [products, setProducts] = useState<Product[]>([]);
+  const [load, setLoad] = useState<Load>("loading");
+  const [removed, setRemoved] = useState<Product | null>(null);
+  const [message, setMessage] = useState("");
+  const [notifyFor, setNotifyFor] = useState<Product | null>(null);
+  const notice = useRef<HTMLDivElement>(null);
 
-  return (
-    <>
-      <Breadcrumb title={"Wishlist"} pages={["Wishlist"]} />
+  const refresh = useCallback(async () => {
+    try {
+      const response = await fetch("/api/wishlist", { cache: "no-store" });
+      if (!response.ok) throw new Error(`Wishlist request failed: ${response.status}`);
+      const data = await response.json();
+      setProducts((data.items ?? []).map((item: { product: Product }) => item.product));
+      setLoad("ready");
+    } catch {
+      setLoad("error");
+    }
+  }, []);
 
-      <section className="py-10 sm:py-14 bg-gray-50 min-h-[60vh]">
-        <div className="max-w-[1200px] w-full mx-auto px-4 sm:px-6 xl:px-0">
-          {loading ? (
-            <div className="flex justify-center py-20">
-              <div className="animate-spin rounded-full h-8 w-8 border-2 border-forest border-t-transparent"></div>
-            </div>
-          ) : wishlistItems.length === 0 ? (
-            <div className="max-w-md mx-auto text-center py-20">
-              <div className="w-24 h-24 rounded-full bg-white flex items-center justify-center mx-auto mb-6 shadow-sm">
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-gray-300">
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                </svg>
-              </div>
-              <h2 className="font-medium text-xl text-dark mb-2">Your wishlist is empty</h2>
-              <p className="text-sm text-gray-400 mb-8 leading-relaxed">
-                Add items that you like to your wishlist.<br />
-                Review them anytime and easily move them to the bag.
-              </p>
-              <Link
-                href="/shop"
-                className="inline-flex items-center gap-2 bg-forest text-white text-custom-sm font-medium py-3 px-8 rounded-full hover:bg-dark transition-colors duration-200"
-              >
-                Continue Shopping
-              </Link>
-            </div>
-          ) : (
-            <>
-              {/* Header bar */}
-              <div className="flex items-center justify-between mb-5">
-                <h2 className="text-base font-semibold text-dark">
-                  My Wishlist
-                  <span className="text-gray-400 font-normal ml-1.5">
-                    {wishlistItems.length} item{wishlistItems.length !== 1 ? "s" : ""}
-                  </span>
-                </h2>
-              </div>
+  useEffect(() => { if (status === "authenticated") refresh(); }, [status, refresh]);
 
-              {/* Product grid — like Flipkart/Myntra */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                {wishlistItems.map((wishlistItem) => (
-                  <SingleItem
-                    item={wishlistItem.product}
-                    onRemoveFromWishlist={removeFromWishlist}
-                    key={wishlistItem.product.id}
-                  />
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      </section>
-    </>
-  );
+  // The heart on each card saves and unsaves through the shared wishlist; follow its changes here.
+  const savedIds = (wishlist?.items ?? []).map(item => item.productId).sort().join(",");
+  const followed = useRef(savedIds);
+  useEffect(() => {
+    if (followed.current === savedIds) return;
+    followed.current = savedIds;
+    if (status === "authenticated" && !wishlist?.loading) refresh();
+  }, [savedIds, status, wishlist?.loading, refresh]);
+
+  async function remove(product: Product) {
+    setProducts(previous => previous.filter(item => item.id !== product.id));
+    try {
+      const response = await fetch(`/api/wishlist?productId=${product.id}`, { method: "DELETE" });
+      if (!response.ok && response.status !== 404) throw new Error();
+      setRemoved(product);
+      setMessage(`${product.title} removed from your wishlist.`);
+      refreshWishlist();
+    } catch {
+      setMessage(`We couldn’t remove ${product.title}. Please try again.`);
+      setRemoved(null);
+      refresh();
+    }
+    // The card and its Remove button are gone; keep keyboard focus next to the list.
+    notice.current?.focus();
+  }
+
+  async function undo() {
+    if (!removed) return;
+    const product = removed;
+    setRemoved(null);
+    try {
+      const response = await fetch("/api/wishlist", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ productId: product.id }) });
+      if (!response.ok) throw new Error();
+      setMessage(`${product.title} is back in your wishlist.`);
+      await refresh();
+      refreshWishlist();
+    } catch {
+      setMessage(`We couldn’t restore ${product.title}. Please try again.`);
+    }
+  }
+
+  const count = products.length;
+  return <AccountFrame path="/wishlist" title={<>Your <em>wishlist.</em></>}
+    aside={load === "ready" && count > 0 && <span>{count} saved {count === 1 ? "product" : "products"}</span>}>
+    <div ref={notice} tabIndex={-1} role="status" className={message ? a.notice : undefined}>
+      {message && <span>{message}</span>}
+      {removed && <button className={styles.textAction} onClick={undo}>Undo</button>}
+    </div>
+    {load === "loading" ? <div className={styles.products} aria-busy="true" aria-label="Loading your wishlist">
+      {Array.from({ length: 4 }, (_, i) => <div key={i} className={styles.skeleton}><div /><p /><p /></div>)}
+    </div> : load === "error" ? <div className={styles.recovery} role="alert">
+      <h2>Your wishlist couldn’t load.</h2>
+      <p>Check your connection and try again.</p>
+      <button className={styles.primaryAction} onClick={() => { setLoad("loading"); refresh(); }}>Try again</button>
+    </div> : !count ? <div className={styles.recovery}>
+      <h2>Your wishlist is empty.</h2>
+      <p>Save a product from its page to find it here later. Pantry goods ship across India; fresh mushrooms deliver only in Dehradun.</p>
+      <Link href="/shop" className={styles.primaryAction}>Shop the pantry</Link>
+    </div> : <ul className={styles.products} aria-label="Saved products">
+      {products.map((product, index) => <li key={product.id} className={a.saved}>
+        <ProductCard product={product} label={productKind(product)} delivery={deliveryScope(product)} priority={index < 4} onNotify={setNotifyFor} />
+        <button className={a.remove} onClick={() => remove(product)} aria-label={`Remove ${product.title} from your wishlist`}><X aria-hidden="true" />Remove</button>
+      </li>)}
+    </ul>}
+    {notifyFor && <NotifyMeModal isOpen onClose={() => setNotifyFor(null)} productId={notifyFor.id} productTitle={notifyFor.title} />}
+  </AccountFrame>;
 };

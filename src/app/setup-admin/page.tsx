@@ -12,6 +12,8 @@ const SetupAdminPage: React.FC = () => {
     setupToken: '',
   });
   const [loading, setLoading] = useState(false);
+  const [managed, setManaged] = useState(false);
+  const [issue, setIssue] = useState("");
   const [checking, setChecking] = useState(true);
   const [setupRequired, setSetupRequired] = useState(false);
   const router = useRouter();
@@ -21,24 +23,18 @@ const SetupAdminPage: React.FC = () => {
   }, []);
 
   const checkSetupStatus = async () => {
+    setChecking(true); setIssue("");
     try {
-      const response = await fetch('/api/setup-admin');
+      const response = await fetch("/api/setup-admin", { cache: "no-store" });
+      if (!response.ok) throw new Error();
       const data = await response.json();
-      
-      if (data.hasAdmin) {
-        setSetupRequired(false);
-        setChecking(false);
-        return;
-      }
-      
-      setSetupRequired(true);
-      setChecking(false);
-    } catch (error) {
-      console.error('Error checking setup status:', error);
-      toast.error('Failed to check setup status');
-      setSetupRequired(true);
-      setChecking(false);
-    }
+      setSetupRequired(data.setupRequired);
+      setManaged(data.managedGoogle === true);
+      if (!data.hasAdmin && !data.setupRequired) setIssue("Owner setup is disabled. Configure the setup token to use this page.");
+    } catch {
+      setIssue("Setup status could not be loaded.");
+      setSetupRequired(false);
+    } finally { setChecking(false); }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,13 +48,13 @@ const SetupAdminPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (formData.password !== formData.confirmPassword) {
+    if (!managed && formData.password !== formData.confirmPassword) {
       toast.error('Passwords do not match');
       return;
     }
 
-    if (formData.password.length < 6) {
-      toast.error('Password must be at least 6 characters long');
+    if (!managed && formData.password.length < 8) {
+      toast.error('Password must be at least 8 characters long');
       return;
     }
 
@@ -82,7 +78,7 @@ const SetupAdminPage: React.FC = () => {
 
       if (response.ok) {
         toast.success('Admin user created successfully!');
-        router.push('/auth/signin?message=Admin user created. Please sign in.');
+        router.push(managed ? "/admin" : "/auth/signin?callbackUrl=/admin");
       } else {
         toast.error(data.error || 'Failed to create admin user');
       }
@@ -105,6 +101,7 @@ const SetupAdminPage: React.FC = () => {
     );
   }
 
+  if (issue) return <div className="p-6" role="alert">{issue} <button onClick={checkSetupStatus}>Check again</button></div>;
   if (!setupRequired) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-1">
@@ -132,7 +129,7 @@ const SetupAdminPage: React.FC = () => {
             Setup Admin Account
           </h2>
           <p className="mt-2 text-center text-sm text-gray-6">
-            Create the first admin user for MushMush
+            Create the first owner account for Kosvana.
           </p>
         </div>
         
@@ -170,6 +167,7 @@ const SetupAdminPage: React.FC = () => {
               />
             </div>
             
+            {managed ? <p>First <a className="underline" href="/auth/signin?callbackUrl=/setup-admin">sign in with your Google Workspace account</a>, then enter that account’s email above.</p> : <>
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-dark">
                 Password
@@ -202,21 +200,22 @@ const SetupAdminPage: React.FC = () => {
               />
             </div>
             
+            </>}
             <div>
               <label htmlFor="setupToken" className="block text-sm font-medium text-dark">
-                Setup Token <span className="text-gray-5">(optional)</span>
+                Setup token
               </label>
               <input
                 id="setupToken"
                 name="setupToken"
-                type="text"
+                type="password" required
                 value={formData.setupToken}
                 onChange={handleInputChange}
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-3 placeholder-gray-5 text-dark rounded-lg focus:outline-none focus:ring-blue focus:border-blue focus:z-10 sm:text-sm"
-                placeholder="Enter setup token if required"
+                placeholder="Enter the configured setup token"
               />
               <p className="mt-1 text-xs text-gray-5">
-                Leave empty if no setup token is configured
+                Use the setup token configured for this deployment.
               </p>
             </div>
           </div>

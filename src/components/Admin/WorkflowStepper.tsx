@@ -128,8 +128,8 @@ export const WorkflowStepper = ({
   pipeline: readonly string[];
   statusMeta: Record<string, StatusMeta>;
   currentStatus: string;
-  onAdvance: (nextStatus: string) => void;
-  onCancel: () => void;
+  onAdvance?: (nextStatus: string) => void;
+  onCancel?: () => void;
   completedMessage?: string;
   cancelledMessage?: string;
 }) => {
@@ -275,7 +275,7 @@ export const WorkflowStepper = ({
       {/* Action buttons */}
       {!isCancelled && !isCompleted && (
         <div className="flex items-center gap-2">
-          {nextStatus && (
+          {nextStatus && onAdvance && (
             <button
               onClick={() => onAdvance(nextStatus)}
               className="inline-flex items-center gap-1.5 text-xs font-medium bg-forest text-white px-3 py-1.5 rounded-md hover:bg-dark transition-colors"
@@ -287,13 +287,13 @@ export const WorkflowStepper = ({
               Move to {statusMeta[nextStatus]?.label || nextStatus}
             </button>
           )}
-          <button
+          {onCancel && <button
             onClick={onCancel}
             className="inline-flex items-center gap-1.5 text-xs font-medium text-red bg-red/5 px-3 py-1.5 rounded-md hover:bg-red/10 transition-colors"
           >
             <StatusIcon name="x" size={12} />
             Cancel
-          </button>
+          </button>}
         </div>
       )}
     </div>
@@ -328,6 +328,14 @@ export const ConfirmStatusModal = ({
   /** Disable confirm button (e.g. if required fields not filled) */
   confirmDisabled?: boolean;
 }) => {
+  const ref = React.useRef<HTMLDialogElement>(null);
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!isOpen || !el) return;
+    const trigger = document.activeElement as HTMLElement | null;
+    if (el.showModal) el.showModal(); else el.setAttribute("open", "");
+    return () => { el.close?.(); trigger?.focus(); };
+  }, [isOpen]);
   if (!isOpen) return null;
 
   const meta = statusMeta[targetStatus] || { label: targetStatus, icon: "check" };
@@ -337,14 +345,14 @@ export const ConfirmStatusModal = ({
     "Are you sure you want to change the status?";
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
+    <dialog ref={ref} aria-label="Confirm status change" onCancel={onClose} className="m-auto max-w-full p-4 bg-transparent backdrop:bg-black/60">
       <div className="bg-white rounded-[10px] shadow-1 max-w-md w-full">
         <div className="border-b border-gray-3 py-5 px-6 flex items-center justify-between">
           <h3 className="font-medium text-lg text-dark">
             Confirm Status Change
           </h3>
           <button
-            onClick={onClose}
+            aria-label="Close confirmation" onClick={onClose}
             className="text-dark-5 hover:text-dark transition-colors"
           >
             <svg
@@ -422,6 +430,6 @@ export const ConfirmStatusModal = ({
           </div>
         </div>
       </div>
-    </div>
+    </dialog>
   );
 };

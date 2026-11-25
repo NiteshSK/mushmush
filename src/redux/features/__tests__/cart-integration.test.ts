@@ -63,10 +63,10 @@ describe("Cart Slice - Integration", () => {
     expect(state.items[0].quantity).toBe(5);
   });
 
-  it("sets quantity to 0 when updated to 0", () => {
+  it("keeps quantity at 1 when updated to 0 (removing a line is removeItemFromCart)", () => {
     let state = cartReducer(initialState, addItemToCart(sampleItem));
     state = cartReducer(state, updateCartItemQuantity({ id: 1, quantity: 0 }));
-    expect(state.items[0].quantity).toBe(0);
+    expect(state.items[0].quantity).toBe(1);
   });
 
   it("clears all items from cart", () => {

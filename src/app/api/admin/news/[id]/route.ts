@@ -1,12 +1,12 @@
+import { publishStory } from "@/lib/editorial-admin";
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { staffSession } from "@/lib/admin";
 
 // Helper function to check if user is admin
 async function isAdmin() {
-  const session = await getServerSession(authOptions)
-  return session?.user?.role === 'ADMIN'
+  const session = await staffSession("editor")
+  return !!session?.user
 }
 
 // GET /api/admin/news/[id] - Fetch a single news article
@@ -88,6 +88,8 @@ export async function PUT(
     }
 
     const body = await request.json()
+    const version = body.expectedUpdatedAt ? new Date(body.expectedUpdatedAt) : undefined;
+    if (version && !Number.isFinite(version.getTime())) return NextResponse.json({error:"Invalid saved version."},{status:400});
     const { title, slug, content, excerpt, img, published, metaTitle, metaDescription, tagIds } = body
 
     // Validate required fields
@@ -127,7 +129,7 @@ export async function PUT(
 
     // Update the news article
     const updatedNews = await prisma.news.update({
-      where: { id: newsId },
+      where: { id: newsId, updatedAt:version },
       data: {
         title,
         slug,
@@ -154,6 +156,7 @@ export async function PUT(
 
     return NextResponse.json(updatedNews)
   } catch (error) {
+    if ((error as {code?:string})?.code==="P2025") return NextResponse.json({error:"This story was changed by another editor. Reload before saving."},{status:409});
     console.error('Error updating news:', error)
     return NextResponse.json(
       { error: 'Failed to update news' },
@@ -163,6 +166,10 @@ export async function PUT(
 }
 
 // DELETE /api/admin/news/[id] - Delete a news article
+export async function PATCH(request:NextRequest,context:{params:Promise<{id:string}>}) {
+  return publishStory(request, Number((await context.params).id), "news");
+}
+
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

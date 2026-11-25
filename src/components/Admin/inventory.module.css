@@ -1,0 +1,129 @@
+.inventory {
+  color: #18372b;
+  max-width: 78rem;
+}
+.filters,
+.adjust {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.filters {
+  margin-bottom: 1rem;
+}
+.filters label,
+.adjust label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.88rem;
+}
+.filters label:has(input[type="checkbox"]) {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.6rem;
+}
+.inventory input:not([type="checkbox"]),
+.inventory select {
+  padding: 0.55rem 0.7rem;
+  background: #fff;
+  border: 1px solid #b7c4bf;
+  border-radius: 0.35rem;
+  max-width: 100%;
+  min-width: 0;
+}
+.inventory button {
+  min-height: 2.5rem;
+  text-align: left;
+  color: #1c593f;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.inventory button:disabled {
+  opacity: 0.55;
+}
+.filters button,
+.adjust button {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid #b7c4bf;
+  border-radius: 0.35rem;
+  text-decoration: none;
+}
+.header,
+.row {
+  display: grid;
+  grid-template-columns: minmax(11rem, 1.5fr) minmax(8rem, 1fr) minmax(
+      5rem,
+      0.7fr
+    ) minmax(6rem, 0.8fr);
+  gap: 0.8rem;
+}
+.header {
+  padding: 0.7rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.item {
+  background: white;
+  border: 1px solid #d5dfd8;
+  border-radius: 0.55rem;
+  margin-bottom: 0.5rem;
+  padding: 1rem;
+}
+.item h2,
+.adjust h3,
+.history h3 {
+  font-weight: 600;
+}
+.item small,
+.row strong,
+.row button {
+  display: block;
+}
+.item small {
+  font-size: 0.8rem;
+  color: #4e655a;
+}
+.row div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.adjust,
+.history {
+  padding: 0.85rem;
+  margin-top: 1rem;
+  border-top: 1px solid #d5dfd8;
+  background: #f6f8f5;
+}
+.adjust h3 {
+  flex: 0 0 100%;
+}
+.adjust label {
+  max-width: 100%;
+}
+.history div {
+  margin: 0.55rem 0;
+}
+.inventory [role="alert"] {
+  padding: 0.75rem;
+  background: #fff1df;
+}
+@media (max-width: 720px) {
+  .header {
+    display: none;
+  }
+  .row {
+    grid-template-columns: 1fr 1fr;
+  }
+  .adjust {
+    align-items: stretch;
+  }
+  .adjust label {
+    width: 100%;
+  }
+  .filters label:first-child {
+    flex: 1;
+    min-width: 9rem;
+  }
+}

@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { staffSession } from "@/lib/admin";
 import { put } from '@vercel/blob'
 
 // Helper function to check if user is admin
 async function isAdmin() {
-  const session = await getServerSession(authOptions)
-  return session?.user?.role === 'ADMIN'
+  const session = await staffSession("editor")
+  return !!session?.user
 }
 
 export async function POST(request: NextRequest) {
@@ -50,7 +49,8 @@ export async function POST(request: NextRequest) {
     // Generate unique filename
     const timestamp = Date.now()
     const randomString = Math.random().toString(36).substring(2, 8)
-    const fileExtension = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+    const extensionByMime:Record<string,string>={"image/jpeg":"jpg","image/jpg":"jpg","image/png":"png","image/webp":"webp","image/gif":"gif"};
+    const fileExtension = extensionByMime[file.type];
     const filename = `blog-${timestamp}-${randomString}.${fileExtension}`
 
     // Upload to Vercel Blob Storage

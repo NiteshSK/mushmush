@@ -5,6 +5,7 @@ import NewsEditor from '@/components/Admin/NewsEditor';
 
 type NewsArticle = {
   id: number;
+  updatedAt:string;
   title: string;
   slug: string;
   excerpt: string;
@@ -37,7 +38,7 @@ const EditNewsPage: React.FC = () => {
         setNewsData(data);
       } else if (response.status === 401) {
         alert('You need to be logged in as an admin to edit news articles');
-        router.push('/auth/signin');
+        router.push(`/auth/signin?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
       } else if (response.status === 404) {
         alert('News article not found');
         router.push('/admin/news');
@@ -64,14 +65,14 @@ const EditNewsPage: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({...data,expectedUpdatedAt:newsData?.updatedAt}),
       });
 
       if (response.ok) {
         router.push('/admin/news');
       } else if (response.status === 401) {
         alert('You need to be logged in as an admin to update news articles');
-        router.push('/auth/signin');
+        router.push(`/auth/signin?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
       } else {
         const error = await response.json();
         alert(error.error || 'Failed to update news article');

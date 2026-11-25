@@ -1,3 +1,4 @@
+import { couponAmount } from "./coupon-amount";
 import { prisma } from '@/lib/prisma';
 
 export interface CouponValidationResult {
@@ -67,18 +68,7 @@ export async function validateCoupon(
     return fail(`Minimum order of ₹${coupon.minOrderValue} required for this coupon.`);
   }
 
-  // Calculate discount
-  let discountAmount: number;
-  if (coupon.type === 'PERCENTAGE') {
-    discountAmount = Math.ceil(subtotal * (coupon.value / 100));
-    // Apply max discount cap
-    if (coupon.maxDiscount !== null && discountAmount > coupon.maxDiscount) {
-      discountAmount = coupon.maxDiscount;
-    }
-  } else {
-    // FIXED_AMOUNT
-    discountAmount = Math.min(coupon.value, subtotal); // Can't discount more than subtotal
-  }
+  const discountAmount = couponAmount(subtotal, coupon.type, coupon.value, coupon.maxDiscount);
 
   return {
     valid: true,

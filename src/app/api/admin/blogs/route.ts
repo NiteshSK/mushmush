@@ -1,76 +1,17 @@
+import { editorialList } from "@/lib/editorial-admin";
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { staffSession } from "@/lib/admin";
 
 // Helper function to check if user is admin
 async function isAdmin() {
-  const session = await getServerSession(authOptions)
-  return session?.user?.role === 'ADMIN'
+  const session = await staffSession("editor")
+  return !!session?.user
 }
 
 // GET /api/admin/blogs - Fetch all blog posts for admin
-export async function GET(request: NextRequest) {
-  try {
-    // Check if user is admin
-    if (!(await isAdmin())) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
-    const { searchParams } = new URL(request.url)
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '50')
-    const skip = (page - 1) * limit
-
-    const [blogs, total] = await Promise.all([
-      prisma.blogPost.findMany({
-        skip,
-        take: limit,
-        orderBy: {
-          createdAt: 'desc'
-        },
-        select: {
-          id: true,
-          title: true,
-          slug: true,
-          excerpt: true,
-          content: true,
-          published: true,
-          views: true,
-          createdAt: true,
-          updatedAt: true,
-          img: true,
-          tags: {
-            select: {
-              id: true,
-              name: true,
-              slug: true
-            }
-          }
-        }
-      }),
-      prisma.blogPost.count()
-    ])
-
-    return NextResponse.json({
-      blogs,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit)
-      }
-    })
-  } catch (error) {
-    console.error('Error fetching admin blogs:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch blog posts' },
-      { status: 500 }
-    )
-  }
+export async function GET(request:NextRequest) {
+  return editorialList(request,"blogs");
 }
 
 // POST /api/admin/blogs - Create new blog post
@@ -85,7 +26,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { title, slug, excerpt, content, published, img, tags } = body
+    const { title, slug, excerpt, content, published, img, tags, metaTitle,metaDescription } = body
 
     // Validate required fields
     if (!title || !slug || !excerpt || !content) {
@@ -117,6 +58,7 @@ export async function POST(request: NextRequest) {
         published: published || false,
         img: img || null,
         views: 0,
+        metaTitle,metaDescription,
         tags: tags && Array.isArray(tags)
           ? { connect: tags.map((id: number) => ({ id })) }
           : undefined

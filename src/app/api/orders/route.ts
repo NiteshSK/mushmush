@@ -1,7 +1,9 @@
+import { canWork } from "@/lib/staff-permissions";
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { checkClientTotal, priceOrder, pricingErrorBody } from '@/lib/order-pricing'
 
 // GET /api/orders - Fetch orders (with user filtering enforced)
 export async function GET(request: NextRequest) {
@@ -18,14 +20,23 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const requestedUserId = searchParams.get('userId')
     const status = searchParams.get('status')
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '10')
+    const page = Math.max(1, Number(searchParams.get('page')) || 1)
+    const limit = Math.min(100, Math.max(1, Number(searchParams.get('limit')) || 10))
     const skip = (page - 1) * limit
 
     const where: any = {}
     
     // CRITICAL SECURITY: Non-admin users can ONLY see their own orders
-    if (session.user.role === 'ADMIN') {
+    if (canWork(session.user, "finance", "fulfillment")) {
+      const query = searchParams.get("q")?.trim().slice(0, 100);
+      if (query) where.OR = [
+        { orderNumber: { contains: query, mode: "insensitive" } },
+        { upi_payments: { some: { transactionId: { contains: query, mode: "insensitive" } } } }
+      ];
+      if (searchParams.get("delivery") === "fresh") {
+        where.orderItems = { some: { product: { fulfillmentClass: "fresh" } } };
+        where.status = { in: ["CONFIRMED", "PROCESSING", "SHIPPED"] };
+      }
       // Admin can filter by any userId or see all
       if (requestedUserId) {
         where.userId = requestedUserId
@@ -49,6 +60,8 @@ export async function GET(request: NextRequest) {
                 select: {
                   id: true,
                   title: true,
+                  fulfillmentClass: true,
+                  measurementType: true,
                   imgs: true
                 }
               }
@@ -67,6 +80,7 @@ export async function GET(request: NextRequest) {
               status: true,
               amount: true,
               transactionId: true,
+              proof: { select: { paymentId: true } },
               createdAt: true,
             },
             orderBy: { createdAt: 'desc' },
@@ -117,15 +131,50 @@ export async function POST(request: NextRequest) {
       customerPhone,
       shippingAddress,
       orderItems,
-      subtotal,
-      tax,
-      shipping
+      couponCode,
+      // Only used to detect a mismatch with what the shopper saw. Client
+      // subtotal, tax, shipping and per-item price are ignored.
+      total: clientTotal
     } = body
+
+    const name = customerName || session.user.name
+    const email = customerEmail || session.user.email
+    if (!name || !email) {
+      return NextResponse.json(
+        { error: 'Customer name and email are required' },
+        { status: 400 }
+      )
+    }
+
+    if (!Array.isArray(orderItems) || orderItems.length === 0) {
+      return NextResponse.json({ error: 'Order must contain at least one item' }, { status: 400 })
+    }
+
+    if (couponCode) {
+      // Coupon usage is recorded only by the checkout route
+      return NextResponse.json(
+        { error: 'Coupons are not supported on this endpoint. Use checkout instead.' },
+        { status: 400 }
+      )
+    }
+
+    // Authoritative server-side pricing (same function as checkout)
+    const pricingResult = await priceOrder({
+      items: orderItems.map((item: any) => ({ productId: item?.productId, quantity: item?.quantity })),
+      pincode: shippingAddress?.zip || shippingAddress?.postalCode,
+    })
+    if (pricingResult.ok === false) {
+      return NextResponse.json(pricingErrorBody(pricingResult), { status: pricingResult.status })
+    }
+    const pricing = pricingResult.pricing
+
+    const totalMismatch = checkClientTotal(clientTotal, pricing)
+    if (totalMismatch) {
+      return NextResponse.json(totalMismatch.body, { status: totalMismatch.status })
+    }
 
     // Generate order number
     const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
-    
-    const total = subtotal + tax + shipping
 
     // Create shipping address if provided
     let shippingAddressId: string | undefined;
@@ -168,20 +217,21 @@ export async function POST(request: NextRequest) {
       data: {
         orderNumber,
         userId,
-        customerName,
-        customerEmail,
+        customerName: name,
+        customerEmail: email,
         customerPhone,
         shippingAddress: shippingAddressJson,
         shippingAddressId,
-        subtotal,
-        tax,
-        shipping,
-        total,
+        subtotal: pricing.subtotal,
+        tax: pricing.convenienceFee, // Convenience fee stored in tax field
+        shipping: pricing.shippingFee,
+        couponDiscount: 0,
+        total: pricing.total,
         orderItems: {
-          create: orderItems.map((item: any) => ({
-            productId: item.productId,
-            quantity: item.quantity,
-            price: item.price
+          create: pricing.items.map((line) => ({
+            productId: line.productId,
+            quantity: line.quantity,
+            price: line.unitPrice // server price incl. active product discount
           }))
         }
       },

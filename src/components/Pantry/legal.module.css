@@ -1,0 +1,65 @@
+/*
+ * Policy pages: /terms and /privacy.
+ * These pages sit inside <PantryShell>, so the tokens (--forest, --paper, --ink, --line,
+ * --brass, --serif, --sans, --gutter) come from .pantry in pantry.module.css.
+ * The reading column stays opaque and holds about 70 characters a line.
+ */
+.legal { --muted: #46523f; --soft: #5c614f; --surface: #fffdf6; }
+.legal h2 { letter-spacing: -.03em; line-height: 1.05; }
+
+/* Opening */
+.head { max-width: 46rem; }
+.lead { margin-top: 1.1rem; font-size: clamp(1.03rem,1.25vw,1.2rem); line-height: 1.6; color: var(--muted); }
+.updated { margin-top: .9rem; font-size: .875rem; color: var(--soft); }
+.updated time { font-weight: 500; color: var(--ink); }
+
+/* Contents beside the reading column; above it below 1000px. */
+.layout { display: grid; grid-template-columns: minmax(13rem,17rem) minmax(0,1fr); gap: clamp(2.5rem,6vw,7rem); align-items: start; margin-top: clamp(2rem,4vw,3.5rem); }
+.toc { position: sticky; top: 100px; border-top: 2px solid var(--forest); padding-top: 1.1rem; }
+.toc h2 { font-size: 1.6rem; }
+.toc ol { display: grid; margin-top: .4rem; counter-reset: toc; }
+.toc li { counter-increment: toc; border-bottom: 1px solid var(--line); }
+.toc li:last-child { border-bottom: 0; }
+.toc a { display: flex; align-items: center; gap: .65rem; min-height: 44px; padding-block: .35rem; font-size: .9375rem; line-height: 1.3; }
+.toc a::before { content: counter(toc, decimal-leading-zero); flex: none; width: 1.5rem; font-size: .75rem; letter-spacing: .08em; color: var(--brass); }
+.toc a:hover { text-decoration: underline; text-underline-offset: 4px; text-decoration-color: #9d926e; }
+
+/* Reading column: opaque surface, about 70 characters a line at desktop sizes. */
+.article { max-width: 40.5rem; padding: clamp(1.25rem,3vw,2.5rem); background: var(--surface); border: 1px solid var(--line); }
+.section { max-width: 35.5rem; scroll-margin-top: 100px; }
+.section + .section { margin-top: clamp(2rem,3.5vw,2.75rem); padding-top: clamp(1.5rem,2.5vw,2rem); border-top: 1px solid var(--line); }
+.section h2 { font-size: clamp(1.9rem,2.8vw,2.5rem); margin-bottom: .85rem; }
+.section h3 { margin-top: 1.4rem; font-size: 1.4rem; line-height: 1.15; letter-spacing: -.01em; }
+.section p, .section li, .section dd { font-size: 1.0625rem; line-height: 1.72; color: #2f4537; }
+.section p + p, .section p + ul, .section ul + p, .section dl + p { margin-top: .9rem; }
+.section h3 + p, .section h3 + ul { margin-top: .4rem; }
+.section a { text-decoration: underline; text-underline-offset: 4px; text-decoration-color: #9d926e; overflow-wrap: anywhere; }
+.section a:hover { text-decoration-thickness: 2px; }
+.section strong { font-weight: 600; color: var(--ink); }
+
+/* Bullets match the help pages: a small brass diamond. */
+.section ul { display: grid; gap: .35rem; margin-top: .6rem; }
+.section ul > li { display: flex; gap: .7rem; align-items: baseline; }
+.section ul > li::before { content: ""; flex: none; width: 5px; height: 5px; transform: translateY(-3px) rotate(45deg); background: var(--brass); }
+
+/* Label and value pairs: seller details, services */
+.pairs { display: grid; margin-top: .75rem; border-top: 1px solid var(--line); }
+.pairs > div { display: grid; grid-template-columns: 9.5rem minmax(0,1fr); gap: .2rem 1rem; padding: .75rem 0; border-bottom: 1px solid var(--line); }
+.pairs dt { font-size: .75rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); padding-top: .3rem; }
+.pairs address { font-style: normal; font-size: 1.0625rem; line-height: 1.6; }
+
+@media (max-width: 1000px) {
+  .layout { grid-template-columns: minmax(0,1fr); }
+  .toc { position: static; max-width: 40.5rem; }
+  .toc ol { grid-template-columns: repeat(2,minmax(0,1fr)); column-gap: 1.5rem; }
+  .toc li:nth-last-child(2):nth-child(odd) { border-bottom: 0; }
+}
+@media (max-width: 640px) {
+  .lead { font-size: 1rem; }
+  .toc ol { grid-template-columns: minmax(0,1fr); }
+  .toc li:nth-last-child(2):nth-child(odd) { border-bottom: 1px solid var(--line); }
+  .article { padding: 1.1rem 1rem 1.5rem; }
+  .section p, .section li, .section dd { font-size: 1rem; }
+  .pairs > div { grid-template-columns: minmax(0,1fr); }
+  .pairs dt { padding-top: 0; }
+}

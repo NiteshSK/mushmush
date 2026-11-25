@@ -45,7 +45,7 @@ describe('ChatPayment', () => {
   it('renders payment screen with order details', () => {
     render(<ChatPayment {...defaultProps} />);
 
-    expect(screen.getByText('UPI Payment')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Pay by UPI' })).toBeInTheDocument();
     expect(screen.getByText('₹411')).toBeInTheDocument();
     expect(screen.getByText('Order #ORD-12345')).toBeInTheDocument();
   });
@@ -68,13 +68,7 @@ describe('ChatPayment', () => {
   it('copies UPI ID to clipboard', async () => {
     render(<ChatPayment {...defaultProps} />);
 
-    // Find the copy button (button near UPI ID)
-    const copyButtons = screen.getAllByRole('button');
-    const copyButton = copyButtons.find(btn => btn.querySelector('svg'));
-    // Click on a button that contains the Copy icon - the one in the UPI ID row
-    const upiRow = screen.getByText('test@upi').closest('div');
-    const copyBtn = upiRow?.parentElement?.querySelector('button');
-    if (copyBtn) fireEvent.click(copyBtn);
+    fireEvent.click(screen.getByRole('button', { name: 'Copy UPI ID' }));
 
     await waitFor(() => {
       expect(navigator.clipboard.writeText).toHaveBeenCalledWith('test@upi');
@@ -85,7 +79,7 @@ describe('ChatPayment', () => {
   it('renders Open UPI App link with correct href', () => {
     render(<ChatPayment {...defaultProps} />);
 
-    const upiLink = screen.getByText('Open UPI App');
+    const upiLink = screen.getByText('Open UPI app');
     expect(upiLink.closest('a')).toHaveAttribute('href', expect.stringContaining('upi://pay'));
   });
 
@@ -93,7 +87,7 @@ describe('ChatPayment', () => {
     render(<ChatPayment {...defaultProps} />);
 
     // Submit form directly to bypass native required validation
-    const form = screen.getByText('Submit Payment').closest('form')!;
+    const form = screen.getByRole('button', { name: 'Submit payment' }).closest('form')!;
     fireEvent.submit(form);
 
     await waitFor(() => {
@@ -116,7 +110,7 @@ describe('ChatPayment', () => {
       '123456789012'
     );
 
-    fireEvent.click(screen.getByText('Submit Payment'));
+    fireEvent.click(screen.getByRole('button', { name: 'Submit payment' }));
 
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith('/api/checkout/upi-payment', expect.objectContaining({
@@ -133,6 +127,36 @@ describe('ChatPayment', () => {
     expect(formData.get('customerEmail')).toBe('john@test.com');
   });
 
+  it('sends the payment token with the UPI payment', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ success: true, message: 'Payment submitted!' }),
+    });
+
+    render(<ChatPayment {...defaultProps} paymentToken="tok_abc" />);
+
+    await userEvent.type(screen.getByPlaceholderText('Enter 12-digit UPI transaction ID'), '123456789012');
+    fireEvent.click(screen.getByRole('button', { name: 'Submit payment' }));
+
+    await waitFor(() => expect(global.fetch).toHaveBeenCalled());
+    const formData = (global.fetch as jest.Mock).mock.calls[0][1].body as FormData;
+    expect(formData.get('paymentToken')).toBe('tok_abc');
+  });
+
+  it('describes a submitted payment as awaiting confirmation', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ success: true, message: 'Payment submitted!' }),
+    });
+
+    render(<ChatPayment {...defaultProps} />);
+
+    await userEvent.type(screen.getByPlaceholderText('Enter 12-digit UPI transaction ID'), '123456789012');
+    fireEvent.click(screen.getByRole('button', { name: 'Submit payment' }));
+
+    expect(await screen.findByText(/We will email/)).toHaveTextContent('when the order is confirmed');
+  });
+
   it('shows success state after payment submission', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
@@ -146,10 +170,10 @@ describe('ChatPayment', () => {
       '123456789012'
     );
 
-    fireEvent.click(screen.getByText('Submit Payment'));
+    fireEvent.click(screen.getByRole('button', { name: 'Submit payment' }));
 
     await waitFor(() => {
-      expect(screen.getByText('Payment Submitted!')).toBeInTheDocument();
+      expect(screen.getByText('Payment submitted')).toBeInTheDocument();
       expect(screen.getByText('Order #ORD-12345')).toBeInTheDocument();
       expect(screen.getByText(/john@test.com/)).toBeInTheDocument();
     });
@@ -168,13 +192,13 @@ describe('ChatPayment', () => {
       '123456789012'
     );
 
-    fireEvent.click(screen.getByText('Submit Payment'));
+    fireEvent.click(screen.getByRole('button', { name: 'Submit payment' }));
 
     await waitFor(() => {
-      expect(screen.getByText('Back to Chat')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Back to chat' })).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText('Back to Chat'));
+    fireEvent.click(screen.getByRole('button', { name: 'Back to chat' }));
     expect(defaultProps.onPaymentComplete).toHaveBeenCalled();
   });
 
@@ -191,14 +215,14 @@ describe('ChatPayment', () => {
       '123456789012'
     );
 
-    fireEvent.click(screen.getByText('Submit Payment'));
+    fireEvent.click(screen.getByRole('button', { name: 'Submit payment' }));
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith('Duplicate transaction ID');
     });
 
     // Should not show success screen
-    expect(screen.queryByText('Payment Submitted!')).not.toBeInTheDocument();
+    expect(screen.queryByText('Payment submitted')).not.toBeInTheDocument();
   });
 
   it('handles network errors gracefully', async () => {
@@ -211,7 +235,7 @@ describe('ChatPayment', () => {
       '123456789012'
     );
 
-    fireEvent.click(screen.getByText('Submit Payment'));
+    fireEvent.click(screen.getByRole('button', { name: 'Submit payment' }));
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith('Network error. Please try again.');
@@ -221,8 +245,7 @@ describe('ChatPayment', () => {
   it('calls onBack when back button is clicked', () => {
     render(<ChatPayment {...defaultProps} />);
 
-    const buttons = screen.getAllByRole('button');
-    fireEvent.click(buttons[0]); // first button is back
+    fireEvent.click(screen.getByRole('button', { name: 'Back to checkout' }));
     expect(defaultProps.onBack).toHaveBeenCalled();
   });
 
@@ -241,11 +264,22 @@ describe('ChatPayment', () => {
     expect(upiInput).toHaveValue('myupi@bank');
   });
 
+  it('rejects unsupported payment proof before uploading', () => {
+    render(<ChatPayment {...defaultProps} />);
+    fireEvent.change(screen.getByLabelText('UPI transaction ID'), { target: { value: '123456789012' } });
+    const proof = screen.getByLabelText(/Payment screenshot/);
+    const unsupported = new File(['test'], 'screenshot.gif', { type: 'image/gif' });
+    fireEvent.change(proof, { target: { files: [unsupported] } });
+    fireEvent.submit(proof.closest('form')!);
+    expect(toast.error).toHaveBeenCalledWith('JPG, PNG or PDF, up to 2 MB.');
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
   it('allows optional screenshot upload', () => {
     render(<ChatPayment {...defaultProps} />);
 
     const fileInput = document.querySelector('input[type="file"]');
     expect(fileInput).toBeInTheDocument();
-    expect(fileInput).toHaveAttribute('accept', 'image/*');
+    expect(fileInput).toHaveAttribute('accept', 'image/jpeg,image/png,application/pdf');
   });
 });

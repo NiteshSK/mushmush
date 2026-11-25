@@ -1,65 +1,30 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { runStaffJobs } from "@/lib/staff-jobs";
 
-const SCRAPE_COOLDOWN = 24 * 60 * 60 * 1000; // 24 hours
-
-export async function POST(request: NextRequest) {
-  try {
-    // Retention Policy: Delete news older than 3 months
-    const threeMonthsAgo = new Date();
-    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-
-    await prisma.news.deleteMany({
-      where: {
-        createdAt: {
-          lt: threeMonthsAgo
-        }
-      }
-    });
-
-    // Check if we have recent SCRAPED news (last 24 hours)
-    const recentScrapedNews = await prisma.news.findFirst({
-      where: {
-        source: 'scraped', // Only check scraped news
-        createdAt: {
-          gte: new Date(Date.now() - SCRAPE_COOLDOWN)
-        }
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    });
-
-    if (recentScrapedNews) {
-      const timeSinceLastScrape = Date.now() - recentScrapedNews.createdAt.getTime();
-      const hoursRemaining = Math.ceil((SCRAPE_COOLDOWN - timeSinceLastScrape) / (60 * 60 * 1000));
-
-      return NextResponse.json({
-        message: 'Scraping cooldown active',
-        hoursRemaining,
-        shouldScrape: false,
-        lastScraped: recentScrapedNews.createdAt
-      });
-    }
-
-    // Trigger scraping
-
-    fetch(`${request.nextUrl.origin}/api/admin/scrape-news`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
-    }).catch(err => console.error('Scraping error:', err));
-
-    return NextResponse.json({
-      message: 'News scraping triggered',
-      status: 'running',
-      shouldScrape: true
-    });
-
-  } catch (error) {
-    console.error('Error triggering scrape:', error);
+export async function GET(request: NextRequest) {
+  if (
+    !process.env.CRON_SECRET ||
+    request.headers.get("authorization") !== "Bearer " + process.env.CRON_SECRET
+  ) {
     return NextResponse.json(
-      { error: 'Failed to trigger scraping', details: error.message },
-      { status: 500 }
+      { error: "Scheduler authentication required" },
+      { status: 403 },
     );
   }
+  const date = new Date().toISOString().slice(0, 10);
+  const key = "news/" + date;
+  await prisma.staffJob.upsert({
+    where: { key },
+    create: { key, kind: "news", resourceId: key, action: "import" },
+    update: {},
+  });
+  await runStaffJobs(key);
+  const result = await prisma.staffJob.findUnique({
+    where: { key },
+    select: { state: true, attempts: true },
+  });
+  return NextResponse.json(result, {
+    status: result?.state === "failed" ? 503 : 200,
+  });
 }

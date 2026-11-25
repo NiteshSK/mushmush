@@ -1,120 +1,54 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import bcrypt from 'bcryptjs';
-import { validatePasswordPolicy } from '@/lib/validation';
+import { NextRequest, NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
+import { getCurrentUser } from "@/lib/admin";
+import { prisma } from "@/lib/prisma";
+import { managedStaffMode } from "@/lib/staff-identity";
+import { validateEmail, validatePasswordPolicy } from "@/lib/validation";
 
-// POST - Create first admin user (only if no admin exists)
 export async function POST(request: NextRequest) {
+  const body = await request.json().catch(() => null);
+  if (!process.env.ADMIN_SETUP_TOKEN || body?.setupToken !== process.env.ADMIN_SETUP_TOKEN)
+    return NextResponse.json({ error: "Owner setup requires a valid setup token." }, { status: 403 });
+  const name = typeof body.name === "string" ? body.name.trim() : "";
+  const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+  if (!name || name.length > 150 || validateEmail(email))
+    return NextResponse.json({ error: "Enter a valid name and email." }, { status: 400 });
+
+  const managed = managedStaffMode();
+  const operator = managed ? await getCurrentUser() : null;
+  let password: string | undefined;
+  if (managed) {
+    if (!operator?.verifiedStaffWorkspace || operator.email?.toLowerCase() !== email)
+      return NextResponse.json({ error: "Sign in with your approved Google Workspace account before setting it up as owner." }, { status: 403 });
+  } else {
+    if (typeof body.password !== "string" || Buffer.byteLength(body.password) > 72)
+      return NextResponse.json({ error: "Enter a password of up to 72 bytes." }, { status: 400 });
+    const policy = validatePasswordPolicy(body.password);
+    if (!policy.valid) return NextResponse.json({ error: policy.error }, { status: 400 });
+    password = await bcrypt.hash(body.password, 12);
+  }
+
   try {
-    const body = await request.json();
-    const { name, email, password, setupToken } = body;
-
-    // Check setup token (optional security measure)
-    const expectedToken = process.env.ADMIN_SETUP_TOKEN;
-    if (expectedToken && setupToken !== expectedToken) {
-      return NextResponse.json(
-        { error: 'Invalid setup token' },
-        { status: 403 }
-      );
-    }
-
-    // Check if any admin user already exists
-    const existingAdmin = await prisma.user.findFirst({
-      where: { role: 'ADMIN' },
+    return await prisma.$transaction(async tx => {
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(742501)::text`;
+      if (await tx.user.findFirst({ where: { role: "ADMIN" }, select: { id: true } }))
+        return NextResponse.json({ error: "Owner setup is complete." }, { status: 409 });
+      const existing = await tx.user.findUnique({ where: { email }, select: { id: true } });
+      const select = { id:true, name:true, email:true, role:true };
+      if (managed && (!existing || existing.id !== operator?.id))
+        return NextResponse.json({ error: "Sign in with the account being enrolled." }, { status: 403 });
+      if (!managed && existing) return NextResponse.json({ error: "That email already has an account." }, { status: 409 });
+      const user = managed && existing
+        ? await tx.user.update({ where: { id: existing.id }, data: { role: "ADMIN", name }, select })
+        : await tx.user.create({ data: { name, email, role: "ADMIN", password }, select });
+      await tx.staffEvent.create({ data: { actorId:user.id, resource:"user", recordId:user.id, action:"owner-provisioned" } });
+      return NextResponse.json({ user, message:"Owner created." }, { status:201 });
     });
-
-    if (existingAdmin) {
-      return NextResponse.json(
-        { error: 'Admin user already exists. Use the admin panel to create additional users.' },
-        { status: 409 }
-      );
-    }
-
-    // Validate required fields
-    if (!name || !email || !password) {
-      return NextResponse.json(
-        { error: 'Name, email, and password are required' },
-        { status: 400 }
-      );
-    }
-
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: 'Invalid email format' },
-        { status: 400 }
-      );
-    }
-
-    // Validate password strength (policy)
-    const passwordCheck = validatePasswordPolicy(password);
-    if (!passwordCheck.valid) {
-      return NextResponse.json({ error: passwordCheck.error }, { status: 400 });
-    }
-
-    // Check if user with email already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (existingUser) {
-      return NextResponse.json(
-        { error: 'User with this email already exists' },
-        { status: 409 }
-      );
-    }
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 12);
-
-    // Create first admin user
-    const adminUser = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        role: 'ADMIN',
-        emailVerified: new Date(),
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        createdAt: true,
-      },
-    });
-
-    return NextResponse.json({
-      message: 'Admin user created successfully',
-      user: adminUser,
-    }, { status: 201 });
-  } catch (error) {
-    console.error('Error creating admin user:', error);
-    return NextResponse.json(
-      { error: 'Failed to create admin user' },
-      { status: 500 }
-    );
+  } catch {
+    return NextResponse.json({error:"Owner setup could not be completed."}, {status:500});
   }
 }
-
-// GET - Check if admin setup is needed
 export async function GET() {
-  try {
-    const adminExists = await prisma.user.findFirst({
-      where: { role: 'ADMIN' },
-    });
-
-    return NextResponse.json({
-      setupRequired: !adminExists,
-      hasAdmin: !!adminExists,
-    });
-  } catch (error) {
-    console.error('Error checking admin setup:', error);
-    return NextResponse.json(
-      { error: 'Failed to check admin setup status' },
-      { status: 500 }
-    );
-  }
+  const owner = await prisma.user.findFirst({ where: { role:"ADMIN" }, select: { id:true } });
+  return NextResponse.json({ setupRequired: !owner && Boolean(process.env.ADMIN_SETUP_TOKEN), hasAdmin:Boolean(owner), managedGoogle:managedStaffMode() },{headers:{"Cache-Control":"no-store"}});
 }

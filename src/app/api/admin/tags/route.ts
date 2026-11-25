@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { staffSession } from "@/lib/admin";
 
 // Helper function to check if user is admin
 async function isAdmin() {
-  const session = await getServerSession(authOptions)
-  return session?.user?.role === 'ADMIN'
+  const session = await staffSession("editor")
+  return !!session?.user
 }
 
 // GET /api/admin/tags - List all tags
@@ -16,6 +15,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     const tags = await prisma.tag.findMany({
+      include: { _count: { select: {posts:true,news:true} } },
       orderBy: { createdAt: 'desc' }
     })
     return NextResponse.json({ tags })
@@ -73,7 +73,8 @@ export async function DELETE(request: NextRequest) {
     if (!id) {
       return NextResponse.json({ error: 'Missing id' }, { status: 400 })
     }
-    await prisma.tag.delete({ where: { id } })
+    const removed=await prisma.tag.deleteMany({where:{id,posts:{none:{}},news:{none:{}}}});
+    if(!removed.count) return NextResponse.json({error:"Remove this tag from its stories before deleting it."},{status:409});
     return NextResponse.json({ message: 'Tag deleted' })
   } catch (error) {
     return NextResponse.json({ error: 'Failed to delete tag' }, { status: 500 })

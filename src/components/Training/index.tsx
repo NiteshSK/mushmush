@@ -1,336 +1,114 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
-import { toast } from "react-hot-toast";
-import Breadcrumb from "@/components/Common/Breadcrumb";
-import UPIPaymentModal from "@/components/Payment/UPIPaymentModal";
-import RegistrationModal from "./RegistrationModal";
-import { getTrainingProgramPrice, isEarlyBirdOfferValid } from "@/lib/utils";
+import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
+import GrowSection from "./GrowSection";
+import ProgrammeFacts from "./ProgrammeFacts";
+import RegisterAction from "./RegisterAction";
+import { loadListings, takesRegistrations, schedulePath, typeLabel, type Listing } from "./programme";
+import pantry from "../Pantry/pantry.module.css";
+import styles from "../Pantry/training.module.css";
 
-interface TrainingProgram {
-  id: number;
-  name: string;
-  slug: string;
-  description: string;
-  price: number;
-  duration: number;
-  dailyHours: string;
-  type: string;
-  isActive: boolean;
+// The loader lives in programme.ts so the homepage and search can use it without this page component.
+export { loadListings, type Listing } from "./programme";
+type State = { status: "loading" } | { status: "error" } | { status: "ready"; listings: Listing[] };
 
-  // Early Bird Pricing Fields
-  hasEarlyBirdOffer: boolean;
-  earlyBirdPrice?: number;
-  originalPrice?: number;
-  earlyBirdEndDate?: string | Date; // Can be string from API or Date object
-}
+/** Training programmes: dates, availability, fees and the Register action first, then the description. */
+export default function TrainingPrograms() {
+  const [state, setState] = useState<State>({ status: "loading" });
 
-const isEarlyBirdValid = (program: any) => {
-  return isEarlyBirdOfferValid(program);
-};
-
-const TrainingPrograms = () => {
-  const { data: session } = useSession();
-  const [trainingPrograms, setTrainingPrograms] = useState<TrainingProgram[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedProgram, setSelectedProgram] = useState<TrainingProgram | null>(null);
-  const [showRegistrationModal, setShowRegistrationModal] = useState(false);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [pendingRegistration, setPendingRegistration] = useState<any>(null);
-
-  // Fetch training programs
-  useEffect(() => {
-    const fetchTrainingPrograms = async () => {
-      try {
-        const response = await fetch("/api/training-programs");
-        if (response.ok) {
-          const data = await response.json();
-          setTrainingPrograms(data);
-        } else {
-          console.error("Failed to fetch training programs:", response.status);
-          toast.error("Failed to fetch training programs");
-        }
-      } catch (error) {
-        console.error("Error fetching training programs:", error);
-        toast.error("Error fetching training programs");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTrainingPrograms();
+  const load = useCallback(() => {
+    let active = true;
+    setState({ status: "loading" });
+    loadListings()
+      .then(listings => { if (active) setState({ status: "ready", listings }); })
+      .catch(() => { if (active) setState({ status: "error" }); });
+    return () => { active = false; };
   }, []);
 
-  const handleRegisterClick = (program: TrainingProgram) => {
-    window.location.href = `/training/${program.slug}/schedule`;
-  };
+  useEffect(() => load(), [load]);
 
-  const handleCheckScheduleClick = (program: TrainingProgram) => {
-    window.location.href = `/training/${program.slug}/schedule`;
-  };
-
-  const handleRegisterNowClick = async (program: TrainingProgram) => {
-    if (!session) {
-      // Redirect to login page if user is not authenticated
-      window.location.href = `/auth/signin?callbackUrl=${encodeURIComponent(window.location.pathname)}`;
-      return;
-    }
-
-    try {
-      // Check if user is already registered for this program
-      const checkResponse = await fetch(`/api/training-registrations/check?programId=${program.id}`);
-
-      if (checkResponse.ok) {
-        const checkData = await checkResponse.json();
-
-        if (checkData.isRegistered) {
-          // User is already registered, show existing registration details
-          const registration = checkData.registration;
-          toast.error(
-            `You are already registered for ${registration.programName}!\n\n` +
-            `Registration Number: ${registration.registrationNumber}\n` +
-            `Status: ${registration.status}\n` +
-            `Payment Status: ${registration.paymentStatus}`,
-            {
-              duration: 8000,
-              style: {
-                maxWidth: '500px',
-                whiteSpace: 'pre-line'
-              }
-            }
-          );
-          return;
-        }
-      }
-    } catch (error) {
-      console.error('Error checking registration status:', error);
-      // If check fails, continue with registration flow
-      toast.error('Could not verify registration status. Continuing with registration...');
-    }
-
-    // User is not registered or check failed, proceed with registration
-    setSelectedProgram(program);
-    setShowRegistrationModal(true);
-  };
-
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case "OYSTER":
-        return "🦪";
-      case "BUTTON":
-        return "🍄";
-      case "SHIITAKE":
-        return "🍄‍🟫";
-      case "GANODERMA":
-        return "🍄‍🟤";
-      default:
-        return "🍄";
-    }
-  };
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case "OYSTER":
-        return "bg-blue-50 text-blue-700 border-blue-200";
-      case "BUTTON":
-        return "bg-green-50 text-green-700 border-green-200";
-      case "SHIITAKE":
-        return "bg-purple-50 text-purple-700 border-purple-200";
-      case "GANODERMA":
-        return "bg-orange-50 text-orange-700 border-orange-200";
-      default:
-        return "bg-gray-50 text-gray-700 border-gray-200";
-    }
-  };
-
-  const getCardColor = (type: string) => {
-    switch (type) {
-      case "OYSTER":
-        return "bg-blue-25 border-blue-100";
-      case "BUTTON":
-        return "bg-green-25 border-green-100";
-      case "SHIITAKE":
-        return "bg-purple-25 border-purple-100";
-      case "GANODERMA":
-        return "bg-orange-25 border-orange-100";
-      default:
-        return "bg-gray-25 border-gray-100";
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
+  // Talk about registering and paying only while at least one course takes registrations.
+  const anyOpen = state.status === "ready" && state.listings.some(({ batch }) => takesRegistrations(batch));
 
   return (
-    <>
-      <Breadcrumb title={"Training Programs"} pages={["training"]} />
-
-      {/* Training Programs Section */}
-      <section className="py-12 sm:py-16 bg-forest/5">
-        <div className="max-w-[1200px] w-full mx-auto px-4 sm:px-6 xl:px-0">
-          <div className="text-center mb-12">
-            <h2 className="font-medium font-bold text-3xl sm:text-4xl text-dark mb-4">
-              Choose Your Training Program
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              We offer specialized training programs for different types of mushroom cultivation.
-              Each program includes both theoretical knowledge and hands-on practical experience.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
-            {trainingPrograms.map((program) => (
-              <div
-                key={program.id}
-                className={`rounded-xl border-2 ${getCardColor(program.type)} overflow-hidden hover:shadow-lg transition-all duration-300`}
-              >
-                <div className="p-6 md:p-8">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-                    <div className="flex items-center">
-                      <span className="text-3xl md:text-4xl mr-3">{getTypeIcon(program.type)}</span>
-                      <div>
-                        <h3 className="text-xl md:text-2xl font-bold text-gray-900">{program.name}</h3>
-                        <span
-                          className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getTypeColor(
-                            program.type
-                          )}`}
-                        >
-                          {program.type}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="text-left sm:text-right">
-                      {isEarlyBirdValid(program) && (
-                        <div className="mb-2">
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800 border border-red-200">
-                            🎟️ Early Bird Offer
-                          </span>
-                        </div>
-                      )}
-
-                      {isEarlyBirdValid(program) &&
-                        program.originalPrice &&
-                        program.earlyBirdPrice ? (
-                        <div className="flex flex-col sm:items-end">
-                          {/* Strikethrough Original Price */}
-                          <div className="text-lg md:text-xl text-gray-400 line-through">
-                            ₹{program.originalPrice.toLocaleString()}
-                          </div>
-                          {/* Early Bird Price */}
-                          <div className="text-2xl md:text-3xl font-bold text-green-600">
-                            ₹{program.earlyBirdPrice.toLocaleString()}
-                          </div>
-                          {/* Savings Badge */}
-                          <div className="text-sm font-medium text-red-600">
-                            SAVE ₹{
-                              (
-                                program.originalPrice - program.earlyBirdPrice
-                              ).toLocaleString()
-                            }
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="text-2xl md:text-3xl font-bold text-green-600">
-                          ₹{(program.originalPrice ?? program.price).toLocaleString()}
-                        </div>
-                      )}
-                      <div className="text-sm text-gray-500">
-                        per participant
-                      </div>
-                    </div>
-                  </div>
-
-                  <p className="text-gray-600 mb-6 leading-relaxed">
-                    {program.description}
-                  </p>
-
-                  <div className="grid grid-cols-2 gap-4 mb-6">
-                    <div className={`p-4 rounded-lg ${getCardColor(program.type)}`}>
-                      <div className="text-sm text-gray-500 mb-1">Duration</div>
-                      <div className="font-semibold text-gray-900">{program.duration} Days</div>
-                    </div>
-                    <div className={`p-4 rounded-lg ${getCardColor(program.type)}`}>
-                      <div className="text-sm text-gray-500 mb-1">Daily Hours</div>
-                      <div className="font-semibold text-gray-900">{program.dailyHours}</div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <button
-                      onClick={() => handleCheckScheduleClick(program)}
-                      className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-colors duration-200 border-2 ${program.type === "OYSTER" ? "bg-white text-blue-600 border-blue-200 hover:bg-blue-50" :
-                        program.type === "BUTTON" ? "bg-white text-green-600 border-green-200 hover:bg-green-50" :
-                          program.type === "SHIITAKE" ? "bg-white text-purple-600 border-purple-200 hover:bg-purple-50" :
-                            program.type === "GANODERMA" ? "bg-white text-orange-600 border-orange-200 hover:bg-orange-50" :
-                              "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
-                        }`}
-                    >
-                      Check Schedule
-                    </button>
-                    <button
-                      onClick={() => handleRegisterNowClick(program)}
-                      className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-colors duration-200 border-2 ${program.type === "OYSTER" ? "bg-white text-blue-600 border-blue-200 hover:bg-blue-50" :
-                        program.type === "BUTTON" ? "bg-white text-green-600 border-green-200 hover:bg-green-50" :
-                          program.type === "SHIITAKE" ? "bg-white text-purple-600 border-purple-200 hover:bg-purple-50" :
-                            program.type === "GANODERMA" ? "bg-white text-orange-600 border-orange-200 hover:bg-orange-50" :
-                              "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
-                        }`}
-                    >
-                      Enroll Now
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+    <main id="main" className={pantry.page} aria-busy={state.status === "loading"}>
+      <header className={pantry.pageHead}>
+        <div>
+          <p className={pantry.kicker}>Kosvana training</p>
+          <h1>Mushroom <em>cultivation</em> courses</h1>
         </div>
-      </section>
-      {showRegistrationModal && selectedProgram && (
-        <RegistrationModal
-          program={selectedProgram}
-          onClose={() => {
-            setShowRegistrationModal(false);
-            setSelectedProgram(null);
-          }}
-          user={session?.user}
-          onRegistrationComplete={(registration) => {
-            setPendingRegistration(registration);
-            setShowPaymentModal(true);
-            setShowRegistrationModal(false);
-            setSelectedProgram(null);
-          }}
-        />
+        <p className={styles.lede}>
+          {anyOpen || state.status !== "ready"
+            ? "Dates, fees and registration for each course. Register with your Kosvana account and pay by UPI."
+            : "Dates, fees and details for each course. Ask us about the next batch."}
+        </p>
+      </header>
+
+      {state.status === "loading" && (
+        <div className={styles.programmes} aria-hidden="true">
+          {[0, 1].map(key => <div key={key} className={styles.programmeSkeleton}><p /><p /><p /></div>)}
+        </div>
       )}
 
-      {showPaymentModal && pendingRegistration && (
-        <UPIPaymentModal
-          payment={{
-            type: "training",
-            registrationId: pendingRegistration.id,
-            registrationNumber: pendingRegistration.registrationNumber,
-            participantName: pendingRegistration.participantName,
-            programName: pendingRegistration.trainingProgram.name,
-            amount: pendingRegistration.totalAmount,
-          }}
-          onClose={() => {
-            setShowPaymentModal(false);
-            setPendingRegistration(null);
-          }}
-          onPaymentComplete={(paymentData) => {
-            toast.success('Payment submitted! Check your email for confirmation.');
-            setShowPaymentModal(false);
-            setPendingRegistration(null);
-          }}
-        />
+      {state.status === "error" && (
+        <div className={pantry.recovery} role="alert">
+          <h2>We couldn’t load the training courses</h2>
+          <p>Check your connection and try again.</p>
+          <button type="button" className={pantry.primaryAction} onClick={load}>Try again</button>
+        </div>
       )}
-    </>
+
+      {state.status === "ready" && state.listings.length === 0 && (
+        <div className={pantry.recovery}>
+          <h2>No training courses are open right now</h2>
+          <p>Contact us to ask about the next course.</p>
+          <Link href="/contact" className={pantry.primaryAction}>Contact Kosvana</Link>
+        </div>
+      )}
+
+      {state.status === "ready" && state.listings.length > 0 && (
+        <ul className={styles.programmes} aria-label="Training courses">
+          {state.listings.map(({ program, batch, hours }) => (
+            <li key={program.id}>
+              <article className={styles.programme} aria-labelledby={`programme-${program.id}`}>
+                <div className={styles.programmeHead}>
+                  <p className={pantry.kicker}>{typeLabel(program.type)}</p>
+                  <h2 id={`programme-${program.id}`}>
+                    <Link href={schedulePath(program.slug)}>{program.name}</Link>
+                  </h2>
+                </div>
+                <ProgrammeFacts program={program} batch={batch} hours={hours} />
+                <div className={styles.programmeActions}>
+                  <RegisterAction
+                    program={program}
+                    returnTo="/training"
+                    open={takesRegistrations(batch)}
+                  />
+                  <Link href={schedulePath(program.slug)} className={pantry.textAction}>
+                    Day-by-day schedule<span className={pantry.srOnly}> for {program.name}</span>
+                  </Link>
+                </div>
+                <p className={styles.programmeSummary}>{program.description}</p>
+              </article>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {anyOpen && (
+        <section className={styles.steps} aria-labelledby="training-steps">
+          <h2 id="training-steps">How registration works</h2>
+          <ol>
+            <li><strong>Sign in</strong><span>Registration needs a Kosvana account.</span></li>
+            <li><strong>Add participant details</strong><span>Name, contact details and address.</span></li>
+            <li><strong>Pay by UPI</strong><span>Pay the fee and enter the UPI transaction ID.</span></li>
+            <li><strong>Wait for verification</strong><span>Your registration stays pending until we verify the payment.</span></li>
+          </ol>
+        </section>
+      )}
+
+      <GrowSection />
+    </main>
   );
-};
-
-export default TrainingPrograms;
+}

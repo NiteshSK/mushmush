@@ -42,6 +42,8 @@ const TrainingScheduleManagement: React.FC<TrainingScheduleManagementProps> = ({
   trainingProgramId,
   trainingProgramName,
 }) => {
+  const [instructors,setInstructors]=useState<{id:number;name:string}[]>([]);
+  useEffect(()=>{fetch("/api/admin/instructors").then(async r=>{if(!r.ok)throw Error();setInstructors(await r.json());}).catch(()=>toast.error("Instructors could not be loaded."));},[]);
   const [schedules, setSchedules] = useState<TrainingSchedule[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -236,7 +238,7 @@ const handleEdit = (schedule: TrainingSchedule) => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata',
       year: 'numeric',
       month: 'short',
       day: 'numeric'
@@ -434,13 +436,12 @@ const handleEdit = (schedule: TrainingSchedule) => {
                   Instructor
                 </label>
                 <select
-                  value={formData.instructorId}
+                  value={formData.instructorId ?? ""}
                   onChange={(e) => setFormData({ ...formData, instructorId: parseInt(e.target.value) || null })}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Select Instructor</option>
-                  <option value="1">Vikrant Rai</option>
-                  <option value="2">Pravesh Rawat</option>
+                  {instructors.map(i=><option key={i.id} value={i.id}>{i.name}</option>)}
                 </select>
               </div>
 

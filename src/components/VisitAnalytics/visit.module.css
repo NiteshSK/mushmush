@@ -1,0 +1,11 @@
+.prompt {
+  position: fixed; z-index: 24; left: clamp(.65rem, 2.25vw, 1.7rem); bottom: max(.8rem, env(safe-area-inset-bottom));
+  width: min(24rem, calc(100% - 5rem)); padding: .9rem 1rem .6rem;
+  color: #22382c; background: #faf8f1; border: 1px solid #a6b1a2; border-radius: 6px;
+  box-shadow: 0 8px 24px rgb(15 36 24 / .14); font-size: .875rem; line-height: 1.4;
+}
+.prompt p + p { margin-top: .3rem; }
+.choices, .preference { display: flex; flex-wrap: wrap; align-items: baseline; gap: .2rem .65rem; margin-top: .35rem; }
+.choices :is(button, a), .preference button { min-height: 44px; display: inline-flex; align-items: center; color: #203d2d; font-size: .8125rem; font-weight: 500; text-decoration: underline; text-underline-offset: 4px; }
+.choices :is(button, a):focus-visible, .preference button:focus-visible { outline: 2px solid #815c32; outline-offset: 3px; }
+@media (min-width: 740px) { .prompt { width: min(24rem,calc(100% - 2rem)); } }

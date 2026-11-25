@@ -1,136 +1,160 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { NextRequest, NextResponse } from "next/server";
+import { staffSession } from "@/lib/admin";
+import { prisma } from "@/lib/prisma";
+import { WorkflowError, workflowFailure } from "@/lib/staff-workflow";
+import { FREE_SHIPPING_THRESHOLD, isValidPincode } from "@/lib/shipping";
 
-async function isAdmin() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.email) return false;
-  const user = await prisma.user.findUnique({ where: { email: session.user.email } });
-  return user?.role === 'ADMIN';
+type ZoneValues = {
+  name: string;
+  pincodeFrom: string;
+  pincodeTo: string;
+  baseFee: number;
+  estimatedDays: string | null;
+  isActive: boolean;
+  priority: number;
+};
+function validate(body: ZoneValues & { freeAbove?: number | null }) {
+  if (
+    typeof body.name !== "string" ||
+    !body.name.trim() ||
+    body.name.length > 120
+  )
+    throw new WorkflowError("Enter a zone name.", 400);
+  if (
+    !isValidPincode(body.pincodeFrom) ||
+    !isValidPincode(body.pincodeTo) ||
+    body.pincodeFrom > body.pincodeTo
+  )
+    throw new WorkflowError("Enter an ordered range of six-digit PINs.", 400);
+  if (
+    !Number.isFinite(body.baseFee) ||
+    body.baseFee < 0 ||
+    !Number.isSafeInteger(body.priority)
+  )
+    throw new WorkflowError("Check the surcharge and priority.", 400);
+  if (
+    typeof body.isActive !== "boolean" ||
+    (body.estimatedDays != null &&
+      (typeof body.estimatedDays !== "string" ||
+        body.estimatedDays.length > 60))
+  )
+    throw new WorkflowError("Invalid delivery estimate or state.", 400);
+  if (body.freeAbove != null && body.freeAbove !== FREE_SHIPPING_THRESHOLD)
+    throw new WorkflowError(
+      "Free shipping uses the store-wide threshold.",
+      400,
+    );
+  return {
+    name: body.name.trim(),
+    pincodeFrom: body.pincodeFrom,
+    pincodeTo: body.pincodeTo,
+    baseFee: body.baseFee,
+    estimatedDays: body.estimatedDays?.trim() || null,
+    isActive: body.isActive,
+    priority: body.priority,
+  };
 }
-
-// GET all shipping zones
 export async function GET() {
-  try {
-    if (!(await isAdmin())) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const zones = await prisma.shippingZone.findMany({
-      orderBy: [{ priority: 'desc' }, { name: 'asc' }],
-    });
-
-    return NextResponse.json({ zones });
-  } catch (error) {
-    console.error('Error fetching shipping zones:', error);
-    return NextResponse.json({ error: 'Failed to fetch shipping zones' }, { status: 500 });
-  }
+  if (!(await staffSession("owner")))
+    return NextResponse.json(
+      { error: "Owner access required." },
+      { status: 403 },
+    );
+  const zones = await prisma.shippingZone.findMany({
+    orderBy: [{ priority: "desc" }, { id: "asc" }],
+  });
+  return NextResponse.json({
+    zones: zones.map((zone) => ({
+      ...zone,
+      freeAbove: FREE_SHIPPING_THRESHOLD,
+    })),
+  });
 }
-
-// POST create a new shipping zone
-export async function POST(request: NextRequest) {
+async function save(request: NextRequest) {
+  const session = await staffSession("owner");
+  if (!session)
+    return NextResponse.json(
+      { error: "Owner access required." },
+      { status: 403 },
+    );
   try {
-    if (!(await isAdmin())) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const body = await request.json();
-    const { name, pincodeFrom, pincodeTo, baseFee, freeAbove, estimatedDays, isActive, priority } = body;
-
-    if (!name || !pincodeFrom || !pincodeTo || baseFee === undefined) {
-      return NextResponse.json({ error: 'Missing required fields: name, pincodeFrom, pincodeTo, baseFee' }, { status: 400 });
-    }
-
-    if (!/^\d{6}$/.test(pincodeFrom) || !/^\d{6}$/.test(pincodeTo)) {
-      return NextResponse.json({ error: 'Pincodes must be exactly 6 digits' }, { status: 400 });
-    }
-
-    if (pincodeFrom > pincodeTo) {
-      return NextResponse.json({ error: 'pincodeFrom must be less than or equal to pincodeTo' }, { status: 400 });
-    }
-
-    const zone = await prisma.shippingZone.create({
-      data: {
-        name,
-        pincodeFrom,
-        pincodeTo,
-        baseFee: parseFloat(baseFee),
-        freeAbove: freeAbove !== null && freeAbove !== undefined ? parseFloat(freeAbove) : null,
-        estimatedDays: estimatedDays || null,
-        isActive: isActive ?? true,
-        priority: priority ?? 0,
-      },
+    const zone = await prisma.$transaction(async (tx) => {
+      let updated;
+      if (request.method === "POST") {
+        updated = await tx.shippingZone.create({
+          data: validate({ priority: 0, isActive: true, ...body }),
+        });
+      } else {
+        if (
+          !Number.isSafeInteger(body.id) ||
+          typeof body.expectedUpdatedAt !== "string"
+        )
+          throw new WorkflowError("Reload the zone before editing it.", 409);
+        const current = await tx.shippingZone.findUnique({
+          where: { id: body.id },
+        });
+        if (!current) throw new WorkflowError("Zone no longer exists.", 404);
+        const result = await tx.shippingZone.updateMany({
+          where: { id: body.id, updatedAt: new Date(body.expectedUpdatedAt) },
+          data: validate({ ...current, ...body, freeAbove: body.freeAbove }),
+        });
+        if (!result.count)
+          throw new WorkflowError("This zone changed. Reload before saving.");
+        updated = await tx.shippingZone.findUniqueOrThrow({
+          where: { id: body.id },
+        });
+      }
+      await tx.staffEvent.create({
+        data: {
+          actorId: session.user.id,
+          resource: "shipping-zone",
+          recordId: String(updated.id),
+          action: request.method === "POST" ? "create" : "update",
+          note: updated.name,
+        },
+      });
+      return updated;
     });
-
-    return NextResponse.json({ zone }, { status: 201 });
+    return NextResponse.json(
+      { zone: { ...zone, freeAbove: FREE_SHIPPING_THRESHOLD } },
+      { status: request.method === "POST" ? 201 : 200 },
+    );
   } catch (error) {
-    console.error('Error creating shipping zone:', error);
-    return NextResponse.json({ error: 'Failed to create shipping zone' }, { status: 500 });
+    return workflowFailure(error);
   }
 }
+export const POST = save;
+export const PUT = save;
 
-// PUT update a shipping zone
-export async function PUT(request: NextRequest) {
-  try {
-    if (!(await isAdmin())) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const body = await request.json();
-    const { id, ...data } = body;
-
-    if (!id) {
-      return NextResponse.json({ error: 'Missing zone id' }, { status: 400 });
-    }
-
-    if (data.pincodeFrom && !/^\d{6}$/.test(data.pincodeFrom)) {
-      return NextResponse.json({ error: 'pincodeFrom must be exactly 6 digits' }, { status: 400 });
-    }
-    if (data.pincodeTo && !/^\d{6}$/.test(data.pincodeTo)) {
-      return NextResponse.json({ error: 'pincodeTo must be exactly 6 digits' }, { status: 400 });
-    }
-
-    const updateData: any = {};
-    if (data.name !== undefined) updateData.name = data.name;
-    if (data.pincodeFrom !== undefined) updateData.pincodeFrom = data.pincodeFrom;
-    if (data.pincodeTo !== undefined) updateData.pincodeTo = data.pincodeTo;
-    if (data.baseFee !== undefined) updateData.baseFee = parseFloat(data.baseFee);
-    if (data.freeAbove !== undefined) updateData.freeAbove = data.freeAbove !== null ? parseFloat(data.freeAbove) : null;
-    if (data.estimatedDays !== undefined) updateData.estimatedDays = data.estimatedDays;
-    if (data.isActive !== undefined) updateData.isActive = data.isActive;
-    if (data.priority !== undefined) updateData.priority = data.priority;
-
-    const zone = await prisma.shippingZone.update({
-      where: { id },
-      data: updateData,
-    });
-
-    return NextResponse.json({ zone });
-  } catch (error) {
-    console.error('Error updating shipping zone:', error);
-    return NextResponse.json({ error: 'Failed to update shipping zone' }, { status: 500 });
-  }
-}
-
-// DELETE a shipping zone
 export async function DELETE(request: NextRequest) {
+  const session = await staffSession("owner");
+  if (!session)
+    return NextResponse.json(
+      { error: "Owner access required." },
+      { status: 403 },
+    );
+  const id = Number(request.nextUrl.searchParams.get("id"));
+  if (!Number.isSafeInteger(id) || id <= 0)
+    return NextResponse.json({ error: "Invalid zone." }, { status: 400 });
   try {
-    if (!(await isAdmin())) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { searchParams } = new URL(request.url);
-    const id = parseInt(searchParams.get('id') || '');
-
-    if (!id) {
-      return NextResponse.json({ error: 'Missing zone id' }, { status: 400 });
-    }
-
-    await prisma.shippingZone.delete({ where: { id } });
+    await prisma.$transaction(async (tx) => {
+      const updated = await tx.shippingZone.updateMany({
+        where: { id, isActive: true },
+        data: { isActive: false },
+      });
+      if (updated.count)
+        await tx.staffEvent.create({
+          data: {
+            actorId: session.user.id,
+            resource: "shipping-zone",
+            recordId: String(id),
+            action: "disable",
+          },
+        });
+    });
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting shipping zone:', error);
-    return NextResponse.json({ error: 'Failed to delete shipping zone' }, { status: 500 });
+    return workflowFailure(error);
   }
 }

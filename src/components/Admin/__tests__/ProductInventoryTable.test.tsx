@@ -8,6 +8,7 @@ import ProductInventoryTable from '../ProductInventoryTable';
 const mockProducts = [
   {
     id: 1,
+    updatedAt:'2026-11-25T00:00:00.000Z',
     title: 'Oyster Mushroom Powder',
     price: 499,
     inStock: true,
@@ -25,6 +26,7 @@ const mockProducts = [
   },
   {
     id: 2,
+    updatedAt:'2026-11-25T00:00:00.000Z',
     title: "Lion's Mane Powder",
     price: 599,
     inStock: false,
@@ -42,6 +44,7 @@ const mockProducts = [
   },
   {
     id: 3,
+    updatedAt:'2026-11-25T00:00:00.000Z',
     title: 'Reishi Extract',
     price: 699,
     inStock: true,
@@ -83,6 +86,7 @@ jest.mock('react-hot-toast', () => {
 describe('ProductInventoryTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    Object.defineProperty(window.crypto,"randomUUID",{configurable:true,value:()=>"00000000-0000-4000-8000-000000000001"});
   });
 
   it('renders loading state initially', () => {
@@ -105,6 +109,24 @@ describe('ProductInventoryTable', () => {
 
     expect(screen.getByText("Lion's Mane Powder")).toBeInTheDocument();
     expect(screen.getByText('Reishi Extract')).toBeInTheDocument();
+  });
+
+  it('opens the first receipt for the requested product in its pack unit', async () => {
+    const previous = window.location.href;
+    window.history.replaceState(null, '', '/admin/inventory?q=Lion&receive=2');
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockProducts,
+    });
+    try {
+      render(<ProductInventoryTable />);
+      expect((await screen.findByLabelText('Movement') as HTMLSelectElement).value).toBe('receive');
+      expect((screen.getByLabelText('Unit') as HTMLSelectElement).value).toBe('gm');
+      expect((screen.getByLabelText('Quantity', { selector: 'input' }) as HTMLInputElement).value).toBe('');
+      expect((screen.getByLabelText('Reason') as HTMLInputElement).value).toBe('Opening stock');
+    } finally {
+      window.history.replaceState(null, '', previous);
+    }
   });
 
   it('displays bulk quantities with correct values', async () => {
@@ -204,7 +226,8 @@ describe('ProductInventoryTable', () => {
     await user.type(input, '50');
 
     // Click confirm button (checkmark)
-    const confirmBtn = screen.getByText('✓');
+    await user.type(screen.getByLabelText("Reason"),"Counted the stockroom");
+    const confirmBtn = screen.getByRole("button",{name:"Save adjustment"});
     await user.click(confirmBtn);
 
     await waitFor(() => {
@@ -213,7 +236,7 @@ describe('ProductInventoryTable', () => {
         '/api/admin/products/1',
         expect.objectContaining({
           method: 'PATCH',
-          body: JSON.stringify({ field: 'quantity', value: 50000 }),
+          body: expect.stringContaining('"value":50000'),
         })
       );
     });
@@ -241,7 +264,7 @@ describe('ProductInventoryTable', () => {
     expect(screen.getByDisplayValue('2.5')).toBeInTheDocument();
 
     // Click cancel
-    const cancelBtn = screen.getByText('✕');
+    const cancelBtn = screen.getByRole('button',{name:'Cancel adjustment'});
     await user.click(cancelBtn);
 
     // Input should be gone, original bulk display should show
@@ -254,7 +277,7 @@ describe('ProductInventoryTable', () => {
 
     (global.fetch as jest.Mock)
       .mockResolvedValueOnce({ ok: true, json: async () => mockProducts })
-      .mockResolvedValueOnce({ ok: true, json: async () => ({}) });
+      .mockResolvedValueOnce({ ok: true, json: async () => ({inStock:true,stockQuantity:50,bulkQuantity:5000,bulkDisplay:"5 kg"}) });
 
     render(<ProductInventoryTable />);
 
@@ -270,7 +293,8 @@ describe('ProductInventoryTable', () => {
     await user.clear(input);
     await user.type(input, '5');
 
-    const confirmBtns = screen.getAllByText('✓');
+    await user.type(screen.getByLabelText('Reason'),'New stock count');
+    const confirmBtns = screen.getAllByRole('button',{name:'Save adjustment'});
     await user.click(confirmBtns[0]);
 
     await waitFor(() => {

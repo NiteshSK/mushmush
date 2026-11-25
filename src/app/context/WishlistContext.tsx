@@ -17,7 +17,8 @@ interface WishlistContextType {
   loading: boolean;
   error: string | null;
   addToWishlist: (productId: number) => Promise<boolean>;
-  removeFromWishlist: (productId: number) => Promise<boolean>;
+  /** Pass `{ confirm: false }` for a heart toggle that should not ask first. */
+  removeFromWishlist: (productId: number, options?: { confirm?: boolean }) => Promise<boolean>;
   isInWishlist: (productId: number) => boolean;
   refreshWishlist: () => Promise<void>;
 }
@@ -31,6 +32,9 @@ export const useWishlist = () => {
   }
   return context;
 };
+
+/** Like useWishlist, but returns undefined outside a WishlistProvider (e.g. in isolated component tests). */
+export const useOptionalWishlist = () => useContext(WishlistContext);
 
 interface WishlistProviderProps {
   children: ReactNode;
@@ -114,12 +118,14 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
     }
   };
 
-  const removeFromWishlist = async (productId: number): Promise<boolean> => {
+  const removeFromWishlist = async (productId: number, options?: { confirm?: boolean }): Promise<boolean> => {
     if (!session?.user) return false;
 
-    // Add confirmation dialog
-    const confirmDelete = window.confirm('Are you sure you want to remove this item from your wishlist?');
-    if (!confirmDelete) return false;
+    // Add confirmation dialog (a heart toggle passes confirm: false)
+    if (options?.confirm !== false) {
+      const confirmDelete = window.confirm('Are you sure you want to remove this item from your wishlist?');
+      if (!confirmDelete) return false;
+    }
 
     try {
       const response = await fetch(`/api/wishlist?productId=${productId}`, {

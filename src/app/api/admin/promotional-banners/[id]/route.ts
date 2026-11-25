@@ -1,11 +1,11 @@
+import { validBanner } from "@/lib/promotion-schedule";
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { staffSession } from "@/lib/admin";
 import { prisma } from '@/lib/prisma';
 
 async function checkAdminAuth() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user || session.user.role !== 'ADMIN') {
+  const session = await staffSession("editor");
+  if (!session?.user) {
     return false;
   }
   return true;
@@ -118,12 +118,8 @@ export async function PUT(
       priority
     } = body;
 
-    if (!title || !imageUrl) {
-      return NextResponse.json(
-        { success: false, error: 'Title and image URL are required' },
-        { status: 400 }
-      );
-    }
+    const error = validBanner(body);
+    if (error) return NextResponse.json({success:false,error},{status:400});
 
     const banner = await prisma.promotionalBanner.update({
       where: { id: bannerId },
@@ -214,4 +210,14 @@ export async function DELETE(
       { status: 500 }
     );
   }
+}
+
+export async function PATCH(request:NextRequest,{params}:{params:Promise<{id:string}>}) {
+  if (!(await staffSession("editor"))) return NextResponse.json({error:"Editor access required"},{status:403});
+  const {isActive,expectedUpdatedAt} = await request.json();
+  const version=new Date(expectedUpdatedAt);
+  const id=Number((await params).id);
+  if(!Number.isSafeInteger(id) || typeof isActive!=="boolean" || !expectedUpdatedAt || !Number.isFinite(version.getTime())) return NextResponse.json({error:"Invalid banner version or state."},{status:400});
+  const changed = await prisma.promotionalBanner.updateMany({where:{id,updatedAt:version},data:{isActive}});
+  return changed.count ? NextResponse.json({success:true}) : NextResponse.json({error:"Another editor changed this promotion. Reload before updating it."},{status:409});
 }

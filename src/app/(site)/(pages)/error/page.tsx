@@ -1,19 +1,17 @@
-import React from "react";
-import Error from "@/components/Error";
+import type { Metadata } from "next";
+import ErrorRecovery from "@/components/Error";
+import PantryShell from "@/components/Pantry/PantryShell";
 
-import { Metadata } from "next";
 export const metadata: Metadata = {
-  title: "Error Page | Kosvana",
-  description: "This is Error Page for Kosvana",
-  // other metadata
+  title: "Page not available | Kosvana",
+  description: "This page isn’t available. Search the Kosvana pantry, browse the shop or contact us.",
+  robots: { index: false },
 };
 
-const ErrorPage = () => {
+export default function ErrorPage() {
   return (
-    <main>
-      <Error />
-    </main>
+    <PantryShell browseHref="/shop">
+      <ErrorRecovery />
+    </PantryShell>
   );
-};
-
-export default ErrorPage;
+}

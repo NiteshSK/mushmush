@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { staffSession } from '@/lib/admin'
 import { prisma } from '@/lib/prisma'
 
 // GET /api/categories - Fetch all categories
-export async function GET() {
+export async function GET(request?:NextRequest) {
   try {
+    if (request && new URL(request.url).searchParams.get("options") === "1") {
+      return NextResponse.json(await prisma.category.findMany({select:{id:true,title:true,slug:true},orderBy:{title:"asc"}}));
+    }
     const categories = await prisma.category.findMany({
       include: {
         products: {
+          where: {product: {archivedAt: null}},
           include: {
             product: {
               select: {
@@ -43,6 +48,7 @@ export async function GET() {
 // POST /api/categories - Create new category (Admin only)
 export async function POST(request: NextRequest) {
   try {
+    if (!(await staffSession("fulfillment"))) return NextResponse.json({ error: "Staff access required" }, { status: 403 })
     const body = await request.json()
     const { title, description, img, path } = body
 

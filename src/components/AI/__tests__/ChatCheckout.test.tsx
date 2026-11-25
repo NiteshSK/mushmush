@@ -102,30 +102,26 @@ describe('ChatCheckout', () => {
     it('shows "Enter pincode" for shipping until pincode is checked', () => {
       renderCheckout();
 
-      expect(screen.getByText('Enter pincode')).toBeInTheDocument();
+      expect(screen.getByText('Enter PIN code')).toBeInTheDocument();
     });
 
     it('shows "Check Delivery First" button until shipping is checked', () => {
       renderCheckout();
 
-      expect(screen.getByText('Check Delivery First')).toBeInTheDocument();
+      expect(screen.getByText('Enter a PIN code we deliver to')).toBeInTheDocument();
     });
 
-    it('calls shipping API when 6-digit pincode is entered', async () => {
+    it('quotes the selected product once before sending an OTP', async () => {
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockShippingResponse,
+        json: async () => ({ deliverable: false, message: 'Fresh mushrooms deliver only to approved Dehradun PINs.' }),
       });
-
       renderCheckout();
-
-      await userEvent.type(screen.getByPlaceholderText('Pincode'), '248001');
-
-      await waitFor(() => {
-        expect(global.fetch).toHaveBeenCalledWith(
-          expect.stringContaining('/api/shipping/check?pincode=248001&subtotal=350')
-        );
-      });
+      fireEvent.change(screen.getByLabelText('PIN code'), { target: { value: '110001' } });
+      expect(await screen.findByText('Fresh mushrooms deliver only to approved Dehradun PINs.')).toBeInTheDocument();
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(global.fetch).toHaveBeenCalledWith('/api/shipping/check?pincode=110001&subtotal=350&productId=1');
+      expect(screen.getByRole('button', { name: 'Enter a PIN code we deliver to' })).toBeDisabled();
     });
 
     it('shows shipping fee after pincode check', async () => {
@@ -165,22 +161,21 @@ describe('ChatCheckout', () => {
       await userEvent.type(screen.getByPlaceholderText('Pincode'), '248001');
 
       await waitFor(() => {
-        expect(screen.getByText('Free Delivery!')).toBeInTheDocument();
+        expect(screen.getByText('Free delivery')).toBeInTheDocument();
       });
     });
 
     it('calls onBack when back button is clicked', () => {
       renderCheckout();
 
-      const buttons = screen.getAllByRole('button');
-      fireEvent.click(buttons[0]); // back button
+      fireEvent.click(screen.getByRole('button', { name: 'Back' }));
       expect(mockOnBack).toHaveBeenCalled();
     });
 
     it('shows quantity controls and updates total', () => {
       renderCheckout();
 
-      const plusButton = screen.getByText('+');
+      const plusButton = screen.getByRole('button', { name: 'Add one' });
       fireEvent.click(plusButton);
 
       expect(screen.getByText('2')).toBeInTheDocument();
@@ -189,11 +184,12 @@ describe('ChatCheckout', () => {
     it('prevents quantity from going below 1', () => {
       renderCheckout();
 
-      const minusButton = screen.getByText('-');
+      const minusButton = screen.getByRole('button', { name: 'Remove one' });
       fireEvent.click(minusButton);
       fireEvent.click(minusButton);
 
-      expect(screen.getByText('Qty: 1')).toBeInTheDocument();
+      expect(screen.getByRole('group', { name: 'Quantity of Premium Oyster Mushroom' })).toHaveTextContent('1');
+      expect(minusButton).toBeDisabled();
     });
 
     it('prevents quantity from exceeding stock limit', () => {
@@ -205,7 +201,7 @@ describe('ChatCheckout', () => {
         />
       );
 
-      const plusButton = screen.getByText('+');
+      const plusButton = screen.getByRole('button', { name: 'Add one' });
       // Stock is 3, start at 1, click + twice to reach 3
       fireEvent.click(plusButton); // 2
       fireEvent.click(plusButton); // 3
@@ -232,7 +228,7 @@ describe('ChatCheckout', () => {
     it('validates required fields before sending OTP', async () => {
       renderCheckout();
 
-      const form = screen.getByText('Check Delivery First').closest('form')!;
+      const form = screen.getByText('Enter a PIN code we deliver to').closest('form')!;
       fireEvent.submit(form);
 
       await waitFor(() => {
@@ -284,7 +280,7 @@ describe('ChatCheckout', () => {
         expect(screen.getAllByText('₹80').length).toBeGreaterThanOrEqual(1);
       });
 
-      fireEvent.click(screen.getByText('Continue & Verify'));
+      fireEvent.click(screen.getByRole('button', { name: 'Send verification code' }));
 
       await waitFor(() => {
         expect(global.fetch).toHaveBeenCalledWith('/api/checkout/send-otp', expect.objectContaining({
@@ -319,12 +315,63 @@ describe('ChatCheckout', () => {
         expect(screen.getAllByText('₹80').length).toBeGreaterThanOrEqual(1);
       });
 
-      fireEvent.click(screen.getByText('Continue & Verify'));
+      fireEvent.click(screen.getByRole('button', { name: 'Send verification code' }));
 
       await waitFor(() => {
-        expect(screen.getByText('Verify OTP')).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: 'Enter your code' })).toBeInTheDocument();
       });
     };
+
+    it('passes the payment token from the order response to payment', async () => {
+      await fillAndSubmitDetails();
+
+      (global.fetch as jest.Mock).mockImplementation((url: string) => {
+        if (typeof url === 'string' && url.includes('/api/shipping/check'))
+          return Promise.resolve({ ok: true, json: async () => mockShippingResponse });
+        if (typeof url === 'string' && url.includes('/api/checkout/verify-and-place-order'))
+          return Promise.resolve({ ok: true, status: 200, json: async () => ({ success: true, order: { id: 'order-9', orderNumber: 'ORD-9', total: 442 }, paymentToken: 'tok_123' }) });
+        return Promise.resolve({ ok: true, json: async () => ({}) });
+      });
+
+      await userEvent.type(screen.getByPlaceholderText('• • • • • •'), '123456');
+      fireEvent.click(screen.getByRole('button', { name: 'Verify and place order' }));
+
+      await waitFor(() => {
+        expect(mockOnProceedToPayment).toHaveBeenCalledWith(expect.objectContaining({ orderNumber: 'ORD-9', paymentToken: 'tok_123' }));
+      });
+    });
+
+    it('keeps the code on a price change and places the order for the new total', async () => {
+      await fillAndSubmitDetails();
+
+      const orderBodies: any[] = [];
+      (global.fetch as jest.Mock).mockImplementation((url: string, init?: RequestInit) => {
+        if (typeof url === 'string' && url.includes('/api/shipping/check'))
+          return Promise.resolve({ ok: true, json: async () => mockShippingResponse });
+        if (typeof url === 'string' && url.includes('/api/checkout/verify-and-place-order')) {
+          orderBodies.push(JSON.parse(String(init?.body)));
+          return orderBodies.length === 1
+            ? Promise.resolve({ ok: false, status: 409, json: async () => ({ code: 'TOTAL_MISMATCH', pricing: { total: 455 } }) })
+            : Promise.resolve({ ok: true, status: 200, json: async () => ({ success: true, order: { id: 'order-2', orderNumber: 'ORD-2', total: 455 }, paymentToken: 'tok_2' }) });
+        }
+        return Promise.resolve({ ok: true, json: async () => ({}) });
+      });
+
+      const otpInput = screen.getByPlaceholderText('• • • • • •');
+      await userEvent.type(otpInput, '123456');
+      fireEvent.click(screen.getByRole('button', { name: 'Verify and place order' }));
+
+      expect(await screen.findByRole('alert')).toHaveTextContent('The price changed while you were checking out. The total is now ₹455.00');
+      expect(otpInput).toHaveValue('123456');
+      expect(mockOnProceedToPayment).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Place order for ₹455.00' }));
+
+      await waitFor(() => {
+        expect(mockOnProceedToPayment).toHaveBeenCalledWith(expect.objectContaining({ total: 455, paymentToken: 'tok_2' }));
+      });
+      expect(orderBodies[1]).toMatchObject({ otp: '123456', total: 455 });
+    });
 
     it('transitions to OTP step after successful OTP send', async () => {
       await fillAndSubmitDetails();
@@ -336,7 +383,7 @@ describe('ChatCheckout', () => {
     it('validates OTP before submission', async () => {
       await fillAndSubmitDetails();
 
-      const form = screen.getByText('Verify & Place Order').closest('form')!;
+      const form = screen.getByRole('button', { name: 'Verify and place order' }).closest('form')!;
       fireEvent.submit(form);
 
       await waitFor(() => {
@@ -359,7 +406,7 @@ describe('ChatCheckout', () => {
       const otpInput = screen.getByPlaceholderText('• • • • • •');
       await userEvent.type(otpInput, '123456');
 
-      fireEvent.click(screen.getByText('Verify & Place Order'));
+      fireEvent.click(screen.getByRole('button', { name: 'Verify and place order' }));
 
       await waitFor(() => {
         expect(global.fetch).toHaveBeenCalledWith('/api/checkout/verify-and-place-order', expect.objectContaining({
@@ -394,7 +441,7 @@ describe('ChatCheckout', () => {
       const otpInput = screen.getByPlaceholderText('• • • • • •');
       await userEvent.type(otpInput, '999999');
 
-      fireEvent.click(screen.getByText('Verify & Place Order'));
+      fireEvent.click(screen.getByRole('button', { name: 'Verify and place order' }));
 
       await waitFor(() => {
         expect(toast.error).toHaveBeenCalledWith('Invalid OTP');

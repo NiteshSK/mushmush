@@ -100,7 +100,7 @@ const config: Config = {
       },
       cream: "#ffffff",
       sand: "#f5f0eb",
-      forest: "#5c8e61",
+      forest: "#1c3024", // same forest green as the Himalayan Pantry pages (--forest)
       bark: "#3a2a1a",
     },
     screens: {

@@ -2,8 +2,8 @@ import React from "react";
 
 const trustItems = [
   { icon: "🌿", label: "Farm Fresh" },
-  { icon: "🍄", label: "100% Organic" },
-  { icon: "✓", label: "Certified Growers" },
+  { icon: "🍄", label: "Grown by Hand" },
+  { icon: "✓", label: "Herbertpur Growers" },
   { icon: "📍", label: "Dehradun, India" },
 ];
 

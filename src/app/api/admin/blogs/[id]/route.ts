@@ -1,12 +1,12 @@
+import { publishStory } from "@/lib/editorial-admin";
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { staffSession } from "@/lib/admin";
 
 // Helper function to check if user is admin
 async function isAdmin() {
-  const session = await getServerSession(authOptions)
-  return session?.user?.role === 'ADMIN'
+  const session = await staffSession("editor")
+  return !!session?.user
 }
 
 interface RouteParams {
@@ -44,6 +44,8 @@ export async function GET(request: NextRequest, context: RouteParams) {
         slug: true,
         excerpt: true,
         content: true,
+        metaTitle:true,
+        metaDescription:true,
         published: true,
         views: true,
         createdAt: true,
@@ -100,7 +102,9 @@ export async function PUT(request: NextRequest, context: RouteParams) {
     }
 
     const body = await request.json()
-    const { title, slug, excerpt, content, published, img, tags } = body
+    const version = body.expectedUpdatedAt ? new Date(body.expectedUpdatedAt) : undefined;
+    if (version && !Number.isFinite(version.getTime())) return NextResponse.json({error:"Invalid saved version."},{status:400});
+    const { title, slug, excerpt, content, published, img, tags, metaTitle,metaDescription } = body
 
     // Validate required fields
     if (!title || !slug || !excerpt || !content) {
@@ -138,7 +142,7 @@ export async function PUT(request: NextRequest, context: RouteParams) {
 
     // Update blog post
     const updatedPost = await prisma.blogPost.update({
-      where: { id },
+      where: { id, updatedAt:version },
       data: {
         title,
         slug,
@@ -146,6 +150,7 @@ export async function PUT(request: NextRequest, context: RouteParams) {
         content,
         published: published || false,
         img: img || null,
+        metaTitle,metaDescription,
         tags: tags && Array.isArray(tags)
           ? { set: tags.map((id: number) => ({ id })) }
           : undefined
@@ -158,6 +163,7 @@ export async function PUT(request: NextRequest, context: RouteParams) {
       blog: updatedPost
     })
   } catch (error) {
+    if ((error as {code?:string})?.code==="P2025") return NextResponse.json({error:"This story was changed by another editor. Reload before saving."},{status:409});
     console.error('Error updating blog post:', error)
     return NextResponse.json(
       { error: 'Failed to update blog post' },
@@ -167,69 +173,10 @@ export async function PUT(request: NextRequest, context: RouteParams) {
 }
 
 // PATCH /api/admin/blogs/[id] - Partial update (e.g., toggle publish status)
-export async function PATCH(request: NextRequest, context: RouteParams) {
-  try {
-    // Check if user is admin
-    if (!(await isAdmin())) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
-    const params = await context.params
-    const id = parseInt(params.id)
-
-    if (isNaN(id)) {
-      return NextResponse.json(
-        { error: 'Invalid blog post ID' },
-        { status: 400 }
-      )
-    }
-
-    const body = await request.json()
-
-    // Check if blog post exists
-    const existingPost = await prisma.blogPost.findUnique({
-      where: { id }
-    })
-
-    if (!existingPost) {
-      return NextResponse.json(
-        { error: 'Blog post not found' },
-        { status: 404 }
-      )
-    }
-
-    // Whitelist allowed fields to prevent mass assignment
-    const allowedFields = ['title', 'content', 'excerpt', 'img', 'published', 'metaTitle', 'metaDescription'];
-    const safeData: Record<string, any> = {};
-    for (const field of allowedFields) {
-      if (body[field] !== undefined) safeData[field] = body[field];
-    }
-    if (safeData.title) {
-      safeData.slug = safeData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    }
-
-    const updatedPost = await prisma.blogPost.update({
-      where: { id },
-      data: safeData
-    })
-
-    return NextResponse.json({
-      message: 'Blog post updated successfully',
-      blog: updatedPost
-    })
-  } catch (error) {
-    console.error('Error updating blog post:', error)
-    return NextResponse.json(
-      { error: 'Failed to update blog post' },
-      { status: 500 }
-    )
-  }
+export async function PATCH(request:NextRequest,context:{params:Promise<{id:string}>}) {
+  return publishStory(request, Number((await context.params).id), "blogs");
 }
 
-// DELETE /api/admin/blogs/[id] - Delete blog post
 export async function DELETE(request: NextRequest, context: RouteParams) {
   try {
     // Check if user is admin

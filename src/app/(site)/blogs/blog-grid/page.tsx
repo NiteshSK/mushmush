@@ -1,19 +1,6 @@
-import React from "react";
-import BlogGrid from "@/components/BlogGrid";
+import { redirect } from "next/navigation";
 
-import { Metadata } from "next";
-export const metadata: Metadata = {
-  title: "Blog Grid Page | Kosvana",
-  description: "This is Blog Grid Page for Kosvana",
-  // other metadata
-};
-
-const BlogGridPage = () => {
-  return (
-    <main>
-      <BlogGrid />
-    </main>
-  );
-};
-
-export default BlogGridPage;
+/** Old template URL. It repeated /blogs under a template title, so it now sends readers there. */
+export default function BlogGridPage() {
+  redirect("/blogs");
+}

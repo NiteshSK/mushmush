@@ -1,8 +1,8 @@
 "use client";
+import { effectiveUnitPrice } from "@/lib/product-pricing";
+import { indiaLocalInput, promotionState } from "@/lib/promotion-schedule";
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import AdminAuthWrapper from '@/components/Admin/AdminAuthWrapper';
-
 interface Product {
   id: number;
   title: string;
@@ -12,6 +12,7 @@ interface Product {
 interface Discount {
   id: number;
   productId: number;
+  updatedAt: string;
   type: 'PERCENTAGE' | 'FIXED_AMOUNT';
   value: number;
   isActive: boolean;
@@ -22,6 +23,7 @@ interface Discount {
 
 const DiscountsPage: React.FC = () => {
   const [discounts, setDiscounts] = useState<Discount[]>([]);
+  const [productQuery, setProductQuery] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -33,13 +35,13 @@ const DiscountsPage: React.FC = () => {
     type: 'PERCENTAGE' as 'PERCENTAGE' | 'FIXED_AMOUNT',
     value: '',
     isActive: true,
-    startDate: new Date().toISOString().split('T')[0],
+    startDate: indiaLocalInput(new Date().toISOString()).slice(0,10),
     endDate: ''
   });
 
   useEffect(() => {
     fetchDiscounts();
-    fetchProducts();
+
   }, []);
 
   const fetchDiscounts = async () => {
@@ -56,16 +58,24 @@ const DiscountsPage: React.FC = () => {
     }
   };
 
-  const fetchProducts = async () => {
-    try {
-      const response = await fetch('/api/products');
-      if (!response.ok) throw new Error('Failed to fetch products');
-      const data = await response.json();
-      setProducts(data.products);
-    } catch (error) {
-      console.error('Error fetching products:', error);
-    }
-  };
+  const [pickerPage,setPickerPage] = useState(1);
+  const [pickerPages,setPickerPages] = useState(1);
+  useEffect(() => {
+    const controller=new AbortController();
+    const timer=setTimeout(async()=>{
+      try {
+        const query=new URLSearchParams({q:productQuery,page:String(pickerPage),limit:"25"});
+        const r=await fetch("/api/products/search?"+query,{signal:controller.signal});
+        if(!r.ok) throw Error();
+        const data=await r.json();
+        if(controller.signal.aborted)return;
+        const found:Product[]=data.products;
+        setProducts(editingDiscount && !found.some(p=>p.id===editingDiscount.productId) ? [editingDiscount.product,...found] : found);
+        setPickerPages(data.pagination.totalPages);
+      }catch {if(!controller.signal.aborted)toast.error("Product search failed.");}
+    },200);
+    return ()=>{clearTimeout(timer);controller.abort();};
+  },[productQuery,pickerPage,editingDiscount]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,7 +95,7 @@ const DiscountsPage: React.FC = () => {
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({...formData,expectedUpdatedAt:editingDiscount?.updatedAt,startDate:formData.startDate+"T00:00:00+05:30",endDate:formData.endDate ? formData.endDate+"T23:59:59.999+05:30":null})
       });
 
       if (!response.ok) {
@@ -110,14 +120,14 @@ const DiscountsPage: React.FC = () => {
       type: discount.type,
       value: discount.value.toString(),
       isActive: discount.isActive,
-      startDate: discount.startDate.split('T')[0],
-      endDate: discount.endDate ? discount.endDate.split('T')[0] : ''
+      startDate: indiaLocalInput(discount.startDate).slice(0,10),
+      endDate: discount.endDate ? indiaLocalInput(discount.endDate).slice(0,10) : ''
     });
     setShowCreateForm(true);
   };
 
   const handleDelete = async (discountId: number) => {
-    if (!confirm('Are you sure you want to delete this discount?')) return;
+    if (!confirm('Disable this discount and retain its history?')) return;
 
     try {
       const response = await fetch(`/api/admin/discounts/${discountId}`, {
@@ -126,7 +136,7 @@ const DiscountsPage: React.FC = () => {
 
       if (!response.ok) throw new Error('Failed to delete discount');
 
-      toast.success('Discount deleted!');
+      toast.success('Discount disabled.');
       fetchDiscounts();
     } catch (error) {
       toast.error('Failed to delete discount');
@@ -139,17 +149,9 @@ const DiscountsPage: React.FC = () => {
       type: 'PERCENTAGE',
       value: '',
       isActive: true,
-      startDate: new Date().toISOString().split('T')[0],
+      startDate: indiaLocalInput(new Date().toISOString()).slice(0,10),
       endDate: ''
     });
-  };
-
-  const calculateDiscountedPrice = (originalPrice: number, type: string, value: number) => {
-    if (type === 'PERCENTAGE') {
-      return Math.round(originalPrice * (1 - value / 100));
-    } else {
-      return Math.max(0, originalPrice - value);
-    }
   };
 
   if (loading) {
@@ -202,7 +204,9 @@ const DiscountsPage: React.FC = () => {
                 <label className="block text-sm font-medium text-dark mb-2">
                   Product *
                 </label>
+                <input aria-label="Find a product" className="block w-full border p-2" placeholder="Find a product by name" value={productQuery} onChange={e=>{setProductQuery(e.target.value);setPickerPage(1);}}/>
                 <select
+                  disabled={!!editingDiscount}
                   value={formData.productId}
                   onChange={(e) => setFormData({ ...formData, productId: e.target.value })}
                   className="w-full border border-gray-3 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue/20"
@@ -215,6 +219,9 @@ const DiscountsPage: React.FC = () => {
                     </option>
                   ))}
                 </select>
+                {pickerPages>1 && <div className="flex gap-3"><button type="button" disabled={pickerPage===1} onClick={()=>setPickerPage(pickerPage-1)}>Previous products</button>
+                  <button type="button" disabled={pickerPage>=pickerPages} onClick={()=>setPickerPage(pickerPage+1)}>More products</button></div>}
+
               </div>
 
               <div>
@@ -286,6 +293,7 @@ const DiscountsPage: React.FC = () => {
               </div>
             </div>
 
+            {products.some(p=>p.id===Number(formData.productId)) && Number(formData.value)>0 && <p className="my-3 text-sm">Preview price per pack · ₹{effectiveUnitPrice((products.find(p=>p.id===Number(formData.productId)) as Product).price,[{type:formData.type,value:Number(formData.value)}]).toLocaleString("en-IN")}</p>}
             <div className="flex gap-3 pt-4">
               <button
                 type="submit"
@@ -312,7 +320,7 @@ const DiscountsPage: React.FC = () => {
       {/* Discounts List */}
       <div className="bg-white rounded-[10px] shadow-1 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-3">
-          <h2 className="text-lg font-semibold text-dark">Active Discounts ({discounts.length})</h2>
+          <h2 className="text-lg font-semibold text-dark">Product discounts ({discounts.length})</h2>
         </div>
         
         {discounts.length === 0 ? (
@@ -360,14 +368,14 @@ const DiscountsPage: React.FC = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="font-medium text-dark">
-                        ₹{calculateDiscountedPrice(discount.product.price, discount.type, discount.value)}
+                        ₹{effectiveUnitPrice(discount.product.price,[discount])}
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        discount.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        promotionState(discount) === 'Live' ? 'bg-green-100 text-green-800' : promotionState(discount) === 'Scheduled' ? 'bg-amber-50 text-amber-800' : 'bg-gray-100 text-gray-700'
                       }`}>
-                        {discount.isActive ? 'Active' : 'Inactive'}
+                        {promotionState(discount)}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-6">
@@ -404,5 +412,5 @@ const DiscountsPage: React.FC = () => {
 };
 
 export default function ProtectedDiscountsPage() {
-  return <AdminAuthWrapper><DiscountsPage /></AdminAuthWrapper>;
+  return <><DiscountsPage /></>;
 }

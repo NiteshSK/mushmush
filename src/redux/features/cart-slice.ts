@@ -3,11 +3,24 @@ import { RootState } from "../store";
 
 type InitialState = {
   items: CartItem[];
+  /**
+   * Lower-case email of the account that `items` belong to. `null` is a guest
+   * bag. `undefined` is a bag persisted before bags had owners.
+   */
+  owner?: string | null;
+  /**
+   * Bags of other accounts that used this browser, keyed by lower-case email,
+   * least recently stashed first. Persisted bags from before this field lack it.
+   */
+  saved?: Record<string, CartItem[]>;
 };
+
+export type CartState = InitialState;
 
 type CartItem = {
   id: number;
   title: string;
+  slug?: string;
   price: number;
   discountedPrice?: number;
   quantity: number;
@@ -18,27 +31,87 @@ type CartItem = {
   };
 };
 
+/** Product details that `refreshItemDetails` copies into bag lines. */
+export type ItemDetails = {
+  id: number;
+  slug?: string | null;
+  stockQuantity?: number | null;
+};
+
+/** Most accounts whose bags this browser keeps while another account (or a guest) shops. */
+export const MAX_SAVED_BAGS = 5;
+
 const initialState: InitialState = {
   items: [],
+  owner: null,
+  saved: {},
 };
+
+const toOwner = (email: string | null | undefined) => email?.trim().toLowerCase() || null;
+
+/** Cap a quantity to the stock, but keep at least one so a line never shows 0. */
+const capToStock = (quantity: number, stock: number | undefined) =>
+  stock === undefined ? quantity : Math.max(1, Math.min(quantity, stock));
+
+/** Put a bag away under its account. An empty bag removes the entry. */
+function stash(state: InitialState, owner: string, items: CartItem[]) {
+  const saved = (state.saved ??= {});
+  delete saved[owner]; // re-adding moves the account to the most recent end
+  if (items.length > 0) saved[owner] = items;
+  const owners = Object.keys(saved);
+  for (let i = 0; i < owners.length - MAX_SAVED_BAGS; i++) delete saved[owners[i]];
+}
+
+/** Take an account's bag out of the saved bags. */
+function unstash(state: InitialState, owner: string): CartItem[] {
+  const saved = (state.saved ??= {});
+  const items = saved[owner] ?? [];
+  delete saved[owner];
+  return items;
+}
+
+/** Add `incoming` lines to `base`. Same products add up, capped by stock. */
+function mergeBags(base: CartItem[], incoming: CartItem[]): CartItem[] {
+  const merged = base.slice();
+  for (const item of incoming) {
+    const index = merged.findIndex((line) => line.id === item.id);
+    if (index === -1) {
+      merged.push({ ...item, quantity: capToStock(item.quantity, item.stockQuantity) });
+      continue;
+    }
+    const line = merged[index];
+    const stockQuantity = item.stockQuantity ?? line.stockQuantity;
+    merged[index] = {
+      ...line,
+      ...item,
+      slug: item.slug ?? line.slug,
+      imgs: item.imgs ?? line.imgs,
+      stockQuantity,
+      quantity: capToStock(line.quantity + item.quantity, stockQuantity),
+    };
+  }
+  return merged;
+}
 
 export const cart = createSlice({
   name: "cart",
   initialState,
   reducers: {
     addItemToCart: (state, action: PayloadAction<CartItem>) => {
-      const { id, title, price, quantity, discountedPrice, imgs, stockQuantity } =
+      const { id, title, slug, price, quantity, discountedPrice, imgs, stockQuantity } =
         action.payload;
       const existingItem = state.items.find((item) => item.id === id);
 
       if (existingItem) {
         const maxQty = stockQuantity ?? existingItem.stockQuantity ?? Infinity;
         existingItem.quantity = Math.min(existingItem.quantity + quantity, maxQty);
+        if (slug) existingItem.slug = slug;
         if (stockQuantity !== undefined) existingItem.stockQuantity = stockQuantity;
       } else {
         state.items.push({
           id,
           title,
+          slug,
           price,
           quantity: stockQuantity !== undefined ? Math.min(quantity, stockQuantity) : quantity,
           discountedPrice,
@@ -67,10 +140,93 @@ export const cart = createSlice({
     removeAllItemsFromCart: (state) => {
       state.items = [];
     },
+    /**
+     * Replace bag prices with the server's prices after checkout reports a
+     * price change (409 TOTAL_MISMATCH), so the bag, the summary and the
+     * order agree.
+     */
+    applyServerPrices: (
+      state,
+      action: PayloadAction<{ productId: number; listPrice: number; unitPrice: number }[]>
+    ) => {
+      for (const line of action.payload) {
+        const item = state.items.find((i) => i.id === line.productId);
+        if (!item) continue;
+        item.price = line.listPrice;
+        item.discountedPrice = line.unitPrice < line.listPrice ? line.unitPrice : undefined;
+      }
+    },
+    /**
+     * Show the bag of the account that is signed in now (email), or a guest
+     * bag (null). Dispatch only when the session is known, never while it loads.
+     * - A guest or pre-owner bag that signs in becomes that account's bag,
+     *   merged with the account's saved bag.
+     * - Switching accounts puts the previous account's bag away and loads the
+     *   new account's saved bag, or an empty one.
+     * - Signing out puts the account's bag away and shows an empty guest bag.
+     */
+    syncCartOwner: (state, action: PayloadAction<string | null | undefined>) => {
+      const next = toOwner(action.payload);
+      const current = state.owner;
+      if (current === next) return;
+
+      if (next === null) {
+        if (typeof current === "string") {
+          stash(state, current, state.items);
+          state.items = [];
+        }
+        state.owner = null;
+        return;
+      }
+
+      if (typeof current === "string") {
+        stash(state, current, state.items);
+        state.items = unstash(state, next);
+      } else {
+        state.items = mergeBags(unstash(state, next), state.items);
+      }
+      state.owner = next;
+    },
+    /**
+     * Fill in product details that older bag lines lack (slug for links,
+     * stockQuantity for limits) in the visible and saved bags, and cap
+     * quantities to the current stock. Prices stay as they are.
+     */
+    refreshItemDetails: (state, action: PayloadAction<ItemDetails[]>) => {
+      const details = new Map<number, ItemDetails>();
+      action.payload.forEach((product) => details.set(product.id, product));
+      const refresh = (items: CartItem[]) => {
+        for (const item of items) {
+          const product = details.get(item.id);
+          if (!product) continue;
+          if (product.slug) item.slug = product.slug;
+          if (typeof product.stockQuantity === "number") {
+            item.stockQuantity = product.stockQuantity;
+            item.quantity = capToStock(item.quantity, product.stockQuantity);
+          }
+        }
+      };
+      refresh(state.items);
+      Object.keys(state.saved ?? {}).forEach((owner) => refresh(state.saved![owner]));
+    },
   },
 });
 
+/** Ids of lines in any bag (visible or saved) that lack a slug or a stock quantity. */
+export const missingDetailIds = (cart: CartState): number[] => {
+  const ids: number[] = [];
+  const bags = [cart.items].concat(Object.keys(cart.saved ?? {}).map((owner) => cart.saved![owner]));
+  for (const bag of bags) {
+    for (const item of bag) {
+      if ((!item.slug || item.stockQuantity === undefined) && ids.indexOf(item.id) === -1) ids.push(item.id);
+    }
+  }
+  return ids;
+};
+
 export const selectCartItems = (state: RootState) => state.cartReducer.items;
+
+export const selectCartOwner = (state: RootState) => state.cartReducer.owner;
 
 export const selectTotalPrice = createSelector([selectCartItems], (items) => {
   return items.reduce((total, item) => {
@@ -84,5 +240,8 @@ export const {
   removeItemFromCart,
   updateCartItemQuantity,
   removeAllItemsFromCart,
+  applyServerPrices,
+  syncCartOwner,
+  refreshItemDetails,
 } = cart.actions;
 export default cart.reducer;

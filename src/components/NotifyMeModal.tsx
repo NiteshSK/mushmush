@@ -38,7 +38,8 @@ const NotifyMeModal: React.FC<NotifyMeModalProps> = ({
     // If user is not authenticated, redirect to login
     if (status === 'unauthenticated') {
       toast.error('Please sign in to get notified when products are back in stock');
-      router.push('/auth/signin');
+      // Come back to this page after signing in.
+      router.push(`/auth/signin?callbackUrl=${encodeURIComponent(window.location.pathname + window.location.search)}`);
       onClose();
       return;
     }

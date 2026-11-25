@@ -1,0 +1,17 @@
+/* Kosvana loader: a mushroom whose cap slowly grows while gold spores rise.
+   Self-contained colours so it also works outside <PantryShell> (route loading, legacy pages). */
+.loader { display: grid; place-items: center; align-content: center; gap: .9rem; color: #1c3024; }
+.full { min-height: 60vh; min-height: 60dvh; padding: 3rem 1rem; }
+.screen { position: fixed; inset: 0; z-index: 999999; min-height: 100dvh; background: #faf8f1; }
+.mark { width: var(--size, 64px); height: auto; overflow: visible; }
+.cap { transform-box: view-box; transform-origin: 32px 49px; animation: grow 1.6s ease-in-out infinite; }
+.spore { opacity: 0; transform-box: view-box; animation: rise 1.8s ease-out infinite; }
+.spore:nth-of-type(2) { animation-delay: .6s; }
+.spore:nth-of-type(3) { animation-delay: 1.2s; }
+.label { font: 500 .875rem/1.4 "Euclid Circular A", system-ui, sans-serif; letter-spacing: .02em; color: #46523f; }
+@keyframes grow { 0%, 100% { transform: scale(.93); } 50% { transform: scale(1); } }
+@keyframes rise { 0% { opacity: 0; transform: translateY(6px); } 25% { opacity: 1; } 100% { opacity: 0; transform: translateY(-12px); } }
+@media (prefers-reduced-motion: reduce) {
+  .cap, .spore { animation: none; }
+  .spore { opacity: .8; }
+}

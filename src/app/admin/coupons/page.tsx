@@ -1,8 +1,8 @@
 "use client";
+import { couponAmount } from "@/lib/coupon-amount";
+import { indiaLocalInput, promotionState } from "@/lib/promotion-schedule";
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import AdminAuthWrapper from '@/components/Admin/AdminAuthWrapper';
-
 interface Coupon {
   id: number;
   code: string;
@@ -28,7 +28,7 @@ const CouponForm = ({ onCreated }: { onCreated: () => void }) => {
     maxDiscount: '',
     maxUses: '',
     maxUsesPerEmail: '1',
-    startDate: new Date().toISOString().slice(0, 16),
+    startDate: indiaLocalInput(new Date().toISOString()),
     endDate: '',
   });
   const [creating, setCreating] = useState(false);
@@ -45,7 +45,7 @@ const CouponForm = ({ onCreated }: { onCreated: () => void }) => {
       const res = await fetch('/api/admin/coupons', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({...form,startDate:form.startDate ? form.startDate + ":00+05:30" : undefined,endDate:form.endDate + ":00+05:30"}),
       });
       const data = await res.json();
 
@@ -54,7 +54,7 @@ const CouponForm = ({ onCreated }: { onCreated: () => void }) => {
         setForm({
           code: '', type: 'PERCENTAGE', value: '', minOrderValue: '',
           maxDiscount: '', maxUses: '', maxUsesPerEmail: '1',
-          startDate: new Date().toISOString().slice(0, 16), endDate: '',
+          startDate: indiaLocalInput(new Date().toISOString()), endDate: '',
         });
         onCreated();
       } else {
@@ -157,7 +157,7 @@ const CouponForm = ({ onCreated }: { onCreated: () => void }) => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-6 mb-1">Start Date</label>
+          <label className="block text-sm font-medium text-gray-6 mb-1">Start date (IST)</label>
           <input
             type="datetime-local"
             value={form.startDate}
@@ -167,7 +167,7 @@ const CouponForm = ({ onCreated }: { onCreated: () => void }) => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-6 mb-1">End Date</label>
+          <label className="block text-sm font-medium text-gray-6 mb-1">End date (IST)</label>
           <input
             type="datetime-local"
             value={form.endDate}
@@ -185,10 +185,19 @@ const CouponForm = ({ onCreated }: { onCreated: () => void }) => {
             {creating ? 'Creating...' : 'Create Coupon'}
           </button>
         </div>
+        <CouponPreview form={form}/>
       </form>
     </div>
   );
 };
+
+function CouponPreview({form}:{form:{minOrderValue:string; value:string; type:string; maxDiscount:string}}) {
+  const [subtotal,setSubtotal]=useState("");
+  const amount=Number(subtotal), minimum=Number(form.minOrderValue)||0;
+  const saving=couponAmount(amount,form.type,Number(form.value),form.maxDiscount ? Number(form.maxDiscount):null);
+  return <section className="mt-4 rounded border p-3"><label>Preview basket subtotal (₹) <input type="number" min="0" step=".01" value={subtotal} onChange={e=>setSubtotal(e.target.value)} className="border p-1"/></label>
+    {subtotal && <p>{amount<minimum ? "Basket is below the minimum of ₹"+minimum : "Basket discount ₹"+saving.toFixed(2)+" · Goods total ₹"+(amount-saving).toFixed(2)}</p>}</section>;
+}
 
 const CouponsPageContent = () => {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
@@ -230,20 +239,9 @@ const CouponsPageContent = () => {
     }
   };
 
-  const deleteCoupon = async (id: number, code: string) => {
-    if (!window.confirm(`Delete coupon "${code}"? This cannot be undone.`)) return;
-    try {
-      const res = await fetch(`/api/admin/coupons/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        setCoupons(prev => prev.filter(c => c.id !== id));
-        toast.success('Coupon deleted');
-      }
-    } catch {
-      toast.error('Failed to delete coupon');
-    }
-  };
 
-  const isExpired = (endDate: string) => new Date(endDate) < new Date();
+
+
 
   return (
     <div className="space-y-6">
@@ -305,19 +303,18 @@ const CouponsPageContent = () => {
                       </span>
                     </td>
                     <td className="px-4 py-4 text-xs text-gray-6">
-                      <div>{new Date(coupon.startDate).toLocaleDateString()}</div>
-                      <div>to {new Date(coupon.endDate).toLocaleDateString()}</div>
-                      {isExpired(coupon.endDate) && (
-                        <span className="text-red font-medium">Expired</span>
-                      )}
+                      <div>{new Date(coupon.startDate).toLocaleDateString("en-IN",{timeZone:"Asia/Kolkata"})}</div>
+                      <div>to {new Date(coupon.endDate).toLocaleDateString("en-IN",{timeZone:"Asia/Kolkata"})}</div>
+
                     </td>
                     <td className="px-4 py-4">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
                         !coupon.isActive ? 'bg-gray-2 text-gray-6' :
-                        isExpired(coupon.endDate) ? 'bg-red-light-5 text-red' :
+                        promotionState(coupon) === 'Scheduled' ? 'bg-amber-50 text-amber-800' :
+                        promotionState(coupon) !== 'Live' ? 'bg-red-light-5 text-red' :
                         'bg-green-light-5 text-green'
                       }`}>
-                        {!coupon.isActive ? 'Inactive' : isExpired(coupon.endDate) ? 'Expired' : 'Active'}
+                        {promotionState(coupon)}
                       </span>
                     </td>
                     <td className="px-4 py-4">
@@ -333,12 +330,7 @@ const CouponsPageContent = () => {
                         >
                           {coupon.isActive ? 'Deactivate' : 'Activate'}
                         </button>
-                        <button
-                          onClick={() => deleteCoupon(coupon.id, coupon.code)}
-                          className="px-3 py-1 text-xs rounded-md font-medium bg-gray-2 text-gray-6 hover:bg-red-light-6 hover:text-red"
-                        >
-                          Delete
-                        </button>
+
                       </div>
                     </td>
                   </tr>
@@ -354,8 +346,8 @@ const CouponsPageContent = () => {
 
 export default function CouponsPage() {
   return (
-    <AdminAuthWrapper>
+    <>
       <CouponsPageContent />
-    </AdminAuthWrapper>
+    </>
   );
 }
