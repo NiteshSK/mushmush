@@ -1,8 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { ShoppingCart, Star, Package, Heart } from "lucide-react";
+import Link from "next/link";
+import { Heart, Minus, Plus, Star } from "lucide-react";
+import { useDispatch } from "react-redux";
 import { useWishlist } from "@/app/context/WishlistContext";
+import { type AppDispatch, useAppSelector } from "@/redux/store";
+import { addItemToCart, removeItemFromCart, selectCartItems, updateCartItemQuantity } from "@/redux/features/cart-slice";
+import { packLabel, rupees } from "@/components/Pantry/catalogue";
+import s from "../Pantry/chat.module.css";
 
 export interface ChatProduct {
   id: number;
@@ -23,103 +29,107 @@ export interface ChatProduct {
 
 interface ChatProductCardProps {
   product: ChatProduct;
+  /** Buy this product now through the checkout inside the chat. */
   onBuy: (product: ChatProduct) => void;
+  /** Called when the shopper follows the product link, so the chat can close. */
+  onOpen?: () => void;
 }
 
-const ChatProductCard: React.FC<ChatProductCardProps> = ({ product, onBuy }) => {
-  const thumbnail = product.imgs?.thumbnails?.[0] || product.imgs?.previews?.[0] || "/images/placeholder.png";
-  const finalPrice = product.hasDiscount && product.discountedPrice ? product.discountedPrice : product.price;
+const ChatProductCard: React.FC<ChatProductCardProps> = ({ product, onBuy, onOpen }) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const quantity = useAppSelector(selectCartItems).find((item) => item.id === product.id)?.quantity ?? 0;
+  const stock = product.stockQuantity ?? Infinity;
+  const soldOut = !product.inStock || stock < 1;
+  const discounted = product.hasDiscount && product.discountedPrice ? product.discountedPrice : null;
+  const price = discounted ?? product.price;
+  const thumbnail = product.imgs?.thumbnails?.[0] || product.imgs?.previews?.[0];
+  const [imageFailed, setImageFailed] = useState(false);
+
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const [wishlistLoading, setWishlistLoading] = useState(false);
   const inWishlist = isInWishlist(product.id);
 
-  const toggleWishlist = async (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const toggleWishlist = async () => {
     setWishlistLoading(true);
     try {
-      if (inWishlist) {
-        await removeFromWishlist(product.id);
-      } else {
-        await addToWishlist(product.id);
-      }
+      if (inWishlist) await removeFromWishlist(product.id);
+      else await addToWishlist(product.id);
     } finally {
       setWishlistLoading(false);
     }
   };
 
+  // Same bag line as the shop card: identity and stock limit travel with it.
+  const add = () => {
+    dispatch(addItemToCart({
+      id: product.id, slug: product.slug, title: product.title, imgs: product.imgs, price: product.price,
+      discountedPrice: discounted ?? undefined, stockQuantity: product.stockQuantity, quantity: 1,
+    }));
+  };
+  const subtract = () => {
+    if (quantity <= 1) dispatch(removeItemFromCart(product.id));
+    else dispatch(updateCartItemQuantity({ id: product.id, quantity: quantity - 1 }));
+  };
+
   return (
-    <div className="flex gap-3 bg-white border border-gray-200 rounded-xl p-3 hover:shadow-sm transition-shadow">
-      {/* Image */}
-      <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gray-50 relative">
-        <img
-          src={thumbnail}
-          alt={product.title}
-          className="w-full h-full object-cover"
-          onError={(e) => { (e.target as HTMLImageElement).src = "/images/placeholder.png"; }}
-        />
+    <article className={s.product}>
+      <div className={s.photo}>
+        {thumbnail && !imageFailed && <img src={thumbnail} alt="" loading="lazy" onError={() => setImageFailed(true)} />}
       </div>
-
-      {/* Info */}
-      <div className="flex-1 min-w-0">
-        <h4 className="text-xs font-semibold text-gray-800 truncate leading-tight">{product.title}</h4>
-
-        <div className="flex items-center gap-1 mt-0.5">
+      <div className={s.info}>
+        <p className={s.pack}>
+          <span>{packLabel(product)}</span>
           {product.averageRating > 0 && (
+            <span className={s.rating}>
+              <Star aria-hidden="true" />{product.averageRating.toFixed(1)}<span className={s.srOnly}> out of 5</span>
+            </span>
+          )}
+        </p>
+        <h3 className={s.productTitle}>
+          {product.slug ? <Link href={`/shop-details/${product.slug}`} onClick={onOpen}>{product.title}</Link> : product.title}
+        </h3>
+        <p className={s.price}>
+          {rupees.format(price)}
+          {discounted !== null && (
             <>
-              <Star size={10} className="fill-amber-400 text-amber-400" />
-              <span className="text-[10px] text-gray-500">{product.averageRating.toFixed(1)}</span>
+              <s className={s.was}><span className={s.srOnly}>Was </span>{rupees.format(product.price)}</s>
+              <span className={s.off}>{product.discountPercentage}% off</span>
             </>
           )}
-          <span className="text-[10px] text-gray-400">
-            {product.measurementValue}{product.measurementType}
-          </span>
-        </div>
-
-        <div className="flex items-center justify-between mt-1.5">
-          <div className="flex items-center gap-1.5">
-            <span className="text-sm font-bold text-gray-900">₹{finalPrice}</span>
-            {product.hasDiscount && product.discountedPrice && (
-              <>
-                <span className="text-[10px] text-gray-400 line-through">₹{product.price}</span>
-                <span className="text-[10px] font-medium text-green-600">{product.discountPercentage}% off</span>
-              </>
-            )}
-          </div>
-        </div>
+        </p>
       </div>
-
-      {/* Actions */}
-      <div className="flex-shrink-0 flex flex-col items-center justify-center gap-1.5">
-        {/* Wishlist heart */}
+      <div className={s.actions}>
+        {quantity ? (
+          <div className={s.stepper} role="group" aria-label={`Quantity of ${product.title}`}>
+            <button type="button" onClick={subtract} aria-label={`Remove one ${product.title}`}><Minus aria-hidden="true" /></button>
+            <span aria-live="polite" aria-label={`${quantity} in bag`}>{quantity}</span>
+            <button type="button" onClick={add} disabled={soldOut || quantity >= stock} aria-label={`Add one ${product.title}`}><Plus aria-hidden="true" /></button>
+          </div>
+        ) : soldOut ? (
+          <button type="button" className={s.add} disabled aria-label={`${product.title} sold out`}>Sold out</button>
+        ) : (
+          <button type="button" className={s.add} onClick={add}>
+            <Plus aria-hidden="true" />Add<span className={s.srOnly}> {product.title}</span> to bag
+          </button>
+        )}
+        {!soldOut && (
+          <button type="button" className={s.buyNow} onClick={() => onBuy(product)}>
+            Buy now<span className={s.srOnly}> {product.title}</span>
+          </button>
+        )}
         <button
+          type="button"
+          className={s.save}
           onClick={toggleWishlist}
           disabled={wishlistLoading}
-          className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50"
-          title={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
+          aria-pressed={inWishlist}
+          aria-label={`Save ${product.title} to wishlist`}
+          title={inWishlist ? "Saved to your wishlist" : "Save to wishlist"}
         >
-          <Heart
-            size={14}
-            className={inWishlist ? "fill-red-500 text-red-500" : "text-gray-400"}
-          />
+          <Heart aria-hidden="true" />
         </button>
-
-        {/* Buy button */}
-        {product.inStock ? (
-          <button
-            onClick={() => onBuy(product)}
-            className="flex items-center gap-1 bg-forest text-white text-[10px] font-semibold px-3 py-1.5 rounded-full hover:bg-green-700 transition-colors"
-          >
-            <ShoppingCart size={10} />
-            Buy
-          </button>
-        ) : (
-          <span className="flex items-center gap-1 text-[10px] text-gray-400 bg-gray-100 px-2.5 py-1.5 rounded-full">
-            <Package size={10} />
-            Sold out
-          </span>
-        )}
       </div>
-    </div>
+    </article>
   );
 };
 

@@ -1,0 +1,33 @@
+.desk { max-width: 1160px; margin: 0 auto; color: #19382d; }
+.heading, .payments { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; }
+.heading { margin: 1rem 0 1.75rem; }
+.heading h1 { font: 500 clamp(2.8rem, 5vw, 4.5rem)/1.05 Georgia, serif; letter-spacing: -.045em; }
+.heading p, .payments p { margin-top: .5rem; font-size: .9rem; }
+.heading p { color: #53665c; }
+.heading button, .problem button { display: inline-flex; align-items: center; gap: .45rem; min-height: 44px; padding: .65rem 1rem; border: 1px solid #becdc4; border-radius: .45rem; }
+.payments, .queue, .problem { border: 1px solid #d5dfd7; border-radius: .8rem; padding: clamp(1.15rem, 3vw, 2.25rem); }
+.payments { background: #193e30; color: #fffaf0; border-color: #193e30; }
+.payments p { color: #e1e9df; }
+.desk h2 { font-size: 1.12rem; font-weight: 600; }
+.desk strong { font-size: 3rem; line-height: 1.35; font-variant-numeric: tabular-nums; }
+.links { display: grid; min-width: min(17rem, 36%); gap: .35rem; }
+.links a { display: flex; align-items: center; gap: .75rem; min-height: 44px; border-bottom: 1px solid #779084; padding: .7rem 0; }
+.links b { margin-left: auto; font-variant-numeric: tabular-nums; }
+.queues { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; margin-top: 1rem; }
+.queue { display: grid; align-content: start; gap: .65rem; background: #fffdf7; }
+.queue:hover { border-color: #698775; }
+.queueTitle, .queue span { display: flex; align-items: center; gap: .625rem; }
+.queueTitle svg { flex: 0 0 auto; color: #597261; }
+.queue span { color: #496257; font-size: .9rem; justify-content: space-between; }
+.desk a:focus-visible, .desk button:focus-visible { outline: 3px solid #b99142; outline-offset: 3px; }
+.problem { background: #fff4e3; }
+.problem button { margin-left: .6rem; }
+@media (max-width: 760px) {
+  .queues { grid-template-columns: 1fr; }
+  .payments { align-items: stretch; flex-direction: column; gap: .7rem; }
+  .queue { grid-template-columns: 1fr auto; align-items: center; }
+  .queue span { grid-column: 1/-1; }
+  .queue strong { font-size: 2rem; }
+  .links { min-width: 0; }
+  .heading { margin-top: .5rem; }
+}

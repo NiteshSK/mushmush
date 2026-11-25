@@ -1,9 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  typescript: { tsconfigPath: process.env.NODE_ENV === "production" ? "tsconfig.build.json" : "tsconfig.json" },
   transpilePackages: ['swiper'],
   experimental: {
     optimizePackageImports: ['swiper']
+  },
+  async rewrites() {
+    // Previously uploaded payment receipts must never be served as public assets.
+    return { beforeFiles: [{source:"/payment-proofs/:path*",destination:"/api/retired-payment-proof"}] };
   },
   async redirects() {
     return [

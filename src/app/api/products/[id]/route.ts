@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { staffSession } from '@/lib/admin'
 import { prisma } from '@/lib/prisma'
-import { triggerRestockNotifications } from '@/lib/notifications'
+import { availablePacks } from '@/lib/inventory'
 
 // GET /api/products/[id] - Fetch single product by ID
 export async function GET(
@@ -9,9 +10,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    const productId = parseInt(id)
+    const productId = Number(id)
     
-    if (isNaN(productId)) {
+    if (!Number.isSafeInteger(productId) || productId < 1) {
       return NextResponse.json(
         { error: 'Invalid product ID' },
         { status: 400 }
@@ -19,7 +20,7 @@ export async function GET(
     }
 
     const product = await prisma.product.findUnique({
-      where: { id: productId },
+      where: { id: productId, archivedAt: null },
       include: {
         categories: {
           include: {
@@ -27,14 +28,7 @@ export async function GET(
           }
         },
         reviews: {
-          include: {
-            user: {
-              select: {
-                name: true,
-                email: true
-              }
-            }
-          },
+          select: { id: true, rating: true, comment: true, createdAt: true, user: { select: { name: true } } },
           orderBy: {
             createdAt: 'desc'
           }
@@ -74,11 +68,12 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (!(await staffSession("fulfillment"))) return NextResponse.json({ error: "Staff access required" }, { status: 403 })
     const { id } = await params
-    const productId = parseInt(id)
+    const productId = Number(id)
     const body = await request.json()
 
-    if (isNaN(productId)) {
+    if (!Number.isSafeInteger(productId) || productId < 1) {
       return NextResponse.json(
         { error: 'Invalid product ID' },
         { status: 400 }
@@ -89,10 +84,8 @@ export async function PUT(
       title,
       description,
       price,
-      discountedPrice,
       measurementValue,
       measurementType,
-      inStock,
       featured,
       imgs,
       specifications,
@@ -102,64 +95,40 @@ export async function PUT(
       categories
     } = body
 
-    // Get current product state to check if stock status changed
-    const currentProduct = await prisma.product.findUnique({
-      where: { id: productId },
-      select: { inStock: true }
+    if (body.fulfillmentClass !== undefined && !["fresh", "national"].includes(body.fulfillmentClass)) {
+      return NextResponse.json({ error: "Choose a delivery class" }, { status: 400 });
+    }
+    if (price !== undefined && (!Number.isFinite(price) || price <= 0) ||
+        measurementValue !== undefined && (!Number.isInteger(measurementValue) || measurementValue <= 0) ||
+        categories !== undefined && (!Array.isArray(categories) || !categories.every(Number.isInteger))) {
+      return NextResponse.json({ error: "Check the price, pack size and categories." }, { status: 400 });
+    }
+    if (body.quantity !== undefined || body.inStock !== undefined) {
+      return NextResponse.json({ error: "Adjust stock and availability in Inventory." }, { status: 400 });
+    }
+    if (measurementType !== undefined && (typeof measurementType !== "string" || !measurementType.trim())) {
+      return NextResponse.json({ error: "Enter a pack unit." }, { status: 400 });
+    }
+    const expected = body.expectedUpdatedAt ? new Date(body.expectedUpdatedAt) : undefined;
+    if (expected && !Number.isFinite(expected.getTime())) return NextResponse.json({ error: "Invalid product version" }, { status: 400 });
+    const product = await prisma.$transaction(async tx => {
+      const current = await tx.product.findUnique({ where: { id: productId }, select: { inStock: true, quantity: true, measurementType: true, measurementValue: true, updatedAt: true } });
+      if (!current) return null;
+      const packChanged = measurementType !== undefined && measurementType !== current.measurementType || measurementValue !== undefined && measurementValue !== current.measurementValue;
+      const unavailable = packChanged && current.inStock && availablePacks(current.quantity, measurementValue ?? current.measurementValue, measurementType ?? current.measurementType) < 1;
+      const changed = await tx.product.updateMany({
+        where: { id: productId, archivedAt: null, updatedAt: expected ?? current.updatedAt },
+        data: { title, description, price, measurementValue, measurementType, ...(unavailable ? { inStock: false } : {}), featured,
+          fulfillmentClass: body.fulfillmentClass, imgs, specifications, howToConsume, additionalInfo, benefits }
+      });
+      if (!changed.count) return null;
+      if (categories) {
+        await tx.productCategory.deleteMany({where:{productId}});
+        await tx.productCategory.createMany({data:categories.map((categoryId:number) => ({productId,categoryId})), skipDuplicates:true});
+      }
+      return tx.product.findUniqueOrThrow({where:{id:productId}});
     });
-
-    // Update slug if title changed
-    const slug = title ? title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : undefined
-
-    const product = await prisma.product.update({
-      where: { id: productId },
-      data: {
-        ...(title && { title, slug }),
-        ...(description && { description }),
-        ...(price !== undefined && { price }),
-        ...(discountedPrice !== undefined && { discountedPrice }),
-        ...(measurementValue && { measurementValue }),
-        ...(measurementType && { measurementType }),
-        ...(inStock !== undefined && { inStock }),
-        ...(featured !== undefined && { featured }),
-        ...(imgs && { imgs }),
-        ...(specifications && { specifications }),
-        ...(howToConsume && { howToConsume }),
-        ...(additionalInfo && { additionalInfo }),
-        ...(benefits && { benefits })
-      }
-    })
-
-    // Trigger restock notifications whenever product is in stock.
-    // Safe to call repeatedly; function only emails active subscribers and deactivates them after send.
-    if (product.inStock) {
-      try {
-        await triggerRestockNotifications(productId);
-      } catch (error) {
-        console.error('Failed to send restock notifications:', error);
-        // Don't fail the update if notifications fail
-      }
-    }
-
-    // Update categories if provided
-    if (categories) {
-      // Remove existing categories
-      await prisma.productCategory.deleteMany({
-        where: { productId }
-      })
-
-      // Add new categories
-      if (categories.length > 0) {
-        await prisma.productCategory.createMany({
-          data: categories.map((categoryId: number) => ({
-            productId,
-            categoryId
-          })),
-          skipDuplicates: true
-        })
-      }
-    }
-
+    if (!product) return NextResponse.json({ error: "This product changed or was archived. Reload before saving." }, {status:409});
     return NextResponse.json(product)
   } catch (error) {
     console.error('Error updating product:', error)
@@ -176,21 +145,22 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (!(await staffSession("fulfillment"))) return NextResponse.json({ error: "Staff access required" }, { status: 403 })
     const { id } = await params
-    const productId = parseInt(id)
+    const productId = Number(id)
 
-    if (isNaN(productId)) {
+    if (!Number.isSafeInteger(productId) || productId < 1) {
       return NextResponse.json(
         { error: 'Invalid product ID' },
         { status: 400 }
       )
     }
 
-    await prisma.product.delete({
-      where: { id: productId }
+    await prisma.product.update({
+      where: { id: productId }, data: { archivedAt: new Date(), inStock: false, featured: false }
     })
 
-    return NextResponse.json({ message: 'Product deleted successfully' })
+    return NextResponse.json({ message: 'Product archived' })
   } catch (error) {
     console.error('Error deleting product:', error)
     return NextResponse.json(

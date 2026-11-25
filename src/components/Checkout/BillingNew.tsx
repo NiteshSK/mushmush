@@ -250,7 +250,7 @@ const BillingNew: React.FC<BillingNewProps> = ({ onAddressChange }) => {
               <h3 className="font-medium text-lg">Billing Address</h3>
               {!session && (
                 <Link
-                  href="/auth/signin"
+                  href="/auth/signin?callbackUrl=%2Fcheckout"
                   className="text-sm text-blue-600 hover:text-blue-700 font-medium"
                 >
                   Sign in to save addresses

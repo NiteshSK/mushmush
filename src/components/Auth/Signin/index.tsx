@@ -1,119 +1,151 @@
 "use client";
+
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import React from "react";
-import { signIn, getProviders } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { signIn, useSession } from "next-auth/react";
+import { validateEmail } from "@/lib/validation";
+import { withCallbackUrl } from "@/lib/safe-callback";
+import AuthPage from "../AuthPage";
+import { FormAlert, GoogleButton, PasswordField, TextField } from "../fields";
+import { authErrorMessage, WRONG_PASSWORD } from "../messages";
+import { hardNavigate, useCallbackUrl } from "../useCallbackUrl";
+import styles from "../../Pantry/auth.module.css";
 
-const Signin = () => {
-  const [providers, setProviders] = useState<any>(null);
+type FieldErrors = { email?: string; password?: string };
+const ALERT_ID = "signin-alert";
 
+export default function Signin() {
+  const router = useRouter();
+  const params = useSearchParams();
+  const status = useSession()?.status;
+  const { callbackUrl, resolve } = useCallbackUrl();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const [formError, setFormError] = useState<string | null>(() => authErrorMessage(params?.get("error")));
+  const [pending, setPending] = useState<"credentials" | "google" | null>(null);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+  const leaving = useRef(false);
+
+  // Someone who is already signed in goes straight to where they were heading.
   useEffect(() => {
-    const getAuthProviders = async () => {
-      const providers = await getProviders();
-      setProviders(providers);
-    };
-    getAuthProviders();
-  }, []);
+    if (status === "authenticated" && !leaving.current) router.replace(resolve());
+  }, [status, router, resolve]);
 
-  const handleGoogleSignIn = () => {
-    signIn("google", { callbackUrl: "/" });
-  };
+  // After a wrong password, keep the email and return focus to the password, ready to retype.
+  useEffect(() => {
+    if (failedAttempts === 0) return;
+    passwordRef.current?.focus();
+    passwordRef.current?.select();
+  }, [failedAttempts]);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const address = email.trim();
+    const next: FieldErrors = {};
+    const emailError = validateEmail(address);
+    if (emailError) next.email = emailError;
+    if (!password) next.password = "Enter your password";
+    setErrors(next);
+    setFormError(null);
+    if (next.email || next.password) {
+      (next.email ? emailRef : passwordRef).current?.focus();
+      return;
+    }
+
+    const target = resolve();
+    setPending("credentials");
+    leaving.current = true;
+    try {
+      const result = await signIn("credentials", { email: address, password, redirect: false, callbackUrl: target });
+      if (result && result.ok && !result.error) {
+        // Do not clear the bag here; bag continuity across sign-in is handled with the session.
+        hardNavigate(target);
+        return;
+      }
+      setFormError(WRONG_PASSWORD);
+    } catch {
+      setFormError("We couldn’t reach Kosvana to sign you in. Check your connection and try again.");
+    }
+    leaving.current = false;
+    setPending(null);
+    setFailedAttempts(count => count + 1);
+  }
+
+  async function handleGoogle() {
+    setFormError(null);
+    setPending("google");
+    try {
+      await signIn("google", { callbackUrl: resolve() });
+    } catch {
+      setPending(null);
+      setFormError("We couldn’t open Google sign-in. Please try again.");
+    }
+  }
+
+  const toCheckout = callbackUrl.indexOf("/checkout") === 0;
+  const notes = [
+    "See your orders, invoices and delivery updates",
+    "Keep saved items and delivery addresses",
+    toCheckout
+      ? <>No account needed: <Link href={callbackUrl} className={styles.textLink}>Check out as a guest</Link></>
+      : "Check out faster with a saved address",
+  ];
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-cream px-4 py-20">
-      <div className="max-w-[420px] w-full">
-        {/* Header */}
-        <div className="text-center mb-10">
-          <Link href="/" className="inline-block mb-6">
-            <span className="font-medium text-2xl text-dark">Kosvana</span>
-          </Link>
-          <h1 className="font-medium text-2xl text-dark mb-2">Welcome back</h1>
-          <p className="text-sm text-gray-400">Sign in to your account to continue</p>
-        </div>
-
-        {/* Card */}
-        <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-          <form>
-            <div className="mb-5">
-              <label htmlFor="email" className="block text-xs font-medium uppercase tracking-wider text-gray-400 mb-2">
-                Email
-              </label>
-              <input
-                type="email"
-                name="email"
-                id="email"
-                placeholder="you@example.com"
-                className="w-full border border-gray-200 rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:border-forest focus:ring-1 focus:ring-forest/20 transition-colors"
-              />
-            </div>
-
-            <div className="mb-6">
-              <label htmlFor="password" className="block text-xs font-medium uppercase tracking-wider text-gray-400 mb-2">
-                Password
-              </label>
-              <input
-                type="password"
-                name="password"
-                id="password"
-                placeholder="Enter your password"
-                autoComplete="on"
-                className="w-full border border-gray-200 rounded-lg py-3 px-4 text-sm text-dark placeholder:text-gray-300 outline-none focus:border-forest focus:ring-1 focus:ring-forest/20 transition-colors"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-dark text-white py-3.5 rounded-full text-sm font-medium hover:bg-forest transition-colors duration-300"
-            >
-              Sign In
-            </button>
-
-            <a
-              href="/auth/forgot-password"
-              className="block text-center text-xs text-gray-400 mt-4 hover:text-dark transition-colors"
-            >
-              Forgot your password?
-            </a>
-          </form>
-
-          {/* Divider */}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-100"></div>
-            </div>
-            <div className="relative flex justify-center">
-              <span className="bg-white px-3 text-xs text-gray-400">or continue with</span>
-            </div>
-          </div>
-
-          {/* Social */}
-          <div className="flex flex-col gap-3">
-            {providers?.google && (
-              <button
-                onClick={handleGoogleSignIn}
-                className="flex items-center justify-center gap-3 w-full border border-gray-200 rounded-full py-3 text-sm text-dark hover:bg-gray-50 transition-colors"
-              >
-                <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
-                  <path d="M19.999 10.2218C20.0111 9.53429 19.9387 8.84791 19.7834 8.17737H10.2031V11.8884H15.8267C15.7201 12.5391 15.4804 13.162 15.1219 13.7195C14.7634 14.2771 14.2935 14.7578 13.7405 15.1328L13.7209 15.2571L16.7502 17.5568L16.96 17.5774C18.8873 15.8329 19.999 13.2661 19.999 10.2218Z" fill="#4285F4" />
-                  <path d="M10.2036 20C12.9586 20 15.2715 19.1111 16.9609 17.5777L13.7409 15.1332C12.8793 15.7223 11.7229 16.1333 10.2036 16.1333C8.91317 16.126 7.65795 15.7206 6.61596 14.9746C5.57397 14.2287 4.79811 13.1802 4.39848 11.9777L4.2789 11.9877L1.12906 14.3766L1.08789 14.4888C1.93622 16.1457 3.23812 17.5386 4.84801 18.512C6.45791 19.4852 8.31194 20.0005 10.2036 20Z" fill="#34A853" />
-                  <path d="M4.39899 11.9776C4.1758 11.3411 4.06063 10.673 4.05807 9.9999C4.06218 9.3279 4.1731 8.66067 4.38684 8.02221L4.38115 7.88959L1.1927 5.46234L1.0884 5.51095C0.372762 6.90337 0 8.44075 0 9.99983C0 11.5589 0.372762 13.0962 1.0884 14.4887L4.39899 11.9776Z" fill="#FBBC05" />
-                  <path d="M10.2039 3.86663C11.6661 3.84438 13.0802 4.37803 14.1495 5.35558L17.0294 2.59997C15.1823 0.90185 12.7364 -0.0298855 10.2039 -3.67839e-05C8.31239 -0.000477835 6.45795 0.514733 4.84805 1.48799C3.23816 2.46123 1.93624 3.85417 1.08789 5.51101L4.38751 8.02225C4.79107 6.82005 5.5695 5.77231 6.61303 5.02675C7.65655 4.28119 8.91254 3.87541 10.2039 3.86663Z" fill="#EB4335" />
-                </svg>
-                Sign in with Google
-              </button>
-            )}
-          </div>
-        </div>
-
-        <p className="text-center mt-6 text-sm text-gray-400">
-          Don&apos;t have an account?{" "}
-          <Link href="/signup" className="text-dark hover:text-forest transition-colors font-medium">
-            Sign Up
-          </Link>
-        </p>
-      </div>
-    </div>
+    <AuthPage
+      kicker="Your account"
+      title={<>Welcome <em>back</em></>}
+      lede={toCheckout ? "Sign in to continue to checkout." : callbackUrl !== "/" ? "Sign in and we’ll take you back to the page you were on." : "Sign in to see your orders, saved items and addresses."}
+      notes={notes}
+      notesLabel="About signing in"
+    >
+      {formError && (
+        <FormAlert id={ALERT_ID}>
+          <p>{formError}</p>
+          {formError === WRONG_PASSWORD && <p>If you joined with Google, use Continue with Google below.</p>}
+        </FormAlert>
+      )}
+      <form className={styles.form} noValidate onSubmit={handleSubmit} aria-label="Sign in with email">
+        <TextField
+          ref={emailRef}
+          id="signin-email"
+          name="email"
+          type="email"
+          label="Email"
+          autoComplete="username"
+          inputMode="email"
+          autoCapitalize="none"
+          spellCheck={false}
+          value={email}
+          onChange={event => { setEmail(event.target.value); if (errors.email) setErrors(prev => ({ ...prev, email: undefined })); }}
+          error={errors.email}
+        />
+        <PasswordField
+          ref={passwordRef}
+          id="signin-password"
+          name="password"
+          label="Password"
+          autoComplete="current-password"
+          value={password}
+          onChange={event => { setPassword(event.target.value); if (errors.password) setErrors(prev => ({ ...prev, password: undefined })); }}
+          error={errors.password}
+          describedBy={formError ? ALERT_ID : undefined}
+          labelAside={<Link href={withCallbackUrl("/auth/forgot-password", callbackUrl)} className={styles.textLink}>Forgot password?</Link>}
+        />
+        <button type="submit" className={styles.submit} disabled={pending !== null}>
+          {pending === "credentials" ? "Signing in…" : "Sign in"}
+        </button>
+      </form>
+      <p className={styles.divider}>or</p>
+      <GoogleButton onClick={handleGoogle} disabled={pending !== null} pending={pending === "google"} />
+      <p className={styles.switch}>
+        New to Kosvana?
+        <Link href={withCallbackUrl("/auth/signup", callbackUrl)} className={styles.textLink}>Create an account</Link>
+      </p>
+    </AuthPage>
   );
-};
-
-export default Signin;
+}

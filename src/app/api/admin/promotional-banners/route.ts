@@ -1,11 +1,11 @@
+import { validBanner } from "@/lib/promotion-schedule";
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { staffSession } from "@/lib/admin";
 import { prisma } from '@/lib/prisma';
 
 async function checkAdminAuth() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user || session.user.role !== 'ADMIN') {
+  const session = await staffSession("editor");
+  if (!session?.user) {
     return false;
   }
   return true;
@@ -121,12 +121,8 @@ export async function POST(request: NextRequest) {
       priority = 0
     } = body;
 
-    if (!title || !imageUrl) {
-      return NextResponse.json(
-        { success: false, error: 'Title and image URL are required' },
-        { status: 400 }
-      );
-    }
+    const error = validBanner(body);
+    if (error) return NextResponse.json({success:false,error},{status:400});
 
     const banner = await prisma.promotionalBanner.create({
       data: {

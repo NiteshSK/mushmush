@@ -59,6 +59,7 @@ export interface EmailOptions {
   html: string;
   text?: string;
   useZoho?: boolean;
+  messageId?: string;
 }
 
 /** Verify SMTP connection is working — call from an admin API route to diagnose issues */
@@ -83,7 +84,7 @@ export async function verifyEmailConnection(): Promise<{ gmail: boolean; zoho: b
   return result;
 }
 
-export async function sendEmail({ to, subject, html, text, useZoho }: EmailOptions) {
+export async function sendEmail({ to, subject, html, text, useZoho, messageId }: EmailOptions) {
   try {
     const recipients = Array.isArray(to) ? to.join(', ') : to;
     const transport = useZoho && zohoTransporter ? zohoTransporter : transporter;
@@ -92,6 +93,7 @@ export async function sendEmail({ to, subject, html, text, useZoho }: EmailOptio
       : `"Kosvana" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`;
 
     const info = await transport.sendMail({
+      messageId,
       from: fromAddress,
       to: recipients,
       subject,
@@ -1047,7 +1049,13 @@ export async function sendAdminNewOrderEmail(data: OrderNotificationData): Promi
 }
 
 /** Email sent to CUSTOMER when they place an order (before payment) */
-export async function sendOrderPlacedEmail(data: OrderNotificationData): Promise<void> {
+export async function sendOrderPlacedEmail(data: OrderNotificationData & { trackingUrl?: string }): Promise<void> {
+  let trackingLink = '';
+  if (data.trackingUrl) {
+    let baseUrl = getAppUrl();
+    if (baseUrl && !baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) baseUrl = `https://${baseUrl}`;
+    trackingLink = `<p style="margin-top: 16px;"><a href="${escapeHtml(baseUrl + data.trackingUrl)}" style="color: #263f31; font-weight: 600;">Track your order</a></p>`;
+  }
   const html = orderEmailWrapper(
     'Order Placed Successfully!',
     `Order #${data.orderNumber}`,
@@ -1059,6 +1067,7 @@ export async function sendOrderPlacedEmail(data: OrderNotificationData): Promise
       <p style="margin-top: 20px; padding: 15px; background: #fef3c7; border-radius: 8px; color: #92400e; font-size: 13px;">
         <strong>Next step:</strong> Complete your UPI payment to confirm this order. Your order will be processed once payment is verified.
       </p>
+      ${trackingLink}
     `
   );
 

@@ -1,19 +1,6 @@
-import React from "react";
-import BlogGridWithSidebar from "@/components/BlogGridWithSidebar";
+import { redirect } from "next/navigation";
 
-import { Metadata } from "next";
-export const metadata: Metadata = {
-  title: "Blog Grid Page | Kosvana",
-  description: "This is Blog Grid Page for Kosvana",
-  // other metadata
-};
-
-const BlogGridWithSidebarPage = () => {
-  return (
-    <>
-      <BlogGridWithSidebar />
-    </>
-  );
-};
-
-export default BlogGridWithSidebarPage;
+/** Old template URL. It showed hard-coded posts, a post link that 404s, "#" pagination and placeholder categories. */
+export default function BlogGridWithSidebarPage() {
+  redirect("/blogs");
+}

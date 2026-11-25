@@ -45,9 +45,9 @@ function unsubscribePage(message: string, requestUrl?: string): string {
     <head><title>Unsubscribe — Kosvana</title></head>
     <body style="font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background: #faf9f6;">
       <div style="text-align: center; max-width: 400px; padding: 40px;">
-        <h1 style="color: #5c8e61; font-size: 24px; margin-bottom: 12px;">Kosvana</h1>
+        <h1 style="color: #1c3024; font-size: 24px; margin-bottom: 12px;">Kosvana</h1>
         <p style="color: #333; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">${message}</p>
-        <a href="${baseUrl}" style="color: #5c8e61; text-decoration: underline; font-size: 14px;">Back to Kosvana</a>
+        <a href="${baseUrl}" style="color: #1c3024; text-decoration: underline; font-size: 14px;">Back to Kosvana</a>
       </div>
     </body>
     </html>

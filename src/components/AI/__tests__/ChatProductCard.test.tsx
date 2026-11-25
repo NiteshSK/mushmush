@@ -1,5 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { configureStore } from '@reduxjs/toolkit';
+import { Provider } from 'react-redux';
+import cartReducer from '@/redux/features/cart-slice';
 import ChatProductCard, { ChatProduct } from '../ChatProductCard';
 
 // Mock WishlistContext
@@ -46,6 +49,12 @@ const outOfStockProduct: ChatProduct = {
   inStock: false,
 };
 
+const renderCard = (product: ChatProduct, onBuy: jest.Mock) => {
+  const store = configureStore({ reducer: { cartReducer } });
+  const view = render(<Provider store={store}><ChatProductCard product={product} onBuy={onBuy} /></Provider>);
+  return { store, ...view };
+};
+
 describe('ChatProductCard', () => {
   const mockOnBuy = jest.fn();
 
@@ -54,31 +63,54 @@ describe('ChatProductCard', () => {
   });
 
   it('renders product title, price, and rating', () => {
-    render(<ChatProductCard product={mockProduct} onBuy={mockOnBuy} />);
+    renderCard(mockProduct, mockOnBuy);
 
-    expect(screen.getByText('Premium Oyster Mushroom')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Premium Oyster Mushroom' })).toBeInTheDocument();
     expect(screen.getByText('₹350')).toBeInTheDocument();
     expect(screen.getByText('4.5')).toBeInTheDocument();
-    expect(screen.getByText('200g')).toBeInTheDocument();
+    expect(screen.getByText('200 g')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Premium Oyster Mushroom' })).toHaveAttribute('href', '/shop-details/premium-oyster-mushroom');
   });
 
-  it('renders Buy button for in-stock products', () => {
-    render(<ChatProductCard product={mockProduct} onBuy={mockOnBuy} />);
+  it('renders Add to bag and Buy now for in-stock products', () => {
+    renderCard(mockProduct, mockOnBuy);
 
-    const buyButton = screen.getByText('Buy');
-    expect(buyButton).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add Premium Oyster Mushroom to bag' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Buy now Premium Oyster Mushroom' })).toBeInTheDocument();
   });
 
-  it('calls onBuy with the product when Buy is clicked', () => {
-    render(<ChatProductCard product={mockProduct} onBuy={mockOnBuy} />);
+  it('adds a bag line with slug and stock limit, then caps the stepper at stock', () => {
+    const { store } = renderCard({ ...mockProduct, stockQuantity: 2 }, mockOnBuy);
 
-    fireEvent.click(screen.getByText('Buy'));
+    fireEvent.click(screen.getByRole('button', { name: 'Add Premium Oyster Mushroom to bag' }));
+    expect(store.getState().cartReducer.items[0]).toMatchObject({
+      id: 1, slug: 'premium-oyster-mushroom', stockQuantity: 2, quantity: 1, price: 350,
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Add one Premium Oyster Mushroom' }));
+    expect(store.getState().cartReducer.items[0].quantity).toBe(2);
+    expect(screen.getByRole('button', { name: 'Add one Premium Oyster Mushroom' })).toBeDisabled();
+    fireEvent.click(screen.getByRole('button', { name: 'Remove one Premium Oyster Mushroom' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Remove one Premium Oyster Mushroom' }));
+    expect(store.getState().cartReducer.items).toHaveLength(0);
+  });
+
+  it('keeps the discounted price on the bag line', () => {
+    const { store } = renderCard(discountedProduct, mockOnBuy);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add Shiitake Mushroom Dried to bag' }));
+    expect(store.getState().cartReducer.items[0]).toMatchObject({ price: 350, discountedPrice: 280 });
+  });
+
+  it('calls onBuy with the product when Buy now is clicked', () => {
+    renderCard(mockProduct, mockOnBuy);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Buy now Premium Oyster Mushroom' }));
     expect(mockOnBuy).toHaveBeenCalledWith(mockProduct);
     expect(mockOnBuy).toHaveBeenCalledTimes(1);
   });
 
   it('shows discount info when product has a discount', () => {
-    render(<ChatProductCard product={discountedProduct} onBuy={mockOnBuy} />);
+    renderCard(discountedProduct, mockOnBuy);
 
     expect(screen.getByText('₹280')).toBeInTheDocument();
     expect(screen.getByText('₹350')).toBeInTheDocument();
@@ -86,29 +118,30 @@ describe('ChatProductCard', () => {
   });
 
   it('shows "Sold out" for out-of-stock products', () => {
-    render(<ChatProductCard product={outOfStockProduct} onBuy={mockOnBuy} />);
+    renderCard(outOfStockProduct, mockOnBuy);
 
-    expect(screen.getByText('Sold out')).toBeInTheDocument();
-    expect(screen.queryByText('Buy')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Reishi Extract Powder sold out' })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: /Buy now/ })).not.toBeInTheDocument();
   });
 
   it('does not call onBuy for out-of-stock products', () => {
-    render(<ChatProductCard product={outOfStockProduct} onBuy={mockOnBuy} />);
+    renderCard(outOfStockProduct, mockOnBuy);
 
     // No buy button to click
     expect(mockOnBuy).not.toHaveBeenCalled();
   });
 
   it('renders product image from thumbnails', () => {
-    render(<ChatProductCard product={mockProduct} onBuy={mockOnBuy} />);
+    const { container } = renderCard(mockProduct, mockOnBuy);
 
-    const img = screen.getByAltText('Premium Oyster Mushroom');
-    expect(img).toHaveAttribute('src', '/images/oyster-thumb.jpg');
+    // The title names the product, so the photo is decorative.
+    expect(container.querySelector('img')).toHaveAttribute('src', '/images/oyster-thumb.jpg');
+    expect(container.querySelector('img')).toHaveAttribute('alt', '');
   });
 
   it('hides rating when averageRating is 0', () => {
     const noRatingProduct = { ...mockProduct, averageRating: 0 };
-    render(<ChatProductCard product={noRatingProduct} onBuy={mockOnBuy} />);
+    renderCard(noRatingProduct, mockOnBuy);
 
     expect(screen.queryByText('0.0')).not.toBeInTheDocument();
   });

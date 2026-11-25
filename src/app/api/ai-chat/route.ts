@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import { availablePacks } from "@/lib/inventory";
+import { activeDiscountsInclude, computeProductDiscount } from "@/lib/product-pricing";
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -71,8 +72,8 @@ export async function POST(req: Request) {
         try {
             [products, programs, blogs, news, featured, banners] = await Promise.all([
                 keywordList.length > 0
-                    ? prisma.product.findMany({ where: buildSearch('title', 'description'), take: 5 })
-                    : prisma.product.findMany({ take: 5 }),
+                    ? prisma.product.findMany({ where: { ...buildSearch('title', 'description'), archivedAt:null }, take: 5 })
+                    : prisma.product.findMany({ where:{archivedAt:null}, take:5 }),
                 keywordList.length > 0
                     ? prisma.trainingProgram.findMany({ where: buildSearch('name', 'description'), take: 3 })
                     : Promise.resolve([]),
@@ -83,7 +84,7 @@ export async function POST(req: Request) {
                     ? prisma.news.findMany({ where: { ...buildSearch('title', 'content'), published: true }, take: 3 })
                     : Promise.resolve([]),
                 prisma.product.findMany({
-                    where: { featured: true },
+                    where: { featured: true, archivedAt:null },
                     take: 3,
                 }),
                 prisma.promotionalBanner.findMany({
@@ -162,37 +163,25 @@ COMPANY INFORMATION:
 
 ABOUT KOSVANA:
 - Founded by: Bhartendu, Pravesh & Vikrant (left conventional jobs to pursue mushroom cultivation full-time)
-- Philosophy: "Naturally Grown, Seriously Cared For" - Zero chemicals, 100% organic cultivation
-- Certification: Certified by Department of Mushroom, Uttarakhand, Dehradun
-- Production Capacity:
-  * 25+ kg daily fresh mushroom production
-  * 5+ premium mushroom varieties
-  * 2+ kg daily spawn distribution
+- The founders are still the growers and look after every stage of cultivation themselves.
+- Fresh mushrooms go to kitchens in Dehradun. Dried mushrooms, spices, dry fruits and seeds ship across India.
 
-MUSHROOM VARIETIES WE GROW:
-- Oyster Mushrooms (fresh, dried)
-- Shiitake
-- Ganoderma (Reishi) - medicinal mushroom extract powders
-- Button Mushrooms
-- King Oyster
+DO NOT CLAIM: organic certification, "zero chemicals", any government or other certification, production volumes, awards, or health cures. We have not published these. If asked, say you don't have that information and offer the contact details.
+
+MUSHROOMS: use the product data above and the searchProducts tool for what is on sale now (for example oyster, king oyster, shiitake, lion's mane, ganoderma and turkey tail, with powders and a tincture). Do not list varieties that are not in the product data.
 
 TRAINING PROGRAMS:
-- Comprehensive training for aspiring entrepreneurs and hobbyists
-- Covers basic to advanced cultivation techniques
-- Weekend batches available
-- Hands-on experience with expert guidance
-- Training programs for: Oyster, Button, Shiitake, and Ganoderma mushrooms
+- 5-day training programs in oyster and shiitake mushroom growing, taught by Pravesh Rawat and Vikrant Rai.
+- For anyone who wants to grow mushrooms, from home growers to people who plan to start a farm.
+- Use the training data above for batch dates, prices and seats. Do not invent dates or batch types.
 
 OTHER PRODUCTS:
-- Dry Fruits (almonds, cashews, walnuts, raisins, etc.)
-- Seeds (chia, flax, pumpkin, sunflower, etc.)
-- Spices (turmeric, black pepper, cinnamon, etc.)
-- Mushroom Pickles (coming soon)
-- Mushroom Cookies (coming soon)
-- Health Tinctures (coming soon)
-- Dry Mushroom Powders (coming soon)
+- Dry Fruits (almonds, cashews, walnuts, raisins, apricots)
+- Seeds (chia, pumpkin, sunflower, sesame, mustard)
+- Grow your own: mushroom spawn and grow bags are growing supplies, not food. They are sold in the separate "Grow your own" section on the home page (${baseUrl}/#grow), not with Seeds. Never suggest eating them.
+- Spices (turmeric, black pepper, cumin, cloves, garlic, black garlic)
 
-When users ask about our company, founders, story, certifications, production capacity, or training programs, use the above information to provide detailed and accurate responses.
+When users ask about our company, founders, story or training programs, use only the information above. If something is not stated here or in the data above, say you don't know and offer the contact details.
 
 If the user asks for a product or its price, ALWAYS provide the direct link to the product page and mention stock availability.
 
@@ -239,15 +228,10 @@ Answer concisely. No filler text. Keep responses under 2-3 sentences when produc
                                 : {};
 
                             let foundProducts = await prisma.product.findMany({
-                                where,
+                                where:{...where, archivedAt:null},
                                 include: {
                                     reviews: { select: { rating: true } },
-                                    discounts: {
-                                        where: {
-                                            isActive: true,
-                                            OR: [{ endDate: null }, { endDate: { gte: new Date() } }],
-                                        },
-                                    },
+                                    discounts: activeDiscountsInclude(),
                                 },
                                 take: 8,
                             });
@@ -255,15 +239,10 @@ Answer concisely. No filler text. Keep responses under 2-3 sentences when produc
                             // Fallback: if no keyword matches, show featured products
                             if (foundProducts.length === 0) {
                                 foundProducts = await prisma.product.findMany({
-                                    where: { featured: true },
+                                    where: { featured: true, archivedAt:null },
                                     include: {
                                         reviews: { select: { rating: true } },
-                                        discounts: {
-                                            where: {
-                                                isActive: true,
-                                                OR: [{ endDate: null }, { endDate: { gte: new Date() } }],
-                                            },
-                                        },
+                                        discounts: activeDiscountsInclude(),
                                     },
                                     take: 8,
                                 });
@@ -274,18 +253,8 @@ Answer concisely. No filler text. Keep responses under 2-3 sentences when produc
                                     ? p.reviews.reduce((sum, r) => sum + r.rating, 0) / p.reviews.length
                                     : 0;
 
-                                let discountedPrice = null;
-                                let discountPercentage = 0;
-                                if (p.discounts && p.discounts.length > 0) {
-                                    const d = p.discounts[0];
-                                    if (d.type === "PERCENTAGE") {
-                                        discountedPrice = Math.ceil(p.price * (1 - d.value / 100));
-                                        discountPercentage = d.value;
-                                    } else if (d.type === "FIXED_AMOUNT") {
-                                        discountedPrice = Math.ceil(Math.max(0, p.price - d.value));
-                                        discountPercentage = ((p.price - discountedPrice) / p.price) * 100;
-                                    }
-                                }
+                                // Same discount rule as /api/products and order pricing
+                                const { discountedPrice, discountPercentage } = computeProductDiscount(p.price, p.discounts);
 
                                 return {
                                     id: p.id,

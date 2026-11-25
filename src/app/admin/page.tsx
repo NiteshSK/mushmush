@@ -1,264 +1,67 @@
 "use client";
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import TrainingProgramsAdmin from "@/components/Admin/TrainingPrograms";
-import PaymentVerification from "@/components/Admin/PaymentVerification";
-import AdminAuthWrapper from "@/components/Admin/AdminAuthWrapper";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { ArrowRight, ArrowUpRight, Box, Leaf, PackageOpen, RefreshCw } from "lucide-react";
+import styles from "./today.module.css";
 
-interface DashboardStats {
-  totalProducts: number;
-  inStockProducts: number;
-  outOfStockProducts: number;
-  productsWithDiscounts: number;
-  totalOrders: number;
-  totalUsers: number;
-}
-
-const AdminDashboardContent: React.FC = () => {
-  const [stats, setStats] = useState<DashboardStats>({
-    totalProducts: 0,
-    inStockProducts: 0,
-    outOfStockProducts: 0,
-    productsWithDiscounts: 0,
-    totalOrders: 0,
-    totalUsers: 0,
-  });
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchDashboardStats();
-  }, []);
-
-  const fetchDashboardStats = async () => {
-    try {
-      const [productsRes, ordersRes, usersRes] = await Promise.allSettled([
-        fetch('/api/admin/products'),
-        fetch('/api/orders?limit=1'),
-        fetch('/api/admin/users'),
-      ]);
-
-      const products = productsRes.status === 'fulfilled' && productsRes.value.ok
-        ? await productsRes.value.json() : [];
-      const ordersData = ordersRes.status === 'fulfilled' && ordersRes.value.ok
-        ? await ordersRes.value.json() : { pagination: { total: 0 } };
-      const usersData = usersRes.status === 'fulfilled' && usersRes.value.ok
-        ? await usersRes.value.json() : [];
-
-      const productList = Array.isArray(products) ? products : [];
-      setStats({
-        totalProducts: productList.length,
-        inStockProducts: productList.filter((p: any) => p.inStock).length,
-        outOfStockProducts: productList.filter((p: any) => !p.inStock).length,
-        productsWithDiscounts: productList.filter((p: any) => p.hasActiveDiscount).length,
-        totalOrders: ordersData.pagination?.total ?? 0,
-        totalUsers: Array.isArray(usersData) ? usersData.length : (usersData.users?.length ?? 0),
-      });
-    } catch {
-      // Dashboard stats are best-effort
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const statCards = [
-    {
-      title: 'Total Products',
-      value: stats.totalProducts,
-      icon: '📦',
-      color: 'bg-blue-light-5 text-blue',
-      link: '/admin/products'
-    },
-    {
-      title: 'In Stock',
-      value: stats.inStockProducts,
-      icon: '✅',
-      color: 'bg-green-light-5 text-green',
-      link: '/admin/inventory'
-    },
-    {
-      title: 'Out of Stock',
-      value: stats.outOfStockProducts,
-      icon: '❌',
-      color: 'bg-red-light-5 text-red',
-      link: '/admin/inventory'
-    },
-    {
-      title: 'With Discounts',
-      value: stats.productsWithDiscounts,
-      icon: '🏷️',
-      color: 'bg-yellow-light-2 text-yellow-dark',
-      link: '/admin/discounts'
-    },
-  ];
-
-  const quickActions = [
-    {
-      title: 'Manage Inventory',
-      description: 'Update product stock status',
-      icon: '📋',
-      link: '/admin/inventory',
-      color: 'bg-blue'
-    },
-    {
-      title: 'View Products',
-      description: 'Browse all products',
-      icon: '📦',
-      link: '/admin/products',
-      color: 'bg-green'
-    },
-    {
-      title: 'Promotional Banners',
-      description: 'Manage promotional banners',
-      icon: '🎨',
-      link: '/admin/promotional-banners',
-      color: 'bg-purple'
-    },
-    {
-      title: 'Manage Discounts',
-      description: 'Update product discounts',
-      icon: '🏷️',
-      link: '/admin/discounts',
-      color: 'bg-yellow'
-    },
-    {
-      title: 'Manage Coupons',
-      description: 'Create & manage coupon codes',
-      icon: '🎟️',
-      link: '/admin/coupons',
-      color: 'bg-orange'
-    },
-    {
-      title: 'View Orders',
-      description: 'Check recent orders',
-      icon: '🛒',
-      link: '/admin/orders',
-      color: 'bg-teal'
-    },
-    {
-      title: 'Training Programs',
-      description: 'Manage training programs',
-      icon: '🎓',
-      link: '/admin/training-programs',
-      color: 'bg-indigo'
-    },
-    {
-      title: 'Training Registrations',
-      description: 'View training registrations',
-      icon: '📝',
-      link: '/admin/training-registrations',
-      color: 'bg-pink'
-    },
-    {
-      title: 'Payment Verification',
-      description: 'Verify UPI payments',
-      icon: '💳',
-      link: '/admin/payment-verification',
-      color: 'bg-orange'
-    },
-    {
-      title: 'Blog Management',
-      description: 'Create and manage blog posts',
-      icon: '📝',
-      link: '/admin/blogs',
-      color: 'bg-blue'
-    },
-    {
-      title: 'News Management',
-      description: 'Create and manage news articles',
-      icon: '📰',
-      link: '/admin/news',
-      color: 'bg-green'
-    },
-    {
-      title: 'Tag Management',
-      description: 'Manage blog and news tags',
-      icon: '🏷️',
-      link: '/admin/tags',
-      color: 'bg-purple'
-    },
-  ];
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-forest mx-auto mb-4"></div>
-          <p className="text-gray-6">Loading dashboard...</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-6">
-      {/* Welcome Section */}
-      <div className="bg-white rounded-[10px] shadow-1 p-6">
-        <h1 className="text-2xl font-semibold text-dark mb-2">Welcome to MushMush Admin</h1>
-        <p className="text-gray-6">
-          Manage your e-commerce store efficiently. Quick access to inventory, products, and more.
-        </p>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statCards.map((card, index) => (
-          <Link
-            key={index}
-            href={card.link}
-            className="bg-white rounded-[10px] shadow-1 p-6 hover:shadow-2 transition-shadow"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-6">{card.title}</p>
-                <p className="text-3xl font-semibold text-dark mt-2">{card.value}</p>
-              </div>
-              <div className={`w-12 h-12 rounded-lg ${card.color} flex items-center justify-center text-2xl`}>
-                {card.icon}
-              </div>
-            </div>
-          </Link>
-        ))}
-      </div>
-
-      {/* Quick Actions */}
-      <div className="bg-white rounded-[10px] shadow-1 p-6">
-        <h2 className="text-lg font-semibold text-dark mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {quickActions.map((action, index) => (
-            <Link
-              key={index}
-              href={action.link}
-              className="group p-4 rounded-lg border border-gray-3 hover:border-forest transition-colors"
-            >
-              <div className={`w-10 h-10 rounded-lg ${action.color} text-white flex items-center justify-center text-xl mb-3 group-hover:scale-110 transition-transform`}>
-                {action.icon}
-              </div>
-              <h3 className="font-medium text-dark mb-1">{action.title}</h3>
-              <p className="text-sm text-gray-6">{action.description}</p>
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* Recent Activity Placeholder */}
-      <div className="bg-white rounded-[10px] shadow-1 p-6">
-        <h2 className="text-lg font-semibold text-dark mb-4">Recent Activity</h2>
-        <div className="text-center py-8">
-          <div className="text-4xl mb-4">📊</div>
-          <p className="text-gray-6">Activity tracking coming soon...</p>
-          <p className="text-sm text-gray-5 mt-2">
-            This section will show recent inventory changes, orders, and system updates.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
+type Work = {
+  finance: boolean; fulfillment: boolean; editor: boolean; trainer: boolean;
+  payments: number | null; training: number | null; pack: number | null; fresh: number | null; stock: number | null;
+  oldest: string | null; updatedAt: string;
 };
+const stamp = new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", hour: "numeric", minute: "2-digit", day: "numeric", month: "short" });
+const queues = [
+  { key: "pack", title: "Ready to pack", href: "/admin/orders?status=CONFIRMED", detail: "Confirmed orders", Icon: Box },
+  { key: "fresh", title: "Dehradun deliveries", href: "/admin/orders?delivery=fresh", detail: "Open fresh orders", Icon: Leaf },
+  { key: "stock", title: "Stock needing attention", href: "/admin/inventory?attention=1", detail: "Unavailable or 5 packs or fewer", Icon: PackageOpen },
+] as const;
 
-export default function AdminDashboard() {
-  return (
-    <AdminAuthWrapper>
-      <AdminDashboardContent />
-    </AdminAuthWrapper>
-  );
+export default function Today() {
+  const [work, setWork] = useState<Work | null>(null);
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [refresh, setRefresh] = useState(0);
+  useEffect(() => {
+    const controller = new AbortController();
+    setLoading(true);
+    setError(false);
+    fetch("/api/admin/today", { signal: controller.signal, cache: "no-store" })
+      .then(async response => {
+        if (!response.ok) throw new Error("Unavailable");
+        const result = await response.json();
+        if (!controller.signal.aborted) setWork(result);
+      })
+      .catch(() => { if (!controller.signal.aborted) setError(true); })
+      .finally(() => { if (!controller.signal.aborted) setLoading(false); });
+    return () => controller.abort();
+  }, [refresh]);
+  const paymentTotal = work?.payments != null && work.training != null ? work.payments + work.training : null;
+  return <section className={styles.desk} aria-labelledby="today-title" aria-busy={loading}>
+    <header className={styles.heading}><div><h1 id="today-title">Today</h1>
+      {work && !error && <p>Updated {stamp.format(new Date(work.updatedAt))} IST</p>}</div>
+      <button disabled={loading} onClick={() => setRefresh(value => value + 1)}><RefreshCw size={15} aria-hidden="true"/> {loading ? "Refreshing…" : "Refresh"}</button>
+    </header>
+    {error ? <p className={styles.problem} role="alert">Work queues could not be loaded. <button onClick={() => setRefresh(value => value + 1)}>Try again</button></p>
+      : !work ? <p role="status">Loading work queues…</p> : <>
+      {work.finance && <div className={styles.payments}>
+        <div><h2>Payments to check</h2><strong aria-label={paymentTotal === null ? "Total unavailable" : undefined}>{paymentTotal ?? "—"}</strong>
+          <p>{paymentTotal === null ? "Part of this queue is unavailable. Refresh to try again." :
+            work.oldest ? "Oldest pending · " + stamp.format(new Date(work.oldest)) + " IST" : "All submitted payments have been reviewed."}</p></div>
+        <div className={styles.links}>
+          <Link href="/admin/orders?status=PAYMENT_RECEIVED">Store orders <b>{work.payments ?? "Unavailable"}</b><ArrowRight size={17}/></Link>
+          <Link href="/admin/payment-verification">Training payments <b>{work.training ?? "Unavailable"}</b><ArrowRight size={17}/></Link>
+        </div>
+      </div>}
+      {work.fulfillment && <div className={styles.queues}>{queues.map(({key,title,href,detail,Icon}) =>
+        <Link key={key} className={styles.queue} href={href}>
+          <div className={styles.queueTitle}><Icon size={19} aria-hidden="true"/><h2>{title}</h2></div>
+          <strong>{work[key] ?? "—"}</strong><span>{work[key] == null ? "Count unavailable" : detail}<ArrowUpRight size={16} aria-hidden="true"/></span>
+        </Link>)}</div>}
+      {!work.finance && !work.fulfillment && <div className={styles.queues}>
+        {work.editor && <Link className={styles.queue} href="/admin/blogs"><h2>Journal</h2><span>Manage articles <ArrowRight size={16}/></span></Link>}
+        {work.editor && <Link className={styles.queue} href="/admin/news"><h2>News</h2><span>Manage news <ArrowRight size={16}/></span></Link>}
+        {work.trainer && <Link className={styles.queue} href="/admin/training-registrations"><h2>Training registrations</h2><span>Open registration list <ArrowRight size={16}/></span></Link>}
+      </div>}
+    </>}
+  </section>;
 }

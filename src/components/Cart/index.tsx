@@ -1,72 +1,72 @@
 "use client";
-import React from "react";
-import OrderSummary from "./OrderSummary";
-import { useAppSelector } from "@/redux/store";
-import SingleItem from "./SingleItem";
-import Breadcrumb from "../Common/Breadcrumb";
+
+import { useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
+import { pinDelivery, undeliverableFreshLines } from "../Pantry/delivery";
+import BagLine from "./BagLine";
+import FreshConflict from "./FreshConflict";
+import OrderSummary from "./OrderSummary";
+import { useBag, useBagReady, useDeliveryQuote } from "./bag";
+import p from "../Pantry/pantry.module.css";
+import r from "../Pantry/review.module.css";
 
-const Cart = () => {
-  const cartItems = useAppSelector((state) => state.cartReducer.items);
+/** Bag, details, verify email, pay. `current` 5 marks every step done. */
+export function CheckoutSteps({ current }: { current: 1 | 2 | 3 | 4 | 5 }) {
+  const steps = ["Bag", "Details", "Verify email", "Pay by UPI"];
+  return <ol className={r.steps} aria-label="Checkout steps">
+    {steps.map((step, index) => <li key={step} aria-current={index + 1 === current ? "step" : undefined} data-done={index + 1 < current || undefined}>
+      {step}{index + 1 < current && <span className={p.srOnly}> (done)</span>}
+    </li>)}
+  </ol>;
+}
 
-  return (
-    <>
-      <Breadcrumb title={"Cart"} pages={["Cart"]} />
+export function EmptyBag() {
+  return <div className={r.empty}>
+    <h2>Your bag is empty.</h2>
+    <p>Dried mushrooms, spices, dry fruits and seeds ship across India. Fresh mushrooms deliver in Dehradun.</p>
+    <Link href="/shop" className={p.primaryAction}>Shop the pantry</Link>
+  </div>;
+}
 
-      {cartItems.length > 0 ? (
-        <section className="py-12 sm:py-16">
-          <div className="max-w-[1200px] w-full mx-auto px-4 sm:px-6 xl:px-0">
-            <div className="bg-white rounded-lg border border-gray-100">
-              {/* Desktop header — hidden on mobile */}
-              <div className="hidden md:flex items-center py-4 px-6 border-b border-gray-100">
-                <div className="flex-1">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">Product</p>
-                </div>
-                <div className="w-[120px] text-center">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">Price</p>
-                </div>
-                <div className="w-[160px] text-center">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">Quantity</p>
-                </div>
-                <div className="w-[100px] text-right">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">Subtotal</p>
-                </div>
-                <div className="w-[50px]"></div>
-              </div>
+export default function Cart() {
+  const ready = useBagReady();
+  const { lines, subtotal, count, savings, catalogueError } = useBag();
+  const delivery = useDeliveryQuote(subtotal);
+  const pinRef = useRef<HTMLInputElement>(null);
+  const conflictRef = useRef<HTMLDivElement>(null);
 
-              {cartItems.map((item, key) => (
-                <SingleItem item={item} key={key} />
-              ))}
-            </div>
+  // Start from the PIN the shopper checked earlier in this visit.
+  useEffect(() => { if (ready && lines.length) delivery.restore(); }, [ready]); // eslint-disable-line react-hooks/exhaustive-deps
 
-            <div className="flex flex-col lg:flex-row gap-8 mt-10">
-              <OrderSummary />
-            </div>
-          </div>
+  const scopes = useMemo(() => new Map(lines.map(line => [line.id, line.scope] as const)), [lines]);
+  const zone = delivery.quote && delivery.checkedPin ? pinDelivery(delivery.checkedPin, delivery.quote) : null;
+  const blocked = zone && zone !== "unavailable" ? undeliverableFreshLines(lines, scopes, zone) : [];
+  const blockedIds = new Set(blocked.map(line => line.id));
+
+  return <main id="main" className={`${p.page} ${r.root}`}>
+    <div className={p.pageHead}>
+      <div>
+        <p className={p.kicker}>Review and pay</p>
+        <h1>Your <em>bag.</em></h1>
+      </div>
+      {ready && count > 0 && <p className={p.deliveryNote}>Pantry goods ship across India. Fresh mushrooms deliver only in Dehradun.</p>}
+    </div>
+    <CheckoutSteps current={1} />
+    {!ready ? <p className={r.loading} role="status">Opening your bag…</p>
+      : !lines.length ? <EmptyBag />
+      : <div className={r.reviewGrid}>
+        <section aria-labelledby="bag-lines-title">
+          <h2 id="bag-lines-title" className={p.srOnly}>{count} {count === 1 ? "pack" : "packs"} in your bag</h2>
+          <ul className={r.lines} id="bag">
+            {lines.map(line => <BagLine key={line.id} line={line} blocked={blockedIds.has(line.id)} />)}
+          </ul>
+          {catalogueError && <p className={r.note}>We couldn’t load pack sizes and delivery details. Fresh mushrooms deliver only in Dehradun.</p>}
+          <Link href="/shop" className={p.textAction}>Continue shopping</Link>
         </section>
-      ) : (
-        <section className="py-20">
-          <div className="max-w-md mx-auto text-center px-4">
-            <div className="w-20 h-20 rounded-full bg-cream flex items-center justify-center mx-auto mb-6">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-gray-400">
-                <circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" />
-                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-              </svg>
-            </div>
-            <h2 className="font-medium text-xl text-dark mb-2">Your cart is empty</h2>
-            <p className="text-sm text-gray-400 mb-8">Looks like you haven't added any items yet.</p>
-            <Link
-              href="/shop"
-              className="inline-flex items-center gap-2 bg-forest text-white text-sm font-medium py-3 px-8 rounded-full hover:bg-dark transition-colors duration-300"
-            >
-              Continue Shopping
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-            </Link>
-          </div>
-        </section>
-      )}
-    </>
-  );
-};
-
-export default Cart;
+        <OrderSummary subtotal={subtotal} count={count} savings={savings} delivery={delivery} pinRef={pinRef}>
+          <FreshConflict ref={conflictRef} pin={delivery.checkedPin} delivery={zone ?? "pantry"} lines={blocked}
+            change={{ label: "Try another PIN", onClick: () => { pinRef.current?.focus(); pinRef.current?.select(); } }} />
+        </OrderSummary>
+      </div>}
+  </main>;
+}

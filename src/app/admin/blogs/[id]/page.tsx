@@ -5,6 +5,7 @@ import BlogEditor from '@/components/Admin/BlogEditor';
 
 type BlogPost = {
   id: number;
+  updatedAt:string;
   title: string;
   slug: string;
   excerpt: string;
@@ -51,7 +52,7 @@ const EditBlogPage: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(blogData),
+        body: JSON.stringify({...blogData,expectedUpdatedAt:blog?.updatedAt}),
       });
 
       if (response.ok) {
@@ -59,7 +60,7 @@ const EditBlogPage: React.FC = () => {
         router.push('/admin/blogs');
       } else {
         const error = await response.json();
-        alert('Error updating blog post: ' + error.message);
+        alert('Error updating blog post: ' + error.error || error.message);
       }
     } catch (error) {
       console.error('Error updating blog post:', error);

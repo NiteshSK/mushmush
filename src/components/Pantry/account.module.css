@@ -1,0 +1,128 @@
+/*
+ * Account pages: overview, orders, addresses, wishlist and recently viewed.
+ * Tokens (--forest, --paper, --ink, --line, --brass, --serif, --gutter) come from .pantry in pantry.module.css.
+ */
+.account { min-height: 60vh; }
+.headAside { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem 1.25rem; font-size: .9rem; color: #46523f; }
+
+/* Account navigation */
+.nav { display: flex; flex-wrap: wrap; align-items: center; gap: 0 clamp(.9rem,2.2vw,2.4rem); margin-top: 1.4rem; border-bottom: 1px solid var(--line); }
+.nav a, .nav button { position: relative; display: inline-flex; align-items: center; min-height: 44px; padding: .55rem .12rem; font-size: .93rem; line-height: 1.35; color: #586254; }
+.nav a:hover, .nav button:hover { color: var(--ink); text-decoration: underline; text-underline-offset: .3em; }
+.nav a[aria-current="page"] { color: var(--forest); font-weight: 500; }
+.nav a[aria-current="page"]::after { content: ""; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: var(--forest); }
+.signOut { margin-left: auto; }
+.body { padding-top: clamp(1.5rem,3vw,2.5rem); }
+
+/* Sections and headings */
+.section + .section { margin-top: clamp(2.25rem,4vw,3.5rem); }
+.sectionHead { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: .25rem 1.5rem; padding-bottom: .6rem; border-bottom: 1px solid var(--line); }
+.sectionHead h2 { font-size: clamp(1.75rem,2.6vw,2.4rem); line-height: 1.05; letter-spacing: -.03em; }
+.sectionHead h2:focus { outline: none; }
+.sectionHead > p, .count { font-size: .875rem; color: #5c614f; }
+.sectionNote { max-width: 44rem; margin-top: .75rem; font-size: .9rem; line-height: 1.55; color: #46523f; }
+.quiet { font-size: .875rem; color: #5c614f; }
+
+/* Compact lists for orders and addresses */
+.list > li { border-bottom: 1px solid var(--line); scroll-margin-top: 96px; }
+.row { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: start; gap: .5rem 2rem; padding: 1.1rem 0; }
+.rowMain { min-width: 0; }
+.meta { display: flex; flex-wrap: wrap; gap: .1rem 1rem; font-size: .8125rem; color: #5c614f; }
+/* .pantry resets p to the sans face; product names stay serif. */
+.account .rowTitle { margin-top: .2rem; font-family: var(--serif); font-size: clamp(1.35rem,1.8vw,1.6rem); font-weight: 500; line-height: 1.15; letter-spacing: -.02em; overflow-wrap: anywhere; }
+.statusLine { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem .75rem; margin-top: .5rem; font-size: .875rem; color: #46523f; }
+.status { display: inline-flex; align-items: center; padding: .1rem .5rem; font-size: .8125rem; font-weight: 500; line-height: 1.5; border: 1px solid; white-space: nowrap; }
+.status[data-tone="pending"] { color: #6b5532; background: #fbf3e2; border-color: #dcc79e; }
+.status[data-tone="confirmed"] { color: var(--forest); background: #eef1e8; border-color: #b8c2ad; }
+.status[data-tone="cancelled"] { color: #7a3b2e; background: #f8ece8; border-color: #e0c1b8; }
+.side { display: grid; justify-items: end; gap: .15rem; text-align: right; }
+.amount { font-size: 1.0625rem; font-weight: 500; white-space: nowrap; }
+.actions { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 0 1.25rem; }
+.actions :is(a, button), .textButton { display: inline-flex; align-items: center; min-height: 44px; font-size: .9375rem; color: var(--ink); text-decoration: underline; text-underline-offset: 5px; text-decoration-color: #9d926e; }
+.actions :is(a, button):hover, .textButton:hover { text-decoration-thickness: 2px; }
+.actions .pay { padding: .55rem 1.1rem; color: #fff8e9; background: var(--forest); text-decoration: none; font-weight: 500; }
+.actions .pay:hover { background: #132119; }
+.actions .danger { color: #8a2c1d; }
+.confirm { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0 1rem; font-size: .9rem; }
+.inlineNote { max-width: 22rem; font-size: .8125rem; line-height: 1.45; color: #46523f; }
+.inlineNote a { text-decoration: underline; text-underline-offset: 3px; }
+
+/* Order details: progress, lines, totals, address */
+.details { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1.5rem clamp(1.5rem,4vw,3.5rem); padding: .25rem 0 1.5rem; }
+.account .details h3 { margin-bottom: .6rem; font-family: var(--sans); font-size: .75rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); }
+.steps { display: grid; gap: .55rem; }
+.steps li { position: relative; display: flex; align-items: center; gap: .6rem; font-size: .9rem; color: #7b7f70; }
+.steps li::before { content: ""; flex: none; width: 11px; height: 11px; border: 1px solid #a9ad9c; border-radius: 50%; background: var(--paper); }
+.steps li[data-done] { color: var(--ink); }
+.steps li[data-done]::before { border-color: var(--forest); background: var(--forest); }
+.steps li[aria-current="step"] { font-weight: 500; }
+.steps li[aria-current="step"]::before { box-shadow: 0 0 0 3px #d8e0d0; }
+.lines li, .totals div { display: flex; justify-content: space-between; gap: 1rem; font-size: .9rem; padding: .2rem 0; }
+.lines li span:first-child { min-width: 0; overflow-wrap: anywhere; }
+.lines li span:last-child, .totals dd { white-space: nowrap; }
+.totals { margin-top: .5rem; padding-top: .4rem; border-top: 1px solid var(--line); }
+.totals dt { color: #5c614f; }
+.totals div:last-child { font-weight: 500; }
+.totals div:last-child dt { color: var(--ink); }
+.address { font-style: normal; font-size: .9375rem; line-height: 1.55; overflow-wrap: anywhere; }
+
+/* Overview */
+.overview { display: grid; grid-template-columns: minmax(0,1.55fr) minmax(0,1fr); gap: 2.5rem clamp(2rem,5vw,5.5rem); align-items: start; }
+.overview .section + .section { margin-top: clamp(2rem,3.5vw,2.75rem); }
+.facts { display: grid; grid-template-columns: max-content minmax(0,1fr); gap: .55rem 1.5rem; padding-top: 1rem; font-size: .9375rem; }
+.facts dt { color: #5c614f; }
+.facts dd { min-width: 0; overflow-wrap: anywhere; }
+.panelBody { padding-top: 1rem; }
+.panelBody > p + p { margin-top: .4rem; }
+
+/* Wishlist and recently viewed: pantry product cards with a sibling Remove control */
+.saved { display: flex; flex-direction: column; min-width: 0; }
+.saved > article { flex: 1; }
+.remove { align-self: flex-start; display: inline-flex; align-items: center; gap: .35rem; min-height: 44px; padding-inline: .1rem; font-size: .875rem; color: #5c614f; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: #b4ad93; }
+.remove:hover { color: var(--ink); text-decoration-thickness: 2px; }
+.remove svg { width: 14px; height: 14px; stroke-width: 1.7; }
+.notice { display: flex; flex-wrap: wrap; align-items: center; gap: 0 1rem; margin-bottom: 1.25rem; padding: .35rem 1rem; font-size: .9rem; background: #f1efe4; border-left: 2px solid var(--forest); }
+.notice:focus { outline: none; }
+.notice:focus-visible { outline: 3px solid #a7803c; outline-offset: 3px; }
+
+/* Forms: address dialog and account details */
+.sheet { position: relative; padding: clamp(1.35rem,3.5vw,2.4rem); }
+.form { display: grid; gap: 1rem; }
+.pair { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 1rem; }
+.field { min-width: 0; }
+.field label { display: block; margin-bottom: .35rem; font-size: .875rem; color: #46523f; }
+.input { width: 100%; min-height: 46px; padding: .6rem .75rem; font-size: 1rem; color: var(--ink); background: #fffdf6; border: 1px solid #939b87; border-radius: 0; }
+select.input { appearance: none; -webkit-appearance: none; padding-right: 2.1rem;
+  background-image: linear-gradient(45deg,transparent 50%,var(--ink) 50%),linear-gradient(135deg,var(--ink) 50%,transparent 50%);
+  background-position: calc(100% - 15px) 52%, calc(100% - 10px) 52%; background-size: 5px 5px; background-repeat: no-repeat; }
+.input[aria-invalid="true"] { border-color: #a33a24; }
+.input:read-only { color: #5c614f; background: #f1efe4; }
+.error { margin-top: .3rem; font-size: .8125rem; color: #a33a24; }
+.hint { margin-top: .3rem; font-size: .8125rem; color: #5c614f; }
+.check { display: flex; align-items: center; gap: .6rem; min-height: 44px; font-size: .9375rem; cursor: pointer; }
+.check input { width: 18px; height: 18px; flex: none; accent-color: var(--forest); }
+.formActions { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1.5rem; margin-top: .25rem; }
+.formActions > button[type="submit"] { margin-top: 0; }
+
+/* Loading rows */
+.skeletonRow { height: 5.5rem; border-bottom: 1px solid var(--line); background: linear-gradient(90deg,#ede9dd 0 45%,transparent 45%) 0 1.1rem / 100% .9rem no-repeat, linear-gradient(90deg,#ede9dd 0 70%,transparent 70%) 0 2.4rem / 100% 1.4rem no-repeat; }
+
+@media (max-width: 900px) {
+  .overview { grid-template-columns: minmax(0,1fr); }
+  .details { grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+@media (max-width: 640px) {
+  .nav { gap: 0 1rem; margin-top: .9rem; }
+  .nav a, .nav button { font-size: .875rem; }
+  .row { grid-template-columns: minmax(0,1fr); gap: .35rem; padding: 1rem 0; }
+  .side { justify-items: start; text-align: left; }
+  .actions { justify-content: flex-start; }
+  .details { grid-template-columns: minmax(0,1fr); }
+  .pair { grid-template-columns: minmax(0,1fr); }
+  .remove { font-size: .8125rem; }
+}
+@media (max-width: 640px) {
+  /* globals.css gives unclassed phone buttons min-height: 40px with a higher specificity; keep account targets at 44px. */
+  .account.account :is(.nav, .actions, .formActions, .notice, .confirm) :is(a, button),
+  .account.account :is(.remove, .textButton, .check) { min-height: 44px; }
+}

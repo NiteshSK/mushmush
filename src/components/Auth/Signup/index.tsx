@@ -1,124 +1,249 @@
+"use client";
+
+import { type FormEvent, type RefObject, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import React from "react";
+import { useRouter } from "next/navigation";
+import { signIn, useSession } from "next-auth/react";
+import { passwordRequirementsText, validateEmail, validateName, validatePasswordPolicy, validatePhone } from "@/lib/validation";
+import { withCallbackUrl } from "@/lib/safe-callback";
+import AuthPage from "../AuthPage";
+import { FormAlert, GoogleButton, PasswordField, TextField } from "../fields";
+import { hardNavigate, useCallbackUrl } from "../useCallbackUrl";
+import CodeDialog from "./CodeDialog";
+import styles from "../../Pantry/auth.module.css";
 
-const Signup = () => {
+type Field = "name" | "email" | "phone" | "password" | "confirmPassword" | "terms";
+type FieldErrors = Partial<Record<Field, string>>;
+const ORDER: Field[] = ["name", "email", "phone", "password", "confirmPassword", "terms"];
+const RESEND_SECONDS = 60;
+
+async function readJson(response: Response): Promise<{ error?: string; message?: string }> {
+  try {
+    return await response.json();
+  } catch {
+    return {};
+  }
+}
+
+export default function Signup() {
+  const router = useRouter();
+  const status = useSession()?.status;
+  const { callbackUrl, resolve } = useCallbackUrl();
+  const [form, setForm] = useState({ name: "", email: "", phone: "", password: "", confirmPassword: "" });
+  const [terms, setTerms] = useState(false);
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const [formError, setFormError] = useState<{ message: string; existing?: boolean } | null>(null);
+  const [pending, setPending] = useState<"code" | "verify" | "google" | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [codeError, setCodeError] = useState<string | null>(null);
+  const [codeNotice, setCodeNotice] = useState<string | null>(null);
+  const [resendIn, setResendIn] = useState(0);
+  const leaving = useRef(false);
+  const submitRef = useRef<HTMLButtonElement>(null);
+  const alertRef = useRef<HTMLDivElement>(null);
+  const refs: Record<Field, RefObject<HTMLInputElement>> = {
+    name: useRef<HTMLInputElement>(null),
+    email: useRef<HTMLInputElement>(null),
+    phone: useRef<HTMLInputElement>(null),
+    password: useRef<HTMLInputElement>(null),
+    confirmPassword: useRef<HTMLInputElement>(null),
+    terms: useRef<HTMLInputElement>(null),
+  };
+
+  useEffect(() => {
+    if (status === "authenticated" && !leaving.current) router.replace(resolve());
+  }, [status, router, resolve]);
+
+  useEffect(() => {
+    if (resendIn <= 0) return;
+    const timer = setTimeout(() => setResendIn(seconds => seconds - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [resendIn]);
+
+  useEffect(() => {
+    if (formError) alertRef.current?.focus();
+  }, [formError]);
+
+  const update = (field: Exclude<Field, "terms">, value: string) => {
+    setForm(prev => ({ ...prev, [field]: value }));
+    if (errors[field]) setErrors(prev => ({ ...prev, [field]: undefined }));
+  };
+
+  const details = () => ({ name: form.name.trim(), email: form.email.trim(), phone: form.phone || undefined });
+
+  async function sendCode(): Promise<boolean> {
+    const response = await fetch("/api/auth/send-signup-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(details()),
+    });
+    if (response.ok) return true;
+    const data = await readJson(response);
+    const message = data.error || "We couldn’t send the code. Please try again.";
+    if (dialogOpen) setCodeError(message);
+    else setFormError({ message, existing: response.status === 409 });
+    return false;
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const next: FieldErrors = {};
+    const nameError = validateName(form.name, "Full name");
+    if (nameError) next.name = nameError;
+    const emailError = validateEmail(form.email);
+    if (emailError) next.email = emailError;
+    const phoneError = validatePhone(form.phone);
+    if (phoneError) next.phone = phoneError;
+    const policy = validatePasswordPolicy(form.password);
+    if (!policy.valid) next.password = policy.error;
+    if (!next.password && form.password !== form.confirmPassword) next.confirmPassword = "The passwords don’t match";
+    if (!terms) next.terms = "Agree to the terms to create an account";
+    setErrors(next);
+    setFormError(null);
+    const first = ORDER.find(field => next[field]);
+    if (first) {
+      refs[first].current?.focus();
+      return;
+    }
+
+    setPending("code");
+    try {
+      if (await sendCode()) {
+        setCodeError(null);
+        setCodeNotice(null);
+        setResendIn(RESEND_SECONDS);
+        setDialogOpen(true);
+      }
+    } catch {
+      setFormError({ message: "We couldn’t reach Kosvana. Check your connection and try again." });
+    } finally {
+      setPending(null);
+    }
+  }
+
+  async function handleVerify(code: string) {
+    setPending("verify");
+    setCodeError(null);
+    setCodeNotice(null);
+    const target = resolve();
+    try {
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...details(), password: form.password, otp: code }),
+      });
+      if (!response.ok) {
+        const data = await readJson(response);
+        setCodeError(data.error === "Invalid OTP"
+          ? "That code doesn’t match. Check the latest email from Kosvana, or resend the code."
+          : data.error || "We couldn’t verify that code. Please try again.");
+        setPending(null);
+        return;
+      }
+      setCodeNotice("Account created. Signing you in…");
+      leaving.current = true;
+      const result = await signIn("credentials", { email: details().email, password: form.password, redirect: false, callbackUrl: target });
+      if (result && result.ok && !result.error) {
+        hardNavigate(target);
+        return;
+      }
+      // The account exists; let the shopper sign in by hand and still return to the same page.
+      router.push(withCallbackUrl("/auth/signin", callbackUrl));
+    } catch {
+      leaving.current = false;
+      setCodeError("We couldn’t reach Kosvana. Check your connection and try again.");
+      setPending(null);
+    }
+  }
+
+  async function handleResend() {
+    setCodeError(null);
+    setCodeNotice(null);
+    try {
+      if (await sendCode()) {
+        setResendIn(RESEND_SECONDS);
+        setCodeNotice(`We sent a new code to ${details().email}.`);
+      }
+    } catch {
+      setCodeError("We couldn’t send a new code. Please try again.");
+    }
+  }
+
+  async function handleGoogle() {
+    setFormError(null);
+    setPending("google");
+    try {
+      await signIn("google", { callbackUrl: resolve() });
+    } catch {
+      setPending(null);
+      setFormError({ message: "We couldn’t open Google sign-in. Please try again." });
+    }
+  }
+
+  const signinHref = withCallbackUrl("/auth/signin", callbackUrl);
+
   return (
-    <section className="min-h-screen bg-cream flex items-center justify-center px-4 py-16">
-      <div className="w-full max-w-[480px]">
-        <div className="text-center mb-10">
-          <Link href="/" className="inline-block font-medium text-2xl text-dark mb-2">
-            Kosvana
-          </Link>
-          <p className="text-sm text-gray-400">Create your account</p>
+    <AuthPage
+      kicker="Your account"
+      title={<>Create an <em>account</em></>}
+      lede="Save addresses, follow your orders and keep a list of pantry favourites. We email you a 6-digit code to confirm the address."
+      notes={[
+        "Delivery addresses saved for next time",
+        "Order history, invoices and delivery updates",
+        "A wishlist of products to come back to",
+      ]}
+      notesLabel="With a Kosvana account"
+    >
+      {formError && (
+        <FormAlert id="signup-alert" ref={alertRef}>
+          <p>{formError.message}</p>
+          {formError.existing && <p><Link href={signinHref}>Sign in with this email</Link> or <Link href={withCallbackUrl("/auth/forgot-password", callbackUrl)}>reset your password</Link>.</p>}
+        </FormAlert>
+      )}
+      <form className={styles.form} noValidate onSubmit={handleSubmit} aria-label="Create an account with email">
+        <TextField ref={refs.name} id="signup-name" name="name" label="Full name" autoComplete="name" autoCapitalize="words"
+          value={form.name} onChange={event => update("name", event.target.value)} error={errors.name} />
+        <TextField ref={refs.email} id="signup-email" name="email" type="email" label="Email" autoComplete="email" inputMode="email"
+          autoCapitalize="none" spellCheck={false} value={form.email} onChange={event => update("email", event.target.value)} error={errors.email} />
+        <TextField ref={refs.phone} id="signup-phone" name="phone" type="tel" label="Mobile number" optional autoComplete="tel-national"
+          inputMode="numeric" maxLength={10} hint="10 digits, for delivery updates" value={form.phone}
+          onChange={event => update("phone", event.target.value.replace(/\D/g, "").slice(0, 10))} error={errors.phone} />
+        <PasswordField ref={refs.password} id="signup-password" name="password" label="Password" autoComplete="new-password"
+          hint={passwordRequirementsText} value={form.password} onChange={event => update("password", event.target.value)} error={errors.password} />
+        <PasswordField ref={refs.confirmPassword} id="signup-confirm-password" name="confirmPassword" label="Confirm password" autoComplete="new-password"
+          value={form.confirmPassword} onChange={event => update("confirmPassword", event.target.value)} error={errors.confirmPassword} />
+        <div className={styles.field}>
+          <label className={styles.check} htmlFor="signup-terms">
+            <input ref={refs.terms} id="signup-terms" name="terms" type="checkbox" checked={terms}
+              aria-invalid={errors.terms ? true : undefined} aria-describedby={errors.terms ? "signup-terms-error" : undefined}
+              onChange={event => { setTerms(event.target.checked); if (errors.terms) setErrors(prev => ({ ...prev, terms: undefined })); }} />
+            <span>I agree to the Kosvana <Link href="/terms" target="_blank" rel="noopener noreferrer" className={styles.inlineLink}>Terms<span className={styles.srOnly}> (opens in a new tab)</span></Link> and <Link href="/privacy" target="_blank" rel="noopener noreferrer" className={styles.inlineLink}>Privacy<span className={styles.srOnly}> (opens in a new tab)</span></Link></span>
+          </label>
+          {errors.terms && <p id="signup-terms-error" className={styles.error}>{errors.terms}</p>}
         </div>
-
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 sm:p-10">
-          <div className="space-y-5">
-            <button className="w-full flex items-center justify-center gap-3 rounded-full border border-gray-200 py-3 px-4 text-sm font-medium text-dark hover:bg-gray-50 transition-colors duration-200">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <g clipPath="url(#clip0_98_7461)">
-                  <mask id="mask0_98_7461" maskUnits="userSpaceOnUse" x="0" y="0" width="20" height="20">
-                    <path d="M20 0H0V20H20V0Z" fill="white" />
-                  </mask>
-                  <g mask="url(#mask0_98_7461)">
-                    <path d="M19.999 10.2218C20.0111 9.53429 19.9387 8.84791 19.7834 8.17737H10.2031V11.8884H15.8267C15.7201 12.5391 15.4804 13.162 15.1219 13.7195C14.7634 14.2771 14.2935 14.7578 13.7405 15.1328L13.7209 15.2571L16.7502 17.5568L16.96 17.5774C18.8873 15.8329 19.999 13.2661 19.999 10.2218Z" fill="#4285F4" />
-                    <path d="M10.2036 20C12.9586 20 15.2715 19.1111 16.9609 17.5777L13.7409 15.1332C12.8793 15.7223 11.7229 16.1333 10.2036 16.1333C8.91317 16.126 7.65795 15.7206 6.61596 14.9746C5.57397 14.2287 4.79811 13.1802 4.39848 11.9777L4.2789 11.9877L1.12906 14.3766L1.08789 14.4888C1.93622 16.1457 3.23812 17.5386 4.84801 18.512C6.45791 19.4852 8.31194 20.0005 10.2036 20Z" fill="#34A853" />
-                    <path d="M4.39899 11.9776C4.1758 11.3411 4.06063 10.673 4.05807 9.9999C4.06218 9.3279 4.1731 8.66067 4.38684 8.02221L4.38115 7.88959L1.1927 5.46234L1.0884 5.51095C0.372762 6.90337 0 8.44075 0 9.99983C0 11.5589 0.372762 13.0962 1.0884 14.4887L4.39899 11.9776Z" fill="#FBBC05" />
-                    <path d="M10.2039 3.86663C11.6661 3.84438 13.0802 4.37803 14.1495 5.35558L17.0294 2.59997C15.1823 0.90185 12.7364 -0.0298855 10.2039 -3.67839e-05C8.31239 -0.000477835 6.45795 0.514733 4.84805 1.48799C3.23816 2.46123 1.93624 3.85417 1.08789 5.51101L4.38751 8.02225C4.79107 6.82005 5.5695 5.77231 6.61303 5.02675C7.65655 4.28119 8.91254 3.87541 10.2039 3.86663Z" fill="#EB4335" />
-                  </g>
-                </g>
-                <defs>
-                  <clipPath id="clip0_98_7461">
-                    <rect width="20" height="20" fill="white" />
-                  </clipPath>
-                </defs>
-              </svg>
-              Sign up with Google
-            </button>
-          </div>
-
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200"></div>
-            </div>
-            <div className="relative flex justify-center">
-              <span className="bg-white px-4 text-xs text-gray-400">or continue with email</span>
-            </div>
-          </div>
-
-          <form className="space-y-5">
-            <div>
-              <label htmlFor="name" className="block text-xs font-medium uppercase tracking-[0.15em] text-gray-500 mb-2">
-                Full Name
-              </label>
-              <input
-                type="text"
-                name="name"
-                id="name"
-                placeholder="Enter your full name"
-                className="w-full rounded-lg border border-gray-200 bg-white py-3 px-4 text-sm placeholder:text-gray-400 outline-none transition-colors duration-200 focus:border-forest focus:ring-2 focus:ring-forest/20"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="email" className="block text-xs font-medium uppercase tracking-[0.15em] text-gray-500 mb-2">
-                Email Address
-              </label>
-              <input
-                type="email"
-                name="email"
-                id="email"
-                placeholder="Enter your email address"
-                className="w-full rounded-lg border border-gray-200 bg-white py-3 px-4 text-sm placeholder:text-gray-400 outline-none transition-colors duration-200 focus:border-forest focus:ring-2 focus:ring-forest/20"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-xs font-medium uppercase tracking-[0.15em] text-gray-500 mb-2">
-                Password
-              </label>
-              <input
-                type="password"
-                name="password"
-                id="password"
-                placeholder="Enter your password"
-                autoComplete="on"
-                className="w-full rounded-lg border border-gray-200 bg-white py-3 px-4 text-sm placeholder:text-gray-400 outline-none transition-colors duration-200 focus:border-forest focus:ring-2 focus:ring-forest/20"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="re-type-password" className="block text-xs font-medium uppercase tracking-[0.15em] text-gray-500 mb-2">
-                Confirm Password
-              </label>
-              <input
-                type="password"
-                name="re-type-password"
-                id="re-type-password"
-                placeholder="Re-type your password"
-                autoComplete="on"
-                className="w-full rounded-lg border border-gray-200 bg-white py-3 px-4 text-sm placeholder:text-gray-400 outline-none transition-colors duration-200 focus:border-forest focus:ring-2 focus:ring-forest/20"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-dark text-white text-sm font-medium py-3 px-8 rounded-full hover:bg-forest transition-colors duration-300"
-            >
-              Create Account
-            </button>
-          </form>
-
-          <p className="text-center text-sm text-gray-500 mt-6">
-            Already have an account?{" "}
-            <Link href="/signin" className="text-forest font-medium hover:underline">
-              Sign in
-            </Link>
-          </p>
-        </div>
-      </div>
-    </section>
+        <button ref={submitRef} type="submit" className={styles.submit} disabled={pending !== null}>
+          {pending === "code" ? "Sending your code…" : "Create account"}
+        </button>
+      </form>
+      <p className={styles.divider}>or</p>
+      <GoogleButton onClick={handleGoogle} disabled={pending !== null} pending={pending === "google"} />
+      <p className={styles.switch}>
+        Already have an account?
+        <Link href={signinHref} className={styles.textLink}>Sign in</Link>
+      </p>
+      {dialogOpen && (
+        <CodeDialog
+          email={details().email}
+          error={codeError}
+          notice={codeNotice}
+          pending={pending === "verify"}
+          resendIn={resendIn}
+          onVerify={handleVerify}
+          onResend={handleResend}
+          onClose={() => { setDialogOpen(false); setCodeError(null); setCodeNotice(null); }}
+          returnFocusTo={submitRef}
+        />
+      )}
+    </AuthPage>
   );
-};
-
-export default Signup;
+}

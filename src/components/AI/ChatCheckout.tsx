@@ -1,9 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
-import { ArrowLeft, Loader2, ShieldCheck, Mail, Phone, MapPin, Truck } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { ArrowLeft, Loader2, MapPin, Minus, Plus, Truck } from "lucide-react";
 import { toast } from "react-hot-toast";
 import type { ChatProduct } from "./ChatProductCard";
+import { CONVENIENCE_FEE } from "@/lib/fees";
+import { packLabel, rupees } from "@/components/Pantry/catalogue";
+import s from "../Pantry/chat.module.css";
 
 interface UserInfo {
   name?: string | null;
@@ -20,6 +23,7 @@ interface ChatCheckoutProps {
     total: number;
     customerName: string;
     email: string;
+    paymentToken: string;
   }) => void;
   userInfo?: UserInfo;
 }
@@ -35,9 +39,6 @@ interface ShippingInfo {
 }
 
 type Step = "details" | "otp";
-
-const inputClass =
-  "w-full bg-white border border-gray-200 rounded-lg py-2 px-3 text-xs text-gray-800 placeholder:text-gray-400 outline-none focus:border-forest focus:ring-1 focus:ring-forest/20 transition-colors";
 
 const ChatCheckout: React.FC<ChatCheckoutProps> = ({ product, onBack, onProceedToPayment, userInfo }) => {
   const [step, setStep] = useState<Step>("details");
@@ -66,8 +67,11 @@ const ChatCheckout: React.FC<ChatCheckoutProps> = ({ product, onBack, onProceedT
   const hasDiscount = product.hasDiscount && product.discountedPrice;
   const discountedSubtotal = hasDiscount ? product.discountedPrice! * quantity : originalSubtotal;
   const productDiscount = originalSubtotal - discountedSubtotal;
-  const convenienceFee = 12;
+  const convenienceFee = CONVENIENCE_FEE;
   const total = discountedSubtotal + (shippingFee ?? 0) + convenienceFee;
+  // Total from the server after a price change; the shopper confirms it with the same OTP.
+  const [serverTotal, setServerTotal] = useState<number | null>(null);
+  useEffect(() => setServerTotal(null), [total]);
 
   useEffect(() => {
     if (resendTimer <= 0) return;
@@ -75,49 +79,33 @@ const ChatCheckout: React.FC<ChatCheckoutProps> = ({ product, onBack, onProceedT
     return () => clearTimeout(t);
   }, [resendTimer]);
 
-  // Check shipping when pincode is 6 digits — same API as normal checkout
-  const checkShipping = useCallback(async (pincode: string, currentSubtotal: number) => {
-    if (!/^\d{6}$/.test(pincode)) {
-      setShippingInfo(null);
-      setShippingFee(null);
+  useEffect(() => {
+    let active = true;
+    setShippingInfo(null);
+    setShippingFee(null);
+    if (!/^\d{6}$/.test(zip)) {
+      setCheckingShipping(false);
       return;
     }
     setCheckingShipping(true);
-    try {
-      const res = await fetch(`/api/shipping/check?pincode=${pincode}&subtotal=${currentSubtotal}`);
-      const data = await res.json();
-      setShippingInfo(data);
-      if (data.deliverable) {
-        setShippingFee(data.shippingFee);
-      } else {
-        setShippingFee(null);
-      }
-    } catch {
-      setShippingInfo(null);
-      setShippingFee(null);
-    } finally {
-      setCheckingShipping(false);
-    }
-  }, []);
+    const url = `/api/shipping/check?pincode=${zip}&subtotal=${discountedSubtotal}&productId=${product.id}`;
+    fetch(url)
+      .then(response => response.json())
+      .then((quote: ShippingInfo) => {
+        if (!active) return;
+        setShippingInfo(quote);
+        setShippingFee(quote.deliverable ? quote.shippingFee : null);
+      })
+      .catch(() => {
+        if (active) setShippingInfo(null);
+      })
+      .finally(() => {
+        if (active) setCheckingShipping(false);
+      });
+    return () => { active = false; };
+  }, [zip, discountedSubtotal, product.id]);
 
-  // Auto-check shipping when pincode reaches 6 digits
-  const handleZipChange = (value: string) => {
-    const digits = value.replace(/\D/g, "").slice(0, 6);
-    setZip(digits);
-    if (digits.length === 6) {
-      checkShipping(digits, discountedSubtotal);
-    } else {
-      setShippingInfo(null);
-      setShippingFee(null);
-    }
-  };
-
-  // Re-check shipping when subtotal changes (quantity change affects free-shipping threshold)
-  useEffect(() => {
-    if (/^\d{6}$/.test(zip)) {
-      checkShipping(zip, discountedSubtotal);
-    }
-  }, [discountedSubtotal, zip, checkShipping]);
+  const handleZipChange = (value: string) => setZip(value.replace(/\D/g, "").slice(0, 6));
 
   const validateDetails = () => {
     if (!name.trim()) { toast.error("Please enter your name"); return false; }
@@ -185,7 +173,7 @@ const ChatCheckout: React.FC<ChatCheckoutProps> = ({ product, onBack, onProceedT
           subtotal: discountedSubtotal,
           shippingFee,
           convenienceFee,
-          total,
+          total: serverTotal ?? total,
           paymentMethod: "bank",
         }),
       });
@@ -199,7 +187,11 @@ const ChatCheckout: React.FC<ChatCheckoutProps> = ({ product, onBack, onProceedT
           total: data.order.total,
           customerName: name,
           email,
+          paymentToken: data.paymentToken,
         });
+      } else if (res.status === 409 && data.code === "TOTAL_MISMATCH" && data.pricing) {
+        // The OTP is still valid: show the new total and let the shopper confirm it.
+        setServerTotal(data.pricing.total);
       } else {
         toast.error(data.error || "Failed to place order");
       }
@@ -210,234 +202,222 @@ const ChatCheckout: React.FC<ChatCheckoutProps> = ({ product, onBack, onProceedT
     }
   };
 
-  const thumbnail = product.imgs?.thumbnails?.[0] || product.imgs?.previews?.[0] || "/images/placeholder.png";
+  const thumbnail = product.imgs?.thumbnails?.[0] || product.imgs?.previews?.[0];
 
   // Can proceed only when shipping has been checked and is deliverable
   const canSubmit = shippingFee !== null && shippingInfo?.deliverable && !loading;
+  const atStockLimit = product.stockQuantity !== undefined && quantity >= product.stockQuantity;
 
   return (
-    <div className="flex flex-col flex-1 min-h-0">
+    <div className={s.step}>
       {/* Header */}
-      <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
-        <button onClick={onBack} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
-          <ArrowLeft size={14} className="text-gray-600" />
+      <div className={s.stepHead}>
+        <button type="button" onClick={onBack} className={s.iconButton} aria-label="Back">
+          <ArrowLeft aria-hidden="true" />
         </button>
-        <span className="text-xs font-semibold text-gray-800">
-          {step === "details" ? "Checkout" : "Verify OTP"}
-        </span>
+        <h3>{step === "details" ? "Checkout" : "Enter your code"}</h3>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className={s.stepBody}>
         {/* Product summary */}
-        <div className="flex gap-3 bg-forest/5 border border-forest/10 rounded-xl p-3">
-          <img src={thumbnail} alt={product.title} className="w-12 h-12 rounded-lg object-cover" />
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-gray-800 truncate">{product.title}</p>
-            <div className="flex items-center gap-2 mt-1">
-              <span className="text-xs text-gray-500">Qty: {quantity}</span>
-              <div className="flex items-center border border-gray-200 rounded-md">
-                <button
-                  type="button"
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="px-1.5 py-0.5 text-xs text-gray-600 hover:bg-gray-100 rounded-l-md"
-                >-</button>
-                <span className="px-2 text-xs font-medium">{quantity}</span>
+        <div className={s.summary}>
+          <div className={s.photo}>{thumbnail && <img src={thumbnail} alt="" />}</div>
+          <div className={s.info}>
+            <p className={s.pack}>{packLabel(product)}</p>
+            <p className={s.productTitle}>{product.title}</p>
+            <div className={s.summaryControls}>
+              <div className={s.stepper} role="group" aria-label={`Quantity of ${product.title}`}>
+                <button type="button" onClick={() => setQuantity(Math.max(1, quantity - 1))} disabled={quantity <= 1} aria-label="Remove one">
+                  <Minus aria-hidden="true" />
+                </button>
+                <span aria-live="polite">{quantity}</span>
                 <button
                   type="button"
                   onClick={() => {
                     const maxQty = product.stockQuantity ?? Infinity;
                     if (quantity < maxQty) setQuantity(quantity + 1);
                   }}
-                  disabled={product.stockQuantity !== undefined && quantity >= product.stockQuantity}
-                  className="px-1.5 py-0.5 text-xs text-gray-600 hover:bg-gray-100 rounded-r-md disabled:opacity-30 disabled:cursor-not-allowed"
-                >+</button>
+                  disabled={atStockLimit}
+                  aria-label="Add one"
+                >
+                  <Plus aria-hidden="true" />
+                </button>
               </div>
               {product.stockQuantity !== undefined && product.stockQuantity <= 10 && (
-                <span className="text-[10px] text-amber-600 font-medium">Only {product.stockQuantity} left</span>
+                <span className={s.lowStock}>Only {product.stockQuantity} left</span>
               )}
             </div>
           </div>
-          <div className="text-right flex-shrink-0">
+          <div className={s.lineTotal}>
             {hasDiscount ? (
               <>
-                <p className="text-[10px] text-gray-400 line-through">₹{originalSubtotal}</p>
-                <p className="text-sm font-bold text-gray-900">₹{discountedSubtotal}</p>
-                <p className="text-[10px] text-green-600 font-medium">{product.discountPercentage}% off</p>
+                <s><span className={s.srOnly}>Was </span>{rupees.format(originalSubtotal)}</s>
+                <p>{rupees.format(discountedSubtotal)}</p>
+                <span>{product.discountPercentage}% off</span>
               </>
             ) : (
-              <p className="text-sm font-bold text-gray-900">₹{originalSubtotal}</p>
+              <p>{rupees.format(originalSubtotal)}</p>
             )}
           </div>
         </div>
 
         {step === "details" && (
-          <form onSubmit={handleDetailsSubmit} className="space-y-3">
-            <div>
-              <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Full Name *</label>
-              <input type="text" value={name} onChange={(e) => setName(e.target.value)} className={inputClass} placeholder="John Doe" required />
-            </div>
-            <div className="grid grid-cols-2 gap-2">
+          <form onSubmit={handleDetailsSubmit} className={s.form}>
+            <fieldset className={s.fieldset}>
+              <legend className={s.legend}>Contact</legend>
               <div>
-                <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Email *</label>
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} placeholder="you@email.com" required />
+                <label htmlFor="chat-checkout-name" className={s.label}>Full name</label>
+                <input id="chat-checkout-name" type="text" value={name} onChange={(e) => setName(e.target.value)} className={s.textInput} placeholder="John Doe" autoComplete="name" required />
               </div>
               <div>
-                <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Phone *</label>
-                <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className={inputClass} placeholder="9876543210" required />
+                <label htmlFor="chat-checkout-email" className={s.label}>Email</label>
+                <input id="chat-checkout-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={s.textInput} placeholder="you@email.com" autoComplete="email" required />
               </div>
-            </div>
+              <div>
+                <label htmlFor="chat-checkout-phone" className={s.label}>Phone</label>
+                <input id="chat-checkout-phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className={s.textInput} placeholder="9876543210" autoComplete="tel-national" inputMode="tel" required />
+              </div>
+            </fieldset>
 
-            <div className="pt-1">
-              <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Delivery Address</label>
-              <input type="text" value={street} onChange={(e) => setStreet(e.target.value)} className={inputClass + " mb-2"} placeholder="Street address" required />
-              <div className="grid grid-cols-3 gap-2">
-                <input type="text" value={city} onChange={(e) => setCity(e.target.value)} className={inputClass} placeholder="City" required />
-                <input type="text" value={state} onChange={(e) => setState(e.target.value)} className={inputClass} placeholder="State" required />
+            <fieldset className={s.fieldset}>
+              <legend className={s.legend}>Delivery address</legend>
+              <div>
+                <label htmlFor="chat-checkout-street" className={s.label}>Street address</label>
+                <input id="chat-checkout-street" type="text" value={street} onChange={(e) => setStreet(e.target.value)} className={s.textInput} placeholder="Street address" autoComplete="street-address" required />
+              </div>
+              <div className={s.pair}>
+                <div>
+                  <label htmlFor="chat-checkout-city" className={s.label}>City</label>
+                  <input id="chat-checkout-city" type="text" value={city} onChange={(e) => setCity(e.target.value)} className={s.textInput} placeholder="City" autoComplete="address-level2" required />
+                </div>
+                <div>
+                  <label htmlFor="chat-checkout-state" className={s.label}>State</label>
+                  <input id="chat-checkout-state" type="text" value={state} onChange={(e) => setState(e.target.value)} className={s.textInput} placeholder="State" autoComplete="address-level1" required />
+                </div>
+              </div>
+              <div>
+                <label htmlFor="chat-checkout-pin" className={s.label}>PIN code</label>
                 <input
+                  id="chat-checkout-pin"
                   type="text"
                   value={zip}
                   onChange={(e) => handleZipChange(e.target.value)}
-                  className={inputClass}
+                  className={s.textInput}
                   placeholder="Pincode"
                   maxLength={6}
+                  inputMode="numeric"
+                  autoComplete="postal-code"
+                  aria-describedby="chat-checkout-pin-hint"
                   required
                 />
+                <p id="chat-checkout-pin-hint" className={s.hint}>Fresh mushrooms deliver in Dehradun only. Other packs ship across India.</p>
               </div>
-            </div>
+            </fieldset>
 
             {/* Shipping status — shown after pincode check */}
-            {zip.length === 6 && (
-              <div className={`rounded-lg p-2.5 text-xs flex items-start gap-2 ${
-                checkingShipping
-                  ? "bg-gray-50 text-gray-500"
-                  : shippingInfo?.deliverable
-                    ? "bg-green-50 border border-green-100 text-green-700"
-                    : shippingInfo
-                      ? "bg-red-50 border border-red-100 text-red-600"
-                      : "bg-gray-50 text-gray-500"
-              }`}>
-                {checkingShipping ? (
-                  <><Loader2 size={12} className="animate-spin mt-0.5 flex-shrink-0" /> Checking delivery...</>
-                ) : shippingInfo?.deliverable ? (
-                  <>
-                    <Truck size={12} className="mt-0.5 flex-shrink-0" />
-                    <div>
-                      {shippingInfo.freeShipping
-                        ? <span className="font-semibold">Free Delivery!</span>
-                        : <span>Delivery: <strong>₹{shippingInfo.shippingFee}</strong></span>
-                      }
-                      {shippingInfo.estimatedDays && (
-                        <span className="text-gray-500"> &middot; {shippingInfo.estimatedDays}</span>
-                      )}
-                      {!shippingInfo.freeShipping && shippingInfo.freeAbove && (
-                        <p className="text-[10px] text-gray-500 mt-0.5">Free on orders above ₹{shippingInfo.freeAbove}</p>
-                      )}
-                    </div>
-                  </>
-                ) : shippingInfo ? (
-                  <><MapPin size={12} className="mt-0.5 flex-shrink-0" /> {shippingInfo.message || "We don't deliver to this pincode yet."}</>
-                ) : null}
-              </div>
-            )}
-
-            {/* Price breakdown */}
-            <div className="bg-gray-50 rounded-lg p-3 space-y-1 text-xs">
-              <div className="flex justify-between text-gray-500">
-                <span>Subtotal ({quantity} item{quantity > 1 ? "s" : ""})</span>
-                <span>₹{originalSubtotal}</span>
-              </div>
-              {productDiscount > 0 && (
-                <div className="flex justify-between text-green-600">
-                  <span>Product Discount ({product.discountPercentage}%)</span>
-                  <span>-₹{productDiscount}</span>
+            <div role="status">
+              {zip.length === 6 && (checkingShipping ? (
+                <p className={s.status}><Loader2 aria-hidden="true" className={s.spin} />Checking delivery to {zip}…</p>
+              ) : shippingInfo?.deliverable ? (
+                <div className={s.status} data-tone="ok">
+                  <Truck aria-hidden="true" />
+                  <div>
+                    {shippingInfo.freeShipping
+                      ? <span>Free delivery</span>
+                      : <span>Delivery {rupees.format(shippingInfo.shippingFee)}</span>}
+                    {shippingInfo.estimatedDays && <span> · {shippingInfo.estimatedDays}</span>}
+                    {!shippingInfo.freeShipping && shippingInfo.freeAbove && (
+                      <small>Free delivery on orders above {rupees.format(shippingInfo.freeAbove)}</small>
+                    )}
+                  </div>
                 </div>
-              )}
-              <div className="flex justify-between text-gray-500">
-                <span>Shipping</span>
-                <span>
-                  {shippingFee === null
-                    ? <span className="text-gray-400 italic">Enter pincode</span>
-                    : shippingFee === 0
-                      ? <span className="text-green-600 font-medium">Free</span>
-                      : `₹${shippingFee}`
-                  }
-                </span>
-              </div>
-              <div className="flex justify-between text-gray-500">
-                <span>Convenience fee</span><span>₹{convenienceFee}</span>
-              </div>
-              <div className="flex justify-between font-bold text-gray-900 pt-1 border-t border-gray-200">
-                <span>Total</span>
-                <span>{shippingFee === null ? "—" : `₹${total}`}</span>
-              </div>
-              {productDiscount > 0 && (
-                <p className="text-[10px] text-green-600 text-right pt-0.5">You save ₹{productDiscount}!</p>
-              )}
+              ) : shippingInfo ? (
+                <p className={s.status} data-tone="error"><MapPin aria-hidden="true" />{shippingInfo.message || "We do not deliver to this PIN code yet."}</p>
+              ) : null)}
             </div>
 
-            <button
-              type="submit"
-              disabled={!canSubmit}
-              className="w-full bg-forest text-white py-2.5 rounded-full text-xs font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-            >
+            {/* Price breakdown */}
+            <dl className={s.totals}>
+              <div>
+                <dt>Subtotal ({quantity} item{quantity > 1 ? "s" : ""})</dt>
+                <dd>{rupees.format(originalSubtotal)}</dd>
+              </div>
+              {productDiscount > 0 && (
+                <div className={s.saving}>
+                  <dt>Product discount ({product.discountPercentage}%)</dt>
+                  <dd>−{rupees.format(productDiscount)}</dd>
+                </div>
+              )}
+              <div>
+                <dt>Delivery</dt>
+                <dd>
+                  {shippingFee === null
+                    ? <span className={s.muted}>Enter PIN code</span>
+                    : shippingFee === 0 ? "Free" : rupees.format(shippingFee)}
+                </dd>
+              </div>
+              <div>
+                <dt>Convenience fee</dt><dd>{rupees.format(convenienceFee)}</dd>
+              </div>
+              <div className={s.grand}>
+                <dt>Total</dt>
+                <dd>{shippingFee === null ? "—" : rupees.format(total)}</dd>
+              </div>
+            </dl>
+
+            <button type="submit" disabled={!canSubmit} className={s.primary}>
               {loading
-                ? <><Loader2 size={12} className="animate-spin" /> Sending OTP...</>
+                ? <><Loader2 aria-hidden="true" className={s.spin} /> Sending code…</>
                 : shippingFee === null
-                  ? "Check Delivery First"
-                  : <><ShieldCheck size={12} /> Continue & Verify</>
-              }
+                  ? "Enter a PIN code we deliver to"
+                  : "Send verification code"}
             </button>
           </form>
         )}
 
         {step === "otp" && (
-          <form onSubmit={handleOTPSubmit} className="space-y-4">
-            <div className="bg-blue-50 border border-blue-100 rounded-lg p-3">
-              <p className="text-xs text-blue-700">
-                <Mail size={12} className="inline mr-1" />
-                We sent a verification code to <strong>{email}</strong>
-                {phone && <><br /><Phone size={12} className="inline mr-1" />and to <strong>{phone}</strong></>}
-              </p>
-            </div>
+          <form onSubmit={handleOTPSubmit} className={s.form}>
+            <p className={s.notice}>
+              We sent a verification code to <strong>{email}</strong>
+              {phone && <> and to <strong>{phone}</strong></>}.
+            </p>
 
             <div>
-              <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Enter OTP *</label>
+              <label htmlFor="chat-checkout-otp" className={s.label}>Verification code</label>
               <input
+                id="chat-checkout-otp"
                 type="text"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                className={inputClass + " text-center text-base tracking-[0.5em] font-bold"}
+                className={`${s.textInput} ${s.otp}`}
                 placeholder="• • • • • •"
                 maxLength={6}
+                inputMode="numeric"
+                autoComplete="one-time-code"
                 autoFocus
                 required
               />
             </div>
 
-            <div className="flex items-center justify-between">
-              <button
-                type="button"
-                onClick={() => setStep("details")}
-                className="text-xs text-gray-500 hover:text-gray-700"
-              >
+            <div className={s.split}>
+              <button type="button" onClick={() => setStep("details")} className={s.textAction}>
                 Change details
               </button>
-              <button
-                type="button"
-                onClick={sendOTP}
-                disabled={resendTimer > 0 || loading}
-                className="text-xs text-forest hover:text-green-700 disabled:text-gray-400"
-              >
-                {resendTimer > 0 ? `Resend in ${resendTimer}s` : "Resend OTP"}
+              <button type="button" onClick={sendOTP} disabled={resendTimer > 0 || loading} className={s.textAction}>
+                {resendTimer > 0 ? `Resend in ${resendTimer}s` : "Resend code"}
               </button>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading || otp.length < 4}
-              className="w-full bg-forest text-white py-2.5 rounded-full text-xs font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {loading ? <><Loader2 size={12} className="animate-spin" /> Placing Order...</> : "Verify & Place Order"}
+            {serverTotal !== null && (
+              <div role="alert" className={s.alert}>
+                The price changed while you were checking out. The total is now <strong>₹{serverTotal.toFixed(2)}</strong> (it was ₹{total.toFixed(2)}). Your code is still valid.
+              </div>
+            )}
+
+            <button type="submit" disabled={loading || otp.length < 4} className={s.primary}>
+              {loading
+                ? <><Loader2 aria-hidden="true" className={s.spin} /> Placing order…</>
+                : serverTotal !== null ? `Place order for ₹${serverTotal.toFixed(2)}` : "Verify and place order"}
             </button>
           </form>
         )}

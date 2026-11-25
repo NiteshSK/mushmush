@@ -1,3 +1,4 @@
+import { canWork, type Duty } from "./staff-permissions";
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
@@ -33,4 +34,9 @@ export async function requireAuth() {
 export async function getCurrentUser() {
   const session = await getServerSession(authOptions);
   return session?.user || null;
+}
+
+export async function staffSession(...duties: Duty[]) {
+  const session = await getServerSession(authOptions);
+  return canWork(session?.user, ...duties) ? session : null;
 }

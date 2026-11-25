@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { ReduxProvider } from "@/redux/provider";
@@ -15,17 +16,22 @@ import CartSidebarModal from "@/components/Common/CartSidebarModal";
 import ScrollToTop from "@/components/Common/ScrollToTop";
 import PreLoader from "@/components/Common/PreLoader";
 import TopBanner from "@/components/TopBanner";
+import { isPantryRoute } from "@/components/Pantry/routes";
 
 export default function SiteLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    setTimeout(() => setLoading(false), 1000);
+    const timer = setTimeout(() => setLoading(false), 1000);
+    return () => clearTimeout(timer);
   }, []);
+
+  if (isPantryRoute(pathname)) return <>{children}</>;
 
   return (
     <ReduxProvider>

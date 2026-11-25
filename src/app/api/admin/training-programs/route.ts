@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { staffSession } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 
 // GET /api/admin/training-programs - Get all training programs (admin only)
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await staffSession("trainer");
     
-    if (!session?.user || session.user.role !== "ADMIN") {
+    if (!session?.user) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
@@ -41,9 +40,9 @@ export async function GET() {
 // POST /api/admin/training-programs - Create new training program (admin only)
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await staffSession("trainer");
     
-    if (!session?.user || session.user.role !== "ADMIN") {
+    if (!session?.user) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
@@ -51,6 +50,8 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+    const seats = body.seatsPerDate;
+    if (seats != null && (!Number.isSafeInteger(seats) || seats < 1)) return NextResponse.json({error:"Enter a positive whole seat count."},{status:400});
     const { name, description, price, duration, dailyHours, type, hasEarlyBirdOffer, earlyBirdPrice, originalPrice, earlyBirdEndDate } = body;
 
     // Validate required fields
@@ -87,6 +88,7 @@ export async function POST(request: NextRequest) {
         description,
         price: parseFloat(price),
         duration: parseInt(duration),
+        seatsPerDate: seats ?? null,
         dailyHours: dailyHours || "5-6 hours",
         type,
         hasEarlyBirdOffer: hasEarlyBirdOffer || false,

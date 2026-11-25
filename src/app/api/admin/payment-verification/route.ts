@@ -1,160 +1,75 @@
-import { NextRequest, NextResponse } from "next/server";
+import { runStaffJobs } from "@/lib/staff-jobs";
+import { after, NextRequest, NextResponse } from "next/server";
+import { staffSession } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { decideTraining, workflowFailure } from "@/lib/staff-workflow";
 
-// GET - Fetch all pending payments for admin verification
-export async function GET(request: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session || session.user?.role !== "ADMIN") {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 403 }
-      );
-    }
-
-    const { searchParams } = new URL(request.url);
-    const rawStatus = searchParams.get('status') || 'PENDING';
-    const validUpiStatuses = ['PENDING', 'VERIFIED', 'FAILED'];
-    const status = validUpiStatuses.includes(rawStatus) ? rawStatus : 'PENDING';
-
-    const registrations = await prisma.trainingRegistration.findMany({
-      where: {
-        upi_payments: {
-          some: {
-            status: status as any
-          }
-        }
-      },
-      include: {
-        trainingProgram: {
-          select: {
-            name: true,
-            price: true
-          }
-        },
-        user: {
-          select: {
-            name: true,
-            email: true
-          }
-        },
-        upi_payments: {
-          orderBy: {
-            createdAt: 'desc'
-          },
-          take: 1
-        }
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    });
-
-    return NextResponse.json(registrations);
-
-  } catch (error) {
-    console.error("Payment verification fetch error:", error);
+export async function GET(req: NextRequest) {
+  if (!(await staffSession("finance")))
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
+      { error: "Staff access required" },
+      { status: 403 },
     );
-  }
+  const status = req.nextUrl.searchParams.get("status") || "PENDING";
+  if (status !== "PENDING" && status !== "VERIFIED" && status !== "FAILED")
+    return NextResponse.json(
+      { error: "Unknown payment state" },
+      { status: 400 },
+    );
+  const page = Math.max(1, Number(req.nextUrl.searchParams.get("page")) || 1);
+  const rows = await prisma.upi_payments.findMany({
+    where: { status, trainingRegistrationId: { not: null } },
+    skip: (page - 1) * 25,
+    take: 26,
+    orderBy: [
+      { createdAt: status === "PENDING" ? "asc" : "desc" },
+      { id: "asc" },
+    ],
+    select: {
+      id: true,
+      amount: true,
+      transactionId: true,
+      createdAt: true,
+      status: true,
+      decisionNotes: true,
+      training_registrations: {
+        select: {
+          registrationNumber: true,
+          participantName: true,
+          trainingProgram: { select: { name: true } },
+        },
+      },
+    },
+  });
+  return NextResponse.json({ rows: rows.slice(0, 25), more: rows.length > 25 });
 }
-
-// PUT - Verify or reject payment
-export async function PUT(request: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session || session.user?.role !== "ADMIN") {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 403 }
-      );
-    }
-
-    const { registrationId, action, adminNotes } = await request.json();
-
-    if (!registrationId || !action) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
-    }
-
-    if (!['approve', 'reject'].includes(action)) {
-      return NextResponse.json(
-        { error: "Invalid action. Must be 'approve' or 'reject'" },
-        { status: 400 }
-      );
-    }
-
-    const registration = await prisma.trainingRegistration.findUnique({
-      where: { id: registrationId },
-      include: { 
-        trainingProgram: true, 
-        user: true,
-        upi_payments: true
-      }
-    });
-
-    if (!registration) {
-      return NextResponse.json(
-        { error: "Registration not found" },
-        { status: 404 }
-      );
-    }
-
-    if (!registration.upi_payments || registration.upi_payments.length === 0) {
-      return NextResponse.json(
-        { error: "No payment found for this registration" },
-        { status: 404 }
-      );
-    }
-
-    // Update the UPI payment status
-    const latestPayment = registration.upi_payments[0];
-    
-    await prisma.upi_payments.update({
-      where: { id: latestPayment.id },
-      data: {
-        status: action === 'approve' ? 'VERIFIED' : 'FAILED',
-        verifiedByUserId: session.user.id,
-        updatedAt: new Date()
-      }
-    });
-
-    // Update registration status
-    const updatedRegistration = await prisma.trainingRegistration.update({
-      where: { id: registrationId },
-      data: {
-        status: action === 'approve' ? 'CONFIRMED' : 'CANCELLED',
-        updatedAt: new Date()
-      },
-      include: {
-        trainingProgram: true,
-        user: true,
-        upi_payments: true
-      }
-    });
-
-    // TODO: Send confirmation/rejection email to user
-    // await sendPaymentStatusEmail(updatedRegistration, action, adminNotes);
-
-    return NextResponse.json({
-      success: true,
-      message: `Payment ${action}d successfully`,
-      registration: updatedRegistration
-    });
-
-  } catch (error) {
-    console.error("Payment verification error:", error);
+export async function PUT(req: NextRequest) {
+  const user = (await staffSession("finance"))?.user;
+  if (!user)
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
+      { error: "Staff access required" },
+      { status: 403 },
     );
+  try {
+    const { paymentId, action, note } = await req.json();
+    if (
+      typeof paymentId !== "string" ||
+      !["approve", "reject"].includes(action) ||
+      (note != null && typeof note !== "string")
+    )
+      return NextResponse.json(
+        { error: "Select a payment and a decision." },
+        { status: 400 },
+      );
+    const registration = await decideTraining({
+      paymentId,
+      approve: action === "approve",
+      actor: user.id,
+      note,
+    });
+    after(() => runStaffJobs(registration.id));
+    return NextResponse.json({ registration });
+  } catch (error) {
+    return workflowFailure(error);
   }
 }

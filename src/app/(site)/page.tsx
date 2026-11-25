@@ -1,16 +1,11 @@
 import Home from "@/components/Home";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Kosvana | Premium Mushrooms, Dry Fruits, Seeds & Spices",
-  description: "Kosvana brings you premium mushrooms, dry fruits, seeds and spices — naturally grown and sourced from Dehradun, India",
-  // other metadata
+  title: "Kosvana | The Himalayan Pantry",
+  description: "Explore Kosvana’s Himalayan pantry. Shop dried mushrooms, spices, dry fruits and seeds across India, with fresh mushroom delivery in Dehradun.",
 };
 
 export default function HomePage() {
-  return (
-    <>
-      <Home />
-    </>
-  );
+  return <Home />;
 }

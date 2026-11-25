@@ -1,170 +1,56 @@
-// Simple Payment Verification Tool
-// This provides immediate verification for UPI transactions
+import { decideTraining, WorkflowError } from "./staff-workflow";
+// Admin payment verification for training registrations.
+// These functions confirm a registration. Call them only after the caller is
+// authenticated as an ADMIN (see /api/quick-verify-payment).
 
 import { prisma } from './prisma';
-import { sendPaymentConfirmationEmail } from './email';
 
+
+/**
+ * Admin-recorded payment for ONE specific training registration.
+ * The registration is always identified by its ID; the amount is never used
+ * to find a registration (two customers can pay the same fee).
+ */
 export interface PaymentVerificationRequest {
   registrationId: string;
   transactionId: string;
-  amount: number;
+  /** ID of the ADMIN user who checked the payment. Required. */
+  verifiedByUserId: string;
+  /** Optional cross-check. If given, it must equal the registration total. */
+  amount?: number;
 }
 
 export interface PaymentVerificationResult {
   success: boolean;
   message: string;
+  /** Suggested HTTP status for a failure (400, 404, 409 or 500). */
+  status?: number;
   registration?: any;
   error?: string;
 }
 
+
+
+function failure(status: number, message: string, error: string): PaymentVerificationResult {
+  return { success: false, status, message, error };
+}
+
+/**
+ * Record a verified UPI payment for a registration and confirm it.
+ * Callers MUST have authenticated the user as an ADMIN.
+ */
 export async function verifyAndProcessPayment(
   request: PaymentVerificationRequest
 ): Promise<PaymentVerificationResult> {
+  if (!request.verifiedByUserId || !request.registrationId || !/^[A-Za-z0-9_-]{10,37}$/.test(request.transactionId || "")) return failure(400, "Invalid payment reference", "Invalid reference");
   try {
-    const { registrationId, transactionId, amount } = request;
-
-    // Validate required fields
-    if (!registrationId || !transactionId || !amount) {
-      return {
-        success: false,
-        message: 'Missing required fields',
-        error: 'REGISTRATION_ID, TRANSACTION_ID, and AMOUNT are required'
-      };
-    }
-
-    // Check if registration exists and is pending
-    const registration = await prisma.trainingRegistration.findUnique({
-      where: { id: registrationId },
-      include: {
-        trainingProgram: true,
-        user: true,
-        upi_payments: true
-      }
-    });
-
-    if (!registration) {
-      return {
-        success: false,
-        message: 'Registration not found',
-        error: 'Invalid registration ID'
-      };
-    }
-
-    // Check if payment already completed
-    const completedPayment = registration.upi_payments.find(p => p.status === 'VERIFIED');
-    if (completedPayment) {
-      return {
-        success: false,
-        message: 'Payment already completed',
-        error: 'This registration has already been paid for'
-      };
-    }
-
-    // Verify amount matches
-    if (Math.abs(registration.totalAmount - amount) > 0.01) {
-      return {
-        success: false,
-        message: 'Amount mismatch',
-        error: `Expected ₹${registration.totalAmount}, but got ₹${amount}`
-      };
-    }
-
-    // Check for duplicate transaction ID
-    const existingPayment = await prisma.upi_payments.findFirst({
-      where: {
-        transactionId: transactionId,
-        status: { in: ['PENDING', 'VERIFIED'] }
-      }
-    });
-
-    if (existingPayment) {
-      return {
-        success: false,
-        message: 'Transaction ID already used',
-        error: 'This transaction ID has already been used for another payment'
-      };
-    }
-
-    // Basic transaction ID format validation
-    if (transactionId.length < 10 || transactionId.length > 37) {
-      return {
-        success: false,
-        message: 'Invalid transaction ID format',
-        error: 'Transaction ID must be between 10-37 characters'
-      };
-    }
-
-    // Create UPI payment record
-    const payment = await prisma.upi_payments.create({
-      data: {
-        id: `upi_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        amount: amount,
-        status: 'VERIFIED',
-        resourceType: 'training_registration',
-        transactionId: transactionId,
-        trainingRegistrationId: registrationId,
-        updatedAt: new Date()
-      }
-    });
-
-    // Update registration status
-    const updatedRegistration = await prisma.trainingRegistration.update({
-      where: { id: registrationId },
-      data: {
-        status: 'CONFIRMED'
-      },
-      include: {
-        trainingProgram: true,
-        user: true,
-        upi_payments: true
-      }
-    });
-
-    // Send payment confirmation email
-    try {
-      await sendPaymentConfirmationEmail({
-        registrationNumber: updatedRegistration.registrationNumber,
-        programName: updatedRegistration.trainingProgram.name,
-        participantName: updatedRegistration.user.name || 'Valued Customer',
-        totalAmount: updatedRegistration.totalAmount,
-        paymentStatus: 'VERIFIED',
-        paymentMethod: 'UPI',
-        upiTransactionId: transactionId,
-        paymentDate: payment.createdAt,
-        participantEmail: updatedRegistration.user.email,
-        programDuration: updatedRegistration.trainingProgram.duration.toString(),
-        programSchedule: updatedRegistration.trainingProgram.dailyHours,
-        programStartDate: new Date().toLocaleDateString('en-IN', { 
-          weekday: 'long', 
-          year: 'numeric', 
-          month: 'long', 
-          day: 'numeric' 
-        }),
-        programLocation: 'MushMush Training Center',
-        programInstructor: 'Expert Trainer'
-      });
-    } catch (emailError) {
-      console.error('Failed to send payment confirmation email:', emailError);
-      // Don't fail the payment process if email fails
-    }
-
-    return {
-      success: true,
-      message: 'Payment verified and processed successfully',
-      registration: updatedRegistration
-    };
-
+    const registration = await decideTraining({ ...request, actor: request.verifiedByUserId, approve: true, allowCreate: true });
+    return { success: true, registration, message: "Payment verified" };
   } catch (error) {
-    console.error('Payment verification error:', error);
-    return {
-      success: false,
-      message: 'Payment verification failed',
-      error: error instanceof Error ? error.message : 'Unknown error'
-    };
+    return failure(error instanceof WorkflowError ? error.status : 500, error instanceof WorkflowError ? error.message : "Payment could not be verified", "Verification failed");
   }
 }
 
-// Helper function to get pending registrations for verification
 export async function getPendingRegistrations() {
   try {
     const pendingRegistrations = await prisma.trainingRegistration.findMany({
@@ -197,50 +83,10 @@ export async function getPendingRegistrations() {
   }
 }
 
-// Quick verification function for admin use
+// Quick verification function for admin use.
+// The admin names the registration explicitly; there is no amount-based lookup.
 export async function quickVerifyPayment(
-  transactionId: string,
-  amount: number
+  request: PaymentVerificationRequest
 ): Promise<PaymentVerificationResult> {
-  try {
-    // Find pending registration by amount
-    const registration = await prisma.trainingRegistration.findFirst({
-      where: {
-        totalAmount: amount,
-        status: 'PENDING',
-        upi_payments: {
-          some: {
-            status: 'PENDING'
-          }
-        }
-      },
-      include: {
-        trainingProgram: true,
-        user: true,
-        upi_payments: true
-      }
-    });
-
-    if (!registration) {
-      return {
-        success: false,
-        message: 'No pending registration found for this amount',
-        error: `No pending registration with amount ₹${amount}`
-      };
-    }
-
-    return await verifyAndProcessPayment({
-      registrationId: registration.id,
-      transactionId,
-      amount
-    });
-
-  } catch (error) {
-    console.error('Quick verification error:', error);
-    return {
-      success: false,
-      message: 'Quick verification failed',
-      error: error instanceof Error ? error.message : 'Unknown error'
-    };
-  }
+  return verifyAndProcessPayment(request);
 }

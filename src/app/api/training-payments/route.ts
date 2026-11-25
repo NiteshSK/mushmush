@@ -1,30 +1,36 @@
+import { WorkflowError, workflowFailure } from "@/lib/staff-workflow";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
-import { sendPaymentConfirmationEmail } from "@/lib/email";
-import { upiVerifier, generateTransactionNote } from "@/lib/upi-verification";
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+    // Registrations are created only by signed-in accounts (training-registrations
+    // requires auth), so a payment can only come from the account that owns it.
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: "Please sign in to submit your payment." },
+        { status: 401 }
+      );
+    }
+
     const formData = await request.formData();
     const registrationId = formData.get('registrationId') as string;
     const paymentMethod = formData.get('paymentMethod') as string;
     const upiTransactionId = formData.get('upiTransactionId') as string;
-    const upiId = formData.get('upiId') as string;
     const amount = parseFloat(formData.get('amount') as string);
 
-    if (!registrationId || !paymentMethod || !upiTransactionId || !amount) {
+    if (!registrationId || !paymentMethod || !upiTransactionId || !Number.isFinite(amount) || amount <= 0) {
       return NextResponse.json(
         { error: "Missing required payment information" },
         { status: 400 }
       );
     }
 
-    // Validate UPI transaction ID format (basic validation)
-    if (upiTransactionId.length < 10) {
+    // Validate UPI transaction ID format (same pattern the old verifier required)
+    if (!/^[a-zA-Z0-9_-]{12,37}$/.test(upiTransactionId)) {
       return NextResponse.json(
         { error: "Invalid UPI transaction ID format" },
         { status: 400 }
@@ -37,10 +43,18 @@ export async function POST(request: NextRequest) {
       include: { trainingProgram: true }
     });
 
-    if (!registration) {
+    // Answer 404 for someone else's registration so IDs cannot be probed.
+    if (!registration || registration.userId !== session.user.id) {
       return NextResponse.json(
         { error: "Registration not found" },
         { status: 404 }
+      );
+    }
+
+    if (registration.status !== 'PENDING') {
+      return NextResponse.json(
+        { error: "This registration is not awaiting payment." },
+        { status: 409 }
       );
     }
 
@@ -67,11 +81,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check for duplicate transaction ID
+    // Check for duplicate transaction ID (transactionId is unique across all payments)
     const duplicateTransaction = await prisma.upi_payments.findFirst({
       where: {
-        transactionId: upiTransactionId,
-        status: { in: ['PENDING', 'VERIFIED'] }
+        transactionId: upiTransactionId
       }
     });
 
@@ -82,80 +95,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify UPI transaction using automated verification system
-    const verificationResult = await upiVerifier.verifyTransaction(upiTransactionId, amount, upiId);
-    if (!verificationResult.isValid) {
-      return NextResponse.json(
-        { error: verificationResult.message || "UPI transaction verification failed" },
-        { status: 400 }
-      );
-    }
-
-    // Create UPI payment record
-    const payment = await prisma.upi_payments.create({
+    // A transaction ID typed by the customer is NOT proof of payment.
+    // Record it as PENDING; the registration stays PENDING until an admin
+    // verifies the payment (/api/admin/payment-verification or
+    // /api/quick-verify-payment) or a signed webhook confirms it.
+    const payment = await prisma.$transaction(async tx => {
+      await tx.$queryRaw`SELECT id FROM training_registrations WHERE id = ${registrationId} FOR UPDATE`;
+      const current = await tx.trainingRegistration.findUnique({where:{id:registrationId},select:{status:true}});
+      if (current?.status !== "PENDING" || await tx.upi_payments.findFirst({where:{trainingRegistrationId:registrationId,status:{in:["PENDING","VERIFIED"]}}}))
+        throw new WorkflowError("This seat already has a payment or is no longer pending.");
+    return tx.upi_payments.create({
       data: {
         id: `upi_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        amount: amount,
-        status: 'VERIFIED', // Automatically verify since we did verification
+        amount: registration.totalAmount,
+        status: 'PENDING',
         resourceType: 'training_registration',
         transactionId: upiTransactionId,
         trainingRegistrationId: registrationId,
         updatedAt: new Date()
       }
     });
-
-    // Update registration status to payment received (awaiting admin verification)
-    const updatedRegistration = await prisma.trainingRegistration.update({
-      where: { id: registrationId },
-      data: {
-        status: 'PAYMENT_RECEIVED'
-      },
-      include: {
-        trainingProgram: true,
-        user: true,
-        upi_payments: true
-      }
-    });
-
-    // Send payment confirmation email with timetable information
-    await sendPaymentConfirmationEmail({
-      registrationNumber: updatedRegistration.registrationNumber,
-      programName: updatedRegistration.trainingProgram.name,
-      participantName: updatedRegistration.participantName,
-      totalAmount: updatedRegistration.totalAmount,
-      paymentStatus: payment.status,
-      paymentMethod: paymentMethod,
-      upiTransactionId: payment.transactionId,
-      paymentDate: payment.createdAt,
-      participantEmail: updatedRegistration.participantEmail,
-      programDuration: updatedRegistration.trainingProgram.duration.toString(),
-      programSchedule: updatedRegistration.trainingProgram.dailyHours,
-      programStartDate: updatedRegistration.preferredStartDate 
-        ? updatedRegistration.preferredStartDate.toLocaleDateString() 
-        : new Date().toLocaleDateString(),
-      programLocation: 'MushMush Training Center',
-      programInstructor: 'MushMush Expert Team',
     });
 
     return NextResponse.json({
       success: true,
-      message: "Payment confirmed successfully! Your registration has been confirmed.",
+      message: "Payment details submitted. We will confirm your registration after we verify the payment.",
       registration: {
-        id: updatedRegistration.id,
-        registrationNumber: updatedRegistration.registrationNumber,
+        id: registration.id,
+        registrationNumber: registration.registrationNumber,
         paymentStatus: payment.status,
         paymentDate: payment.createdAt,
         upiTransactionId: payment.transactionId,
-        status: updatedRegistration.status
+        status: registration.status
       }
     });
 
   } catch (error) {
-    console.error("Payment processing error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return workflowFailure(error);
   }
 }
 
@@ -163,6 +139,12 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: "Please sign in to see this registration." },
+        { status: 401 }
+      );
+    }
     const { searchParams } = new URL(request.url);
     const registrationId = searchParams.get('registrationId');
 
@@ -180,6 +162,7 @@ export async function GET(request: NextRequest) {
         registrationNumber: true,
         status: true,
         totalAmount: true,
+        userId: true,
         trainingProgram: {
           select: {
             name: true,
@@ -208,15 +191,16 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Only allow user to see their own registration or admin to see all
-    if (session?.user?.role !== 'ADMIN' && registration.id !== session?.user?.id) {
+    // Only the account that owns the registration, or an admin, may see it.
+    const { userId, ...publicRegistration } = registration;
+    if (session.user.role !== 'ADMIN' && userId !== session.user.id) {
       return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 403 }
+        { error: "Registration not found" },
+        { status: 404 }
       );
     }
 
-    return NextResponse.json(registration);
+    return NextResponse.json(publicRegistration);
 
   } catch (error) {
     console.error("Payment status check error:", error);

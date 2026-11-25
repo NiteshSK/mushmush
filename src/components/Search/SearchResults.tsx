@@ -1,140 +1,113 @@
 "use client";
-import React, { useEffect, useState, useRef } from "react";
-import { useSearchParams } from "next/navigation";
-import { useSearch } from "@/hooks/useSearch";
-import SingleGridItem from "../Shop/SingleGridItem";
-import NotifyMeModal from "../NotifyMeModal";
-import Breadcrumb from "../Common/Breadcrumb";
-import { Product } from "@/types/product";
+
+import { type FormEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useProducts } from "@/hooks/useProducts";
+import type { Product } from "@/types/product";
+import NotifyMeModal from "../NotifyMeModal";
+import ProductCard from "../Pantry/ProductCard";
+import { useOpenPanel } from "../Pantry/PantryShell";
+import { deliveryScope, productKind, searchCatalogue } from "../Pantry/catalogue";
+import { loadListings, type Listing } from "../Training/programme";
+import styles from "../Pantry/pantry.module.css";
+import search from "./search.module.css";
+import TrainingResults from "./TrainingResults";
+import { couldMatchTraining, matchesTraining } from "./training-match";
 
-const SearchResults = () => {
-  const searchParams = useSearchParams();
-  const query = searchParams.get('search') || searchParams.get('q') || '';
-  const category = searchParams.get('category') || '';
+const examples = ["Walnuts", "Cumin", "Dried mushrooms"];
+const browse = [{ slug: "spices", label: "Spices" }, { slug: "dry-fruits", label: "Dry fruits" }, { slug: "seeds", label: "Seeds" }];
 
-  const { data, loading, error, searchProducts } = useSearch();
-  const [hasSearched, setHasSearched] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+function trimOrBlock(event: FormEvent<HTMLFormElement>) {
+  const field = event.currentTarget.elements.namedItem("search") as HTMLInputElement;
+  field.value = field.value.trim();
+  if (!field.value) { event.preventDefault(); field.reportValidity(); }
+}
 
-  const [notifyModalOpen, setNotifyModalOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+function Suggestions() {
+  return <div className={styles.suggestions}>
+    <p>Try <span className={styles.chips}>{examples.map(term => <Link key={term} href={`/search?search=${encodeURIComponent(term.toLowerCase())}`}>{term}</Link>)}</span></p>
+    <p>Or browse <span className={styles.chips}>{browse.map(({ slug, label }) => <Link key={slug} href={`/shop?category=${slug}`}>{label}</Link>)}
+      <Link href="/training">Training</Link>
+      <Link href="/shop">The whole pantry</Link></span></p>
+  </div>;
+}
 
-  const handleNotifyMe = (product: Product) => {
-    setSelectedProduct(product);
-    setNotifyModalOpen(true);
-  };
+export default function SearchResults() {
+  const params = useSearchParams();
+  const query = (params.get("search") ?? params.get("q") ?? "").trim();
+  const shown = query.length > 60 ? `${query.slice(0, 60)}…` : query;
+  const openPanel = useOpenPanel();
+  const { products, loading, error } = useProducts({ limit: 100 });
+  const results = useMemo(() => searchCatalogue(products, query), [products, query]);
+  const [notifyFor, setNotifyFor] = useState<Product | null>(null);
 
-  const handleCloseNotifyModal = () => {
-    setNotifyModalOpen(false);
-    setSelectedProduct(null);
-  };
-
+  // Load the courses only for a query that could be about training. If they fail, show products only.
+  const wantsTraining = couldMatchTraining(query);
+  const [training, setTraining] = useState<Listing[] | "loading" | null>(null);
   useEffect(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
+    if (!wantsTraining) { setTraining(null); return; }
+    let active = true;
+    setTraining("loading");
+    loadListings()
+      .then(listings => { if (active) setTraining(listings); })
+      .catch(() => { if (active) setTraining(null); });
+    return () => { active = false; };
+  }, [wantsTraining]);
+  const courses = useMemo(() => {
+    if (!Array.isArray(training)) return [];
+    const matched = matchesTraining(query, training.map(({ program }) => program));
+    return training.filter(({ program }) => matched.indexOf(program) >= 0);
+  }, [training, query]);
 
-    if ((query || category) && !hasSearched) {
-      timeoutRef.current = setTimeout(() => {
-        searchProducts({ query, category, page: 1, limit: 12 });
-        setHasSearched(true);
-      }, 300);
-    }
+  return <main id="main" className={styles.page}>
+    <div className={styles.pageHead}>
+      <div>
+        <p className={styles.kicker}>Search the pantry</p>
+        <h1>{query ? <>Results for <em>“{shown}”</em></> : <>What are you <em>looking for?</em></>}</h1>
+      </div>
+      <p className={styles.deliveryNote}>
+        <span>Pantry goods ship across India. Fresh mushrooms are available only in Dehradun.</span>
+        <button onClick={() => openPanel("delivery")}>Check delivery</button>
+      </p>
+    </div>
 
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, [query, category, searchProducts, hasSearched]);
+    <form action="/search" role="search" className={styles.searchForm} onSubmit={trimOrBlock} key={query}>
+      <label htmlFor="search-page-field">Product or ingredient</label>
+      <div className={styles.field}>
+        <input id="search-page-field" type="search" name="search" required defaultValue={query} placeholder="Try walnuts or cumin" autoComplete="off" />
+        <button>Search</button>
+      </div>
+    </form>
 
-  useEffect(() => {
-    setHasSearched(false);
-  }, [query, category]);
-
-  if (loading) {
-    return (
-      <>
-        <Breadcrumb title="Search" pages={["Search"]} />
-        <div className="flex justify-center items-center min-h-[400px]">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-forest border-t-transparent"></div>
+    <section id="results" aria-label="Search results" className={styles.results}>
+      {!query ? <div className={styles.recovery}>
+        <h2>Search by product or ingredient.</h2>
+        <p>Local names work too, such as haldi, jeera or akhrot.</p>
+        <Suggestions />
+      </div> : <>{courses.length > 0 && <TrainingResults listings={courses} />}
+      {loading || (training === "loading" && !results.length) ? <>
+        <p className={styles.count} role="status">Searching the pantry…</p>
+        <div className={styles.products} aria-hidden="true">{Array.from({ length: 4 }, (_, i) => <div key={i} className={styles.skeleton}><div /><p /><p /></div>)}</div>
+      </> : error ? <div className={styles.recovery} role="alert">
+        <h2>Search couldn’t load.</h2>
+        <p>Check your connection and try again.</p>
+        <button className={styles.primaryAction} onClick={() => window.location.reload()}>Try again</button>
+      </div> : results.length ? <>
+        <p className={styles.count} role="status">{results.length} {results.length === 1 ? "product" : "products"} for “{shown}”</p>
+        <div className={styles.products}>
+          {results.map((product, index) => <ProductCard key={product.id} product={product} label={productKind(product)} delivery={deliveryScope(product)}
+            titleAs="h2" priority={index < 4} onNotify={setNotifyFor} />)}
         </div>
-      </>
-    );
-  }
+      </> : courses.length ? <p className={`${styles.count} ${search.noProducts}`} role="status">
+        No pantry products match “{shown}”.<Link href="/shop" className={styles.textAction}>Browse the pantry</Link>
+      </p> : <div className={styles.recovery} role="status">
+        <h2>Nothing in the pantry matches “{shown}”.</h2>
+        <p>Check the spelling, or try a shorter or more general word.</p>
+        <Suggestions />
+      </div>}</>}
+    </section>
 
-  if (error) {
-    return (
-      <>
-        <Breadcrumb title="Search" pages={["Search"]} />
-        <div className="text-center py-20">
-          <p className="text-sm text-red-600">{error}</p>
-        </div>
-      </>
-    );
-  }
-
-  const products = data?.products || [];
-  const totalResults = data?.pagination?.total || 0;
-
-  return (
-    <>
-      <Breadcrumb title="Search" pages={["Search"]} />
-
-      <section className="py-12 sm:py-16">
-        <div className="max-w-[1200px] w-full mx-auto px-4 sm:px-6 xl:px-0">
-          {/* Search info */}
-          <div className="mb-10">
-            {query && (
-              <p className="text-sm text-gray-500 mb-1">
-                Results for <span className="text-dark font-medium">"{query}"</span>
-              </p>
-            )}
-            <p className="text-xs text-gray-400">
-              {totalResults} product{totalResults !== 1 ? 's' : ''} found
-            </p>
-          </div>
-
-          {/* Results */}
-          {products.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {products.map((product: Product) => (
-                <SingleGridItem key={product.id} item={product} onNotifyMe={handleNotifyMe} />
-              ))}
-            </div>
-          ) : (
-            <div className="max-w-md mx-auto text-center py-12">
-              <div className="w-20 h-20 rounded-full bg-cream flex items-center justify-center mx-auto mb-6">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-gray-400">
-                  <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-                </svg>
-              </div>
-              <h2 className="font-medium text-xl text-dark mb-2">No results found</h2>
-              <p className="text-sm text-gray-400 mb-8">
-                {query
-                  ? `We couldn't find products matching "${query}".`
-                  : "No products match your search."}
-              </p>
-              <Link
-                href="/shop"
-                className="inline-flex items-center gap-2 bg-forest text-white text-sm font-medium py-3 px-8 rounded-full hover:bg-dark transition-colors duration-300"
-              >
-                Browse All Products
-              </Link>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {selectedProduct && (
-        <NotifyMeModal
-          isOpen={notifyModalOpen}
-          onClose={handleCloseNotifyModal}
-          productId={selectedProduct.id}
-          productTitle={selectedProduct.title}
-        />
-      )}
-    </>
-  );
-};
-
-export default SearchResults;
+    {notifyFor && <NotifyMeModal isOpen onClose={() => setNotifyFor(null)} productId={notifyFor.id} productTitle={notifyFor.title} />}
+  </main>;
+}

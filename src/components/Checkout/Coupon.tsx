@@ -1,5 +1,8 @@
 "use client";
 import React, { useState } from "react";
+import { rupees } from "../Pantry/catalogue";
+import p from "../Pantry/pantry.module.css";
+import r from "../Pantry/review.module.css";
 
 interface AppliedCoupon {
   code: string;
@@ -69,68 +72,46 @@ const Coupon = ({ subtotal, email, onApply, onRemove, appliedCoupon }: CouponPro
     onRemove();
   };
 
-  return (
-    <div className="bg-white shadow-1 rounded-[10px] mt-7.5">
-      <div className="border-b border-gray-3 py-5 px-4 sm:px-8.5">
-        <h3 className="font-medium text-xl text-dark">Have a Coupon Code?</h3>
+  if (appliedCoupon) {
+    return (
+      <div className={r.applied} role="status">
+        <span><code>{appliedCoupon.code}</code> · −{rupees.format(appliedCoupon.discountAmount)}<br /><small>{appliedCoupon.message}</small></span>
+        {/* type="button": this sits inside the checkout form and must not submit it. */}
+        <button type="button" onClick={handleRemove} className={p.textAction} aria-label={`Remove coupon ${appliedCoupon.code}`}>Remove</button>
       </div>
+    );
+  }
 
-      <div className="py-6 px-4 sm:px-8.5">
-        {appliedCoupon ? (
-          <div className="flex items-center justify-between bg-forest/5 border border-forest/20 rounded-lg px-4 py-3">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-mono font-semibold text-forest text-sm bg-forest/10 px-2 py-0.5 rounded">
-                  {appliedCoupon.code}
-                </span>
-                <span className="text-sm text-forest font-medium">
-                  -₹{appliedCoupon.discountAmount}
-                </span>
-              </div>
-              <p className="text-xs text-gray-500 mt-1">{appliedCoupon.message}</p>
-            </div>
-            <button
-              onClick={handleRemove}
-              className="text-red hover:text-red-dark text-sm font-medium ml-4"
-            >
-              Remove
-            </button>
-          </div>
-        ) : (
-          <div>
-            <div className="flex gap-4">
-              <input
-                type="text"
-                value={code}
-                onChange={(e) => {
-                  setCode(e.target.value.toUpperCase());
-                  setError("");
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleApply();
-                  }
-                }}
-                placeholder="Enter coupon code"
-                className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20 font-mono uppercase"
-              />
-              <button
-                type="button"
-                onClick={handleApply}
-                disabled={loading || !code.trim()}
-                className="inline-flex font-medium text-white bg-forest py-3 px-6 rounded-lg ease-out duration-200 hover:bg-dark disabled:bg-gray-400 disabled:cursor-not-allowed whitespace-nowrap"
-              >
-                {loading ? "Checking..." : "Apply"}
-              </button>
-            </div>
-            {error && (
-              <p className="text-red text-sm mt-2">{error}</p>
-            )}
-          </div>
-        )}
+  return (
+    <details className={r.coupon} open={!!error || undefined}>
+      <summary>Have a coupon code?</summary>
+      <div className={r.input}>
+        <label htmlFor="coupon-code" className={p.srOnly}>Coupon code</label>
+        <div className={p.field}>
+          <input
+            id="coupon-code"
+            type="text"
+            value={code}
+            autoComplete="off"
+            onChange={(e) => {
+              setCode(e.target.value.toUpperCase());
+              setError("");
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleApply();
+              }
+            }}
+            placeholder="Coupon code"
+          />
+          <button type="button" onClick={handleApply} disabled={loading || !code.trim()}>
+            {loading ? "Checking…" : "Apply"}
+          </button>
+        </div>
+        {error && <p role="alert" className={r.pinResult} data-error>{error}</p>}
       </div>
-    </div>
+    </details>
   );
 };
 

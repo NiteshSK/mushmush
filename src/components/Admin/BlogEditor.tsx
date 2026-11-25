@@ -1,4 +1,6 @@
 "use client";
+import ArticlePreview from "./ArticlePreview";
+import { useUnsavedDraft } from "./useUnsavedDraft";
 import React, { useState, useEffect } from 'react';
 import { generateSlug } from "@/lib/utils";
 
@@ -37,6 +39,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
     metaDescription: '',
   });
 
+  const draft = useUnsavedDraft();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
@@ -103,7 +106,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
     setFormData(prev => ({
       ...prev,
       title,
-      slug: generateSlug(title),
+      slug: initialData ? prev.slug : generateSlug(title),
     }));
   };
 
@@ -309,6 +312,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
   };
 
   const toggleTag = (tagId: number) => {
+    draft.markDirty();
     setSelectedTags(prev => 
       prev.includes(tagId) 
         ? prev.filter(id => id !== tagId)
@@ -368,7 +372,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
 
   return (
     <div className="bg-white rounded-lg shadow-1">
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onChange={draft.markDirty} onSubmit={handleSubmit} className="space-y-6">
         {/* Basic Information */}
         <div className="p-6 border-b border-gray-3">
           <h2 className="text-lg font-semibold text-dark mb-4">Basic Information</h2>
@@ -836,7 +840,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
         <div className="p-6 border-t border-gray-3 flex items-center justify-between">
           <button
             type="button"
-            onClick={onCancel}
+            onClick={()=>{if(draft.leave())onCancel();}}
             className="px-4 py-2 text-gray-7 hover:text-dark"
             disabled={isSubmitting}
           >
@@ -850,6 +854,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
             {isSubmitting ? 'Saving...' : initialData ? 'Update Blog Post' : 'Create Blog Post'}
           </button>
         </div>
+      <ArticlePreview title={formData.title} excerpt={formData.excerpt} content={formData.content}/>
       </form>
     </div>
   );

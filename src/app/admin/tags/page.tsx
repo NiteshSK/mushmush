@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 
-interface Tag {
+interface Tag { _count:{posts:number;news:number};
   id: number;
   name: string;
   slug: string;
@@ -26,6 +26,7 @@ const TagsAdminPage: React.FC = () => {
     setLoading(true);
     try {
       const res = await fetch("/api/admin/tags");
+      if(!res.ok) throw Error();
       const data = await res.json();
       setTags(data.tags || []);
     } catch (e) {
@@ -186,7 +187,7 @@ const TagsAdminPage: React.FC = () => {
                         className="px-2 py-1 border rounded-md"
                       />
                     ) : (
-                      tag.name
+                      <>{tag.name}<small className="block">{tag._count.posts} journal · {tag._count.news} news</small></>
                     )}
                   </td>
                   <td className="p-2">
@@ -226,7 +227,7 @@ const TagsAdminPage: React.FC = () => {
                           Edit
                         </button>
                         <button
-                          onClick={() => handleDelete(tag.id)}
+                          disabled={tag._count.posts + tag._count.news > 0} title={tag._count.posts + " journal / " + tag._count.news + " news stories"} onClick={() => handleDelete(tag.id)}
                           className="px-3 py-1 bg-red text-white rounded-md"
                         >
                           Delete

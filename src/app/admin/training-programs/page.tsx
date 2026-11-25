@@ -1,10 +1,8 @@
 import { Suspense } from "react";
 import TrainingProgramsAdmin from "@/components/Admin/TrainingPrograms";
-import AdminAuthWrapper from "@/components/Admin/AdminAuthWrapper";
-
 export default function AdminTrainingProgramsPage() {
   return (
-    <AdminAuthWrapper>
+    <>
       <Suspense
         fallback={
           <div className="flex items-center justify-center h-64">
@@ -14,6 +12,6 @@ export default function AdminTrainingProgramsPage() {
       >
         <TrainingProgramsAdmin />
       </Suspense>
-    </AdminAuthWrapper>
+    </>
   );
 }

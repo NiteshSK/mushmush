@@ -1,3 +1,4 @@
+import type { GoogleWorkspaceIdentity } from "@/lib/staff-identity"
 import { DefaultSession, DefaultUser } from "next-auth"
 import { UserRole } from "@prisma/client"
 
@@ -6,6 +7,8 @@ declare module "next-auth" {
     user: {
       id: string
       role: UserRole
+      staffDuties?: string[]
+      verifiedStaffWorkspace?: boolean
     } & DefaultSession["user"]
   }
 
@@ -17,6 +20,7 @@ declare module "next-auth" {
 
 declare module "next-auth/jwt" {
   interface JWT {
+    staffGoogleIdentity?: GoogleWorkspaceIdentity | null
     id: string
     role: UserRole
   }

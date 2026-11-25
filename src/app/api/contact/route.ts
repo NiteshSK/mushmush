@@ -15,12 +15,14 @@ function escapeHtml(str: string): string {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, phone, subject, message } = body;
+    const { name, email, subject, message } = body;
+    // Phone is optional: an email address is enough to reply.
+    const phone = typeof body.phone === 'string' ? body.phone.trim() : '';
 
     // Validate required fields
-    if (!name || !email || !phone || !subject || !message) {
+    if (!name || !email || !subject || !message) {
       return NextResponse.json(
-        { error: 'All fields are required' },
+        { error: 'Name, email, subject and message are required' },
         { status: 400 }
       );
     }
@@ -54,7 +56,7 @@ export async function POST(request: NextRequest) {
     // Escape all user inputs to prevent HTML injection
     const safeName = escapeHtml(name);
     const safeEmail = escapeHtml(email);
-    const safePhone = escapeHtml(phone);
+    const safePhone = phone ? escapeHtml(phone) : 'Not given';
     const safeSubject = escapeHtml(subject);
     const safeMessage = escapeHtml(message);
 
@@ -112,7 +114,7 @@ New Contact Form Submission - MushMush Website
 Contact Details:
 Name: ${name}
 Email: ${email}
-Phone: ${phone}
+Phone: ${phone || 'Not given'}
 Subject: ${subject}
 
 Message:

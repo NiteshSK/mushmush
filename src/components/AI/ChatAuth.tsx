@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
-import { ArrowLeft, Loader2, Mail, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Loader2, Eye, EyeOff } from "lucide-react";
 import { toast } from "react-hot-toast";
+import s from "../Pantry/chat.module.css";
 
 interface ChatAuthProps {
   onBack: () => void;
@@ -11,12 +12,6 @@ interface ChatAuthProps {
 }
 
 type AuthMode = "signin" | "signup" | "signup-otp";
-
-const inputClass =
-  "w-full bg-white border border-gray-200 rounded-lg py-2 px-3 text-xs text-gray-800 placeholder:text-gray-400 outline-none focus:border-forest focus:ring-1 focus:ring-forest/20 transition-colors";
-
-const errorInputClass =
-  "w-full bg-white border border-red-300 rounded-lg py-2 px-3 text-xs text-gray-800 placeholder:text-gray-400 outline-none focus:border-red-400 focus:ring-1 focus:ring-red-200 transition-colors";
 
 const ChatAuth: React.FC<ChatAuthProps> = ({ onBack, onAuthSuccess }) => {
   const [mode, setMode] = useState<AuthMode>("signin");
@@ -178,106 +173,81 @@ const ChatAuth: React.FC<ChatAuthProps> = ({ onBack, onAuthSuccess }) => {
     }
   };
 
-  return (
-    <div className="flex flex-col flex-1 min-h-0">
-      {/* Header */}
-      <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
-        <button onClick={onBack} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
-          <ArrowLeft size={14} className="text-gray-600" />
-        </button>
-        <span className="text-xs font-semibold text-gray-800">
-          {mode === "signin" ? "Sign In to Continue" : mode === "signup" ? "Create Account" : "Verify Email"}
-        </span>
-      </div>
+  const field = (key: string) => ({
+    className: s.textInput,
+    "aria-invalid": errors[key] ? true : undefined,
+    "aria-describedby": errors[key] ? `chat-auth-${key}-error` : undefined,
+  });
+  const fieldError = (key: string) =>
+    errors[key] ? <p id={`chat-auth-${key}-error`} className={s.fieldError}>{errors[key]}</p> : null;
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {/* Info banner */}
-        <div className="bg-forest/5 border border-forest/10 rounded-xl p-3">
-          <p className="text-xs text-gray-600">
-            {mode === "signup-otp"
-              ? "We sent a verification code to your email."
-              : "Sign in or create an account to complete your purchase."}
-          </p>
-        </div>
-
-        {errors.form && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-2.5">
-            <p className="text-xs text-red-600">{errors.form}</p>
-          </div>
-        )}
-
-        {/* ─── Sign In ─── */}
-        {mode === "signin" && (
-          <>
-            {/* Google */}
-            <button
-              onClick={handleGoogleSignIn}
-              disabled={loading}
-              className="flex items-center justify-center gap-2 w-full bg-white border border-gray-200 rounded-full py-2.5 text-xs text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
-            >
-              <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+  const googleButton = (
+    <button type="button" onClick={handleGoogleSignIn} disabled={loading} className={s.secondary}>
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                 <path d="M19.999 10.2218C20.0111 9.53429 19.9387 8.84791 19.7834 8.17737H10.2031V11.8884H15.8267C15.7201 12.5391 15.4804 13.162 15.1219 13.7195C14.7634 14.2771 14.2935 14.7578 13.7405 15.1328L13.7209 15.2571L16.7502 17.5568L16.96 17.5774C18.8873 15.8329 19.999 13.2661 19.999 10.2218Z" fill="#4285F4" />
                 <path d="M10.2036 20C12.9586 20 15.2715 19.1111 16.9609 17.5777L13.7409 15.1332C12.8793 15.7223 11.7229 16.1333 10.2036 16.1333C8.91317 16.126 7.65795 15.7206 6.61596 14.9746C5.57397 14.2287 4.79811 13.1802 4.39848 11.9777L4.2789 11.9877L1.12906 14.3766L1.08789 14.4888C1.93622 16.1457 3.23812 17.5386 4.84801 18.512C6.45791 19.4852 8.31194 20.0005 10.2036 20Z" fill="#34A853" />
                 <path d="M4.39899 11.9776C4.1758 11.3411 4.06063 10.673 4.05807 9.9999C4.06218 9.3279 4.1731 8.66067 4.38684 8.02221L4.38115 7.88959L1.1927 5.46234L1.0884 5.51095C0.372762 6.90337 0 8.44075 0 9.99983C0 11.5589 0.372762 13.0962 1.0884 14.4887L4.39899 11.9776Z" fill="#FBBC05" />
                 <path d="M10.2039 3.86663C11.6661 3.84438 13.0802 4.37803 14.1495 5.35558L17.0294 2.59997C15.1823 0.90185 12.7364 -0.0298855 10.2039 -3.67839e-05C8.31239 -0.000477835 6.45795 0.514733 4.84805 1.48799C3.23816 2.46123 1.93624 3.85417 1.08789 5.51101L4.38751 8.02225C4.79107 6.82005 5.5695 5.77231 6.61303 5.02675C7.65655 4.28119 8.91254 3.87541 10.2039 3.86663Z" fill="#EB4335" />
               </svg>
-              Continue with Google
-            </button>
+      Continue with Google
+    </button>
+  );
 
-            <div className="flex items-center gap-3">
-              <div className="flex-1 border-t border-gray-200"></div>
-              <span className="text-[10px] text-gray-400">or</span>
-              <div className="flex-1 border-t border-gray-200"></div>
-            </div>
+  const passwordToggle = (
+    <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? "Hide password" : "Show password"} aria-pressed={showPassword}>
+      {showPassword ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
+    </button>
+  );
+
+  return (
+    <div className={s.step}>
+      {/* Header */}
+      <div className={s.stepHead}>
+        <button type="button" onClick={onBack} className={s.iconButton} aria-label="Back">
+          <ArrowLeft aria-hidden="true" />
+        </button>
+        <h3>{mode === "signin" ? "Sign In to Continue" : mode === "signup" ? "Create Account" : "Verify Email"}</h3>
+      </div>
+
+      <div className={s.stepBody}>
+        {/* Info banner */}
+        <p className={s.notice}>
+          {mode === "signup-otp"
+            ? "We sent a verification code to your email."
+            : "Sign in or create an account to complete your purchase."}
+        </p>
+
+        {errors.form && <p className={s.error} role="alert">{errors.form}</p>}
+
+        {/* ─── Sign In ─── */}
+        {mode === "signin" && (
+          <>
+            {googleButton}
+            <p className={s.divider}>or</p>
 
             {/* Email form */}
-            <form onSubmit={handleSignIn} className="space-y-3">
+            <form onSubmit={handleSignIn} className={s.form}>
               <div>
-                <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Email</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => { setEmail(e.target.value); setErrors({}); }}
-                  className={errors.email ? errorInputClass : inputClass}
-                  placeholder="you@example.com"
-                />
-                {errors.email && <p className="text-[10px] text-red-500 mt-0.5">{errors.email}</p>}
+                <label htmlFor="chat-auth-email" className={s.label}>Email</label>
+                <input id="chat-auth-email" type="email" value={email} onChange={(e) => { setEmail(e.target.value); setErrors({}); }} placeholder="you@example.com" autoComplete="email" {...field("email")} />
+                {fieldError("email")}
               </div>
               <div>
-                <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Password</label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => { setPassword(e.target.value); setErrors({}); }}
-                    className={errors.password ? errorInputClass : inputClass}
-                    placeholder="Enter your password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
-                  </button>
+                <label htmlFor="chat-auth-password" className={s.label}>Password</label>
+                <div className={s.passwordField}>
+                  <input id="chat-auth-password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => { setPassword(e.target.value); setErrors({}); }} placeholder="Enter your password" autoComplete="current-password" {...field("password")} />
+                  {passwordToggle}
                 </div>
-                {errors.password && <p className="text-[10px] text-red-500 mt-0.5">{errors.password}</p>}
+                {fieldError("password")}
               </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-forest text-white py-2.5 rounded-full text-xs font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {loading ? <><Loader2 size={12} className="animate-spin" /> Signing in...</> : "Sign In"}
+              <button type="submit" disabled={loading} className={s.primary}>
+                {loading ? <><Loader2 aria-hidden="true" className={s.spin} /> Signing in…</> : "Sign In"}
               </button>
             </form>
 
-            <p className="text-center text-[11px] text-gray-400">
+            <p className={s.center}>
               Don&apos;t have an account?{" "}
-              <button
-                onClick={() => { setMode("signup"); clearErrors(); }}
-                className="text-forest font-semibold hover:text-green-700"
-              >
+              <button type="button" onClick={() => { setMode("signup"); clearErrors(); }} className={s.textAction}>
                 Sign Up
               </button>
             </p>
@@ -287,90 +257,57 @@ const ChatAuth: React.FC<ChatAuthProps> = ({ onBack, onAuthSuccess }) => {
         {/* ─── Sign Up ─── */}
         {mode === "signup" && (
           <>
-            <button
-              onClick={handleGoogleSignIn}
-              disabled={loading}
-              className="flex items-center justify-center gap-2 w-full bg-white border border-gray-200 rounded-full py-2.5 text-xs text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
-            >
-              <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
-                <path d="M19.999 10.2218C20.0111 9.53429 19.9387 8.84791 19.7834 8.17737H10.2031V11.8884H15.8267C15.7201 12.5391 15.4804 13.162 15.1219 13.7195C14.7634 14.2771 14.2935 14.7578 13.7405 15.1328L13.7209 15.2571L16.7502 17.5568L16.96 17.5774C18.8873 15.8329 19.999 13.2661 19.999 10.2218Z" fill="#4285F4" />
-                <path d="M10.2036 20C12.9586 20 15.2715 19.1111 16.9609 17.5777L13.7409 15.1332C12.8793 15.7223 11.7229 16.1333 10.2036 16.1333C8.91317 16.126 7.65795 15.7206 6.61596 14.9746C5.57397 14.2287 4.79811 13.1802 4.39848 11.9777L4.2789 11.9877L1.12906 14.3766L1.08789 14.4888C1.93622 16.1457 3.23812 17.5386 4.84801 18.512C6.45791 19.4852 8.31194 20.0005 10.2036 20Z" fill="#34A853" />
-                <path d="M4.39899 11.9776C4.1758 11.3411 4.06063 10.673 4.05807 9.9999C4.06218 9.3279 4.1731 8.66067 4.38684 8.02221L4.38115 7.88959L1.1927 5.46234L1.0884 5.51095C0.372762 6.90337 0 8.44075 0 9.99983C0 11.5589 0.372762 13.0962 1.0884 14.4887L4.39899 11.9776Z" fill="#FBBC05" />
-                <path d="M10.2039 3.86663C11.6661 3.84438 13.0802 4.37803 14.1495 5.35558L17.0294 2.59997C15.1823 0.90185 12.7364 -0.0298855 10.2039 -3.67839e-05C8.31239 -0.000477835 6.45795 0.514733 4.84805 1.48799C3.23816 2.46123 1.93624 3.85417 1.08789 5.51101L4.38751 8.02225C4.79107 6.82005 5.5695 5.77231 6.61303 5.02675C7.65655 4.28119 8.91254 3.87541 10.2039 3.86663Z" fill="#EB4335" />
-              </svg>
-              Continue with Google
-            </button>
+            {googleButton}
+            <p className={s.divider}>or</p>
 
-            <div className="flex items-center gap-3">
-              <div className="flex-1 border-t border-gray-200"></div>
-              <span className="text-[10px] text-gray-400">or</span>
-              <div className="flex-1 border-t border-gray-200"></div>
-            </div>
-
-            <form onSubmit={handleSignUp} className="space-y-3">
+            <form onSubmit={handleSignUp} className={s.form}>
               <div>
-                <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Full Name *</label>
-                <input type="text" value={name} onChange={(e) => { setName(e.target.value); setErrors({}); }} className={errors.name ? errorInputClass : inputClass} placeholder="John Doe" />
-                {errors.name && <p className="text-[10px] text-red-500 mt-0.5">{errors.name}</p>}
+                <label htmlFor="chat-auth-name" className={s.label}>Full name</label>
+                <input id="chat-auth-name" type="text" value={name} onChange={(e) => { setName(e.target.value); setErrors({}); }} placeholder="John Doe" autoComplete="name" {...field("name")} />
+                {fieldError("name")}
               </div>
               <div>
-                <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Email *</label>
-                <input type="email" value={email} onChange={(e) => { setEmail(e.target.value); setErrors({}); }} className={errors.email ? errorInputClass : inputClass} placeholder="you@example.com" />
-                {errors.email && <p className="text-[10px] text-red-500 mt-0.5">{errors.email}</p>}
+                <label htmlFor="chat-auth-email" className={s.label}>Email</label>
+                <input id="chat-auth-email" type="email" value={email} onChange={(e) => { setEmail(e.target.value); setErrors({}); }} placeholder="you@example.com" autoComplete="email" {...field("email")} />
+                {fieldError("email")}
               </div>
               <div>
-                <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
-                  Phone <span className="text-gray-300">(optional)</span>
+                <label htmlFor="chat-auth-phone" className={s.label}>
+                  Phone <span className={s.optional}>(optional)</span>
                 </label>
                 <input
+                  id="chat-auth-phone"
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                  className={inputClass}
+                  className={s.textInput}
                   placeholder="9876543210"
                   maxLength={10}
+                  inputMode="tel"
+                  autoComplete="tel-national"
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Password *</label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => { setPassword(e.target.value); setErrors({}); }}
-                    className={errors.password ? errorInputClass : inputClass}
-                    placeholder="Min 8 characters"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
-                  </button>
+                <label htmlFor="chat-auth-new-password" className={s.label}>Password</label>
+                <div className={s.passwordField}>
+                  <input id="chat-auth-new-password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => { setPassword(e.target.value); setErrors({}); }} placeholder="Min 8 characters" autoComplete="new-password" {...field("password")} />
+                  {passwordToggle}
                 </div>
-                {errors.password && <p className="text-[10px] text-red-500 mt-0.5">{errors.password}</p>}
+                {fieldError("password")}
               </div>
               <div>
-                <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Confirm Password *</label>
-                <input type="password" value={confirmPassword} onChange={(e) => { setConfirmPassword(e.target.value); setErrors({}); }} className={errors.confirmPassword ? errorInputClass : inputClass} placeholder="Confirm your password" />
-                {errors.confirmPassword && <p className="text-[10px] text-red-500 mt-0.5">{errors.confirmPassword}</p>}
+                <label htmlFor="chat-auth-confirm" className={s.label}>Confirm password</label>
+                <input id="chat-auth-confirm" type="password" value={confirmPassword} onChange={(e) => { setConfirmPassword(e.target.value); setErrors({}); }} placeholder="Confirm your password" autoComplete="new-password" {...field("confirmPassword")} />
+                {fieldError("confirmPassword")}
               </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-forest text-white py-2.5 rounded-full text-xs font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {loading ? <><Loader2 size={12} className="animate-spin" /> Creating account...</> : "Create Account"}
+              <button type="submit" disabled={loading} className={s.primary}>
+                {loading ? <><Loader2 aria-hidden="true" className={s.spin} /> Creating account…</> : "Create Account"}
               </button>
             </form>
 
-            <p className="text-center text-[11px] text-gray-400">
+            <p className={s.center}>
               Already have an account?{" "}
-              <button
-                onClick={() => { setMode("signin"); clearErrors(); }}
-                className="text-forest font-semibold hover:text-green-700"
-              >
+              <button type="button" onClick={() => { setMode("signin"); clearErrors(); }} className={s.textAction}>
                 Sign In
               </button>
             </p>
@@ -379,52 +316,40 @@ const ChatAuth: React.FC<ChatAuthProps> = ({ onBack, onAuthSuccess }) => {
 
         {/* ─── OTP Verification ─── */}
         {mode === "signup-otp" && (
-          <form onSubmit={handleVerifyOTP} className="space-y-4">
-            <div className="bg-blue-50 border border-blue-100 rounded-lg p-3">
-              <p className="text-xs text-blue-700">
-                <Mail size={12} className="inline mr-1" />
-                OTP sent to <strong>{email}</strong>
-              </p>
-            </div>
+          <form onSubmit={handleVerifyOTP} className={s.form}>
+            <p className={s.notice}>
+              OTP sent to <strong>{email}</strong>
+            </p>
 
             <div>
-              <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Enter OTP *</label>
+              <label htmlFor="chat-auth-otp" className={s.label}>Verification code</label>
               <input
+                id="chat-auth-otp"
                 type="text"
                 value={otp}
                 onChange={(e) => { setOtp(e.target.value.replace(/\D/g, "").slice(0, 6)); setErrors({}); }}
-                className={`${errors.otp ? errorInputClass : inputClass} text-center text-base tracking-[0.5em] font-bold`}
+                {...field("otp")}
+                className={`${s.textInput} ${s.otp}`}
                 placeholder="• • • • • •"
                 maxLength={6}
+                inputMode="numeric"
+                autoComplete="one-time-code"
                 autoFocus
               />
-              {errors.otp && <p className="text-[10px] text-red-500 mt-0.5">{errors.otp}</p>}
+              {fieldError("otp")}
             </div>
 
-            <div className="flex items-center justify-between">
-              <button
-                type="button"
-                onClick={() => { setMode("signup"); setOtp(""); clearErrors(); }}
-                className="text-xs text-gray-500 hover:text-gray-700"
-              >
+            <div className={s.split}>
+              <button type="button" onClick={() => { setMode("signup"); setOtp(""); clearErrors(); }} className={s.textAction}>
                 Back
               </button>
-              <button
-                type="button"
-                onClick={handleResendOTP}
-                disabled={resendTimer > 0 || loading}
-                className="text-xs text-forest hover:text-green-700 disabled:text-gray-400"
-              >
+              <button type="button" onClick={handleResendOTP} disabled={resendTimer > 0 || loading} className={s.textAction}>
                 {resendTimer > 0 ? `Resend in ${resendTimer}s` : "Resend OTP"}
               </button>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading || otp.length !== 6}
-              className="w-full bg-forest text-white py-2.5 rounded-full text-xs font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {loading ? <><Loader2 size={12} className="animate-spin" /> Verifying...</> : "Verify & Create Account"}
+            <button type="submit" disabled={loading || otp.length !== 6} className={s.primary}>
+              {loading ? <><Loader2 aria-hidden="true" className={s.spin} /> Verifying…</> : "Verify & Create Account"}
             </button>
           </form>
         )}

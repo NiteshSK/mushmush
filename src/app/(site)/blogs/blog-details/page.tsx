@@ -1,13 +1,6 @@
-import { redirect } from 'next/navigation'
-import { Metadata } from 'next'
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: 'Blogs | Kosvana',
-  description: 'Read our latest blog posts on Kosvana',
-}
-
-export default function BlogDetailsRedirectPage() {
-  // Redirect to the main blogs page since individual blog posts
-  // are now handled by the dynamic route: /blogs/[slug]
-  redirect('/blogs')
+/** Old template URL with no article of its own. Articles live at /blogs/[slug]. */
+export default function BlogDetailsPage() {
+  redirect("/blogs");
 }

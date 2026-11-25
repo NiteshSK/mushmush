@@ -1,7 +1,9 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, type Ref } from "react";
 import { INDIAN_STATES, MAX_ADDRESSES_PER_USER } from "@/lib/constants";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
+import p from "../Pantry/pantry.module.css";
+import r from "../Pantry/review.module.css";
 
 export interface Address {
   id: string;
@@ -26,36 +28,53 @@ interface AddressSectionProps {
   addresses: Address[];
   /** Currently selected saved address ID */
   selectedId: string | null;
+  /** The selected address, including one entered for this order only (id "temp-…"). */
+  selected?: Address | null;
   /** Called when user selects a saved address or null (new address mode) */
   onSelect: (address: Address | null) => void;
   /** Called when pincode changes (for delivery check) */
   onPincodeChange: (pincode: string) => void;
   /** Whether this is a guest checkout */
   isGuest: boolean;
-  /** Label: "Delivery Address" or "Billing Address" */
+  /** Label: "Delivery address" or "Billing address" */
   label?: string;
+  /** Step number shown before the heading. */
+  step?: number;
+  /** Lets checkout move focus to this section, e.g. "Change the delivery address". */
+  headingRef?: Ref<HTMLHeadingElement>;
+  /** Render inside another section (billing) without its own rule and step. */
+  nested?: boolean;
+  /** Saved addresses are still loading. */
+  loading?: boolean;
   /** Called when addresses list changes (after saving new) */
   onAddressesChange?: (addresses: Address[]) => void;
 }
 
-const inputClass =
-  "rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-forest/20";
+const slug = (text: string) => text.toLowerCase().replace(/[^a-z]+/g, "-");
 
 const AddressForm = ({
+  idPrefix,
+  initial,
   onSubmit,
   onCancel,
   onPincodeChange,
   showCancel,
+  submitLabel,
 }: {
+  idPrefix: string;
+  initial?: AddressFormData;
   onSubmit: (data: AddressFormData) => void;
   onCancel?: () => void;
   onPincodeChange: (pin: string) => void;
   showCancel: boolean;
+  submitLabel: string;
 }) => {
-  const [form, setForm] = useState<AddressFormData>({ street: "", city: "", state: "", zip: "" });
+  const [form, setForm] = useState<AddressFormData>(initial ?? { street: "", city: "", state: "", zip: "" });
+  const [error, setError] = useState("");
 
   const update = (field: keyof AddressFormData, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
+    setError("");
     if (field === "zip") {
       const clean = value.replace(/\D/g, "").slice(0, 6);
       if (clean.length === 6) onPincodeChange(clean);
@@ -64,92 +83,48 @@ const AddressForm = ({
 
   const handleSubmit = () => {
     if (!form.street || !form.city || !form.state || !form.zip) {
+      setError("Please fill all address fields");
       toast.error("Please fill all address fields");
       return;
     }
     if (!/^\d{6}$/.test(form.zip)) {
+      setError("Please enter a valid 6-digit PIN code");
       toast.error("Please enter a valid 6-digit PIN code");
       return;
     }
     onSubmit(form);
   };
 
+  const id = (field: string) => `${idPrefix}-${field}`;
   return (
-    <div className="space-y-4 mt-4">
-      <div>
-        <label className="block text-sm font-medium text-dark mb-1.5">
-          Street Address <span className="text-red">*</span>
-        </label>
-        <input
-          type="text"
-          value={form.street}
-          onChange={(e) => update("street", e.target.value)}
-          placeholder="House number and street name"
-          className={inputClass}
-        />
+    <div className={r.fields}>
+      <div className={`${r.input} ${r.full}`}>
+        <label htmlFor={id("street")}>House number and street</label>
+        <input id={id("street")} type="text" autoComplete="address-line1" value={form.street} onChange={(e) => update("street", e.target.value)} />
       </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-dark mb-1.5">
-            City <span className="text-red">*</span>
-          </label>
-          <input
-            type="text"
-            value={form.city}
-            onChange={(e) => update("city", e.target.value)}
-            placeholder="Enter city"
-            className={inputClass}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-dark mb-1.5">
-            State <span className="text-red">*</span>
-          </label>
-          <select
-            value={form.state}
-            onChange={(e) => update("state", e.target.value)}
-            className={inputClass}
-          >
-            <option value="">Select State</option>
-            {INDIAN_STATES.map((s) => (
-              <option key={s} value={s}>{s}</option>
-            ))}
-          </select>
-        </div>
+      <div className={r.input}>
+        <label htmlFor={id("city")}>City or town</label>
+        <input id={id("city")} type="text" autoComplete="address-level2" value={form.city} onChange={(e) => update("city", e.target.value)} />
       </div>
-
-      <div className="max-w-[200px]">
-        <label className="block text-sm font-medium text-dark mb-1.5">
-          PIN Code <span className="text-red">*</span>
-        </label>
-        <input
-          type="text"
-          value={form.zip}
-          onChange={(e) => update("zip", e.target.value.replace(/\D/g, "").slice(0, 6))}
-          placeholder="6-digit PIN"
-          maxLength={6}
-          className={inputClass}
-        />
+      <div className={r.input}>
+        <label htmlFor={id("state")}>State</label>
+        <select id={id("state")} autoComplete="address-level1" value={form.state} onChange={(e) => update("state", e.target.value)}>
+          <option value="">Select state</option>
+          {INDIAN_STATES.map((s) => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
       </div>
-
-      <div className="flex gap-3 pt-2">
-        <button
-          type="button"
-          onClick={handleSubmit}
-          className="bg-forest text-white text-sm font-medium py-2.5 px-6 rounded-md hover:bg-dark transition-colors"
-        >
-          Use This Address
-        </button>
+      <div className={r.input}>
+        <label htmlFor={id("zip")}>PIN code</label>
+        <input id={id("zip")} type="text" inputMode="numeric" autoComplete="postal-code" placeholder="6-digit PIN" maxLength={6}
+          value={form.zip} onChange={(e) => update("zip", e.target.value.replace(/\D/g, "").slice(0, 6))} />
+      </div>
+      {error && <p role="alert" className={`${r.error} ${r.full}`}>{error}</p>}
+      <div className={`${r.formActions} ${r.full}`}>
+        <button type="button" onClick={handleSubmit} className={r.secondaryAction}>{submitLabel}</button>
         {showCancel && onCancel && (
-          <button
-            type="button"
-            onClick={onCancel}
-            className="text-sm font-medium text-gray-500 py-2.5 px-6 rounded-md border border-gray-200 hover:bg-gray-50 transition-colors"
-          >
-            Cancel
-          </button>
+          <button type="button" onClick={onCancel} className={p.textAction}>Cancel</button>
         )}
       </div>
     </div>
@@ -159,14 +134,21 @@ const AddressForm = ({
 const AddressSection: React.FC<AddressSectionProps> = ({
   addresses,
   selectedId,
+  selected,
   onSelect,
   onPincodeChange,
   isGuest,
-  label = "Delivery Address",
+  label = "Delivery address",
+  step,
+  headingRef,
+  nested,
+  loading,
   onAddressesChange,
 }) => {
   const [showNewForm, setShowNewForm] = useState(isGuest || addresses.length === 0);
   const [savingAddress, setSavingAddress] = useState(false);
+  const [editing, setEditing] = useState<AddressFormData | undefined>(undefined);
+  const idPrefix = slug(label);
 
   // Auto-trigger pincode check when a saved address is selected
   useEffect(() => {
@@ -176,12 +158,19 @@ const AddressSection: React.FC<AddressSectionProps> = ({
     }
   }, [selectedId]);
 
+  // Saved addresses load after the section mounts: show them once they arrive.
+  const hasSaved = addresses.length > 0;
+  useEffect(() => {
+    if (!isGuest && hasSaved && selectedId && addresses.some((a) => a.id === selectedId)) setShowNewForm(false);
+  }, [hasSaved]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleSelectSaved = (address: Address) => {
     setShowNewForm(false);
     onSelect(address);
   };
 
   const handleNewAddressClick = () => {
+    setEditing(undefined);
     setShowNewForm(true);
     onSelect(null);
   };
@@ -248,118 +237,93 @@ const AddressSection: React.FC<AddressSectionProps> = ({
     }
   };
 
-  return (
-    <div className="bg-white shadow-1 rounded-[10px] mt-7.5">
-      <div className="border-b border-gray-3 py-5 px-4 sm:px-8.5">
-        <h3 className="font-medium text-xl text-dark">{label}</h3>
-      </div>
+  // An address entered for this order only (guests, or a full address book).
+  const oneOff = !showNewForm && selected && selected.id.startsWith("temp-") ? selected : null;
+  const Heading = nested ? "h3" : "h2";
 
-      <div className="p-4 sm:p-8.5">
-        {/* Saved addresses list */}
-        {!isGuest && addresses.length > 0 && (
-          <div className="space-y-3 mb-4">
-            {addresses.map((addr) => (
-              <label
-                key={addr.id}
-                className={`block p-4 border-2 rounded-[10px] cursor-pointer transition-all ${
-                  selectedId === addr.id && !showNewForm
-                    ? "border-forest bg-forest/5 shadow-sm"
-                    : "border-gray-3 hover:border-forest/30"
-                }`}
-                onClick={() => handleSelectSaved(addr)}
-              >
-                <div className="flex items-start gap-3">
-                  <div className="relative mt-0.5">
-                    <input
-                      type="radio"
-                      name={`address-${label}`}
-                      checked={selectedId === addr.id && !showNewForm}
-                      onChange={() => handleSelectSaved(addr)}
-                      className="sr-only"
-                    />
-                    <div
-                      className={`flex h-4 w-4 items-center justify-center rounded-full ${
-                        selectedId === addr.id && !showNewForm
-                          ? "border-4 border-forest"
-                          : "border border-gray-4"
-                      }`}
-                    ></div>
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-dark text-sm">{addr.street}</span>
-                      {addr.isDefault && (
-                        <span className="text-[10px] font-semibold uppercase tracking-wider text-forest bg-forest/10 px-2 py-0.5 rounded-full">
-                          Default
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-sm text-dark-5 mt-0.5">
-                      {addr.city}, {addr.state} &mdash; {addr.zip}
-                    </p>
-                  </div>
-                </div>
-              </label>
-            ))}
+  const content = (
+    <>
+      <Heading id={`${idPrefix}-title`} ref={headingRef} tabIndex={-1}>
+        {step !== undefined && <span>{step}</span>}{label}
+      </Heading>
+      {!nested && <p>{isGuest ? "Fresh mushrooms deliver only in Dehradun. Everything else ships across India." : "Choose a saved address or add a new one."}</p>}
 
-            {/* Add new address option */}
-            <label
-              className={`block p-4 border-2 rounded-[10px] cursor-pointer transition-all ${
-                showNewForm
-                  ? "border-forest bg-forest/5 shadow-sm"
-                  : "border-dashed border-gray-3 hover:border-forest/30"
-              }`}
-              onClick={handleNewAddressClick}
-            >
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <input
-                    type="radio"
-                    name={`address-${label}`}
-                    checked={showNewForm}
-                    onChange={handleNewAddressClick}
-                    className="sr-only"
-                  />
-                  <div
-                    className={`flex h-4 w-4 items-center justify-center rounded-full ${
-                      showNewForm
-                        ? "border-4 border-forest"
-                        : "border border-gray-4"
-                    }`}
-                  ></div>
-                </div>
-                <span className="text-sm font-medium text-dark">+ Add New Address</span>
-              </div>
+      {loading && <p className={r.loading} role="status">Loading your saved addresses…</p>}
+
+      {/* Saved addresses list */}
+      {!loading && !isGuest && addresses.length > 0 && (
+        <div className={r.choices} role="radiogroup" aria-labelledby={`${idPrefix}-title`}>
+          {addresses.map((addr) => (
+            <label key={addr.id} className={r.choice}>
+              <input
+                type="radio"
+                name={`address-${label}`}
+                checked={selectedId === addr.id && !showNewForm}
+                onChange={() => handleSelectSaved(addr)}
+              />
+              <span>
+                <strong>{addr.street}</strong>
+                {addr.isDefault && <small>Default</small>}
+                <br />
+                {addr.city}, {addr.state} {addr.zip}
+              </span>
             </label>
+          ))}
 
-            {/* Address count */}
-            <p className="text-xs text-dark-5 mt-2">
-              {addresses.length} of {MAX_ADDRESSES_PER_USER} addresses saved
-            </p>
-          </div>
-        )}
+          {/* Add new address option */}
+          <label className={r.choice}>
+            <input
+              type="radio"
+              name={`address-${label}`}
+              checked={showNewForm}
+              onChange={handleNewAddressClick}
+            />
+            <span><strong>Add a new address</strong></span>
+          </label>
 
-        {/* New address form — shown for guests, or when "Add New" is selected */}
-        {showNewForm && (
-          <AddressForm
-            onSubmit={handleNewAddressSubmit}
-            onCancel={addresses.length > 0 ? () => {
-              setShowNewForm(false);
-              // Re-select first/default address
-              const defaultAddr = addresses.find((a) => a.isDefault) || addresses[0];
-              if (defaultAddr) onSelect(defaultAddr);
-            } : undefined}
-            onPincodeChange={onPincodeChange}
-            showCancel={addresses.length > 0}
-          />
-        )}
+          <p className={r.hint}>{addresses.length} of {MAX_ADDRESSES_PER_USER} addresses saved</p>
+        </div>
+      )}
 
-        {savingAddress && (
-          <p className="text-sm text-dark-5 mt-2 animate-pulse">Saving address...</p>
-        )}
-      </div>
-    </div>
+      {oneOff && (
+        <div className={r.chosen}>
+          <span>{oneOff.street}, {oneOff.city}, {oneOff.state} {oneOff.zip}</span>
+          <button type="button" className={p.textAction} onClick={() => {
+            setEditing({ street: oneOff.street, city: oneOff.city, state: oneOff.state, zip: oneOff.zip });
+            setShowNewForm(true);
+            onSelect(null);
+          }} aria-label={`Change ${label.toLowerCase()}`}>Change</button>
+        </div>
+      )}
+
+      {/* New address form — shown for guests, or when "Add New" is selected */}
+      {!loading && showNewForm && (
+        <AddressForm
+          key={editing ? "edit" : "new"}
+          idPrefix={idPrefix}
+          initial={editing}
+          onSubmit={handleNewAddressSubmit}
+          onCancel={addresses.length > 0 ? () => {
+            setShowNewForm(false);
+            // Re-select first/default address
+            const defaultAddr = addresses.find((a) => a.isDefault) || addresses[0];
+            if (defaultAddr) onSelect(defaultAddr);
+          } : undefined}
+          onPincodeChange={onPincodeChange}
+          showCancel={addresses.length > 0}
+          submitLabel={isGuest ? "Use this address" : "Save and use this address"}
+        />
+      )}
+
+      {savingAddress && (
+        <p className={r.hint} role="status">Saving address…</p>
+      )}
+    </>
   );
+
+  return nested
+    ? <div className={r.spaced}>{content}</div>
+    : <section className={r.block} aria-labelledby={`${idPrefix}-title`}>{content}</section>;
 };
 
 export default AddressSection;

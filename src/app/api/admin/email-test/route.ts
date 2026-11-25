@@ -40,7 +40,7 @@ export async function POST(request: Request) {
     subject: 'Kosvana Email Test',
     html: `
       <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 500px;">
-        <h2 style="color: #5c8e61;">Email is working!</h2>
+        <h2 style="color: #1c3024;">Email is working!</h2>
         <p>This is a test email from your Kosvana store.</p>
         <p style="color: #666; font-size: 13px;">Sent at: ${new Date().toISOString()}</p>
       </div>

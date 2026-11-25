@@ -1,23 +1,15 @@
 import type { Metadata } from "next";
-import AuthSessionProvider from "@/components/Providers/SessionProvider";
-import { Toaster } from "react-hot-toast";
-import "../css/euclid-circular-a-font.css";
-import "../css/style.css";
 
 export const metadata: Metadata = {
-  title: "Authentication - Kosvana",
+  title: "Your account | Kosvana",
   description: "Sign in to your Kosvana account",
 };
 
-export default function AuthLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <AuthSessionProvider>
-      <Toaster />
-      {children}
-    </AuthSessionProvider>
-  );
+/**
+ * The root layout already provides the session, the Redux store and the fonts.
+ * Each sign-in, sign-up and recovery page renders <PantryShell>, which brings the
+ * masthead, footer and toaster, so this layout adds nothing around them.
+ */
+export default function AuthLayout({ children }: { children: React.ReactNode }) {
+  return children;
 }

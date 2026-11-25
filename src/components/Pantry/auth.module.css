@@ -1,0 +1,103 @@
+/* Sign-in, sign-up and password recovery inside <PantryShell>. Tokens come from .pantry in pantry.module.css. */
+.auth {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 29rem);
+  grid-template-rows: auto 1fr;
+  grid-template-areas: "intro panel" "notes panel";
+  align-items: start;
+  gap: 0 clamp(2rem, 6vw, 7rem);
+  max-width: 1240px;
+  margin-inline: auto;
+  padding: clamp(2.25rem, 5vw, 5.5rem) var(--gutter) clamp(3.5rem, 7vw, 7rem);
+  /* Short pages (recovery, errors) end above the viewport bottom, and <body> is white.
+     Paint paper below this point only; a shadow adds no scroll. Remove once the shell fills the viewport. */
+  box-shadow: 0 100vmax 0 100vmax var(--paper);
+}
+.intro { grid-area: intro; padding-top: clamp(0rem, 1.5vw, 1.5rem); }
+.kicker { text-transform: uppercase; font-size: .76rem; font-weight: 500; letter-spacing: .18em; line-height: 1.5; color: var(--brass); }
+.intro h1 { margin-top: .5rem; font-size: clamp(3rem, 5vw, 5.25rem); line-height: .95; letter-spacing: -.045em; overflow-wrap: anywhere; }
+.intro h1 em { color: var(--forest); }
+.lede { max-width: 31rem; margin-top: 1.1rem; font-size: 1.03rem; line-height: 1.6; color: #46523f; }
+.notes { grid-area: notes; display: grid; align-content: start; gap: .55rem; max-width: 31rem; margin-top: 1.6rem; padding-top: 1.2rem; border-top: 1px solid var(--line); font-size: .9375rem; color: #46523f; }
+.notes li { display: flex; gap: .6rem; align-items: baseline; }
+.notes li::before { content: ""; flex: none; width: 5px; height: 5px; transform: translateY(-2px) rotate(45deg); background: var(--brass); }
+.notes a { text-decoration: underline; text-underline-offset: 4px; text-decoration-color: #9d926e; }
+
+/* Forms and payment-adjacent surfaces stay opaque. */
+.panel { grid-area: panel; min-width: 0; background: #fffdf6; border: 1px solid var(--line); padding: clamp(1.25rem, 3vw, 2.25rem); }
+.panel h2 { font-size: clamp(1.75rem, 2.4vw, 2.25rem); line-height: 1.05; letter-spacing: -.03em; margin-bottom: 1.1rem; }
+.form { display: grid; gap: 1.15rem; }
+.field { display: grid; gap: .4rem; min-width: 0; }
+.labelRow { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0 1rem; min-height: 44px; margin-bottom: -.4rem; }
+.label { font-size: .9rem; font-weight: 500; color: var(--ink); }
+.optional { font-weight: 400; color: #5c614f; }
+.input {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: .7rem .85rem;
+  font-size: 1rem;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid #8d9581;
+  border-radius: 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.input::placeholder { color: #7b7f70; }
+.input:hover { border-color: var(--ink); }
+.auth .input:focus-visible { position: relative; z-index: 1; outline: 3px solid #a7803c; outline-offset: 1px; }
+.input[aria-invalid="true"] { border-color: #a1321f; box-shadow: inset 3px 0 #a1321f; }
+.secret { display: flex; min-width: 0; }
+.secret .input { flex: 1; border-right: 0; }
+.reveal { flex: none; min-width: 72px; min-height: 48px; padding-inline: .85rem; font-size: .875rem; font-weight: 500; color: var(--forest); background: #fff; border: 1px solid #8d9581; border-radius: 0; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: #9d926e; }
+.reveal:hover { background: #f1efe4; }
+.hint { font-size: .8125rem; line-height: 1.45; color: #5c614f; }
+.error { display: flex; gap: .4rem; align-items: baseline; font-size: .875rem; line-height: 1.4; color: #9b2c1c; }
+.error::before { content: "!"; flex: none; display: inline-grid; place-items: center; width: 1.05rem; height: 1.05rem; transform: translateY(1px); font-size: .7rem; font-weight: 700; color: #fff; background: #9b2c1c; border-radius: 50%; }
+.alert, .status { padding: .85rem 1rem; font-size: .9375rem; line-height: 1.5; border-left: 3px solid; }
+.alert { color: #6d1f12; background: #fbefe9; border-color: #a1321f; }
+.status { color: var(--ink); background: #eef1e6; border-color: var(--forest); }
+.alert:focus, .status:focus { outline: none; }
+.panel > :is(.alert, .status) + :is(.form, .actions) { margin-top: 1.15rem; }
+.alert :is(strong, b), .status :is(strong, b) { font-weight: 500; }
+.alert p + p, .status p + p { margin-top: .35rem; }
+.alert a, .status a, .inlineLink { text-decoration: underline; text-underline-offset: 4px; }
+.textLink { display: inline-flex; align-items: center; min-height: 44px; font-size: .9rem; color: var(--ink); text-decoration: underline; text-underline-offset: 5px; text-decoration-color: #9d926e; }
+.textLink:hover, .reveal:hover { text-decoration-thickness: 2px; }
+.check { display: flex; align-items: flex-start; gap: .7rem; min-height: 44px; padding-block: .6rem; font-size: .9rem; line-height: 1.45; color: #46523f; cursor: pointer; }
+.check input { flex: none; width: 22px; height: 22px; margin: 0; accent-color: var(--forest); cursor: pointer; }
+.submit, .secondary, .google { display: inline-flex; align-items: center; justify-content: center; gap: .65rem; width: 100%; min-height: 50px; padding: .7rem 1.25rem; font-size: .97rem; font-weight: 500; border-radius: 0; }
+.submit { color: #fff8e9; background: var(--forest); border: 1px solid var(--forest); }
+.submit:hover:not(:disabled) { background: #132119; }
+.secondary, .google { color: var(--ink); background: #fff; border: 1px solid #8d9581; }
+.secondary:hover:not(:disabled), .google:hover:not(:disabled) { background: #f1efe4; }
+.google svg { width: 18px; height: 18px; flex: none; }
+.divider { display: flex; align-items: center; gap: .9rem; margin-block: 1.4rem; font-size: .8125rem; color: #5c614f; }
+.divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.switch { display: flex; flex-wrap: wrap; align-items: center; gap: 0 .45rem; margin-top: 1.25rem; padding-top: .75rem; border-top: 1px solid var(--line); font-size: .9375rem; color: #46523f; }
+.actions { display: grid; gap: .75rem; margin-top: 1.1rem; }
+.srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* One-time code dialog: the paper panel stays opaque; only the backdrop uses glass (from pantry.module.css). */
+.code { font-size: 1.5rem; letter-spacing: .4em; text-align: center; font-variant-numeric: tabular-nums; }
+.dialogLede { margin-bottom: 1rem; color: #46523f; overflow-wrap: anywhere; }
+.dialogRow { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 1rem; margin-top: .5rem; }
+.dialogRow button { display: inline-flex; align-items: center; min-height: 44px; font-size: .9rem; text-decoration: underline; text-underline-offset: 5px; text-decoration-color: #9d926e; }
+
+@media (max-width: 900px) {
+  .auth { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-template-areas: "intro" "panel" "notes"; max-width: 36rem; gap: 1.5rem; }
+  .intro { padding-top: 0; }
+  .notes { margin-top: 0; }
+}
+@media (max-width: 640px) {
+  .auth { padding-top: 1.5rem; }
+  .intro h1 { font-size: clamp(2.6rem, 11vw, 3.5rem); }
+  .lede { margin-top: .75rem; font-size: 1rem; }
+  .panel { padding: 1.15rem 1rem 1.25rem; }
+  .kicker { font-size: .75rem; letter-spacing: .12em; }
+  /* globals.css gives unclassed phone buttons min-height: 40px with a higher specificity; keep these targets at 44px or more. */
+  .auth.auth :is(.submit, .secondary, .google) { min-height: 50px; }
+  .auth.auth .reveal { min-height: 48px; }
+  .auth.auth :is(.textLink, .dialogRow button) { min-height: 44px; }
+}

@@ -7,7 +7,7 @@ import { menuData } from "./menuData";
 import Dropdown from "./Dropdown";
 import { useAppSelector, AppDispatch } from "@/redux/store";
 import { useSelector, useDispatch } from "react-redux";
-import { selectTotalPrice, removeAllItemsFromCart } from "@/redux/features/cart-slice";
+import { selectTotalPrice, syncCartOwner } from "@/redux/features/cart-slice";
 import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
 import { useWishlist } from "@/app/context/WishlistContext";
 import Image from "next/image";
@@ -22,24 +22,17 @@ const Header = () => {
   const router = useRouter();
   const userMenuRef = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch<AppDispatch>();
-  const prevUserRef = useRef<string | null | undefined>(undefined);
 
   const product = useAppSelector((state) => state.cartReducer.items);
   const totalPrice = useSelector(selectTotalPrice);
   const { items: wishlistItems } = useWishlist();
   const pathUrl = usePathname();
 
-  // Clear cart when user changes (sign out → sign in as different user)
-  useEffect(() => {
-    const currentUser = session?.user?.email ?? null;
-    if (prevUserRef.current !== undefined && prevUserRef.current !== currentUser) {
-      dispatch(removeAllItemsFromCart());
-    }
-    prevUserRef.current = currentUser;
-  }, [session?.user?.email, dispatch]);
-
+  // CartOwnerSync (in ClientRootLayout) keeps each account's bag. Put this
+  // account's bag away before leaving, so the next page shows an empty guest bag
+  // at once. The account gets it back when it signs in again.
   const handleSignOut = () => {
-    dispatch(removeAllItemsFromCart());
+    dispatch(syncCartOwner(null));
     signOut({ callbackUrl: '/' });
   };
 
@@ -224,7 +217,7 @@ const Header = () => {
               </div>
             ) : (
               <Link
-                href="/auth/signin"
+                href={`/auth/signin?callbackUrl=${encodeURIComponent(pathUrl || "/")}`}
                 className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
                 aria-label="Sign in"
               >
@@ -372,7 +365,7 @@ const Header = () => {
               </div>
             ) : (
               <Link
-                href="/auth/signin"
+                href={`/auth/signin?callbackUrl=${encodeURIComponent(pathUrl || "/")}`}
                 className="mt-6 w-full flex justify-center items-center gap-2 bg-dark text-white rounded-full py-3 text-sm font-medium"
                 onClick={() => setNavigationOpen(false)}
               >

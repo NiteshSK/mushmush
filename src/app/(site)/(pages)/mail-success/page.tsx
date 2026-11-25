@@ -1,19 +1,17 @@
-import React from "react";
+import type { Metadata } from "next";
 import MailSuccess from "@/components/MailSuccess";
+import PantryShell from "@/components/Pantry/PantryShell";
 
-import { Metadata } from "next";
 export const metadata: Metadata = {
-  title: "Mail Success Page | Kosvana",
-  description: "This is Mail Success Page for Kosvana",
-  // other metadata
+  title: "Message sent | Kosvana",
+  description: "Your message to Kosvana is sent.",
+  robots: { index: false },
 };
 
-const MailSuccessPage = () => {
+export default function MailSuccessPage() {
   return (
-    <main>
+    <PantryShell browseHref="/shop">
       <MailSuccess />
-    </main>
+    </PantryShell>
   );
-};
-
-export default MailSuccessPage;
+}

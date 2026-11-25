@@ -9,6 +9,9 @@
 // ── Mock next/server before any imports ────────────────────
 
 const mockJsonResponse = jest.fn();
+// verify-and-place-order signs a payment token with this secret.
+process.env.NEXTAUTH_SECRET = 'test-secret';
+
 jest.mock('next/server', () => {
   class FakeNextRequest {
     private body: string;
@@ -40,14 +43,18 @@ jest.mock('@/lib/prisma', () => ({
       update: jest.fn(),
     },
     user: { findFirst: jest.fn(), create: jest.fn() },
-    addresses: { findUnique: jest.fn(), create: jest.fn() },
+    addresses: { findUnique: jest.fn(), findFirst: jest.fn(), create: jest.fn() },
     order: { create: jest.fn() },
+    // Pricing now looks up the shipping zone for the delivery pincode
+    shippingZone: { findFirst: jest.fn() },
   },
 }));
 
 jest.mock('@/lib/otp-store', () => ({
   otpStore: {
     verify: jest.fn(),
+    check: jest.fn(),
+    consume: jest.fn(),
     get: jest.fn(),
     delete: jest.fn(),
   },
@@ -122,6 +129,8 @@ function makeRequest(body: any) {
 
 function setupValidOTP() {
   (otpStore.verify as jest.Mock).mockResolvedValue({ valid: true });
+  (otpStore.check as jest.Mock).mockResolvedValue({ valid: true, id: 'otp-1' });
+  (otpStore.consume as jest.Mock).mockResolvedValue(true);
 }
 
 function setupSession() {
@@ -174,8 +183,15 @@ function lastResponse(): { data: any; status: number } {
 }
 
 // All test products use 100gm packs. Bulk quantity is in grams.
-// Default order: 2 packs = 200gm consumed.
-const PRODUCT_100GM = { measurementValue: 100, measurementType: 'gm' };
+// Default order: 2 packs = 200gm consumed. Server price is ₹499 per pack.
+const PRODUCT_100GM = { measurementValue: 100, measurementType: 'gm', price: 499 };
+
+function setupShippingZone() {
+  // Zone extra fee 0 → shipping = base ₹50 (subtotal 998 < 1999)
+  (prisma.shippingZone.findFirst as jest.Mock).mockResolvedValue({
+    id: 3, name: 'Delhi NCR', baseFee: 0, estimatedDays: '3-5 days',
+  });
+}
 
 // ── Tests ──────────────────────────────────────────────────
 
@@ -186,6 +202,7 @@ describe('POST /api/checkout/verify-and-place-order — stock validation (bulk)'
     setupSession();
     setupAddress();
     setupOrder();
+    setupShippingZone();
   });
 
   it('rejects order when a product is out of stock (0 bulk qty)', async () => {

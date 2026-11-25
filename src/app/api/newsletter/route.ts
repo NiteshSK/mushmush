@@ -47,7 +47,7 @@ export async function POST(request: Request) {
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: #5c8e61; margin: 0;">You're In!</h1>
+            <h1 style="color: #1c3024; margin: 0;">You're In!</h1>
             <p style="color: #666; font-size: 16px;">Welcome to the Kosvana community</p>
           </div>
           <div style="background: #f8f9fa; padding: 30px; border-radius: 10px; margin-bottom: 30px;">
@@ -63,13 +63,13 @@ export async function POST(request: Request) {
           </div>
           <div style="text-align: center; margin-bottom: 30px;">
             <a href="${baseUrl}/shop"
-               style="background: #5c8e61; color: white; padding: 12px 30px; text-decoration: none; border-radius: 25px; display: inline-block; font-weight: bold;">
+               style="background: #1c3024; color: white; padding: 12px 30px; text-decoration: none; border-radius: 25px; display: inline-block; font-weight: bold;">
               Shop Now
             </a>
           </div>
           <div style="border-top: 1px solid #eee; padding-top: 20px; text-align: center;">
             <p style="color: #666; font-size: 12px; margin: 0;">
-              Don't want these emails? <a href="${baseUrl}/api/newsletter/unsubscribe?email=${encodeURIComponent(normalizedEmail)}" style="color: #5c8e61;">Unsubscribe</a>
+              Don't want these emails? <a href="${baseUrl}/api/newsletter/unsubscribe?email=${encodeURIComponent(normalizedEmail)}" style="color: #1c3024;">Unsubscribe</a>
             </p>
             <p style="color: #666; font-size: 12px; margin-top: 10px;">
               &copy; ${new Date().getFullYear()} Kosvana by Mush Agro Products. All rights reserved.

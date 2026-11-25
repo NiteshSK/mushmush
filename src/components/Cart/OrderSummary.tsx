@@ -1,174 +1,57 @@
-import { selectTotalPrice } from "@/redux/features/cart-slice";
-import { useAppSelector } from "@/redux/store";
-import React, { useState, useMemo } from "react";
-import { useSelector } from "react-redux";
+"use client";
+
+import type { ReactNode, RefObject } from "react";
 import Link from "next/link";
+import { CONVENIENCE_FEE } from "@/lib/fees";
+import { rupees } from "../Pantry/catalogue";
+import type { useDeliveryQuote } from "./bag";
+import p from "../Pantry/pantry.module.css";
+import r from "../Pantry/review.module.css";
 
-const CONVENIENCE_FEE = 12;
-
-const OrderSummary = () => {
-  const cartItems = useAppSelector((state) => state.cartReducer.items);
-  const totalPrice = useSelector(selectTotalPrice);
-
-  // Calculate product-level discount (original vs discounted)
-  const productDiscount = useMemo(() =>
-    cartItems.reduce((sum, item) => {
-      if (item.discountedPrice && item.discountedPrice < item.price) {
-        return sum + (item.price - item.discountedPrice) * item.quantity;
-      }
-      return sum;
-    }, 0),
-  [cartItems]);
-  const originalTotal = totalPrice + productDiscount;
-
-  // Shipping estimate
-  const [pincode, setPincode] = useState('');
-  const [checking, setChecking] = useState(false);
-  const [shippingResult, setShippingResult] = useState<{
-    deliverable: boolean;
-    shippingFee?: number;
-    estimatedDays?: string;
-    freeAbove?: number | null;
-    freeShipping?: boolean;
-    message?: string;
-  } | null>(null);
-
-  const checkShipping = async () => {
-    if (!/^\d{6}$/.test(pincode)) return;
-    setChecking(true);
-    try {
-      const res = await fetch(`/api/shipping/check?pincode=${pincode}&subtotal=${totalPrice}`);
-      const data = await res.json();
-      setShippingResult(data);
-    } catch {
-      setShippingResult(null);
-    } finally {
-      setChecking(false);
-    }
-  };
-
-  return (
-    <div className="lg:max-w-[455px] w-full">
-      {/* <!-- order list box --> */}
-      <div className="bg-white border border-gray-100 rounded-[10px]">
-        <div className="border-b border-gray-3 py-5 px-4 sm:px-8.5">
-          <h3 className="font-medium text-xl text-dark">Order Summary</h3>
-        </div>
-
-        <div className="pt-2.5 pb-8.5 px-4 sm:px-8.5">
-          {/* <!-- title --> */}
-          <div className="flex items-center justify-between py-5 border-b border-gray-3">
-            <div>
-              <h4 className="font-medium text-dark">Product</h4>
-            </div>
-            <div>
-              <h4 className="font-medium text-dark text-right">Subtotal</h4>
-            </div>
-          </div>
-
-          {/* <!-- product item --> */}
-          {cartItems.map((item, key) => {
-            const hasItemDiscount = item.discountedPrice && item.discountedPrice < item.price;
-            return (
-              <div key={key} className="flex items-center justify-between py-5 border-b border-gray-3">
-                <div>
-                  <p className="text-dark">{item.title}</p>
-                  {hasItemDiscount && (
-                    <p className="text-xs text-gray-400 mt-0.5">
-                      <span className="line-through">₹{item.price}</span>
-                      <span className="text-forest ml-1.5">₹{item.discountedPrice} each</span>
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <p className="text-dark text-right">
-                    ₹{(item.discountedPrice || item.price) * item.quantity}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
-
-          {/* Shipping estimate */}
-          <div className="py-5 border-b border-gray-3">
-            <p className="text-sm text-dark mb-2.5 font-medium">Estimate Shipping</p>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={pincode}
-                onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, '').slice(0, 6);
-                  setPincode(val);
-                  if (val.length < 6) setShippingResult(null);
-                }}
-                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); checkShipping(); } }}
-                placeholder="Enter pincode"
-                maxLength={6}
-                className="flex-1 rounded-lg border border-gray-200 bg-gray-50 py-2 px-3.5 text-sm text-dark placeholder:text-gray-400 outline-none focus:border-forest focus:ring-1 focus:ring-forest/20 transition-colors"
-              />
-              <button
-                type="button"
-                onClick={checkShipping}
-                disabled={pincode.length !== 6 || checking}
-                className="px-3.5 py-2 bg-forest text-white text-xs font-medium rounded-lg hover:bg-dark transition-colors disabled:opacity-50"
-              >
-                {checking ? '...' : 'Check'}
-              </button>
-            </div>
-            {shippingResult && (
-              <div className={`mt-2.5 text-sm ${shippingResult.deliverable ? 'text-forest' : 'text-red-500'}`}>
-                {shippingResult.deliverable ? (
-                  <span>
-                    {shippingResult.freeShipping ? 'Free Delivery' : `Delivery: ₹${shippingResult.shippingFee}`}
-                    {shippingResult.estimatedDays && ` · ${shippingResult.estimatedDays}`}
-                  </span>
-                ) : (
-                  <span>{shippingResult.message}</span>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Product discount */}
-          {productDiscount > 0 && (
-            <div className="flex items-center justify-between py-3 border-b border-gray-3">
-              <p className="text-sm text-forest">Product Discount</p>
-              <p className="text-sm text-forest font-medium text-right">-₹{productDiscount.toFixed(2)}</p>
-            </div>
-          )}
-
-          {/* Convenience fee */}
-          <div className="flex items-center justify-between py-3 border-b border-gray-3">
-            <p className="text-sm text-dark">Convenience Fee</p>
-            <p className="text-sm text-dark text-right">₹{CONVENIENCE_FEE}</p>
-          </div>
-
-          {/* <!-- total --> */}
-          <div className="flex items-center justify-between pt-5">
-            <div>
-              <p className="font-medium text-lg text-dark">Total</p>
-            </div>
-            <div>
-              <p className="font-medium text-lg text-dark text-right">
-                ₹{(totalPrice + CONVENIENCE_FEE + (shippingResult?.deliverable ? (shippingResult.shippingFee || 0) : 0)).toFixed(2)}
-              </p>
-              {shippingResult?.deliverable && shippingResult.shippingFee !== undefined && shippingResult.shippingFee > 0 && (
-                <p className="text-xs text-gray-400 text-right">(incl. ₹{shippingResult.shippingFee} shipping)</p>
-              )}
-            </div>
-          </div>
-
-          {/* <!-- checkout button --> */}
-          <Link
-            href="/checkout"
-            className="w-full flex justify-center font-medium text-white bg-forest py-3 px-6 rounded-full ease-out duration-200 hover:bg-dark mt-7.5"
-          >
-            Process to Checkout
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
+type Props = {
+  subtotal: number;
+  count: number;
+  savings: number;
+  delivery: ReturnType<typeof useDeliveryQuote>;
+  pinRef?: RefObject<HTMLInputElement>;
+  /** Problems the shopper can fix before checkout, such as a fresh line outside Dehradun. */
+  children?: ReactNode;
 };
 
-export default OrderSummary;
+/** The /cart summary: every fee before checkout, a delivery PIN check and one primary action. */
+export default function OrderSummary({ subtotal, count, savings, delivery, pinRef, children }: Props) {
+  const { pin, edit, check, checkedPin, quote, checking, failed } = delivery;
+  const fee = quote?.deliverable ? quote.shippingFee ?? 0 : null;
+  const total = subtotal + CONVENIENCE_FEE + (fee ?? 0);
+
+  return <aside className={r.summary} aria-labelledby="summary-title">
+    <h2 id="summary-title">Order summary</h2>
+    <form className={r.pin} onSubmit={event => { event.preventDefault(); check(); }}>
+      <label htmlFor="bag-pin">Delivery PIN code</label>
+      <div className={p.field}>
+        <input ref={pinRef} id="bag-pin" inputMode="numeric" autoComplete="postal-code" maxLength={6} placeholder="6-digit PIN" value={pin}
+          pattern="[1-9][0-9]{5}" title="Enter a six-digit Indian PIN code" aria-describedby="bag-pin-result" onChange={event => edit(event.target.value)} />
+        <button disabled={checking || pin.length !== 6}>{checking ? "Checking…" : "Check"}</button>
+      </div>
+      <p id="bag-pin-result" role="status" className={r.pinResult} data-ok={quote?.deliverable || undefined} data-error={failed || quote?.deliverable === false || undefined}>
+        {failed ? "We couldn’t check this PIN. Please try again."
+          : quote && !quote.deliverable ? `We don’t deliver to ${checkedPin} yet. Try another PIN or contact us.`
+          : quote ? `Delivers to ${checkedPin}${quote.estimatedDays ? ` in ${quote.estimatedDays}` : ""}.`
+          : "Add your PIN to see the delivery fee."}
+      </p>
+    </form>
+    {children}
+    <dl className={r.totals}>
+      <dt>Subtotal<small>{count} {count === 1 ? "pack" : "packs"}{savings > 0 ? ` · includes ${rupees.format(savings)} off` : ""}</small></dt>
+      <dd data-price>{rupees.format(subtotal)}</dd>
+      <dt>Delivery{quote?.deliverable && !quote.freeShipping && quote.freeAbove ? <small>Free above {rupees.format(quote.freeAbove)}</small> : null}</dt>
+      <dd data-price className={fee === null ? r.pending : undefined}>{fee === null ? "Add PIN" : fee === 0 ? "Free" : rupees.format(fee)}</dd>
+      <dt>Convenience fee</dt>
+      <dd data-price>{rupees.format(CONVENIENCE_FEE)}</dd>
+      <dt className={r.grand}>{fee === null ? "Total before delivery" : "Total"}</dt>
+      <dd className={r.grand} data-price data-testid="bag-total">{rupees.format(total)}</dd>
+    </dl>
+    <Link href="/checkout" className={`${p.primaryAction} ${r.wide}`}>Go to checkout</Link>
+    <p className={r.note}>Next, add your contact details and address. We email you a code to confirm the order, then you pay by UPI. Coupons apply at checkout.</p>
+  </aside>;
+}

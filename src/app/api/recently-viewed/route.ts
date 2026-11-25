@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     }
 
     const recentlyViewed = await prisma.recentlyViewed.findMany({
-      where: { userId: user.id },
+      where: { userId: user.id , product: { archivedAt:null }},
       include: {
         product: {
           include: {
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
 
     // Check if product exists
     const product = await prisma.product.findUnique({
-      where: { id: parseInt(productId) }
+      where: { id: parseInt(productId), archivedAt:null }
     })
 
     if (!product) {
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
 
     // Keep only top 5 most recent items per user
     const userRecentlyViewed = await prisma.recentlyViewed.findMany({
-      where: { userId: user.id },
+      where: { userId: user.id , product: { archivedAt:null }},
       orderBy: { updatedAt: 'desc' },
       skip: 5 // Skip the first 5 (most recent)
     })

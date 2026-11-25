@@ -40,13 +40,14 @@ export const otpStore = {
   },
 
   /**
-   * Verify an OTP. Returns true if valid, false if wrong/expired/too many attempts.
-   * Automatically increments attempt counter and invalidates after MAX_ATTEMPTS.
+   * Check an OTP without using it up. Wrong codes count towards MAX_ATTEMPTS.
+   * Checkout calls this first, prices the order, and calls consume() only
+   * when it is about to create the order, so a shopper who must accept a
+   * corrected total can continue with the same code.
    */
-  async verify(email: string, otpInput: string): Promise<{
-    valid: boolean;
-    error?: string;
-  }> {
+  async check(email: string, otpInput: string): Promise<
+    { valid: true; id: string } | { valid: false; error: string }
+  > {
     try {
       const record = await prisma.oTP.findFirst({
         where: {
@@ -82,13 +83,42 @@ export const otpStore = {
         };
       }
 
-      // OTP is valid — delete it (single use)
-      await prisma.oTP.deleteMany({ where: { email: email.toLowerCase() } });
-      return { valid: true };
+      return { valid: true, id: record.id };
     } catch (error) {
       console.error('OTP verify error:', error);
       return { valid: false, error: 'Verification failed. Please try again.' };
     }
+  },
+
+  /**
+   * Use up a checked OTP. Returns false when another request already used it,
+   * so only one of two simultaneous submissions can succeed.
+   */
+  async consume(id: string): Promise<boolean> {
+    try {
+      const { count } = await prisma.oTP.deleteMany({ where: { id } });
+      return count === 1;
+    } catch (error) {
+      console.error('OTP consume error:', error);
+      return false;
+    }
+  },
+
+  /**
+   * Verify and use up an OTP in one step (single use).
+   */
+  async verify(email: string, otpInput: string): Promise<{
+    valid: boolean;
+    error?: string;
+  }> {
+    const result = await otpStore.check(email, otpInput);
+    if (result.valid === false) return { valid: false, error: result.error };
+    if (!(await otpStore.consume(result.id))) {
+      return { valid: false, error: 'OTP not found or expired. Please request a new OTP.' };
+    }
+    // Remove any other codes for this email, as before.
+    await prisma.oTP.deleteMany({ where: { email: email.toLowerCase() } });
+    return { valid: true };
   },
 
   /** Legacy get method — kept for backward compatibility but prefer verify() */

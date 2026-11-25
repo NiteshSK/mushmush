@@ -1,4 +1,6 @@
 "use client";
+import Roster from "./Roster";
+import { canWork } from "@/lib/staff-permissions";
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
@@ -13,6 +15,7 @@ interface TrainingProgram {
   description: string;
   price: number;
   duration: number;
+  seatsPerDate?:number|null;
   dailyHours: string;
   type: string;
   isActive: boolean;
@@ -39,7 +42,7 @@ const TrainingProgramsAdmin = () => {
 
   useEffect(() => {
     if (status === "loading") return;
-    if (!session || session.user?.role !== "ADMIN") {
+    if (!session || !canWork(session.user,"trainer")) {
       router.push("/");
     }
   }, [session, status, router]);
@@ -61,7 +64,7 @@ const TrainingProgramsAdmin = () => {
   };
 
   useEffect(() => {
-    if (session?.user?.role === "ADMIN") {
+    if (canWork(session?.user,"trainer")) {
       fetchTrainingPrograms();
     }
   }, [session]);
@@ -92,7 +95,7 @@ const TrainingProgramsAdmin = () => {
     );
   }
 
-  if (!session || session.user?.role !== "ADMIN") return null;
+  if (!session || !canWork(session.user,"trainer")) return null;
 
   return (
     <div className="space-y-6">
@@ -162,7 +165,7 @@ const TrainingProgramsAdmin = () => {
                       )}
                     </td>
                     <td className="px-5 py-4 text-sm text-dark">{program.duration} days</td>
-                    <td className="px-5 py-4 text-sm text-dark">{program._count.registrations}</td>
+                    <td className="px-5 py-4 text-sm text-dark">{program._count.registrations}<Roster id={program.id}/></td>
                     <td className="px-5 py-4">
                       <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${program.isActive ? "bg-forest/10 text-forest" : "bg-red/10 text-red"}`}>
                         {program.isActive ? "Active" : "Inactive"}
@@ -229,6 +232,7 @@ const ProgramModal = ({
 }) => {
   const [formData, setFormData] = useState({
     name: program?.name || "",
+    seatsPerDate: program?.seatsPerDate ?? null as number|null,
     description: program?.description || "",
     price: program?.price ?? 0,
     duration: program?.duration ?? 0,
@@ -277,6 +281,9 @@ const ProgramModal = ({
         </div>
 
         <form onSubmit={handleSubmit} className="p-5 sm:p-8 space-y-4">
+          <label>Planning capacity per start date
+            <input type="number" min="1" step="1" placeholder="Optional" value={formData.seatsPerDate ?? ""} onChange={e=>setFormData({...formData,seatsPerDate:e.target.value?Number(e.target.value):null})} className={inputClass}/>
+          </label>
           <div>
             <label className="block text-sm font-medium text-dark mb-1.5">Program Name <span className="text-red">*</span></label>
             <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className={inputClass} required />

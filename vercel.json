@@ -7,5 +7,19 @@
     "src/app/api/**/*.ts": {
       "maxDuration": 30
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/admin/scrape-news/trigger",
+      "schedule": "15 2 * * *"
+    },
+    {
+      "path": "/api/admin/jobs/run",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/admin/analytics/cleanup",
+      "schedule": "45 2 * * *"
+    }
+  ]
 }

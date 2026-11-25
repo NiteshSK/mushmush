@@ -1,0 +1,17 @@
+/* Training courses in search results. The colour and font tokens come from the .pantry page wrapper. */
+.training { margin-bottom: clamp(2rem,3.5vw,3rem); }
+.trainingHead { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: .25rem 1.5rem; padding-bottom: .9rem; border-bottom: 1px solid var(--line); }
+.trainingHead h2 { margin-top: .3rem; font-size: clamp(2rem,3.2vw,3rem); line-height: 1.05; letter-spacing: -.035em; }
+.courses { list-style: none; margin: 0; padding: 0; }
+.course { display: grid; grid-template-columns: minmax(0,1.3fr) minmax(0,1.5fr) auto; align-items: center; gap: .75rem clamp(1.5rem,3vw,3rem); padding: 1.15rem 0; border-bottom: 1px solid var(--line); }
+.courseName h3 { margin-top: .2rem; font-size: clamp(1.5rem,2vw,1.9rem); line-height: 1.1; letter-spacing: -.02em; overflow-wrap: anywhere; }
+.courseMeta { margin-top: .2rem; font-size: .875rem; color: #5c614f; }
+.courseFacts { display: grid; grid-template-columns: minmax(0,1.4fr) minmax(0,1fr); gap: .75rem clamp(1rem,2vw,1.75rem); margin: 0; }
+.courseFacts dt { font-size: .72rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); }
+.courseFacts dd { margin: .2rem 0 0; font-size: .95rem; line-height: 1.4; color: var(--ink); }
+.courseFacts s { margin-left: .4rem; font-size: .8125rem; color: #6f7464; }
+.noProducts { padding-top: .25rem; }
+.noProducts a { margin-left: .75rem; }
+@media (max-width: 760px) {
+  .course { grid-template-columns: minmax(0,1fr); align-items: start; gap: .6rem; }
+}

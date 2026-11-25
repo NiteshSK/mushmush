@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { availablePacks } from '@/lib/inventory';
+import { activeDiscountsInclude, computeProductDiscount } from '@/lib/product-pricing';
 
 // GET - Fetch user's wishlist
 export async function GET() {
@@ -21,7 +23,7 @@ export async function GET() {
     }
 
     const wishlistItems = await prisma.wishlistItem.findMany({
-      where: { userId: user.id },
+      where: { userId: user.id , product: { archivedAt:null }},
       include: {
         product: {
           include: {
@@ -35,15 +37,7 @@ export async function GET() {
                 rating: true
               }
             },
-            discounts: {
-              where: {
-                isActive: true,
-                OR: [
-                  { endDate: null },
-                  { endDate: { gte: new Date() } }
-                ]
-              }
-            }
+            discounts: activeDiscountsInclude()
           }
         }
       },
@@ -57,22 +51,10 @@ export async function GET() {
     // Transform the data to include discount calculations
     const transformedItems = wishlistItems.map(item => {
       const product = item.product;
-      const activeDiscount = product.discounts?.[0];
-      
-      let discountedPrice = product.price;
-      let discountPercentage = 0;
-      let hasDiscount = false;
-
-      if (activeDiscount) {
-        if (activeDiscount.type === 'PERCENTAGE') {
-          discountPercentage = activeDiscount.value;
-          discountedPrice = Math.round(product.price * (1 - activeDiscount.value / 100));
-        } else if (activeDiscount.type === 'FIXED_AMOUNT') {
-          discountedPrice = Math.max(0, product.price - activeDiscount.value);
-          discountPercentage = Math.round(((product.price - discountedPrice) / product.price) * 100);
-        }
-        hasDiscount = true;
-      }
+      // Same rule as the product listing and the order pricing.
+      const { discountedPrice, discountPercentage } = computeProductDiscount(product.price, product.discounts);
+      const hasDiscount = discountedPrice !== null;
+      const stockQuantity = availablePacks(product.quantity, product.measurementValue, product.measurementType);
 
       // Calculate average rating
       const averageRating = product.reviews?.length > 0 
@@ -86,6 +68,8 @@ export async function GET() {
           discountedPrice,
           discountPercentage,
           hasDiscount,
+          stockQuantity,
+          inStock: product.inStock && stockQuantity > 0,
           averageRating,
           reviewCount: product.reviews?.length || 0,
           reviews: product.reviews?.length || 0,
@@ -94,7 +78,7 @@ export async function GET() {
       };
     });
 
-    return NextResponse.json({ items: wishlistItems });
+    return NextResponse.json({ items: transformedItems });
   } catch (error) {
     console.error('Wishlist fetch error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -123,6 +107,9 @@ export async function POST(request: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
+
+    const available = await prisma.product.findFirst({where:{id:Number(productId), archivedAt:null},select:{id:true}});
+    if (!available) return NextResponse.json({error:"Product unavailable"},{status:404});
 
     // Check if item already exists in wishlist
     const existingItem = await prisma.wishlistItem.findUnique({

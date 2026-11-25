@@ -3,8 +3,13 @@ import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { otpStore } from '@/lib/otp-store';
-import { availablePacks } from '@/lib/inventory';
-import { validateCoupon } from '@/lib/coupon';
+import {
+  checkClientTotal,
+  priceOrder,
+  pricingBreakdown,
+  pricingErrorBody,
+} from '@/lib/order-pricing';
+import { createOrderPaymentToken, GUEST_USER_EMAIL, orderTrackingUrl } from '@/lib/order-access';
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,29 +26,36 @@ export async function POST(request: NextRequest) {
       billingAddressId,
       shippingAddressId,
       cartItems,
-      subtotal,
-      shippingFee,
-      convenienceFee,
-      total,
-      paymentMethod,
-      notes,
+      // Only used to detect a mismatch with what the shopper saw. Browser
+      // subtotal, shippingFee, convenienceFee and per-item price /
+      // discountedPrice are ignored: all amounts come from priceOrder().
+      total: clientTotal,
       couponCode
     } = body;
 
     // Validate required fields
-    if (!otp || !email || !customerName || !cartItems || cartItems.length === 0) {
+    if (
+      !otp ||
+      typeof email !== 'string' ||
+      !email ||
+      !customerName ||
+      !Array.isArray(cartItems) ||
+      cartItems.length === 0
+    ) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       );
     }
 
-    // Verify OTP — hashed comparison with attempt tracking
-    const otpResult = await otpStore.verify(email.toLowerCase(), otp);
+    // Check the OTP (hashed comparison with attempt tracking). It is used up
+    // only when the order is created below, so a shopper who must accept a
+    // corrected total (409 TOTAL_MISMATCH) can continue with the same code.
+    const otpCheck = await otpStore.check(email.toLowerCase(), otp);
 
-    if (!otpResult.valid) {
+    if (otpCheck.valid === false) {
       return NextResponse.json(
-        { error: otpResult.error },
+        { error: otpCheck.error },
         { status: 400 }
       );
     }
@@ -55,7 +67,7 @@ export async function POST(request: NextRequest) {
       // For guest checkout, create a temporary guest user or use a default guest ID
       // Option 1: Use a default "guest" user ID
       const guestUser = await prisma.user.findFirst({
-        where: { email: 'guest@mushmush.in' }
+        where: { email: GUEST_USER_EMAIL }
       });
       
       if (!guestUser) {
@@ -64,7 +76,7 @@ export async function POST(request: NextRequest) {
           data: {
             id: 'guest-user',
             name: 'Guest User',
-            email: 'guest@mushmush.in',
+            email: GUEST_USER_EMAIL,
             role: 'CUSTOMER'
           }
         });
@@ -75,27 +87,82 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate address data
-    if (!billingAddress.street || !billingAddress.city || !billingAddress.state || !billingAddress.zip) {
+    const hasAddressFields = (addr: any) =>
+      Boolean(addr?.street && addr?.city && addr?.state && addr?.zip);
+
+    if (!hasAddressFields(billingAddress) || (!shippingAddressId && !hasAddressFields(shippingAddress))) {
       return NextResponse.json(
         { error: 'Missing required address fields (street, city, state, zip)' },
         { status: 400 }
       );
     }
 
-    // Handle billing address - use existing if ID provided, otherwise create new (UPDATED)
-    let billingAddr;
+    // Saved addresses belong to the signed-in shopper. A guest, or another
+    // account, cannot use an address ID to ship to or bill a stranger's address.
+    const sessionUserId = session?.user?.id ?? null;
+    const findOwnAddress = (id: unknown) =>
+      sessionUserId && typeof id === 'string' && id
+        ? prisma.addresses.findFirst({ where: { id, userId: sessionUserId } })
+        : Promise.resolve(null);
+
+    // Resolve the saved shipping address first: its pincode decides the shipping fee
+    let savedShippingAddr = null;
+    if (shippingAddressId) {
+      savedShippingAddr = await findOwnAddress(shippingAddressId);
+
+      if (!savedShippingAddr) {
+        return NextResponse.json(
+          { error: 'Selected shipping address not found' },
+          { status: 400 }
+        );
+      }
+    }
+
+    let savedBillingAddr = null;
     if (billingAddressId) {
-      // Use existing saved address (prevents duplicates) (UPDATED)
-      billingAddr = await prisma.addresses.findUnique({
-        where: { id: billingAddressId }
-      });
-      
-      if (!billingAddr) {
+      savedBillingAddr = await findOwnAddress(billingAddressId);
+
+      if (!savedBillingAddr) {
         return NextResponse.json(
           { error: 'Selected billing address not found' },
           { status: 400 }
         );
       }
+    }
+
+    // Authoritative server-side pricing (prices, discounts, stock, shipping,
+    // convenience fee, coupon). Done before any address/order row is created.
+    const pricingResult = await priceOrder({
+      items: cartItems.map((item: any) => ({ productId: item?.id, quantity: item?.quantity })),
+      pincode: savedShippingAddr ? savedShippingAddr.zip : shippingAddress.zip,
+      couponCode,
+      email,
+    });
+
+    if (pricingResult.ok === false) {
+      return NextResponse.json(pricingErrorBody(pricingResult), { status: pricingResult.status });
+    }
+    const pricing = pricingResult.pricing;
+
+    // The amount shown to the shopper must equal the amount charged
+    const totalMismatch = checkClientTotal(clientTotal, pricing);
+    if (totalMismatch) {
+      return NextResponse.json(totalMismatch.body, { status: totalMismatch.status });
+    }
+
+    // The shopper accepted this total. Use up the OTP now; if a parallel
+    // request already used it, stop before creating a second order.
+    if (!(await otpStore.consume(otpCheck.id))) {
+      return NextResponse.json(
+        { error: 'This OTP has already been used. Please request a new OTP.' },
+        { status: 400 }
+      );
+    }
+
+    // Handle billing address - use the shopper's saved address if given (resolved above), otherwise create new
+    let billingAddr;
+    if (savedBillingAddr) {
+      billingAddr = savedBillingAddr;
     } else {
       // Create new billing address
       billingAddr = await prisma.addresses.create({
@@ -116,18 +183,9 @@ export async function POST(request: NextRequest) {
 
     // Handle shipping address - use existing if ID provided, otherwise create new
     let shippingAddr;
-    if (shippingAddressId) {
-      // Use existing saved address
-      shippingAddr = await prisma.addresses.findUnique({
-        where: { id: shippingAddressId }
-      });
-      
-      if (!shippingAddr) {
-        return NextResponse.json(
-          { error: 'Selected shipping address not found' },
-          { status: 400 }
-        );
-      }
+    if (savedShippingAddr) {
+      // Use existing saved address (resolved above)
+      shippingAddr = savedShippingAddr;
     } else {
       // Create new shipping address
       shippingAddr = await prisma.addresses.create({
@@ -145,54 +203,6 @@ export async function POST(request: NextRequest) {
         }
       });
     }
-
-    // Validate stock availability for all cart items
-    const productIds = cartItems.map((item: any) => item.id);
-    const products = await prisma.product.findMany({
-      where: { id: { in: productIds } },
-      select: { id: true, title: true, quantity: true, inStock: true, measurementValue: true, measurementType: true }
-    });
-
-    const stockErrors: string[] = [];
-    for (const cartItem of cartItems) {
-      const product = products.find((p: any) => p.id === cartItem.id);
-      if (!product) {
-        stockErrors.push(`Product not found: ID ${cartItem.id}`);
-        continue;
-      }
-      const packs = availablePacks(product.quantity, product.measurementValue, product.measurementType);
-      if (!product.inStock || packs <= 0) {
-        stockErrors.push(`"${product.title}" is out of stock`);
-      } else if (cartItem.quantity > packs) {
-        stockErrors.push(`"${product.title}" only has ${packs} unit(s) available`);
-      }
-    }
-
-    if (stockErrors.length > 0) {
-      return NextResponse.json(
-        { error: 'Some items are unavailable', stockErrors },
-        { status: 409 }
-      );
-    }
-
-    // Validate and calculate coupon discount server-side
-    let couponDiscount = 0;
-    let couponId: number | null = null;
-
-    if (couponCode) {
-      const couponResult = await validateCoupon(couponCode, subtotal, email);
-      if (!couponResult.valid) {
-        return NextResponse.json(
-          { error: `Coupon error: ${couponResult.message}` },
-          { status: 400 }
-        );
-      }
-      couponDiscount = couponResult.discountAmount!;
-      couponId = couponResult.couponId!;
-    }
-
-    // Recalculate total server-side (never trust client total)
-    const serverTotal = subtotal + (shippingFee ?? 0) + (convenienceFee ?? 12) - couponDiscount;
 
     // Generate order number
     const orderNumber = `ORD-${Date.now()}`;
@@ -214,22 +224,22 @@ export async function POST(request: NextRequest) {
         customerName,
         customerEmail: email,
         customerPhone: customerPhone || '',
-        subtotal,
-        tax: convenienceFee || 12, // Convenience fee stored in tax field
-        shipping: shippingFee,
-        couponDiscount,
-        couponId,
-        total: serverTotal,
+        subtotal: pricing.subtotal,
+        tax: pricing.convenienceFee, // Convenience fee stored in tax field
+        shipping: pricing.shippingFee,
+        couponDiscount: pricing.couponDiscount,
+        couponId: pricing.couponId,
+        total: pricing.total,
         status: 'PENDING', // Awaiting payment — stock decremented on payment confirmation
         shippingAddress: shippingAddressJson, // JSON object for jsonb column
         billingAddressId: billingAddr.id,
         shippingAddressId: shippingAddr.id,
         userId: session?.user?.id || userId, // Use session user or guest user
         orderItems: {
-          create: cartItems.map((item: any) => ({
-            productId: item.id,
-            quantity: item.quantity,
-            price: item.discountedPrice || item.price
+          create: pricing.items.map((line) => ({
+            productId: line.productId,
+            quantity: line.quantity,
+            price: line.unitPrice // server price incl. active product discount
           }))
         }
       },
@@ -243,18 +253,18 @@ export async function POST(request: NextRequest) {
     });
 
     // Record coupon usage atomically
-    if (couponId) {
+    if (pricing.couponId) {
       await prisma.$transaction([
         prisma.couponUsage.create({
           data: {
-            couponId,
+            couponId: pricing.couponId,
             email: email.toLowerCase(),
             orderId: order.id,
-            discountAmount: couponDiscount,
+            discountAmount: pricing.couponDiscount,
           },
         }),
         prisma.coupon.update({
-          where: { id: couponId },
+          where: { id: pricing.couponId },
           data: { usedCount: { increment: 1 } },
         }),
       ]);
@@ -287,14 +297,14 @@ export async function POST(request: NextRequest) {
         orderItems: orderItemsWithOriginal,
         subtotal: order.subtotal,
         shipping: order.shipping,
-        couponDiscount: couponDiscount || 0,
+        couponDiscount: pricing.couponDiscount || 0,
         productDiscount: productDiscount > 0 ? productDiscount : 0,
         total: order.total,
         shippingAddress: shippingAddressJson,
       };
 
       await Promise.allSettled([
-        sendOrderPlacedEmail(notificationData),
+        sendOrderPlacedEmail({ ...notificationData, trackingUrl: orderTrackingUrl(order) }),
         sendAdminNewOrderEmail(notificationData),
       ]);
     } catch {
@@ -309,7 +319,13 @@ export async function POST(request: NextRequest) {
         orderNumber: order.orderNumber,
         total: order.total,
         status: order.status
-      }
+      },
+      // Proof for /api/checkout/upi-payment that this browser created the order
+      paymentToken: createOrderPaymentToken(order.id),
+      // Read-only link for guests to follow the order (relative; the email makes it absolute)
+      trackingUrl: orderTrackingUrl(order),
+      // Server breakdown; the UPI amount must be order.total
+      pricing: pricingBreakdown(pricing)
     });
 
   } catch (error) {

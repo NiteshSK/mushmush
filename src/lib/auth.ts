@@ -1,3 +1,4 @@
+import { googleWorkspaceIdentity, managedStaffMode, matchesWorkspace, needsManagedSignIn } from "./staff-identity"
 import { NextAuthOptions } from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import CredentialsProvider from "next-auth/providers/credentials"
@@ -27,11 +28,12 @@ const providers = [
           return null;
         }
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email }
+        // Sign-up stores emails in lower case; match whatever case the shopper types.
+        const user = await prisma.user.findFirst({
+          where: { email: { equals: credentials.email.trim(), mode: 'insensitive' } }
         });
 
-        if (!user || !user.password) {
+        if (!user || !user.password || needsManagedSignIn(user.role)) {
           return null;
         }
 
@@ -125,7 +127,13 @@ export const authOptions: NextAuthOptions = {
     },
   },
   callbacks: {
-    async signIn({ user, account, profile, email, credentials }) {
+    async signIn({ user, account, profile }) {
+      if (managedStaffMode() && user.email) {
+        const current = await prisma.user.findUnique({ where: { email: user.email }, select: { role: true, email: true } });
+        if (needsManagedSignIn(current?.role) && !matchesWorkspace(
+          googleWorkspaceIdentity(account, profile), current?.email ?? null, process.env.STAFF_GOOGLE_DOMAIN
+        )) return false;
+      }
       if (user?.id) {
         try {
           // CRITICAL: Invalidate all existing NextAuth sessions for single device login
@@ -151,11 +159,20 @@ export const authOptions: NextAuthOptions = {
     session: async ({ session, token }) => {
       if (session?.user && token?.sub) {
         session.user.id = token.sub;
-        session.user.role = token.role as UserRole;
+        // Re-read staff privileges so revocation applies to an existing session.
+        const account = await prisma.user.findUnique({
+          where: { id: token.sub }, select: { role: true, staffDuties: true, email: true }
+        });
+        const workspace = matchesWorkspace(token.staffGoogleIdentity, account?.email ?? null, process.env.STAFF_GOOGLE_DOMAIN);
+        const allowStaff = !needsManagedSignIn(account?.role) || workspace;
+        session.user.verifiedStaffWorkspace = workspace;
+        session.user.role = allowStaff ? account?.role ?? UserRole.CUSTOMER : UserRole.CUSTOMER;
+        session.user.staffDuties = allowStaff ? account?.staffDuties ?? [] : [];
       }
       return session;
     },
-    jwt: async ({ user, token }) => {
+    jwt: async ({ user, token, account, profile }) => {
+      if (account) token.staffGoogleIdentity = googleWorkspaceIdentity(account, profile);
       if (user) {
         token.sub = user.id;
         token.role = (user as any).role;

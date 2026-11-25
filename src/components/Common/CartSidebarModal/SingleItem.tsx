@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store";
 import { updateCartItemQuantity } from "@/redux/features/cart-slice";
@@ -9,7 +9,8 @@ import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
 const SingleItem = ({ item, removeItemFromCart }: { item: any; removeItemFromCart: any }) => {
   const dispatch = useDispatch<AppDispatch>();
   const { closeCartModal } = useCartModalContext();
-  const [quantity, setQuantity] = useState(item.quantity);
+  // Read the bag directly so this drawer agrees with the pantry steppers and /cart.
+  const quantity: number = item.quantity;
 
   const handleRemoveFromCart = () => {
     dispatch(removeItemFromCart(item.id));
@@ -19,14 +20,12 @@ const SingleItem = ({ item, removeItemFromCart }: { item: any; removeItemFromCar
     const maxQty = item.stockQuantity ?? Infinity;
     if (quantity >= maxQty) return;
     const newQty = quantity + 1;
-    setQuantity(newQty);
     dispatch(updateCartItemQuantity({ id: item.id, quantity: newQty }));
   };
 
   const handleDecrease = () => {
     if (quantity <= 1) return;
     const newQty = quantity - 1;
-    setQuantity(newQty);
     dispatch(updateCartItemQuantity({ id: item.id, quantity: newQty }));
   };
 

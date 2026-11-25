@@ -1,0 +1,240 @@
+/* Batch 2 "Decide": product details. Tokens (--forest, --paper, --ink, --line, --brass, --gold, --serif, --sans, --gutter) come from .pantry. */
+/* One green on every page: --forest. Muted text and hover fills are mixed from the tokens, not new colours. */
+.detail { --muted: color-mix(in srgb, var(--ink) 80%, var(--paper)); --hover: color-mix(in srgb, var(--line) 55%, var(--paper));
+  padding-top: clamp(.5rem,1.5vw,1.25rem); }
+
+/* Breadcrumb */
+.crumbs ol { display: flex; flex-wrap: wrap; align-items: center; gap: 0 .55rem; font-size: .875rem; color: var(--muted); }
+.crumbs li { display: inline-flex; align-items: center; min-width: 0; overflow-wrap: anywhere; }
+.crumbs li + li::before { content: "/"; margin-right: .55rem; color: #9d926e; }
+.crumbs a { display: inline-flex; align-items: center; min-height: 44px; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: #c9c2a8; }
+.crumbs a:hover { text-decoration-color: currentColor; }
+.crumbs [aria-current] { color: var(--ink); }
+
+/* Photo and purchase panel together near the top */
+.top { display: grid; gap: 1.25rem; margin-top: .5rem; }
+.gallery { position: relative; min-width: 0; }
+.track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; background: #ede9dd; }
+.track::-webkit-scrollbar { display: none; }
+.slide { position: relative; flex: 0 0 100%; margin: 0; aspect-ratio: 1.2; scroll-snap-align: start; isolation: isolate; background: #ede9dd; }
+.slide img, .thumbs img { mix-blend-mode: multiply; }
+.slide img { object-fit: contain; }
+.noPhoto { aspect-ratio: 1.2; background: #ede9dd; }
+.photoCount { position: absolute; top: .65rem; right: .65rem; padding: .1rem .5rem; font-size: .8125rem; color: var(--ink); background: rgba(250,248,241,.88); pointer-events: none; }
+.thumbs { display: flex; gap: .5rem; margin-top: .6rem; overflow-x: auto; padding: 2px; scrollbar-width: thin; }
+.thumbs button { position: relative; flex: none; width: 64px; height: 64px; overflow: hidden; isolation: isolate; background: #ede9dd; border: 1px solid transparent; }
+.thumbs button:hover { border-color: #b9b7a5; }
+.thumbs button[aria-pressed="true"] { border-color: var(--forest); box-shadow: inset 0 0 0 1px var(--forest); }
+.thumbs img { object-fit: cover; }
+
+.panel { min-width: 0; }
+.title { font-size: clamp(2.6rem,4.2vw,4.4rem); line-height: .98; letter-spacing: -.04em; margin-top: .35rem; overflow-wrap: anywhere; }
+.offer { display: flex; flex-wrap: wrap; align-items: baseline; gap: .2rem .6rem; margin-top: 1rem; }
+.pack { font-size: 1.0625rem; color: var(--muted); white-space: nowrap; }
+.dot { color: #9d926e; }
+.price { font-size: 1.75rem; font-weight: 500; line-height: 1.2; letter-spacing: -.01em; white-space: nowrap; }
+.was { font-size: .9375rem; color: var(--muted); white-space: nowrap; }
+.off { padding: .05rem .45rem; font-size: .875rem; color: var(--forest); border: 1px solid var(--line); white-space: nowrap; }
+.rating { display: inline-flex; align-items: center; gap: .5rem; min-height: 44px; font-size: .9375rem; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: #c9c2a8; }
+.stars { display: inline-flex; gap: 1px; color: var(--brass); }
+.stars svg { stroke-width: 1.5; }
+.stars svg[data-filled] { fill: currentColor; }
+
+.facts { margin-top: 1rem; border-top: 1px solid var(--line); }
+.facts li { display: flex; align-items: center; flex-wrap: wrap; justify-content: space-between; gap: 0 1rem; min-height: 48px; padding-block: .15rem; border-bottom: 1px solid var(--line); font-size: .9375rem; }
+.facts li > span { display: inline-flex; align-items: center; gap: .45rem; }
+.facts svg { width: 17px; height: 17px; stroke-width: 1.7; flex: none; }
+.facts .stock { justify-content: flex-start; gap: .55rem; }
+.stock i { width: 8px; height: 8px; border-radius: 50%; background: var(--forest); }
+.stock[data-state="low"] { color: var(--brass); font-weight: 500; }
+.stock[data-state="low"] i { background: var(--brass); }
+.stock[data-state="out"] { color: #7a2f22; font-weight: 500; }
+.stock[data-state="out"] i { background: #a3402e; }
+.delivery[data-scope="fresh"] > span { color: var(--forest); font-weight: 500; }
+.aside { margin-top: .6rem; font-size: .875rem; color: var(--muted); }
+.aside a { text-decoration: underline; text-underline-offset: 4px; text-decoration-color: #9d926e; }
+/* Spawn and grow bags: a plain note before Add that they are for growing, not eating. */
+.growNote { margin-top: 1rem; padding: .85rem 1rem .4rem; border: 1px solid var(--line); border-left: 3px solid var(--forest);
+  background: color-mix(in srgb, var(--forest) 5%, var(--paper)); font-size: .9375rem; line-height: 1.55; color: var(--muted); }
+.growTitle { display: flex; align-items: center; gap: .5rem; margin-bottom: .25rem; color: var(--ink); font-weight: 600; }
+.growTitle svg { width: 18px; height: 18px; flex: none; stroke-width: 1.8; color: var(--forest); }
+.growLinks { display: flex; flex-wrap: wrap; gap: 0 1.25rem; margin-top: .15rem; }
+
+.actions { display: flex; flex-wrap: wrap; align-items: stretch; gap: .75rem; margin-top: 1.25rem; }
+/* Add and the heart match the pantry card: an outlined forest button that fills on hover, and a round heart toggle. */
+.add, .stepper { flex: 1 1 13rem; min-height: 52px; border: 1px solid var(--forest); border-radius: 2px; color: var(--forest); background: transparent; }
+.add { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; padding: .75rem 1.5rem; font-size: 1rem; font-weight: 500; transition: background-color .15s ease, color .15s ease; }
+.add:hover:not(:disabled) { color: #fff8e9; background: var(--forest); }
+.add svg, .stepper svg { width: 17px; height: 17px; stroke-width: 1.9; }
+.stepper { display: inline-flex; align-items: stretch; justify-content: space-between; background: #fffdf6; }
+.stepper button { min-width: 56px; display: grid; place-items: center; }
+.stepper button:hover:not(:disabled) { background: var(--hover); }
+.stepper span { flex: 1; display: grid; place-items: center; font-size: 1.0625rem; font-weight: 500; }
+.save { flex: none; display: grid; place-items: center; width: 52px; height: 52px; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 50%;
+  transition: border-color .15s ease, transform .15s ease; }
+.save:hover:not(:disabled) { border-color: var(--ink); transform: scale(1.04); }
+.save svg { width: 20px; height: 20px; stroke-width: 1.7; }
+.save[aria-pressed="true"] { color: var(--forest); border-color: var(--forest); }
+.save[aria-pressed="true"] svg { fill: var(--forest); }
+.saveNote { flex-basis: 100%; font-size: .875rem; color: var(--muted); }
+.saveNote:empty { display: none; }
+.saveNote a { min-height: 44px; }
+.bagNote { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 1rem; margin-top: .6rem; font-size: .9375rem; }
+.ask { margin-top: .4rem; font-size: .9375rem; }
+
+/* Reviews layout and rich content used by the product information panel. */
+.reading { margin-top: clamp(2rem,4vw,4rem); border-top: 1px solid var(--line); }
+.block { display: grid; gap: .75rem 3rem; padding-block: clamp(1.5rem,3vw,2.6rem); border-bottom: 1px solid var(--line); scroll-margin-top: 90px; }
+.block > h2 { font-size: clamp(1.9rem,2.6vw,2.6rem); line-height: 1.05; letter-spacing: -.03em; overflow-wrap: anywhere; }
+.block > div { min-width: 0; }
+.rich { max-width: 46rem; font-size: 1rem; line-height: 1.7; color: var(--ink); overflow-wrap: anywhere; }
+.rich :is(p, ul, ol, div) + :is(p, ul, ol, div) { margin-top: .85rem; }
+.rich ul, ul.rich { list-style: disc; padding-left: 1.2rem; }
+.rich ol { list-style: decimal; padding-left: 1.4rem; }
+.rich li + li { margin-top: .55rem; }
+.rich li::marker { color: #9d926e; }
+.rich :is(h2, h3, h4) { margin: 1.1rem 0 .35rem; font-size: 1.4rem; line-height: 1.2; letter-spacing: -.015em; }
+.rich strong, .rich b { font-weight: 600; color: var(--ink); }
+.rich a { text-decoration: underline; text-underline-offset: 3px; }
+.rows { max-width: 46rem; margin-top: 1rem; border-top: 1px solid var(--line); font-size: .9375rem; }
+.rows:first-child { margin-top: 0; }
+.rows > div { display: grid; grid-template-columns: minmax(7.5rem,13rem) minmax(0,1fr); gap: .25rem 1.25rem; padding-block: .7rem; border-bottom: 1px solid var(--line); }
+.rows dt { color: var(--muted); }
+.rows dd { overflow-wrap: anywhere; }
+.muted { color: var(--muted); font-size: .9375rem; }
+
+/* Product information stays beside the purchase panel. The sheet scrolls independently. */
+.introBlock { margin-top: 1rem; }
+.intro { max-width: 56ch; font-size: .9375rem; line-height: 1.6; color: var(--muted); overflow-wrap: anywhere; }
+.intro + .informationActions { margin-top: .75rem; }
+.informationActions { display: flex; flex-wrap: wrap; gap: 0 clamp(.5rem, 3vw, 1.4rem); }
+.informationActions button {
+  display: inline-flex; align-items: center; gap: .32rem; min-height: 44px; text-align: left;
+  color: var(--forest); font-size: .9375rem; font-weight: 500;
+  text-decoration: underline; text-decoration-color: #9d926e; text-underline-offset: 4px;
+}
+.informationActions button:hover { text-decoration-color: currentColor; }
+.informationActions svg { width: 15px; height: 15px; flex: none; stroke-width: 1.7; }
+
+.informationDialog {
+  position: fixed; inset: 0 0 0 auto; width: min(100%, 34rem); height: 100dvh; max-width: none; max-height: none;
+  margin: 0; padding: 0; overflow: hidden; color: var(--ink); background: var(--paper);
+  border-inline-start: 1px solid var(--line); box-shadow: -16px 0 56px rgba(17, 32, 24, .19);
+}
+.informationDialog::backdrop { background: rgba(18, 34, 25, .48); backdrop-filter: blur(4px); }
+.informationSheet { --sheet-gutter: clamp(1rem, 4vw, 2rem); display: flex; flex-direction: column; height: 100%; }
+.informationHead {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem;
+  padding: clamp(1rem, 4vw, 2rem) var(--sheet-gutter) .65rem;
+}
+.informationHead h2 { align-self: center; margin: 0; font-size: clamp(1.9rem, 5vw, 2.75rem); line-height: 1.04; letter-spacing: -.035em; overflow-wrap: anywhere; }
+.informationClose { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 50%; }
+.informationClose:hover { background: var(--hover); }
+.informationClose svg { width: 20px; height: 20px; }
+.informationTabs { display: flex; flex-wrap: wrap; gap: 0 1.25rem; padding-inline: var(--sheet-gutter); border-bottom: 1px solid var(--line); }
+.informationTabs button { min-height: 44px; margin-bottom: -1px; border-bottom: 2px solid transparent; color: var(--muted); font-size: .9375rem; }
+.informationTabs button[aria-selected="true"] { border-color: var(--forest); color: var(--forest); font-weight: 600; }
+.informationContent {
+  min-height: 0; overflow-y: auto; overscroll-behavior-y: contain; scrollbar-gutter: stable;
+  padding: 1.25rem var(--sheet-gutter) max(1.5rem, env(safe-area-inset-bottom));
+}
+.informationContent .rows > div { grid-template-columns: minmax(0, 1fr) minmax(0, 1.8fr); gap: .25rem .8rem; }
+.informationContent .rows dt { overflow-wrap: anywhere; }
+.informationContent .rows dd:only-child { grid-column: 1 / -1; }
+.informationSection:not(:first-child) { margin-top: 1.5rem; }
+.informationSection h3 { margin-bottom: .6rem; color: var(--forest); font-size: 1.55rem; line-height: 1.16; }
+
+@media (max-width: 640px) {
+  .informationDialog {
+    inset: auto 0 0; width: 100%; height: min(76dvh, 38rem); border: 1px solid var(--line);
+    border-bottom: 0; border-radius: 16px 16px 0 0; box-shadow: 0 -10px 40px rgba(17, 32, 24, .17);
+  }
+}
+
+/* Reviews */
+.reviews { max-width: 46rem; }
+.reviewSummary { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem .75rem; font-size: 1rem; }
+.reviewList { margin-top: .75rem; border-top: 1px solid var(--line); }
+.reviewList li { padding-block: 1rem; border-bottom: 1px solid var(--line); line-height: 1.6; }
+.reviewMeta { display: flex; flex-wrap: wrap; align-items: center; gap: .2rem .75rem; margin-bottom: .3rem; font-size: .875rem; color: var(--muted); }
+.reviewMeta strong { font-weight: 500; color: var(--ink); }
+.signInNote { margin-top: 1rem; font-size: .9375rem; }
+.reviewForm { margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--line); }
+.reviewForm h3 { font-size: 1.6rem; line-height: 1.1; }
+.reviewForm fieldset { margin-top: .75rem; }
+.reviewForm legend, .reviewForm > label { font-size: .9rem; color: var(--muted); }
+.reviewForm > label { display: block; margin: .75rem 0 .35rem; }
+.ratingChoices { display: flex; }
+.ratingChoices label { position: relative; display: grid; place-items: center; width: 44px; height: 44px; color: #b9b7a5; cursor: pointer; }
+.ratingChoices label[data-on] { color: var(--brass); }
+.ratingChoices label[data-on] svg { fill: currentColor; }
+.ratingChoices svg { width: 22px; height: 22px; stroke-width: 1.5; }
+.ratingChoices input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.ratingChoices label:has(input:focus-visible) { outline: 3px solid #a7803c; outline-offset: -3px; }
+.reviewForm textarea { display: block; width: 100%; padding: .7rem; font: inherit; font-size: 1rem; color: var(--ink); background: #fffdf6; border: 1px solid var(--muted); resize: vertical; }
+.formFoot { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: .5rem; }
+.submit { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: .6rem 1.4rem; color: #fff8e9; background: var(--forest); font-size: .9375rem; font-weight: 500; }
+.submit:hover:not(:disabled) { background: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
+.formMessage { margin-top: .6rem; font-size: .9375rem; }
+.formMessage[data-tone="error"] { color: #7a2f22; }
+
+/* Related packs */
+.related { margin-top: clamp(2.5rem,5vw,4.5rem); }
+.relatedHead { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: .25rem 1.5rem; margin-bottom: 1.25rem; }
+.relatedHead h2 { font-size: clamp(2.2rem,3.4vw,3.5rem); line-height: 1; letter-spacing: -.04em; }
+
+/* Recovery and loading */
+.recoveryTitle { font-size: clamp(2.4rem,4vw,4rem); line-height: 1; letter-spacing: -.04em; overflow-wrap: anywhere; }
+.recoveryActions { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1.5rem; }
+.skeletonPhoto { aspect-ratio: 1.2; background: #ede9dd; }
+.skeletonPanel p { height: 1rem; width: 30%; margin-top: 1rem; background: #ede9dd; }
+.skeletonPanel p:nth-child(2) { height: 3.2rem; width: 75%; }
+.skeletonPanel p:nth-child(4) { height: 3.2rem; width: 100%; margin-top: 2rem; }
+
+/* Phone purchase bar: in the page flow at the end of the content, so it never covers the footer or the last content. */
+.bar { position: sticky; bottom: 0; z-index: 11; display: flex; align-items: center; justify-content: space-between; gap: .75rem;
+  margin: 1.5rem calc(var(--gutter) * -1) 0; padding: .55rem var(--gutter) calc(.55rem + env(safe-area-inset-bottom));
+  background: var(--paper); border-top: 1px solid var(--line); box-shadow: 0 -8px 20px rgba(34,56,44,.08); transition: transform .2s ease, visibility .2s; }
+.bar[data-visible="false"] { visibility: hidden; transform: translateY(100%); }
+/* The chat launcher (48px, 12px from the right edge on phones) floats over the bar's right end; keep Add clear of it. */
+.bar { padding-right: calc(12px + 48px + .75rem); }
+.barOffer { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 .5rem; min-width: 0; }
+.barOffer .price { font-size: 1.25rem; }
+.barOffer .pack { font-size: .9375rem; }
+.bar .add, .bar .stepper { flex: 0 1 11.5rem; min-height: 48px; }
+
+@media (min-width: 760px) {
+  .top { grid-template-columns: minmax(0,1.12fr) minmax(0,1fr); gap: clamp(2rem,4.5vw,5.5rem); align-items: start; }
+  .panel { position: sticky; top: calc(78px + 1.5rem); }
+  .block { grid-template-columns: minmax(9rem,1fr) minmax(0,2.6fr); }
+  .bar { display: none; }
+}
+@media (max-width: 640px) {
+  /* Keep the price and Add inside the first phone screen: a shorter photo, smaller thumbnails and tighter rows. */
+  .detail { padding-top: 0; }
+  .crumbs ol { font-size: .8125rem; }
+  .top { margin-top: 0; gap: .9rem; }
+  .gallery { margin-inline: calc(var(--gutter) * -1); }
+  .slide, .noPhoto, .skeletonPhoto { aspect-ratio: 1.35; }
+  .thumbs { margin-top: .45rem; padding-inline: var(--gutter); }
+  .thumbs button { width: 48px; height: 48px; }
+  .title { font-size: clamp(2.2rem,9.5vw,3rem); }
+  .offer { margin-top: .55rem; }
+  .price { font-size: 1.6rem; }
+  .facts { margin-top: .7rem; }
+  .facts li { min-height: 44px; padding-block: 0; }
+  .actions { gap: .6rem; margin-top: .9rem; }
+  .rows > div { grid-template-columns: 1fr; }
+  .relatedHead h2 { font-size: clamp(2rem,8.5vw,2.6rem); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bar { transition: none; }
+  .track { scroll-behavior: auto; }
+}
+@media (max-width: 640px) {
+  /* globals.css gives unclassed phone buttons min-height: 40px with a higher specificity; keep these targets at 44px or more. */
+  .detail.detail :is(.add, .save, .submit) { min-height: 48px; }
+  .detail.detail .stepper button, .detail.detail .thumbs button { min-height: 44px; }
+  .detail.detail .bar :is(.add, .stepper) { min-height: 48px; }
+  .detail.detail .facts button { min-height: 44px; }
+}

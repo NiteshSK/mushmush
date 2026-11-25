@@ -18,6 +18,7 @@ export async function GET(request: NextRequest) {
 
     // Build where clause
     const where: any = {
+      archivedAt: null,
       AND: [
         {
           price: {
