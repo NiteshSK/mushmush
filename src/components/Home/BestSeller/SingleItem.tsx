@@ -1,12 +1,9 @@
 "use client";
 import React from "react";
 import { Product } from "@/types/product";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/redux/store";
-import { addItemToCart } from "@/redux/features/cart-slice";
+import { useAddProductToBag } from "@/hooks/useAddProductToBag";
 import Image from "next/image";
 import Link from "next/link";
-import toast from "react-hot-toast";
 import StarRating from "@/components/Common/StarRating";
 
 const SingleItem = ({
@@ -16,21 +13,7 @@ const SingleItem = ({
   item: Product;
   onNotifyMe?: (product: Product) => void;
 }) => {
-  const dispatch = useDispatch<AppDispatch>();
-
-  const handleAddToCart = () => {
-    dispatch(
-      addItemToCart({
-        id: item.id,
-        title: item.title,
-        price: item.price,
-        discountedPrice: item.discountedPrice,
-        quantity: 1,
-        imgs: item.imgs,
-      })
-    );
-    toast.success("Added to cart!");
-  };
+  const handleAddToCart = useAddProductToBag(item);
 
   const handleNavigateToDetails = () => {
     // Product details fetched fresh from API by slug

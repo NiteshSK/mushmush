@@ -164,4 +164,14 @@ describe("Himalayan pantry shop", () => {
     openShop();
     expect(screen.queryByRole("link", { name: /Spawn and grow bags/ })).toBeNull();
   });
+
+  it("links to every shop collection and marks All products as the current page", () => {
+    openShop();
+    const nav = screen.getByRole("navigation", { name: "Browse by collection" });
+    const links = within(nav).getAllByRole("link");
+    expect(links.map(link => link.getAttribute("href"))).toEqual([
+      "/shop/dried-mushrooms", "/shop/fresh-mushrooms", "/shop/spices", "/shop/dry-fruits", "/shop/seeds", "/shop/medicinal-mushrooms", "/shop",
+    ]);
+    expect(within(nav).getByRole("link", { name: "All products" }).getAttribute("aria-current")).toBe("page");
+  });
 });

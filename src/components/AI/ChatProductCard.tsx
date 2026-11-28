@@ -1,5 +1,7 @@
 "use client";
 
+import { sellablePackLimit } from "@/lib/inventory";
+
 import React, { useState } from "react";
 import Link from "next/link";
 import { Heart, Minus, Plus, Star } from "lucide-react";
@@ -38,8 +40,8 @@ interface ChatProductCardProps {
 const ChatProductCard: React.FC<ChatProductCardProps> = ({ product, onBuy, onOpen }) => {
   const dispatch = useDispatch<AppDispatch>();
   const quantity = useAppSelector(selectCartItems).find((item) => item.id === product.id)?.quantity ?? 0;
-  const stock = product.stockQuantity ?? Infinity;
-  const soldOut = !product.inStock || stock < 1;
+  const stock = sellablePackLimit(product);
+  const soldOut = stock === 0;
   const discounted = product.hasDiscount && product.discountedPrice ? product.discountedPrice : null;
   const price = discounted ?? product.price;
   const thumbnail = product.imgs?.thumbnails?.[0] || product.imgs?.previews?.[0];
@@ -103,16 +105,18 @@ const ChatProductCard: React.FC<ChatProductCardProps> = ({ product, onBuy, onOpe
           <div className={s.stepper} role="group" aria-label={`Quantity of ${product.title}`}>
             <button type="button" onClick={subtract} aria-label={`Remove one ${product.title}`}><Minus aria-hidden="true" /></button>
             <span aria-live="polite" aria-label={`${quantity} in bag`}>{quantity}</span>
-            <button type="button" onClick={add} disabled={soldOut || quantity >= stock} aria-label={`Add one ${product.title}`}><Plus aria-hidden="true" /></button>
+            <button type="button" onClick={add} disabled={stock === null || quantity >= stock} aria-label={`Add one ${product.title}`}><Plus aria-hidden="true" /></button>
           </div>
         ) : soldOut ? (
           <button type="button" className={s.add} disabled aria-label={`${product.title} sold out`}>Sold out</button>
+        ) : stock === null ? (
+          <button type="button" className={s.add} disabled>Stock unconfirmed</button>
         ) : (
           <button type="button" className={s.add} onClick={add}>
             <Plus aria-hidden="true" />Add<span className={s.srOnly}> {product.title}</span> to bag
           </button>
         )}
-        {!soldOut && (
+        {Boolean(stock) && (
           <button type="button" className={s.buyNow} onClick={() => onBuy(product)}>
             Buy now<span className={s.srOnly}> {product.title}</span>
           </button>

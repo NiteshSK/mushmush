@@ -24,7 +24,7 @@ export async function GET() {
     fulfillment ? available(prisma.order.count({ where: { status: { in: ["CONFIRMED", "PROCESSING", "SHIPPED"] },
       orderItems: { some: { product: { fulfillmentClass: "fresh" } } } } })) : null,
     fulfillment ? available(prisma.$queryRaw<{ count: number }[]>`SELECT count(*)::int AS count FROM products WHERE "archivedAt" IS NULL AND
-      (NOT "inStock" OR "measurementValue" <= 0 OR quantity < 6 * "measurementValue" *
+      (NOT "inStock" OR "measurementValue" <= 0 OR quantity < 6 * "measurementValue"::double precision *
         CASE WHEN lower("measurementType") IN ('kg','l','litre','litres') THEN 1000 ELSE 1 END)`) : null
   ]);
   const dates = [paymentQueue?._min.updatedAt, trainingQueue?._min.createdAt].filter((date): date is Date => !!date);

@@ -50,6 +50,8 @@ describe("robots and sitemap", () => {
     const urls = (await sitemap()).map(entry => entry.url);
     expect(urls).toEqual(expect.arrayContaining([
       `${SITE_URL}/`, `${SITE_URL}/shop`, `${SITE_URL}/shop-details/cumin-seeds`,
+      `${SITE_URL}/shop/dried-mushrooms`, `${SITE_URL}/shop/fresh-mushrooms`, `${SITE_URL}/shop/spices`,
+      `${SITE_URL}/shop/dry-fruits`, `${SITE_URL}/shop/seeds`, `${SITE_URL}/shop/medicinal-mushrooms`,
       `${SITE_URL}/blogs/unlock-the-umami`, `${SITE_URL}/training/oyster-mushroom-training/schedule`,
     ]));
     expect(urls.every(url => url.startsWith(SITE_URL))).toBe(true);
@@ -62,6 +64,7 @@ describe("robots and sitemap", () => {
     (prisma.product.findMany as jest.Mock).mockRejectedValue(new Error("down"));
     const urls = (await sitemap()).map(entry => entry.url);
     expect(urls).toContain(`${SITE_URL}/shop`);
+    expect(urls).toContain(`${SITE_URL}/shop/spices`);
   });
 });
 

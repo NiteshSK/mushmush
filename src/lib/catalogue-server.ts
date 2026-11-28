@@ -48,12 +48,14 @@ export function toCatalogueProduct(product: ProductRow, now: Date = new Date()) 
     : 0;
   // Discounted price ONLY if an active discount record exists (src/lib/product-pricing.ts).
   const { discountedPrice, discountPercentage } = computeProductDiscount(product.price, product.discounts);
+  const stockQuantity = product.inStock ? availablePacks(product.quantity, product.measurementValue, product.measurementType) : 0;
   return {
     ...product,
     averageRating,
     reviewCount: product.reviews.length,
-    isOutOfStock: !product.inStock,
-    stockQuantity: availablePacks(product.quantity, product.measurementValue, product.measurementType),
+    inStock: stockQuantity > 0,
+    isOutOfStock: stockQuantity === 0,
+    stockQuantity,
     bulkQuantity: product.quantity,
     bulkDisplay: formatBulkQuantity(product.quantity, product.measurementType),
     discountedPrice,

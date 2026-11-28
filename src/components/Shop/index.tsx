@@ -11,6 +11,7 @@ import NotifyMeModal from "../NotifyMeModal";
 import ProductCard from "../Pantry/ProductCard";
 import { useOpenPanel } from "../Pantry/PantryShell";
 import { isFreshMushroom, productKind } from "../Pantry/catalogue";
+import CollectionLinks from "./CollectionLinks";
 import { categoryOptions, isMushroomCategory, readShopQuery, shopPage, shortTitle, sorts, splitCatalogue, type Sort } from "./listing";
 import styles from "../Pantry/pantry.module.css";
 
@@ -140,6 +141,8 @@ export default function Shop({ initialProducts }: ShopProps = {}) {
       </ol>
       {page < pages ? <Link href={href({ page: page + 1 })} scroll={false} onClick={toProducts}>Next</Link> : <span aria-hidden="true" />}
     </nav>}
+
+    <CollectionLinks current="all" />
 
     {notifyFor && <NotifyMeModal isOpen onClose={() => setNotifyFor(null)} productId={notifyFor.id} productTitle={notifyFor.title} />}
   </main>;

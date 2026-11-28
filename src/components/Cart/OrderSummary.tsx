@@ -14,12 +14,13 @@ type Props = {
   savings: number;
   delivery: ReturnType<typeof useDeliveryQuote>;
   pinRef?: RefObject<HTMLInputElement>;
+  stockIssue?: string | null;
   /** Problems the shopper can fix before checkout, such as a fresh line outside Dehradun. */
   children?: ReactNode;
 };
 
 /** The /cart summary: every fee before checkout, a delivery PIN check and one primary action. */
-export default function OrderSummary({ subtotal, count, savings, delivery, pinRef, children }: Props) {
+export default function OrderSummary({ subtotal, count, savings, delivery, pinRef, stockIssue, children }: Props) {
   const { pin, edit, check, checkedPin, quote, checking, failed } = delivery;
   const fee = quote?.deliverable ? quote.shippingFee ?? 0 : null;
   const total = subtotal + CONVENIENCE_FEE + (fee ?? 0);
@@ -51,7 +52,8 @@ export default function OrderSummary({ subtotal, count, savings, delivery, pinRe
       <dt className={r.grand}>{fee === null ? "Total before delivery" : "Total"}</dt>
       <dd className={r.grand} data-price data-testid="bag-total">{rupees.format(total)}</dd>
     </dl>
-    <Link href="/checkout" className={`${p.primaryAction} ${r.wide}`}>Go to checkout</Link>
+    {stockIssue ? <p className={r.stockNote} role="status">{stockIssue}</p>
+      : <Link href="/checkout" className={`${p.primaryAction} ${r.wide}`}>Go to checkout</Link>}
     <p className={r.note}>Next, add your contact details and address. We email you a code to confirm the order, then you pay by UPI. Coupons apply at checkout.</p>
   </aside>;
 }

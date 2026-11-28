@@ -1,5 +1,7 @@
 "use client";
 
+import { sellablePackLimit } from "@/lib/inventory";
+
 import React, { useState, useEffect } from "react";
 import { ArrowLeft, Loader2, MapPin, Minus, Plus, Truck } from "lucide-react";
 import { toast } from "react-hot-toast";
@@ -44,6 +46,10 @@ const ChatCheckout: React.FC<ChatCheckoutProps> = ({ product, onBack, onProceedT
   const [step, setStep] = useState<Step>("details");
   const [loading, setLoading] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const stock = sellablePackLimit(product);
+  const stockIssue = stock === null ? "Stock could not be verified. Go back and try again."
+    : stock === 0 ? "This product is sold out."
+    : quantity > stock ? `Only ${stock} left. Reduce your quantity to continue.` : null;
 
   // Customer details — pre-fill from session
   const [name, setName] = useState(userInfo?.name || "");
@@ -121,6 +127,7 @@ const ChatCheckout: React.FC<ChatCheckoutProps> = ({ product, onBack, onProceedT
   };
 
   const sendOTP = async () => {
+    if (stockIssue) { toast.error(stockIssue); return; }
     setLoading(true);
     try {
       const res = await fetch("/api/checkout/send-otp", {
@@ -151,6 +158,7 @@ const ChatCheckout: React.FC<ChatCheckoutProps> = ({ product, onBack, onProceedT
 
   const handleOTPSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (stockIssue) { toast.error(stockIssue); return; }
     if (!otp.trim() || otp.length < 4) {
       toast.error("Please enter a valid OTP");
       return;
@@ -205,8 +213,8 @@ const ChatCheckout: React.FC<ChatCheckoutProps> = ({ product, onBack, onProceedT
   const thumbnail = product.imgs?.thumbnails?.[0] || product.imgs?.previews?.[0];
 
   // Can proceed only when shipping has been checked and is deliverable
-  const canSubmit = shippingFee !== null && shippingInfo?.deliverable && !loading;
-  const atStockLimit = product.stockQuantity !== undefined && quantity >= product.stockQuantity;
+  const canSubmit = shippingFee !== null && shippingInfo?.deliverable && !loading && !stockIssue;
+  const atStockLimit = stock === null || quantity >= stock;
 
   return (
     <div className={s.step}>
@@ -233,19 +241,15 @@ const ChatCheckout: React.FC<ChatCheckoutProps> = ({ product, onBack, onProceedT
                 <span aria-live="polite">{quantity}</span>
                 <button
                   type="button"
-                  onClick={() => {
-                    const maxQty = product.stockQuantity ?? Infinity;
-                    if (quantity < maxQty) setQuantity(quantity + 1);
-                  }}
+                  onClick={() => { if (stock !== null) setQuantity(current => current < stock ? current + 1 : current); }}
                   disabled={atStockLimit}
                   aria-label="Add one"
                 >
                   <Plus aria-hidden="true" />
                 </button>
               </div>
-              {product.stockQuantity !== undefined && product.stockQuantity <= 10 && (
-                <span className={s.lowStock}>Only {product.stockQuantity} left</span>
-              )}
+              {stockIssue ? <span className={s.lowStock} role="status">{stockIssue}</span>
+                : stock !== null && stock <= 10 && <span className={s.lowStock}>Only {stock} left</span>}
             </div>
           </div>
           <div className={s.lineTotal}>
@@ -414,7 +418,7 @@ const ChatCheckout: React.FC<ChatCheckoutProps> = ({ product, onBack, onProceedT
               </div>
             )}
 
-            <button type="submit" disabled={loading || otp.length < 4} className={s.primary}>
+            <button type="submit" disabled={loading || otp.length < 4 || Boolean(stockIssue)} className={s.primary}>
               {loading
                 ? <><Loader2 aria-hidden="true" className={s.spin} /> Placing order…</>
                 : serverTotal !== null ? `Place order for ₹${serverTotal.toFixed(2)}` : "Verify and place order"}

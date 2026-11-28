@@ -33,8 +33,8 @@ export default function BagLine({ line, editable = true, blocked, onNavigate }: 
   const dispatch = useDispatch<AppDispatch>();
   const [imageFailed, setImageFailed] = useState(false);
   const { id, title, quantity, max } = line;
-  const atMax = quantity >= max;
-  const over = Number.isFinite(max) && quantity > max;
+  const atMax = max === null || quantity >= max;
+  const over = max !== null && quantity > max;
   const name = line.href ? <Link href={line.href} onClick={onNavigate}>{title}</Link> : title;
 
   return <li className={r.line} data-blocked={blocked || undefined} data-testid={`bag-line-${line.slug ?? id}`}>
@@ -52,16 +52,20 @@ export default function BagLine({ line, editable = true, blocked, onNavigate }: 
       <DeliveryTag scope={line.scope} />
       {line.soldOut ? <p className={r.stockNote}>Sold out. Remove it to continue.</p>
         : over ? <p className={r.stockNote}>Only {max} left. Reduce the quantity to {max}.</p>
-        : Number.isFinite(max) && max <= 10 ? <p className={r.stockNote}>Only {max} left</p> : null}
+        : max !== null && max <= 10 ? <p className={r.stockNote}>Only {max} left</p> : null}
     </div>
     <p className={r.lineTotal} data-price><span className={p.srOnly}>Line total </span>{rupees.format(line.lineTotal)}</p>
     {editable && <div className={r.lineControls}>
       <div className={`${p.stepper} ${r.qty}`} role="group" aria-label={`Quantity of ${title}`}>
-        <button type="button" onClick={() => quantity <= 1 ? dispatch(removeItemFromCart(id)) : dispatch(updateCartItemQuantity({ id, quantity: Math.min(quantity - 1, Math.max(max, 1)) }))}
+        <button type="button" onClick={() => quantity <= 1 ? dispatch(removeItemFromCart(id)) : dispatch(updateCartItemQuantity({
+          id, quantity: quantity - 1, stockQuantity: max ?? undefined,
+        }))}
           aria-label={`Remove one ${title}`}><Minus /></button>
         <span aria-live="polite" aria-label={`${quantity} in bag`}>{quantity}</span>
-        <button type="button" onClick={() => !atMax && dispatch(updateCartItemQuantity({ id, quantity: quantity + 1 }))} disabled={atMax}
-          aria-label={atMax ? `${title}: no more in stock` : `Add one ${title}`}><Plus /></button>
+        <button type="button" onClick={() => !atMax && dispatch(updateCartItemQuantity({
+          id, quantity: quantity + 1, stockQuantity: max ?? undefined,
+        }))} disabled={atMax}
+          aria-label={max === null ? `${title}: stock not verified` : atMax ? `${title}: no more in stock` : `Add one ${title}`}><Plus /></button>
       </div>
       <button type="button" className={r.remove} onClick={() => dispatch(removeItemFromCart(id))} aria-label={`Remove ${title} from bag`}>Remove</button>
     </div>}

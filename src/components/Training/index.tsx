@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import GrowSection from "./GrowSection";
 import ProgrammeFacts from "./ProgrammeFacts";
@@ -13,9 +13,18 @@ import styles from "../Pantry/training.module.css";
 export { loadListings, type Listing } from "./programme";
 type State = { status: "loading" } | { status: "error" } | { status: "ready"; listings: Listing[] };
 
+type Props = {
+  /** Listings loaded on the server. Without them the page loads the listings in the browser. */
+  initialListings?: Listing[];
+  /** Server-rendered sections shown after the course list and before the grow supplies. */
+  children?: ReactNode;
+};
+
 /** Training programmes: dates, availability, fees and the Register action first, then the description. */
-export default function TrainingPrograms() {
-  const [state, setState] = useState<State>({ status: "loading" });
+export default function TrainingPrograms({ initialListings, children }: Props) {
+  const [state, setState] = useState<State>(initialListings ? { status: "ready", listings: initialListings } : { status: "loading" });
+  // Server data is already in the first render; load in the browser only without it (and on retry).
+  const [loadOnMount] = useState(!initialListings);
 
   const load = useCallback(() => {
     let active = true;
@@ -26,7 +35,7 @@ export default function TrainingPrograms() {
     return () => { active = false; };
   }, []);
 
-  useEffect(() => load(), [load]);
+  useEffect(() => (loadOnMount ? load() : undefined), [load, loadOnMount]);
 
   // Talk about registering and paying only while at least one course takes registrations.
   const anyOpen = state.status === "ready" && state.listings.some(({ batch }) => takesRegistrations(batch));
@@ -35,8 +44,8 @@ export default function TrainingPrograms() {
     <main id="main" className={pantry.page} aria-busy={state.status === "loading"}>
       <header className={pantry.pageHead}>
         <div>
-          <p className={pantry.kicker}>Kosvana training</p>
-          <h1>Mushroom <em>cultivation</em> courses</h1>
+          <p className={pantry.kicker}>Kosvana farm, Herbertpur</p>
+          <h1>Mushroom <em>cultivation</em> training in Dehradun</h1>
         </div>
         <p className={styles.lede}>
           {anyOpen || state.status !== "ready"
@@ -107,6 +116,8 @@ export default function TrainingPrograms() {
           </ol>
         </section>
       )}
+
+      {children}
 
       <GrowSection />
     </main>

@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Product } from "@/types/product";
 import { useModalContext } from "@/app/context/QuickViewModalContext";
 import { updateQuickView } from "@/redux/features/quickView-slice";
-import { addItemToCart } from "@/redux/features/cart-slice";
+import { useAddProductToBag } from "@/hooks/useAddProductToBag";
 import { useWishlist } from "@/app/context/WishlistContext";
 import { updateproductDetails } from "@/redux/features/product-details";
 import { useDispatch } from "react-redux";
@@ -25,20 +25,7 @@ const ProductItem = ({ item }: { item: Product }) => {
     dispatch(updateQuickView({ ...item }));
   };
 
-  // add to cart
-  const handleAddToCart = () => {
-    dispatch(
-      addItemToCart({
-        id: item.id,
-        title: item.title,
-        price: item.price,
-        discountedPrice: item.discountedPrice,
-        quantity: 1,
-        imgs: item.imgs,
-      })
-    );
-    toast.success("Added to cart!");
-  };
+  const handleAddToCart = useAddProductToBag(item);
 
   const handleItemToWishList = async () => {
     setIsWishlistLoading(true);

@@ -1,5 +1,6 @@
 import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../store";
+import { isPackQuantity, MAX_ORDER_PACKS, sellablePackLimit } from "@/lib/inventory";
 
 type InitialState = {
   items: CartItem[];
@@ -50,8 +51,25 @@ const initialState: InitialState = {
 const toOwner = (email: string | null | undefined) => email?.trim().toLowerCase() || null;
 
 /** Cap a quantity to the stock, but keep at least one so a line never shows 0. */
-const capToStock = (quantity: number, stock: number | undefined) =>
-  stock === undefined ? quantity : Math.max(1, Math.min(quantity, stock));
+function capToStock(quantity: number, stock?: number) {
+  const safeQuantity = isPackQuantity(quantity) ? quantity : 1;
+  return Math.max(1, Math.min(safeQuantity, stock ?? safeQuantity));
+}
+
+function restoreLines(lines: CartItem[]) {
+  return lines.filter(item => item && isPackQuantity(item.id)).map(item => {
+    const stockQuantity = sellablePackLimit(item) ?? undefined;
+    return { ...item, stockQuantity, quantity: capToStock(item.quantity, stockQuantity) };
+  });
+}
+
+export function restoreCartState(state: CartState | null): CartState {
+  if (!state) return initialState;
+  const items = restoreLines(Array.isArray(state.items) ? state.items : []);
+  const saved = Object.fromEntries(Object.entries(state.saved ?? {}).map(([owner, lines]) =>
+    [owner, restoreLines(Array.isArray(lines) ? lines : [])]));
+  return { ...state, items, saved };
+}
 
 /** Put a bag away under its account. An empty bag removes the entry. */
 function stash(state: InitialState, owner: string, items: CartItem[]) {
@@ -80,14 +98,14 @@ function mergeBags(base: CartItem[], incoming: CartItem[]): CartItem[] {
       continue;
     }
     const line = merged[index];
-    const stockQuantity = item.stockQuantity ?? line.stockQuantity;
+    const stockQuantity = sellablePackLimit(item) ?? sellablePackLimit(line) ?? undefined;
     merged[index] = {
       ...line,
       ...item,
       slug: item.slug ?? line.slug,
       imgs: item.imgs ?? line.imgs,
       stockQuantity,
-      quantity: capToStock(line.quantity + item.quantity, stockQuantity),
+      quantity: capToStock(Math.min(MAX_ORDER_PACKS, line.quantity + item.quantity), stockQuantity),
     };
   }
   return merged;
@@ -100,11 +118,13 @@ export const cart = createSlice({
     addItemToCart: (state, action: PayloadAction<CartItem>) => {
       const { id, title, slug, price, quantity, discountedPrice, imgs, stockQuantity } =
         action.payload;
+      if (!isPackQuantity(id) || !isPackQuantity(quantity)) return;
       const existingItem = state.items.find((item) => item.id === id);
+      const max = sellablePackLimit({ stockQuantity: stockQuantity === undefined ? existingItem?.stockQuantity : stockQuantity });
+      if (!max) return;
 
       if (existingItem) {
-        const maxQty = stockQuantity ?? existingItem.stockQuantity ?? Infinity;
-        existingItem.quantity = Math.min(existingItem.quantity + quantity, maxQty);
+        existingItem.quantity = Math.min(existingItem.quantity + quantity, max);
         if (slug) existingItem.slug = slug;
         if (stockQuantity !== undefined) existingItem.stockQuantity = stockQuantity;
       } else {
@@ -113,7 +133,7 @@ export const cart = createSlice({
           title,
           slug,
           price,
-          quantity: stockQuantity !== undefined ? Math.min(quantity, stockQuantity) : quantity,
+          quantity: Math.min(quantity, max),
           discountedPrice,
           stockQuantity,
           imgs,
@@ -126,15 +146,15 @@ export const cart = createSlice({
     },
     updateCartItemQuantity: (
       state,
-      action: PayloadAction<{ id: number; quantity: number }>
+      action: PayloadAction<{ id: number; quantity: number; stockQuantity?: number }>
     ) => {
-      const { id, quantity } = action.payload;
+      const { id, quantity, stockQuantity } = action.payload;
       const existingItem = state.items.find((item) => item.id === id);
 
-      if (existingItem) {
-        const maxQty = existingItem.stockQuantity ?? Infinity;
-        existingItem.quantity = Math.min(Math.max(1, quantity), maxQty);
-      }
+      if (!existingItem || !isPackQuantity(quantity)) return;
+      const max = sellablePackLimit({ stockQuantity: stockQuantity === undefined ? existingItem.stockQuantity : stockQuantity });
+      if (stockQuantity !== undefined) existingItem.stockQuantity = max ?? undefined;
+      existingItem.quantity = max === null ? Math.min(quantity, existingItem.quantity) : capToStock(quantity, max);
     },
 
     removeAllItemsFromCart: (state) => {
@@ -200,9 +220,10 @@ export const cart = createSlice({
           const product = details.get(item.id);
           if (!product) continue;
           if (product.slug) item.slug = product.slug;
-          if (typeof product.stockQuantity === "number") {
-            item.stockQuantity = product.stockQuantity;
-            item.quantity = capToStock(item.quantity, product.stockQuantity);
+          const limit = sellablePackLimit(product);
+          if (limit !== null) {
+            item.stockQuantity = limit;
+            item.quantity = capToStock(item.quantity, limit);
           }
         }
       };
@@ -218,7 +239,7 @@ export const missingDetailIds = (cart: CartState): number[] => {
   const bags = [cart.items].concat(Object.keys(cart.saved ?? {}).map((owner) => cart.saved![owner]));
   for (const bag of bags) {
     for (const item of bag) {
-      if ((!item.slug || item.stockQuantity === undefined) && ids.indexOf(item.id) === -1) ids.push(item.id);
+      if ((!item.slug || sellablePackLimit(item) === null) && ids.indexOf(item.id) === -1) ids.push(item.id);
     }
   }
   return ids;

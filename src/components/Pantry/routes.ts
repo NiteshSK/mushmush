@@ -6,7 +6,7 @@
  * renders <PantryShell>, otherwise the page loses its header. A pattern that
  * ends in "/*" matches that path and every path below it.
  */
-const BROWSE = ["/", "/shop", "/search"];
+const BROWSE = ["/", "/shop", "/shop/*", "/search"]; // /shop/* is the shop collections, such as /shop/spices
 const DECIDE: string[] = ["/shop-details", "/shop-details/*"]; // batch 2: product details
 const REVIEW_AND_PAY: string[] = ["/cart", "/checkout", "/track"]; // batch 3: cart and checkout
 const ACCOUNT = ["/wishlist", "/recently-viewed", "/account", "/my-account", "/addresses", "/orders"]; // batch 4: saved items, account, addresses, orders

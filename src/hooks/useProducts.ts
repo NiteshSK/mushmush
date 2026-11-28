@@ -11,6 +11,7 @@ export function useProducts(params?: {
   inStock?: boolean
   page?: number
   limit?: number
+  ids?: string
 }, initialProducts?: Product[]) {
   const [products, setProducts] = useState<Product[]>(initialProducts ?? [])
   const [loading, setLoading] = useState(!initialProducts)
@@ -26,25 +27,29 @@ export function useProducts(params?: {
   // The params the server data belongs to. Kept (not cleared) on the first run, so the
   // second effect run in React Strict Mode does not fetch the same products again.
   const initialKey = useRef(initialProducts ? paramsKey : null)
+  const [resolvedKey, setResolvedKey] = useState(initialKey.current)
 
   useEffect(() => {
     if (initialKey.current === paramsKey) return
     initialKey.current = null
+    let active = true
     const fetchProducts = async () => {
       try {
         setLoading(true)
         setError(null)
         const response = await productsApi.getAll(params)
+        if (!active) return
         setProducts(response.products)
         setPagination(response.pagination)
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch products')
+        if (active) setError(err instanceof Error ? err.message : 'Failed to fetch products')
       } finally {
-        setLoading(false)
+        if (active) { setResolvedKey(paramsKey); setLoading(false) }
       }
     }
 
     fetchProducts()
+    return () => { active = false }
   }, [
     params?.category, 
     params?.featured, 
@@ -55,7 +60,7 @@ export function useProducts(params?: {
     paramsKey
   ])
 
-  return { products, loading, error, pagination }
+  return { products, loading: loading || resolvedKey !== paramsKey, error, pagination }
 }
 
 export function useProduct(id: number) {

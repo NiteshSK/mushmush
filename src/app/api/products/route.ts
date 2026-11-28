@@ -3,25 +3,37 @@ import { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { listCatalogueProducts } from '@/lib/catalogue-server'
+import { isPackQuantity, MAX_ORDER_PACKS } from '@/lib/inventory'
 
 // GET /api/products - Fetch all products with optional filtering
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
+    const idList = searchParams.get('ids')
     const slug = searchParams.get('slug')
     const category = searchParams.get('category')
     const featured = searchParams.get('featured')
     const inStock = searchParams.get('inStock')
-    const page = Math.max(1, parseInt(searchParams.get('page') || '1'))
-    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '10')))
+    const page = Math.max(1, Number(searchParams.get('page') || '1'))
+    const requestedLimit = Math.max(1, Number(searchParams.get('limit') || (idList !== null ? '100' : '10')))
+    const limit = Math.min(100, requestedLimit)
     const skip = (page - 1) * limit
+    if (!Number.isSafeInteger(page) || !Number.isSafeInteger(requestedLimit) || skip > MAX_ORDER_PACKS) {
+      return NextResponse.json({ error: 'Invalid pagination.' }, { status: 400 });
+    }
 
     const where: Prisma.ProductWhereInput = { archivedAt: null }
-    
-    // If ID is provided, fetch single product
-    if (id) {
-      where.id = parseInt(id)
+    if (idList !== null) {
+      const ids = idList.split(',').map(Number);
+      if (ids.length > 100 || !ids.every(isPackQuantity)) {
+        return NextResponse.json({ error: 'Choose up to 100 valid product IDs.' }, { status: 400 });
+      }
+      where.id = { in: ids };
+    } else if (id) {
+      const productId = Number(id);
+      if (!isPackQuantity(productId)) return NextResponse.json({ error: 'Invalid product ID.' }, { status: 400 });
+      where.id = productId;
     }
     
     // If slug is provided, fetch single product
@@ -96,8 +108,8 @@ export async function POST(request: NextRequest) {
     if (typeof title !== "string" || !title.trim() || typeof description !== "string" || !description.trim()) {
       return NextResponse.json({ error: "Enter a product name and description." }, { status: 400 });
     }
-    if (!Number.isFinite(price) || price <= 0 || !Number.isInteger(measurementValue) ||
-        measurementValue <= 0 || measurementValue > 2147483647 || typeof measurementType !== "string" || !measurementType.trim()) {
+    if (!Number.isFinite(price) || price <= 0 || !isPackQuantity(measurementValue) ||
+        typeof measurementType !== "string" || !measurementType.trim()) {
       return NextResponse.json({ error: "Enter a positive price and a whole-number pack size with a unit." }, { status: 400 });
     }
     if (categories !== undefined && (!Array.isArray(categories) || !categories.every(Number.isSafeInteger))) {

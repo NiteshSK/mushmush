@@ -16,7 +16,7 @@ import r from "../Pantry/review.module.css";
  */
 export default function BagDrawer({ onClose }: { onClose: () => void }) {
   const dialog = useModalDialog();
-  const { lines, subtotal, count } = useBag();
+  const { lines, subtotal, count, stockIssue } = useBag();
 
   return <dialog ref={dialog} className={`${r.drawer} ${r.root}`} aria-labelledby="bag-drawer-title"
     onCancel={event => { event.preventDefault(); onClose(); }}
@@ -39,7 +39,8 @@ export default function BagDrawer({ onClose }: { onClose: () => void }) {
             <dt>Convenience fee</dt><dd data-price>{rupees.format(CONVENIENCE_FEE)}</dd>
             <dt>Delivery<small>From your PIN at checkout</small></dt><dd className={r.pending}>Next step</dd>
           </dl>
-          <Link href="/checkout" className={`${p.primaryAction} ${r.wide}`} onClick={onClose}>Go to checkout</Link>
+          {stockIssue ? <p className={r.stockNote} role="status">{stockIssue}</p>
+            : <Link href="/checkout" className={`${p.primaryAction} ${r.wide}`} onClick={onClose}>Go to checkout</Link>}
           <div className={r.drawerLinks}><Link href="/cart" className={p.textAction} onClick={onClose}>Review bag and delivery</Link></div>
         </div>
       </> : <div className={r.drawerBody}>

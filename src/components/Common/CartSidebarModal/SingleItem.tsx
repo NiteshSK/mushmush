@@ -5,20 +5,22 @@ import { updateCartItemQuantity } from "@/redux/features/cart-slice";
 import Image from "next/image";
 import Link from "next/link";
 import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
+import { sellablePackLimit } from "@/lib/inventory";
 
 const SingleItem = ({ item, removeItemFromCart }: { item: any; removeItemFromCart: any }) => {
   const dispatch = useDispatch<AppDispatch>();
   const { closeCartModal } = useCartModalContext();
   // Read the bag directly so this drawer agrees with the pantry steppers and /cart.
   const quantity: number = item.quantity;
+  const maxQty = sellablePackLimit(item);
+  const atMax = maxQty === null || quantity >= maxQty;
 
   const handleRemoveFromCart = () => {
     dispatch(removeItemFromCart(item.id));
   };
 
   const handleIncrease = () => {
-    const maxQty = item.stockQuantity ?? Infinity;
-    if (quantity >= maxQty) return;
+    if (atMax) return;
     const newQty = quantity + 1;
     dispatch(updateCartItemQuantity({ id: item.id, quantity: newQty }));
   };
@@ -30,8 +32,6 @@ const SingleItem = ({ item, removeItemFromCart }: { item: any; removeItemFromCar
   };
 
   const unitPrice = item.discountedPrice || item.price;
-  const maxQty = item.stockQuantity ?? Infinity;
-  const atMax = quantity >= maxQty;
 
   return (
     <div className="flex items-start gap-4">
@@ -47,8 +47,8 @@ const SingleItem = ({ item, removeItemFromCart }: { item: any; removeItemFromCar
         </h3>
 
         <p className="text-xs text-gray-500 mb-1">₹{unitPrice} each</p>
-        {item.stockQuantity !== undefined && item.stockQuantity <= 10 && (
-          <p className="text-xs text-amber-600 mb-1">Only {item.stockQuantity} left</p>
+        {maxQty !== null && maxQty <= 10 && (
+          <p className="text-xs text-amber-600 mb-1">{maxQty ? `Only ${maxQty} left` : "Sold out"}</p>
         )}
 
         <div className="flex items-center justify-between">

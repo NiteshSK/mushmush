@@ -6,6 +6,10 @@ import { rateLimit } from "@/lib/rate-limit";
 import { availablePacks } from "@/lib/inventory";
 import { activeDiscountsInclude, computeProductDiscount } from "@/lib/product-pricing";
 
+function productPackCount(product: { inStock: boolean; quantity: number; measurementValue: number; measurementType: string }) {
+    return product.inStock ? availablePacks(product.quantity, product.measurementValue, product.measurementType) : 0;
+}
+
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
@@ -125,12 +129,12 @@ export async function POST(req: Request) {
 Relevant Kosvana Products:
 ${products.map(p => `- ${p.title} (₹${p.price}): ${p.description.substring(0, 100)}...
   Link: ${baseUrl}/shop-details/${p.slug}
-  Status: ${p.inStock ? '✅ Available' : '❌ Out of Stock'}`).join("\n")}
+  Status: ${productPackCount(p) > 0 ? '✅ Available' : '❌ Out of Stock'}`).join("\n")}
 
 Featured/Trending Products:
 ${featured.map(p => `- ${p.title}: ${p.description.substring(0, 60)}...
   Link: ${baseUrl}/shop-details/${p.slug}
-  Status: ${p.inStock ? '✅ Available' : '❌ Out of Stock'}`).join("\n")}
+  Status: ${productPackCount(p) > 0 ? '✅ Available' : '❌ Out of Stock'}`).join("\n")}
 
 Active Promotions:
 ${banners.map(b => `- ${b.title}: ${b.discount || b.subtitle}`).join("\n")}
@@ -256,6 +260,7 @@ Answer concisely. No filler text. Keep responses under 2-3 sentences when produc
                                 // Same discount rule as /api/products and order pricing
                                 const { discountedPrice, discountPercentage } = computeProductDiscount(p.price, p.discounts);
 
+                                const stockQuantity = productPackCount(p);
                                 return {
                                     id: p.id,
                                     title: p.title,
@@ -264,13 +269,13 @@ Answer concisely. No filler text. Keep responses under 2-3 sentences when produc
                                     discountedPrice,
                                     discountPercentage: Math.round(discountPercentage),
                                     hasDiscount: discountedPrice !== null,
-                                    inStock: p.inStock,
+                                    inStock: stockQuantity > 0,
                                     imgs: p.imgs as any,
                                     averageRating: Math.round(avgRating * 10) / 10,
                                     reviewCount: p.reviews.length,
                                     measurementValue: p.measurementValue,
                                     measurementType: p.measurementType,
-                                    stockQuantity: availablePacks(p.quantity, p.measurementValue, p.measurementType),
+                                    stockQuantity,
                                 };
                             });
                         } catch (err) {

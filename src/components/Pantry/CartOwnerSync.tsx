@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 import { useSession } from "next-auth/react";
 import { type AppDispatch, useAppSelector } from "@/redux/store";
 import { missingDetailIds, refreshItemDetails, syncCartOwner, type ItemDetails } from "@/redux/features/cart-slice";
+import { productsApi } from "@/lib/api";
 
 /**
  * Keeps the bag with the account it belongs to, on every route: a guest bag
@@ -34,8 +35,7 @@ export default function CartOwnerSync() {
     const ids = missing ? missing.split(",").map(Number).filter((id) => !lookedUp.current.has(id)) : [];
     if (ids.length === 0) return;
     ids.forEach((id) => lookedUp.current.add(id));
-    fetch("/api/products?limit=100")
-      .then((res) => (res.ok ? res.json() : null))
+    productsApi.getAll({ ids: ids.join(",") })
       .then((data: { products?: ItemDetails[] } | null) => {
         if (!Array.isArray(data?.products)) return;
         dispatch(refreshItemDetails(data.products.map(({ id, slug, stockQuantity }) => ({ id, slug, stockQuantity }))));

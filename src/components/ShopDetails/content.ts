@@ -1,5 +1,5 @@
 import type { Product } from "@/types/product";
-import { escapeHtml } from "@/lib/sanitize";
+import { escapeHtml, sanitizeHtml } from "@/lib/sanitize";
 import { sentenceCase } from "../Pantry/catalogue";
 
 type Copy = Pick<Product, "description" | "specifications" | "howToConsume" | "additionalInfo" | "benefits">;
@@ -31,7 +31,7 @@ function parseBenefits(raw: unknown): Benefit[] {
 }
 
 /**
- * Groups the stored product copy for the product information panel.
+ * Groups the stored product copy for the "About this product" section.
  * Storage lines come from the "Storage" information row and the "Shelf life" specification.
  * Nothing is invented: a section without stored copy is left out.
  */
@@ -50,6 +50,25 @@ export function productSections(product: Copy) {
     specifications: specifications.filter(item => !isStorage(plain(item))).map(dropLeadingHeading),
     details: info.filter(row => !isStorage(row.label)),
   };
+}
+
+/** Stored copy without block tags, such as text typed with line breaks. */
+const hasBlocks = (html: string) => /<(p|div|ul|ol|li|table|h[1-6]|br|blockquote|pre)\b/i.test(html);
+
+/**
+ * Stored copy ready to show as HTML on the page: sanitised with the shared sanitiser (no script, style,
+ * event handlers or unsafe links), and stored headings moved below the page's own h3 topics, so the
+ * heading order stays h2 → h3 → h4.
+ */
+export function readableHtml(html: string) {
+  return sanitizeHtml(html ?? "").replace(/<(\/?)h[1-3]\b/gi, "<$1h4");
+}
+
+/** The description as HTML: a plain description typed with line breaks becomes one paragraph per line. */
+export function descriptionHtml(html: string) {
+  const copy = (html ?? "").trim();
+  if (!copy || hasBlocks(copy) || !copy.includes("\n")) return readableHtml(copy);
+  return readableHtml(copy.split(/\n+/).map(line => line.trim()).filter(Boolean).map(line => `<p>${line}</p>`).join(""));
 }
 
 /** A short plain-text summary for metadata. */

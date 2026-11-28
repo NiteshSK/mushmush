@@ -9,6 +9,7 @@ import { toast } from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { useOptionalWishlist } from "@/app/context/WishlistContext";
 import type { Product } from "@/types/product";
+import { sellablePackLimit } from "@/lib/inventory";
 import { type AppDispatch, useAppSelector } from "@/redux/store";
 import { addItemToCart, removeItemFromCart, selectCartItems, updateCartItemQuantity } from "@/redux/features/cart-slice";
 import { type DeliveryScope, isFreshMushroom, packLabel, productCover, rupees } from "./catalogue";
@@ -30,8 +31,8 @@ export default function ProductCard({ product, label, delivery, titleAs: Title =
   const dispatch = useDispatch<AppDispatch>();
   const [imageFailed, setImageFailed] = useState(false);
   const quantity = useAppSelector(selectCartItems).find(item => item.id === product.id)?.quantity ?? 0;
-  const stock = product.stockQuantity ?? Infinity;
-  const soldOut = !product.inStock || stock < 1;
+  const stock = sellablePackLimit(product);
+  const soldOut = stock === 0;
   const price = product.discountedPrice ?? product.price;
   const image = productCover(product);
   const url = `/shop-details/${product.slug}`;
@@ -85,9 +86,10 @@ export default function ProductCard({ product, label, delivery, titleAs: Title =
       {quantity ? <div className={styles.stepper} role="group" aria-label={`Quantity of ${product.title}`}>
         <button onClick={subtract} aria-label={`Remove one ${product.title}`}><Minus /></button>
         <span aria-live="polite" aria-label={`${quantity} in bag`}>{quantity}</span>
-        <button onClick={add} disabled={soldOut || quantity >= stock} aria-label={`Add one ${product.title}`}><Plus /></button>
+        <button onClick={add} disabled={stock === null || quantity >= stock} aria-label={`Add one ${product.title}`}><Plus /></button>
       </div> : soldOut && onNotify ? <button onClick={() => onNotify(product)} className={styles.add} aria-label={`${product.title} is sold out. Notify me when it is back`}>Notify me</button>
         : soldOut ? <button disabled className={styles.add} aria-label={`${product.title} sold out`}>Sold out</button>
+        : stock === null ? <button disabled className={styles.add}>Stock unconfirmed</button>
         // Visible text "Add to bag"; screen readers hear "Add {title} to bag".
         : <button onClick={add} className={styles.add}><Plus aria-hidden="true" /><span>Add<span className={styles.srOnly}> {product.title}</span> to bag</span></button>}
     </div>

@@ -95,6 +95,10 @@ describe('inventory helpers', () => {
     it('returns 0 for zero measurement value', () => {
       expect(availablePacks(1000, 0, 'gm')).toBe(0);
     });
+
+    it.each([Infinity, NaN, -1, Number.MAX_SAFE_INTEGER + 1])('returns 0 for invalid bulk stock (%p)', stock => {
+      expect(availablePacks(stock, 100, 'gm')).toBe(0);
+    });
   });
 
   // ─── packsToBulk ──────────────────────────────────────────

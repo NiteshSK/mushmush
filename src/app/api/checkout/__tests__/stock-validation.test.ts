@@ -69,6 +69,7 @@ jest.mock('@/lib/auth', () => ({
 }));
 
 jest.mock('@/lib/inventory', () => ({
+  ...jest.requireActual('@/lib/inventory'),
   availablePacks: jest.fn((quantity: number, measurementValue: number, measurementType: string) => {
     const packSize = measurementType === 'kg' ? measurementValue * 1000 : measurementValue;
     if (packSize <= 0) return 0;

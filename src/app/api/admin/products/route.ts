@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
   const search = params.get("q")?.trim().slice(0, 100);
   const category = params.get("category");
   const conditions = [Prisma.sql`p."archivedAt" IS NULL`];
-  const packs = Prisma.sql`COALESCE(FLOOR(p.quantity / NULLIF(p."measurementValue" *
+  const packs = Prisma.sql`COALESCE(FLOOR(p.quantity / NULLIF(p."measurementValue"::double precision *
     CASE WHEN lower(p."measurementType") IN ('kg','l','litre','litres') THEN 1000 ELSE 1 END,0)),0)`;
   if (search) {
     const pattern = "%" + search.replace(/[\\%_]/g, "\\$&") + "%";

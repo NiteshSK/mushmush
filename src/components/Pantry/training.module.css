@@ -142,12 +142,43 @@
 .submitAction { color: #fff8e9; background: var(--forest); }
 .submitAction:hover:not(:disabled) { background: #132119; }
 
+/* Training guide: what you learn, who it is for, where, common questions */
+.guide { margin-top: clamp(2.5rem,5vw,4.5rem); }
+.guideSection { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,2.2fr); gap: 1rem clamp(2rem,5vw,5rem); padding: clamp(1.5rem,3vw,2.25rem) 0; border-top: 1px solid var(--line); }
+.guideHead h2 { font-size: clamp(1.9rem,3vw,2.6rem); line-height: 1.05; letter-spacing: -.03em; }
+.guideHead p { margin-top: .5rem; max-width: 30ch; font-size: .9375rem; line-height: 1.55; color: #46523f; }
+.guideCopy { display: grid; gap: .75rem; align-content: start; max-width: 66ch; }
+.guideCopy p { font-size: 1.0625rem; line-height: 1.65; color: #33463a; }
+.guideAddress { font-style: normal; line-height: 1.6; color: var(--ink); }
+.learn { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 1.5rem clamp(1.5rem,3vw,3rem); }
+.learnCourse { display: grid; gap: .6rem; align-content: start; min-width: 0; }
+.learnCourse h3 { font-size: clamp(1.45rem,2.1vw,1.9rem); line-height: 1.1; letter-spacing: -.02em; overflow-wrap: anywhere; }
+.learnNote { font-size: .9375rem; line-height: 1.55; color: #46523f; }
+.learnDays { border-top: 1px solid var(--line); }
+.learnDays li { padding: .7rem 0; border-bottom: 1px solid var(--line); }
+.learnDays span { display: block; font-size: .72rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); }
+.learnDays strong { display: block; margin-top: .15rem; font-weight: 500; line-height: 1.4; color: var(--ink); }
+.learnDays p { margin-top: .2rem; font-size: .875rem; line-height: 1.55; color: #5c614f; }
+.questions { display: grid; gap: 1.5rem; max-width: 70ch; }
+.questions h3 { font-size: 1.3rem; line-height: 1.2; letter-spacing: -.01em; }
+.questions p, .questions li { font-size: .9375rem; line-height: 1.6; color: #33463a; }
+.questions p { margin-top: .4rem; }
+.questions ul, .questions ol { margin-top: .4rem; padding-left: 1.1rem; }
+.questions ul { list-style: disc; }
+.questions ol { list-style: decimal; }
+.questions li::marker { color: #9d926e; }
+.questions li + li { margin-top: .2rem; }
+.questions p a { text-decoration: underline; text-underline-offset: 4px; text-decoration-color: #9d926e; }
+.questions .questionLinks { margin-top: .2rem; padding-left: 0; list-style: none; }
+.questions .questionLinks li + li { margin-top: 0; }
+
 @media (max-width: 1100px) {
   .programme { grid-template-columns: minmax(0,1fr) minmax(13rem,16rem); grid-template-areas: "head actions" "facts actions" "summary summary"; }
   .steps ol { grid-template-columns: repeat(2, minmax(0,1fr)); }
 }
 @media (max-width: 900px) {
   .grow { grid-template-columns: minmax(0,1fr); }
+  .guideSection { grid-template-columns: minmax(0,1fr); }
   .detailTop { grid-template-columns: minmax(0,1fr); }
   .about { grid-template-columns: minmax(0,1fr); }
   .listGrid { grid-template-columns: repeat(2, minmax(0,1fr)); }
@@ -160,7 +191,7 @@
   .day { grid-template-columns: minmax(0,1fr); gap: .2rem; }
   .dayDate { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 .75rem; }
   .dayDate strong { margin-top: 0; }
-  .sessionGrid, .listGrid, .instructors ul { grid-template-columns: minmax(0,1fr); }
+  .sessionGrid, .listGrid, .instructors ul, .learn { grid-template-columns: minmax(0,1fr); }
 }
 @media (max-width: 640px) {
   .lede { font-size: .9rem; }

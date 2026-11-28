@@ -4,6 +4,7 @@ import { useModalContext } from "@/app/context/QuickViewModalContext";
 import { AppDispatch, useAppSelector } from "@/redux/store";
 import { addItemToCart } from "@/redux/features/cart-slice";
 import { sanitizeHtml } from "@/lib/sanitize";
+import { sellablePackLimit } from "@/lib/inventory";
 import { useDispatch } from "react-redux";
 import Image from "next/image";
 import { usePreviewSlider } from "@/app/context/PreviewSliderContext";
@@ -16,6 +17,7 @@ const QuickViewModal = () => {
   const [quantity, setQuantity] = useState(1);
   const dispatch = useDispatch<AppDispatch>();
   const product = useAppSelector((state) => state.quickViewReducer.value);
+  const stock = sellablePackLimit(product);
   const [activePreview, setActivePreview] = useState(0);
 
   const handlePreviewSlider = () => {
@@ -29,6 +31,7 @@ const QuickViewModal = () => {
   };
 
   const handleAddToCart = () => {
+    if (!stock || quantity > stock) return;
     dispatch(addItemToCart({ ...product, quantity, stockQuantity: product.stockQuantity }));
     closeModal();
   };
@@ -165,7 +168,8 @@ const QuickViewModal = () => {
                 </button>
                 <span className="w-10 text-center text-sm font-medium text-dark">{quantity}</span>
                 <button
-                  onClick={() => { const maxQty = product?.stockQuantity ?? Infinity; if (quantity < maxQty) setQuantity(quantity + 1); }}
+                  onClick={() => { if (stock !== null) setQuantity(current => current < stock ? current + 1 : current); }}
+                  disabled={stock === null || quantity >= stock}
                   className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-dark transition-colors"
                 >
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><rect y="6" width="14" height="2" rx="1" /><rect x="6" width="2" height="14" rx="1" /></svg>
@@ -177,9 +181,10 @@ const QuickViewModal = () => {
             <div className="flex items-center gap-3">
               <button
                 onClick={handleAddToCart}
+                disabled={!stock || quantity > stock}
                 className="flex-1 bg-forest text-white py-3.5 rounded-full text-sm font-medium hover:bg-dark transition-colors duration-300"
               >
-                Add to Cart
+                {stock === null ? "Stock unconfirmed" : stock === 0 ? "Sold out" : "Add to Cart"}
               </button>
             </div>
           </div>

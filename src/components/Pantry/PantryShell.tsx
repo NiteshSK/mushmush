@@ -14,6 +14,7 @@ import PantryDialog, { type Panel } from "./PantryDialog";
 import BagDrawer from "../Cart/BagDrawer";
 import { CONTACT } from "../Help/ContactOptions";
 import { openChat } from "../AI/open-chat";
+import { COLLECTIONS, collectionPath } from "../Shop/collections";
 import styles from "./pantry.module.css";
 
 const PanelContext = createContext<(panel: Panel) => void>(() => {});
@@ -101,10 +102,7 @@ export default function PantryShell({ children, current, skipTo = { href: "#main
               <h2>Shop</h2>
               <ul>
                 <li><Link href="/shop">All products</Link></li>
-                <li><Link href="/shop?category=spices">Spices</Link></li>
-                <li><Link href="/shop?category=dry-fruits">Dry fruits</Link></li>
-                <li><Link href="/shop?category=seeds">Seeds</Link></li>
-                <li><Link href="/shop?category=edible,medicinal,powders,tinctures">Mushrooms</Link></li>
+                {COLLECTIONS.map(collection => <li key={collection.slug}><Link href={collectionPath(collection)}>{collection.name}</Link></li>)}
                 <li><Link href="/#grow">Spawn and grow bags</Link></li>
               </ul>
             </nav>

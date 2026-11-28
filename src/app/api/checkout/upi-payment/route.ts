@@ -4,7 +4,7 @@ import { after, NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { packsToBulk, availablePacks } from "@/lib/inventory";
+import { packsToBulk, availablePacks, isPackQuantity } from "@/lib/inventory";
 import { WorkflowError, workflowFailure } from "@/lib/staff-workflow";
 import { isValidOrderPaymentToken, ownsOrder } from '@/lib/order-access';
 
@@ -103,7 +103,11 @@ export async function POST(request: NextRequest) {
         await tx.$queryRaw`SELECT id FROM products WHERE id = ${item.productId} FOR UPDATE`;
         const sku = await tx.product.findUniqueOrThrow({ where: { id: item.productId } });
         const units = packsToBulk(item.quantity, sku.measurementValue, sku.measurementType);
-        if (sku.archivedAt || !sku.inStock || units <= 0 || sku.quantity < units) throw new WorkflowError("Stock changed for " + sku.title);
+        const available = availablePacks(sku.quantity, sku.measurementValue, sku.measurementType);
+        if (sku.archivedAt || !sku.inStock || !isPackQuantity(item.quantity) || item.quantity > available ||
+            !Number.isFinite(units) || units <= 0 || sku.quantity < units) {
+          throw new WorkflowError("Stock changed for " + sku.title);
+        }
         const remaining = sku.quantity - units;
         await tx.product.update({ where: { id: sku.id }, data: { quantity: remaining, inStock: availablePacks(remaining,sku.measurementValue,sku.measurementType)>0 } });
         await tx.orderItem.update({ where: { id: item.id }, data: { reservedUnits: units } });

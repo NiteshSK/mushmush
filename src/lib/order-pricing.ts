@@ -9,7 +9,7 @@ import { freshDeliveryPins } from "@/lib/shipping";
  * is only compared against the server total (see `checkClientTotal()`).
  */
 import { prisma } from '@/lib/prisma';
-import { availablePacks } from '@/lib/inventory';
+import { availablePacks, isPackQuantity, MAX_ORDER_PACKS } from '@/lib/inventory';
 import { validateCoupon } from '@/lib/coupon';
 import { activeDiscountsInclude, effectiveUnitPrice } from '@/lib/product-pricing';
 import { calculateShippingFee, findShippingZone, isValidPincode } from '@/lib/shipping';
@@ -108,13 +108,15 @@ function normalizeLines(
     const productId = raw?.productId;
     const quantity = raw?.quantity;
 
-    if (typeof productId !== 'number' || !Number.isInteger(productId) || productId < 1) {
+    if (!isPackQuantity(productId)) {
       return fail(400, 'INVALID_ITEMS', 'Invalid product in cart.');
     }
-    if (typeof quantity !== 'number' || !Number.isInteger(quantity) || quantity < 1) {
+    if (!isPackQuantity(quantity)) {
       return fail(400, 'INVALID_ITEMS', 'Quantity must be a whole number of 1 or more.');
     }
-    merged.set(productId, (merged.get(productId) ?? 0) + quantity);
+    const combined = (merged.get(productId) ?? 0) + quantity;
+    if (combined > MAX_ORDER_PACKS) return fail(400, 'INVALID_ITEMS', 'Quantity is too large for one product.');
+    merged.set(productId, combined);
   }
 
   return {

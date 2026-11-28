@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { Heart, MapPin, Minus, Plus, Sprout, Truck } from "lucide-react";
 import type { Product } from "@/types/product";
+import { sellablePackLimit } from "@/lib/inventory";
 import { type AppDispatch, useAppSelector } from "@/redux/store";
 import { addItemToCart, removeItemFromCart, selectCartItems, updateCartItemQuantity } from "@/redux/features/cart-slice";
 import { useWishlist } from "@/app/context/WishlistContext";
@@ -17,7 +18,7 @@ import { deliveryScope, isGrowProduct, packLabel, productKind, rupees } from "..
 import { productSections, slugWords } from "./content";
 import { isSoldOut, photos, shelf } from "./product-facts";
 import Gallery from "./Gallery";
-import ProductInformation from "./ProductInformation";
+import ProductAbout, { ProductSummary } from "./ProductInformation";
 import Reviews, { Stars } from "./Reviews";
 import Related from "./Related";
 import pantry from "../Pantry/pantry.module.css";
@@ -94,7 +95,7 @@ function useProductDetails(slug?: string, initialProduct?: Product) {
 function BuyControl({ product, onNotify }: { product: Product; onNotify: () => void }) {
   const dispatch = useDispatch<AppDispatch>();
   const quantity = useAppSelector(selectCartItems).find(item => item.id === product.id)?.quantity ?? 0;
-  const stock = product.stockQuantity ?? Infinity;
+  const stock = sellablePackLimit(product);
   const soldOut = isSoldOut(product);
 
   const add = () => dispatch(addItemToCart({ id: product.id, slug: product.slug, title: product.title, imgs: product.imgs, price: product.price,
@@ -103,6 +104,7 @@ function BuyControl({ product, onNotify }: { product: Product; onNotify: () => v
 
   // A sold-out pack always offers the stock alert, even when an older bag still holds it (the bag note offers removal).
   if (soldOut) return <button type="button" className={styles.add} onClick={onNotify} aria-label={`${product.title} is sold out. Notify me when it is back`}>Notify me</button>;
+  if (stock === null) return <button type="button" className={styles.add} disabled>Stock unconfirmed</button>;
   if (quantity) return <div className={styles.stepper} role="group" aria-label={`Quantity of ${product.title}`}>
     <button type="button" onClick={subtract} aria-label={`Remove one ${product.title}`}><Minus aria-hidden="true" /></button>
     <span aria-live="polite" aria-label={`${quantity} in bag`}>{quantity}</span>
@@ -189,7 +191,7 @@ function ProductView({ product }: { product: Product }) {
   track.current = addToRecentlyViewed;
 
   const price = product.discountedPrice ?? product.price;
-  const stock = product.stockQuantity ?? Infinity;
+  const stock = sellablePackLimit(product);
   const soldOut = isSoldOut(product);
   const scope = deliveryScope(product);
   const kind = productKind(product);
@@ -248,8 +250,8 @@ function ProductView({ product }: { product: Product }) {
         {grow && <GrowNote />}
 
         <ul className={styles.facts}>
-          <li className={styles.stock} data-state={soldOut ? "out" : stock <= LOW_STOCK ? "low" : "in"}>
-            <i aria-hidden="true" />{soldOut ? "Sold out" : stock <= LOW_STOCK ? `Only ${stock} left` : "In stock"}
+          <li className={styles.stock} data-state={soldOut ? "out" : stock === null || stock <= LOW_STOCK ? "low" : "in"}>
+            <i aria-hidden="true" />{soldOut ? "Sold out" : stock === null ? "Stock unconfirmed" : stock <= LOW_STOCK ? `Only ${stock} left` : "In stock"}
           </li>
           <li className={styles.delivery} data-scope={scope}>
             <span>{scope === "fresh" ? <><MapPin aria-hidden="true" />Fresh · Dehradun only</> : <><Truck aria-hidden="true" />Ships across India</>}</span>
@@ -264,18 +266,20 @@ function ProductView({ product }: { product: Product }) {
           <span>Your bag has {inBag}, but this pack is sold out.</span>
           <button type="button" className={pantry.textAction} onClick={() => dispatch(removeItemFromCart(product.id))}>Remove from bag</button>
         </p> : <p className={styles.bagNote}>
-          <span>{inBag} in your bag{inBag >= stock ? ` · that is all ${stock} we have` : ""}</span>
-          <Link href="/checkout" className={pantry.textAction}>Go to checkout</Link>
+          <span>{inBag} in your bag{stock !== null && inBag === stock ? ` · that is all ${stock} we have` : ""}</span>
+          {stock === null || inBag > stock ? <Link href="/cart" className={pantry.textAction}>Review bag</Link>
+            : <Link href="/checkout" className={pantry.textAction}>Go to checkout</Link>}
         </p>)}
         {scope === "fresh" && <p className={styles.aside}>
           Outside Dehradun? <Link href="/search?search=dried%20mushrooms">Dried mushrooms</Link> ship across India.
         </p>}
-        <ProductInformation title={product.title} sections={sections} />
+        <ProductSummary sections={sections} />
         <p className={styles.ask}><a href={WHATSAPP} target="_blank" rel="noopener noreferrer" className={pantry.textAction}>Ask us on WhatsApp</a></p>
       </section>
     </div>
 
     <div className={styles.reading}>
+      <ProductAbout title={product.title} sections={sections} />
       <Reviews productId={product.id} title={product.title} signIn={signInHref(product.slug)} />
     </div>
 

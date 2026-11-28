@@ -60,7 +60,9 @@ const CheckoutWithOTP = () => {
   const cartItems = useSelector(selectCartItems);
   const subtotal = useSelector(selectTotalPrice);
   const ready = useBagReady();
-  const { lines, count, catalogueLoading, catalogueError } = useBag();
+  const { lines, count, catalogueError, stockIssue: bagStockIssue } = useBag();
+  const [stockConflict, setStockConflict] = useState<string | null>(null);
+  const stockIssue = stockConflict ?? bagStockIssue;
 
   // State management
   const [loading, setLoading] = useState(false);
@@ -147,6 +149,7 @@ const CheckoutWithOTP = () => {
   const blockedIds = new Set(blockedLines.concat(refused).map((line) => line.id));
 
   const submitRef = useRef<HTMLButtonElement>(null);
+  const reviewBagRef = useRef<HTMLAnchorElement>(null);
   const conflictRef = useRef<HTMLDivElement>(null);
   const addressRef = useRef<HTMLHeadingElement>(null);
   const statusRef = useRef<HTMLHeadingElement>(null);
@@ -386,8 +389,8 @@ const CheckoutWithOTP = () => {
       (blockedLines.length ? conflictRef : refusalRef).current?.focus();
       return;
     }
-    if (catalogueLoading) {
-      setError("We are still checking which items are fresh. Try again in a moment.");
+    if (stockIssue) {
+      setError(stockIssue);
       return;
     }
     handleCheckout(e);
@@ -519,6 +522,9 @@ const CheckoutWithOTP = () => {
         setPriceChange(null);
         setOtpNotice("");
         setUndeliverable(data.error || 'We cannot deliver this order to your PIN.');
+      } else if (data.code === 'STOCK') {
+        closeOtp();
+        setStockConflict(data.stockErrors?.join('. ') || data.error || 'Stock changed. Review your bag to continue.');
       } else {
         if (data.stockErrors && data.stockErrors.length > 0) {
           setError(data.stockErrors.join('. '));
@@ -804,7 +810,8 @@ const CheckoutWithOTP = () => {
 
               {error && <p role="alert" className={r.error}>{error}</p>}
 
-              <button ref={submitRef} type="submit" disabled={loading} className={`${p.primaryAction} ${r.wide}`}>
+              {stockIssue && <p role="status" className={r.stockNote}>{stockIssue} <Link ref={reviewBagRef} className={p.textAction} href="/cart">Review bag</Link></p>}
+              <button ref={submitRef} type="submit" disabled={loading || Boolean(stockIssue)} className={`${p.primaryAction} ${r.wide}`}>
                 {loading ? 'Sending code…' : 'Send verification code'}
               </button>
               <p className={r.note}>
@@ -831,7 +838,7 @@ const CheckoutWithOTP = () => {
           resending={resendingOTP}
           onResend={handleResendOTP}
           priceChange={priceChange}
-          returnFocus={() => refusalRef.current ?? submitRef.current}
+          returnFocus={() => refusalRef.current ?? reviewBagRef.current ?? submitRef.current}
         />
       )}
 

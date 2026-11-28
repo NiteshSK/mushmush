@@ -26,6 +26,7 @@ const mockProduct: ChatProduct = {
   discountPercentage: 0,
   hasDiscount: false,
   inStock: true,
+  stockQuantity: 20,
   imgs: { thumbnails: ['/images/oyster-thumb.jpg'], previews: ['/images/oyster.jpg'] },
   averageRating: 4.5,
   reviewCount: 12,
@@ -77,6 +78,13 @@ describe('ChatProductCard', () => {
 
     expect(screen.getByRole('button', { name: 'Add Premium Oyster Mushroom to bag' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Buy now Premium Oyster Mushroom' })).toBeInTheDocument();
+  });
+
+  it('blocks purchases until stock is known', () => {
+    renderCard({ ...mockProduct, stockQuantity: undefined }, mockOnBuy);
+
+    expect(screen.getByRole('button', { name: 'Stock unconfirmed' })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: /Buy now/ })).not.toBeInTheDocument();
   });
 
   it('adds a bag line with slug and stock limit, then caps the stepper at stock', () => {

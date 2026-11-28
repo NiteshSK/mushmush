@@ -85,7 +85,21 @@ export const productsApi = {
     inStock?: boolean
     page?: number
     limit?: number
+    ids?: string
   }) => {
+    if (params?.ids !== undefined) {
+      const ids = params.ids ? params.ids.split(',') : [];
+      const batches: string[] = [];
+      for (let i = 0; i < ids.length; i += 100) batches.push(ids.slice(i, i + 100).join(','));
+      const parts = await Promise.all(batches.map(async ids => {
+        const query = new URLSearchParams({ ids, limit: '100' });
+        const response = await fetch(`/api/products?${query}`, { cache: 'no-store' });
+        if (!response.ok) throw new Error('Failed to check stock');
+        return response.json() as Promise<{ products: Product[] }>;
+      }));
+      const products = parts.flatMap(part => part.products);
+      return { products, pagination: { page: 1, limit: ids.length, total: products.length, totalPages: 1 } };
+    }
     const searchParams = new URLSearchParams()
     if (params?.category) searchParams.set('category', params.category)
     if (params?.featured) searchParams.set('featured', 'true')

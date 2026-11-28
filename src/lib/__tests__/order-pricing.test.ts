@@ -16,6 +16,7 @@ jest.mock('@/lib/prisma', () => ({
 }));
 
 import { prisma } from '@/lib/prisma';
+import { MAX_ORDER_PACKS } from '@/lib/inventory';
 import {
   CONVENIENCE_FEE,
   TOTAL_MISMATCH_TOLERANCE,
@@ -135,10 +136,21 @@ describe('priceOrder — input validation', () => {
     ['fraction', 1.5],
     ['string', '2'],
     ['NaN', NaN],
+    ['infinite', Infinity],
+    ['outside the database range', MAX_ORDER_PACKS + 1],
     ['null', null],
     ['missing', undefined],
   ])('rejects a %s quantity with 400 before touching the DB', async (_label, quantity) => {
     const result = await priceOrder({ items: [{ productId: 1, quantity }], pincode: '110001' });
+    expect(result).toMatchObject({ ok: false, status: 400, code: 'INVALID_ITEMS' });
+    expect(mocked.product.findMany).not.toHaveBeenCalled();
+  });
+
+  it('rejects an oversized combined quantity across duplicate lines before touching the DB', async () => {
+    const result = await priceOrder({
+      items: [{ productId: 1, quantity: MAX_ORDER_PACKS }, { productId: 1, quantity: 1 }],
+      pincode: '110001',
+    });
     expect(result).toMatchObject({ ok: false, status: 400, code: 'INVALID_ITEMS' });
     expect(mocked.product.findMany).not.toHaveBeenCalled();
   });

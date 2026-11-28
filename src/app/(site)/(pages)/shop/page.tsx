@@ -5,17 +5,21 @@ import PantryShell from "@/components/Pantry/PantryShell";
 import JsonLd from "@/components/Seo/JsonLd";
 import { shopView } from "@/components/Shop/listing";
 import { shopItemList } from "@/components/Shop/structured-data";
-import { listCatalogueProducts } from "@/lib/catalogue-server";
+import { collectionForCategoryQuery, collectionPath } from "@/components/Shop/collections";
+import { loadListedCatalogue } from "@/components/Shop/load-catalogue";
 import { breadcrumbJsonLd, shareMetadata } from "@/lib/seo";
-import type { Product } from "@/types/product";
 
 const title = "Shop the pantry | Kosvana";
 const description = "Shop Kosvana’s Himalayan pantry: dried mushrooms, spices, dry fruits and seeds delivered across India, with fresh mushrooms in Dehradun.";
 
-// Filtered, sorted and later pages are views of one listing: they all canonicalise to /shop.
-export const metadata: Metadata = { title, description, ...shareMetadata({ path: "/shop", title, description }) };
-
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+// Filtered, sorted and later pages are views of one listing: they canonicalise to /shop. A filter on one
+// category that has its own collection page (/shop?category=spices) canonicalises to that page instead.
+export async function generateMetadata({ searchParams }: { searchParams: SearchParams }): Promise<Metadata> {
+  const collection = collectionForCategoryQuery(toQuery(await searchParams).get("category") ?? undefined);
+  return { title, description, ...shareMetadata({ path: collection ? collectionPath(collection) : "/shop", title, description }) };
+}
 
 function toQuery(params: Awaited<SearchParams>) {
   const query = new URLSearchParams();
@@ -26,27 +30,10 @@ function toQuery(params: Awaited<SearchParams>) {
   return query;
 }
 
-/**
- * The catalogue in the /api/products JSON shape (the same as the browser fetch), or undefined when
- * the database fails. Product-page text that the listing does not show stays out of the HTML.
- */
-async function loadCatalogue(): Promise<Product[] | undefined> {
-  try {
-    // The same 100 products the shop asked /api/products for in the browser.
-    const { products } = await listCatalogueProducts({ take: 100 });
-    const listed = products.map(({ description: _d, specifications: _s, howToConsume: _h, additionalInfo: _a, benefits: _b, reviews: _r, discounts: _x, ...product }) =>
-      ({ ...product, description: "", specifications: [], howToConsume: [], additionalInfo: [] }));
-    return JSON.parse(JSON.stringify(listed)) as Product[];
-  } catch (error) {
-    console.error("Error loading the shop catalogue:", error);
-    return undefined;
-  }
-}
-
 export default async function ShopPage({ searchParams }: { searchParams: SearchParams }) {
   // Reading the query makes the page render per request, so the first HTML lists the products for this URL.
   const query = toQuery(await searchParams);
-  const catalogue = await loadCatalogue();
+  const catalogue = await loadListedCatalogue();
   const view = catalogue ? shopView(catalogue, query) : null;
 
   return (

@@ -5,6 +5,8 @@ import { TypedUseSelectorHook, useSelector } from "react-redux";
 import {
   persistStore,
   persistReducer,
+  createTransform,
+  type PersistConfig,
   FLUSH,
   REHYDRATE,
   PAUSE,
@@ -16,7 +18,7 @@ import storage from 'redux-persist/lib/storage'; // defaults to localStorage for
 
 // Import your reducers
 import quickViewReducer from "./features/quickView-slice";
-import cartReducer, { addItemToCart } from "./features/cart-slice";
+import cartReducer, { addItemToCart, restoreCartState, type CartState } from "./features/cart-slice";
 import { trackVisitAction } from "@/lib/visit-analytics";
 import wishlistReducer from "./features/wishlist-slice";
 import productDetailsReducer from "./features/product-details";
@@ -30,10 +32,11 @@ const rootReducer = combineReducers({
 });
 
 // Persist config
-const persistConfig = {
+const persistConfig: PersistConfig<ReturnType<typeof rootReducer>> = {
   key: 'root',
   storage,
   whitelist: ['cartReducer'], // Only cartReducer will be persisted
+  transforms: [createTransform<CartState, CartState>(undefined, restoreCartState, { whitelist: ['cartReducer'] })],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

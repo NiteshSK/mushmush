@@ -66,12 +66,6 @@ beforeEach(() => {
   (useSession as jest.Mock).mockReturnValue({ data: null, status: "unauthenticated" });
 });
 
-// JSDOM implements the dialog element but not its modal methods.
-beforeAll(() => {
-  HTMLDialogElement.prototype.showModal ??= function () { this.setAttribute("open", ""); };
-  HTMLDialogElement.prototype.close ??= function () { this.removeAttribute("open"); };
-});
-
 describe("Product details", () => {
   it("puts pack, server price, stock and delivery beside Add, and reads the real slug", async () => {
     serve(cumin);
@@ -88,41 +82,63 @@ describe("Product details", () => {
     expect(openPanel).toHaveBeenCalledWith("delivery");
   });
 
-  it("keeps a short summary by Add and opens the requested product information without expanding the page", async () => {
+  it("keeps a short summary by Add and shows all the product information, headed, below the purchase area", async () => {
     serve(cumin);
     await open("cumin-seeds");
     expect(panel().textContent).toMatch(/Cumin Seeds \(Jeera\) are an essential spice\./);
-    expect(screen.queryByRole("heading", { name: "Storage" })).toBeNull();
-    const care = within(panel()).getByRole("button", { name: "Use & storage" });
-    care.focus();
-    fireEvent.click(care);
-    const dialog = screen.getByRole("dialog", { name: "Cumin Seeds" });
-    expect(dialog.hasAttribute("open")).toBe(true);
-    const storage = within(dialog).getByRole("tabpanel", { name: "Use & storage" });
-    expect(storage.textContent).toMatch(/Heat oil and add the seeds/);
-    expect(storage.textContent).toMatch(/Storage: Store in a cool, dry place.*Shelf Life: 12-18 months/);
-    fireEvent.keyDown(within(dialog).getByRole("tab", { name: "Use & storage" }), { key: "ArrowLeft" });
-    const overview = within(dialog).getByRole("tabpanel", { name: "Overview" });
-    expect(overview.textContent).toMatch(/essential spice.*Origin.*Rajasthan/);
-    expect(overview.textContent).not.toMatch(/Shelf Life/);
-    fireEvent.click(within(dialog).getByRole("button", { name: "Close product details" }));
-    expect(document.activeElement).toBe(care);
+    expect(within(panel()).getByRole("link", { name: "Product details" }).getAttribute("href")).toBe("#about");
     expect(screen.queryByRole("dialog")).toBeNull();
-    fireEvent.click(within(panel()).getByRole("button", { name: "Product details" }));
-    expect(screen.getByRole("tabpanel", { name: "Overview" })).toBeTruthy();
-    expect(screen.getByRole("heading", { level: 2, name: "Reviews" })).toBeTruthy();
+    const about = screen.getByRole("region", { name: "About Cumin Seeds" });
+    expect(about.id).toBe("about");
+    expect(panel().contains(about)).toBe(false);
+    // The purchase panel comes first, then About, then reviews.
+    const reviews = screen.getByRole("heading", { level: 2, name: "Reviews" });
+    expect(within(panel()).getByRole("button", { name: "Add Cumin Seeds to bag" }).compareDocumentPosition(about) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(about.compareDocumentPosition(reviews) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(within(about).getAllByRole("heading", { level: 3 }).map(h => h.textContent)).toEqual(["How to use", "Specifications", "Storage"]);
+    expect(within(screen.getByRole("region", { name: "How to use" })).getAllByRole("listitem").map(li => li.textContent))
+      .toEqual(["Tadka: Heat oil and add the seeds.", "Jeera water: Boil a teaspoon in water."]);
+    const specifications = screen.getByRole("region", { name: "Specifications" });
+    expect(specifications.textContent).toMatch(/Variety: Whole cumin seeds.*Origin.*Rajasthan/);
+    expect(specifications.textContent).not.toMatch(/Shelf Life|Storage/);
+    expect(screen.getByRole("region", { name: "Storage" }).textContent).toMatch(/Storage: Store in a cool, dry place.*Shelf Life: 12-18 months/);
+    expect(screen.queryByRole("heading", { name: "Benefits" })).toBeNull();
     expect(screen.getByRole("link", { name: "Spices" }).getAttribute("href")).toBe("/shop?category=spices");
     expect(screen.getByRole("heading", { name: "Black Pepper" })).toBeTruthy();
   });
 
-  it("shows the available information when a product only has storage copy", async () => {
+  it("shows only the topics that have stored copy, and nothing when there is none", async () => {
     serve({ ...cumin, description: "", specifications: [], howToConsume: [], additionalInfo: [{ label: "Storage", value: "Keep refrigerated" }] });
     await open("cumin-seeds");
-    expect(within(panel()).queryByRole("button", { name: "Product details" })).toBeNull();
-    fireEvent.click(within(panel()).getByRole("button", { name: "Storage" }));
-    const dialog = screen.getByRole("dialog", { name: "Cumin Seeds" });
-    expect(dialog.textContent).toMatch(/Keep refrigerated/);
-    expect(within(dialog).queryByRole("tablist")).toBeNull();
+    const about = screen.getByRole("region", { name: "About Cumin Seeds" });
+    expect(within(about).getAllByRole("heading", { level: 3 }).map(h => h.textContent)).toEqual(["Storage"]);
+    expect(about.textContent).toMatch(/Keep refrigerated/);
+    expect(within(panel()).getByRole("link", { name: "Product details" })).toBeTruthy();
+
+    cleanup();
+    serve({ ...cumin, description: " ", specifications: [], howToConsume: [], additionalInfo: [], benefits: "" });
+    await open("cumin-seeds");
+    expect(screen.queryByRole("heading", { name: /^About/ })).toBeNull();
+    expect(within(panel()).queryByRole("link", { name: "Product details" })).toBeNull();
+  });
+
+  it("keeps stored rich copy readable and safe: no style or script, stored headings below the topics, lines as paragraphs", async () => {
+    serve({
+      ...cumin, title: "Grow Bag",
+      description: "First line of the bag.\nSecond line of the bag.\n\n",
+      specifications: ["<style>.spec-row { color: red }</style><div class=\"spec-row\"><div class=\"spec-key\">Product Weight</div><div class=\"spec-value\">Approx. 2.2 kg</div></div><script>window.bad = 1</script>"],
+      howToConsume: ["<div><h2>How to consume?</h2><h3>Tea</h3><ul><li onclick=\"bad()\">Simmer for 30 minutes.</li></ul></div>"],
+      benefits: JSON.stringify({ immuneSupport: "Contains PSK and PSP." }),
+      additionalInfo: [{ label: "Botanical Name", value: "Pleurotus ostreatus" }],
+    });
+    await open("cumin-seeds");
+    const about = screen.getByRole("region", { name: "About Grow Bag" });
+    expect(about.innerHTML).not.toMatch(/<style|<script|onclick|color: red|window\.bad|How to consume/);
+    expect(Array.from(about.querySelectorAll("p")).slice(0, 2).map(p => p.textContent)).toEqual(["First line of the bag.", "Second line of the bag."]);
+    expect(within(about).getByRole("heading", { level: 4, name: "Tea" })).toBeTruthy();
+    expect(within(about).queryByRole("heading", { level: 2, name: "How to consume?" })).toBeNull();
+    expect(screen.getByRole("region", { name: "Specifications" }).textContent).toMatch(/Product Weight.*Approx\. 2\.2 kg.*Botanical Name.*Pleurotus ostreatus/);
+    expect(screen.getByRole("region", { name: "Benefits" }).textContent).toBe("BenefitsImmune supportContains PSK and PSP.");
   });
 
   it("turns Add into a stepper capped by stock, with slug and stock on the bag line", async () => {
@@ -313,6 +329,11 @@ describe("Product details from the server", () => {
     expect(html).toMatch(/In stock/);
     expect(html).toMatch(/Cumin Seeds \(Jeera\) are an essential spice\./);
     expect(html).toMatch(/<img[^>]*alt="Cumin Seeds"/);
+    // The full product information is visible text in the first HTML, not hidden in a dialog.
+    expect(html).toMatch(/<h2 id="about-title">About Cumin Seeds<\/h2>/);
+    expect(html).toMatch(/<h3[^>]*>How to use<\/h3>.*Heat oil and add the seeds/);
+    expect(html).toMatch(/Rajasthan \/ Gujarat, India/);
+    expect(html).not.toMatch(/<dialog|hidden=""/);
     expect(html).not.toMatch(/Opening the product/);
     expect(html).not.toMatch(/aria-busy="true"/);
   });

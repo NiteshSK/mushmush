@@ -82,7 +82,7 @@
 .bagNote { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 1rem; margin-top: .6rem; font-size: .9375rem; }
 .ask { margin-top: .4rem; font-size: .9375rem; }
 
-/* Reviews layout and rich content used by the product information panel. */
+/* Reading blocks below the purchase area (About, Reviews) and the stored rich copy. */
 .reading { margin-top: clamp(2rem,4vw,4rem); border-top: 1px solid var(--line); }
 .block { display: grid; gap: .75rem 3rem; padding-block: clamp(1.5rem,3vw,2.6rem); border-bottom: 1px solid var(--line); scroll-margin-top: 90px; }
 .block > h2 { font-size: clamp(1.9rem,2.6vw,2.6rem); line-height: 1.05; letter-spacing: -.03em; overflow-wrap: anywhere; }
@@ -103,53 +103,40 @@
 .rows dd { overflow-wrap: anywhere; }
 .muted { color: var(--muted); font-size: .9375rem; }
 
-/* Product information stays beside the purchase panel. The sheet scrolls independently. */
+/* The first sentence of the description beside the price, with a link down to "About". */
 .introBlock { margin-top: 1rem; }
 .intro { max-width: 56ch; font-size: .9375rem; line-height: 1.6; color: var(--muted); overflow-wrap: anywhere; }
-.intro + .informationActions { margin-top: .75rem; }
-.informationActions { display: flex; flex-wrap: wrap; gap: 0 clamp(.5rem, 3vw, 1.4rem); }
-.informationActions button {
-  display: inline-flex; align-items: center; gap: .32rem; min-height: 44px; text-align: left;
+.introLink {
+  display: inline-flex; align-items: center; gap: .32rem; min-height: 44px; margin-top: .15rem;
   color: var(--forest); font-size: .9375rem; font-weight: 500;
   text-decoration: underline; text-decoration-color: #9d926e; text-underline-offset: 4px;
 }
-.informationActions button:hover { text-decoration-color: currentColor; }
-.informationActions svg { width: 15px; height: 15px; flex: none; stroke-width: 1.7; }
+.introLink:hover { text-decoration-color: currentColor; }
+.introLink svg { width: 15px; height: 15px; flex: none; stroke-width: 1.7; }
 
-.informationDialog {
-  position: fixed; inset: 0 0 0 auto; width: min(100%, 34rem); height: 100dvh; max-width: none; max-height: none;
-  margin: 0; padding: 0; overflow: hidden; color: var(--ink); background: var(--paper);
-  border-inline-start: 1px solid var(--line); box-shadow: -16px 0 56px rgba(17, 32, 24, .19);
-}
-.informationDialog::backdrop { background: rgba(18, 34, 25, .48); backdrop-filter: blur(4px); }
-.informationSheet { --sheet-gutter: clamp(1rem, 4vw, 2rem); display: flex; flex-direction: column; height: 100%; }
-.informationHead {
-  display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem;
-  padding: clamp(1rem, 4vw, 2rem) var(--sheet-gutter) .65rem;
-}
-.informationHead h2 { align-self: center; margin: 0; font-size: clamp(1.9rem, 5vw, 2.75rem); line-height: 1.04; letter-spacing: -.035em; overflow-wrap: anywhere; }
-.informationClose { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 50%; }
-.informationClose:hover { background: var(--hover); }
-.informationClose svg { width: 20px; height: 20px; }
-.informationTabs { display: flex; flex-wrap: wrap; gap: 0 1.25rem; padding-inline: var(--sheet-gutter); border-bottom: 1px solid var(--line); }
-.informationTabs button { min-height: 44px; margin-bottom: -1px; border-bottom: 2px solid transparent; color: var(--muted); font-size: .9375rem; }
-.informationTabs button[aria-selected="true"] { border-color: var(--forest); color: var(--forest); font-weight: 600; }
-.informationContent {
-  min-height: 0; overflow-y: auto; overscroll-behavior-y: contain; scrollbar-gutter: stable;
-  padding: 1.25rem var(--sheet-gutter) max(1.5rem, env(safe-area-inset-bottom));
-}
-.informationContent .rows > div { grid-template-columns: minmax(0, 1fr) minmax(0, 1.8fr); gap: .25rem .8rem; }
-.informationContent .rows dt { overflow-wrap: anywhere; }
-.informationContent .rows dd:only-child { grid-column: 1 / -1; }
-.informationSection:not(:first-child) { margin-top: 1.5rem; }
-.informationSection h3 { margin-bottom: .6rem; color: var(--forest); font-size: 1.55rem; line-height: 1.16; }
-
-@media (max-width: 640px) {
-  .informationDialog {
-    inset: auto 0 0; width: 100%; height: min(76dvh, 38rem); border: 1px solid var(--line);
-    border-bottom: 0; border-radius: 16px 16px 0 0; box-shadow: 0 -10px 40px rgba(17, 32, 24, .17);
-  }
-}
+/* About this product: all the stored copy as visible text, at a readable line length. */
+.aboutBody { max-width: 65ch; }
+.aboutBody .rich, .aboutBody .rows { max-width: none; }
+.aboutBody > .rich { font-size: 1.0625rem; line-height: 1.72; }
+.topic { margin-top: clamp(2rem,3.5vw,2.75rem); }
+.topic:first-child { margin-top: 0; }
+/* Quiet topic headings, like the kicker above the product title. */
+.detail .topic > h3 { margin-bottom: .75rem; font-family: var(--sans); font-size: .8125rem; font-weight: 600; line-height: 1.4;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--brass); }
+.topic .rows { margin-top: 0; }
+.topic > * + .rows { margin-top: 1.25rem; }
+/* Stored headings sit below the topic headings (h4 and lower). */
+.rich :is(h4, h5, h6) { margin: 1.25rem 0 .35rem; font-size: 1rem; font-weight: 600; line-height: 1.4; color: var(--ink); }
+.rich > :first-child, .rich > div > :first-child { margin-top: 0; }
+/* Stored tables, and the stored key/value rows of some specifications, read like the fact rows. */
+.rich table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; font-size: .9375rem; }
+.rich :is(th, td) { padding: .6rem 1.25rem .6rem 0; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+.rich th { font-weight: 600; }
+.rich :global(.spec-row) { display: grid; grid-template-columns: minmax(7.5rem,13rem) minmax(0,1fr); gap: .25rem 1.25rem;
+  padding-block: .7rem; border-bottom: 1px solid var(--line); font-size: .9375rem; }
+.rich :global(.product-specifications) { border-top: 1px solid var(--line); }
+.rich :global(.spec-row) + :global(.spec-row), .rich :global(.spec-row) > * { margin-top: 0; }
+.rich :global(.spec-key) { color: var(--muted); }
 
 /* Reviews */
 .reviews { max-width: 46rem; }
@@ -224,7 +211,7 @@
   .facts { margin-top: .7rem; }
   .facts li { min-height: 44px; padding-block: 0; }
   .actions { gap: .6rem; margin-top: .9rem; }
-  .rows > div { grid-template-columns: 1fr; }
+  .rows > div, .rich :global(.spec-row) { grid-template-columns: 1fr; }
   .relatedHead h2 { font-size: clamp(2rem,8.5vw,2.6rem); }
 }
 @media (prefers-reduced-motion: reduce) {

@@ -105,7 +105,7 @@ describe("/about-us", () => {
   it("tells the Herbertpur story without unsupported numbers or certifications", () => {
     inShell(<AboutUs />);
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Grown in Herbertpur.");
-    expect(text()).toContain("Bhartendu, Pravesh and Vikrant");
+    expect(text()).toContain("Nitesh Singh Kataria");
     expect(text()).toContain("Kosvana by Mush Agro Products LLP");
     expect(text()).not.toMatch(/organic|certif|zero chemicals|\d+\+|kg|award|since \d{4}/i);
     expect(within(screen.getByRole("main")).queryByRole("img")).toBeNull();
@@ -113,10 +113,10 @@ describe("/about-us", () => {
     expect(screen.getByRole("link", { name: "See training dates and fees" }).getAttribute("href")).toBe("/training");
   });
 
-  it("links each shelf to a real shop filter", () => {
+  it("links each shelf to its collection page", () => {
     inShell(<AboutUs />);
     const shelves = within(screen.getByRole("region", { name: "What we sell" })).getAllByRole("link").map(link => link.getAttribute("href"));
-    expect(shelves).toEqual(["/shop?category=edible,medicinal", "/shop?category=spices", "/shop?category=dry-fruits", "/shop?category=seeds", "/#grow"]);
+    expect(shelves).toEqual(["/shop/fresh-mushrooms", "/shop/dried-mushrooms", "/shop/spices", "/shop/dry-fruits", "/shop/seeds", "/#grow"]);
   });
 
   it("lists spawn and grow bags apart from seeds, as growing supplies", () => {

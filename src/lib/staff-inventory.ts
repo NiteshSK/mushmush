@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "./prisma";
-import { availablePacks, formatBulkQuantity } from "./inventory";
+import { availablePacks, formatBulkQuantity, MAX_BULK_STOCK } from "./inventory";
 import { WorkflowError } from "./staff-workflow";
 import { sendRestockNotifications } from "./notifications";
 
@@ -36,8 +36,10 @@ export function projectedStock(
     action === "stocktake"
       ? units
       : before + (action === "receive" ? units : -units);
-  if (!Number.isFinite(after) || after < 0)
+  if (after < 0)
     throw new WorkflowError("The adjustment would leave less than zero stock.");
+  if (!Number.isFinite(after) || after > MAX_BULK_STOCK)
+    throw new WorkflowError("The adjustment would exceed the supported stock quantity.");
   return after;
 }
 

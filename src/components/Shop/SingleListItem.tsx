@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Product } from "@/types/product";
 import { useModalContext } from "@/app/context/QuickViewModalContext";
 import { updateQuickView } from "@/redux/features/quickView-slice";
-import { addItemToCart } from "@/redux/features/cart-slice";
+import { useAddProductToBag } from "@/hooks/useAddProductToBag";
 import { useWishlist } from "@/app/context/WishlistContext";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store";
@@ -28,18 +28,7 @@ const SingleListItem = ({ item, priority = false, onNotifyMe }: Props) => {
     dispatch(updateQuickView({ ...item }));
   };
 
-  const handleAddToCart = () => {
-    dispatch(addItemToCart({
-      id: item.id,
-      title: item.title,
-      price: item.price,
-      discountedPrice: item.discountedPrice,
-      quantity: 1,
-      stockQuantity: item.stockQuantity,
-      imgs: item.imgs,
-    }));
-    toast.success("Added to cart!");
-  };
+  const handleAddToCart = useAddProductToBag(item);
 
   const handleItemToWishList = async () => {
     setIsWishlistLoading(true);

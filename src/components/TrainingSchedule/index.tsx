@@ -14,6 +14,8 @@ import styles from "../Pantry/training.module.css";
 
 interface TrainingScheduleProps {
   programSlug: string;
+  /** The programme and timetable loaded on the server. Without it the page loads them in the browser. */
+  initial?: { program: TrainingProgram; days: ScheduleDay[] | null };
 }
 
 type State =
@@ -46,8 +48,10 @@ function scheduleNote(batch: Batch) {
 }
 
 /** One programme: dates, fee and registration first, then the description and the day-by-day timetable. */
-export default function TrainingSchedule({ programSlug }: TrainingScheduleProps) {
-  const [state, setState] = useState<State>({ status: "loading" });
+export default function TrainingSchedule({ programSlug, initial }: TrainingScheduleProps) {
+  const [state, setState] = useState<State>(initial ? { status: "ready", ...initial } : { status: "loading" });
+  // Server data is already in the first render; load in the browser only without it (and on retry).
+  const [loadOnMount] = useState(!initial);
   const [open, setOpen] = useState<number[]>([]);
 
   const load = useCallback(() => {
@@ -59,16 +63,9 @@ export default function TrainingSchedule({ programSlug }: TrainingScheduleProps)
     return () => { active = false; };
   }, [programSlug]);
 
-  useEffect(() => load(), [load]);
+  useEffect(() => (loadOnMount ? load() : undefined), [load, loadOnMount]);
 
-  const crumbs = (current?: string) => (
-    <nav aria-label="Breadcrumb" className={styles.crumbs}>
-      <ol>
-        <li><Link href="/training">Training</Link></li>
-        {current && <li aria-current="page">{current}</li>}
-      </ol>
-    </nav>
-  );
+  const crumbs = (current?: string) => <Crumbs current={current} />;
 
   if (state.status === "loading") {
     return (
@@ -79,17 +76,16 @@ export default function TrainingSchedule({ programSlug }: TrainingScheduleProps)
     );
   }
 
-  if (state.status === "missing" || state.status === "error") {
-    const missing = state.status === "missing";
+  if (state.status === "missing") return <CourseNotFound />;
+
+  if (state.status === "error") {
     return (
       <main id="main" className={pantry.page}>
         {crumbs()}
-        <div className={`${pantry.recovery} ${styles.recoveryTitle}`} role={missing ? undefined : "alert"}>
-          <h1>{missing ? "We couldn’t find this training course" : "We couldn’t load this training course"}</h1>
-          <p>{missing ? "The link may be old, or the course may no longer run. See the courses that are open now." : "Check your connection and try again."}</p>
-          {missing
-            ? <Link href="/training" className={pantry.primaryAction}>See all training courses</Link>
-            : <button type="button" className={pantry.primaryAction} onClick={load}>Try again</button>}
+        <div className={`${pantry.recovery} ${styles.recoveryTitle}`} role="alert">
+          <h1>We couldn’t load this training course</h1>
+          <p>Check your connection and try again.</p>
+          <button type="button" className={pantry.primaryAction} onClick={load}>Try again</button>
         </div>
       </main>
     );
@@ -173,6 +169,31 @@ export default function TrainingSchedule({ programSlug }: TrainingScheduleProps)
       )}
 
       <p className={styles.backLink}><Link href="/training" className={pantry.textAction}>All training courses</Link></p>
+    </main>
+  );
+}
+
+function Crumbs({ current }: { current?: string }) {
+  return (
+    <nav aria-label="Breadcrumb" className={styles.crumbs}>
+      <ol>
+        <li><Link href="/training">Training</Link></li>
+        {current && <li aria-current="page">{current}</li>}
+      </ol>
+    </nav>
+  );
+}
+
+/** An unknown or inactive course. The server sends it with a 404 status. */
+export function CourseNotFound() {
+  return (
+    <main id="main" className={pantry.page}>
+      <Crumbs />
+      <div className={`${pantry.recovery} ${styles.recoveryTitle}`}>
+        <h1>We couldn’t find this training course</h1>
+        <p>The link may be old, or the course may no longer run. See the courses that are open now.</p>
+        <Link href="/training" className={pantry.primaryAction}>See all training courses</Link>
+      </div>
     </main>
   );
 }

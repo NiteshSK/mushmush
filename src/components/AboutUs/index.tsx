@@ -12,10 +12,11 @@ import h from "../Pantry/help.module.css";
  * owner can document them.
  */
 const SHELVES = [
-  { href: "/shop?category=edible,medicinal", name: "Mushrooms", note: "Fresh in Dehradun, dried across India" },
-  { href: "/shop?category=spices", name: "Spices", note: "Across India" },
-  { href: "/shop?category=dry-fruits", name: "Dry fruits", note: "Across India" },
-  { href: "/shop?category=seeds", name: "Seeds", note: "Across India" },
+  { href: "/shop/fresh-mushrooms", name: "Fresh mushrooms", note: "Dehradun only" },
+  { href: "/shop/dried-mushrooms", name: "Dried mushrooms", note: "Across India" },
+  { href: "/shop/spices", name: "Spices", note: "Across India" },
+  { href: "/shop/dry-fruits", name: "Dry fruits", note: "Across India" },
+  { href: "/shop/seeds", name: "Seeds", note: "Across India" },
   // Spawn and grow bags are growing supplies, not food. No delivery note until their delivery area is confirmed.
   { href: "/#grow", name: "Spawn and grow bags", note: "For growing mushrooms, not for eating" },
 ];
@@ -31,7 +32,7 @@ export default function AboutUs() {
 
       <div className={h.columns}>
         <div className={h.prose}>
-          <p>Kosvana began when three friends, Bhartendu, Pravesh and Vikrant, left their conventional jobs to grow mushrooms full-time in Herbertpur, in the foothills of Uttarakhand.</p>
+          <p>Kosvana began when three friends, Nitesh Singh Kataria, left their conventional jobs to grow mushrooms full-time in Herbertpur, in the foothills of Uttarakhand.</p>
           <p>They are still the growers. They look after every stage of cultivation themselves. Fresh mushrooms from the farm go to kitchens in Dehradun.</p>
           <p>The shop has grown into a pantry. Dried mushrooms, whole spices, dry fruits and seeds now travel from Herbertpur to homes across India.</p>
 
@@ -75,7 +76,7 @@ export default function AboutUs() {
           <h2 id="glance-title">At a glance</h2>
           <dl className={h.facts}>
             <div><dt>Home</dt><dd>Herbertpur, Dehradun, Uttarakhand</dd></div>
-            <div><dt>Founders</dt><dd>Bhartendu, Pravesh and Vikrant</dd></div>
+            <div><dt>Founders</dt><dd>Nitesh Singh Kataria</dd></div>
             <div><dt>Fresh</dt><dd>Mushrooms, sold in Dehradun only</dd></div>
             <div><dt>Pantry</dt><dd>Dried mushrooms, spices, dry fruits and seeds, shipped across India</dd></div>
             <div><dt>Training</dt><dd>5-day oyster and shiitake mushroom programs</dd></div>

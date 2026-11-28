@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useProducts } from "@/hooks/useProducts";
+import { sellablePackLimit } from "@/lib/inventory";
 import type { Product } from "@/types/product";
 import { useAppSelector } from "@/redux/store";
 import { selectCartItems, selectTotalPrice } from "@/redux/features/cart-slice";
@@ -21,21 +22,20 @@ export type BagLine = CartItem & {
   scope?: DeliveryScope;
   unitPrice: number;
   lineTotal: number;
-  /** Most packs the shopper can have: the lower of the saved stock cap and live stock. */
-  max: number;
+  /** Most packs the shopper can have. Null means stock has yet to be confirmed. */
+  max: number | null;
   soldOut: boolean;
 };
 
 const unitPrice = (item: CartItem) => item.discountedPrice || item.price;
 
-export function enrichLines(items: CartItem[], catalogue: Product[]): BagLine[] {
+export function enrichLines(items: CartItem[], catalogue: Product[], stockLoaded = true): BagLine[] {
   const products = new Map(catalogue.map(product => [product.id, product] as const));
   const scopes = lineScopes(items, catalogue);
   return items.map(item => {
     const product = products.get(item.id);
     const slug = item.slug || product?.slug;
-    const live = product ? (product.inStock === false ? 0 : product.stockQuantity ?? Infinity) : Infinity;
-    const max = Math.min(item.stockQuantity ?? Infinity, live);
+    const max = !stockLoaded ? null : product ? sellablePackLimit(product) : 0;
     return {
       ...item,
       href: slug ? `/shop-details/${slug}` : undefined,
@@ -45,7 +45,7 @@ export function enrichLines(items: CartItem[], catalogue: Product[]): BagLine[] 
       unitPrice: unitPrice(item),
       lineTotal: unitPrice(item) * item.quantity,
       max,
-      soldOut: max < 1,
+      soldOut: max === 0,
     };
   });
 }
@@ -67,12 +67,15 @@ export function useBagReady() {
 export function useBag() {
   const items = useAppSelector(selectCartItems);
   const subtotal = useAppSelector(selectTotalPrice);
-  const { products, loading, error } = useProducts({ limit: 100 });
+  const ids = Array.from(new Set(items.map(item => item.id))).sort((a, b) => a - b).join(",");
+  const { products, loading, error } = useProducts({ ids });
   const catalogue: Product[] = products;
-  const lines = useMemo(() => enrichLines(items, catalogue), [items, catalogue]);
+  const lines = useMemo(() => enrichLines(items, catalogue, !loading && !error), [items, catalogue, loading, error]);
+  const stockIssue = loading ? "Checking stock…" : lines.some(line => line.max === null) ? "We couldn’t verify stock. Refresh or try again."
+    : lines.some(line => line.max !== null && line.quantity > line.max) ? "Review the quantities in your bag to continue." : null;
   const count = items.reduce((sum, item) => sum + item.quantity, 0);
   const savings = items.reduce((sum, item) => sum + (item.discountedPrice && item.discountedPrice < item.price ? (item.price - item.discountedPrice) * item.quantity : 0), 0);
-  return { lines, subtotal, count, savings, catalogueLoading: loading, catalogueError: error };
+  return { lines, subtotal, count, savings, catalogueLoading: loading, catalogueError: error, stockIssue };
 }
 
 export type DeliveryQuote = {

@@ -1,4 +1,5 @@
 import type { Product } from "@/types/product";
+import { sellablePackLimit } from "@/lib/inventory";
 import { GROW_CATEGORY, isFreshMushroom, isGrowProduct, productCover, sentenceCase } from "../Pantry/catalogue";
 
 /**
@@ -40,4 +41,4 @@ export const allPhotos = (product: Pick<Product, "imgs">) =>
 
 /** Sold out when the product is switched off or no full pack is left. */
 export const isSoldOut = (product: Pick<Product, "inStock" | "stockQuantity">) =>
-  !product.inStock || (product.stockQuantity ?? Infinity) < 1;
+  sellablePackLimit(product) === 0;

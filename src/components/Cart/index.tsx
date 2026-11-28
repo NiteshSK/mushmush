@@ -30,7 +30,7 @@ export function EmptyBag() {
 
 export default function Cart() {
   const ready = useBagReady();
-  const { lines, subtotal, count, savings, catalogueError } = useBag();
+  const { lines, subtotal, count, savings, catalogueError, stockIssue } = useBag();
   const delivery = useDeliveryQuote(subtotal);
   const pinRef = useRef<HTMLInputElement>(null);
   const conflictRef = useRef<HTMLDivElement>(null);
@@ -63,7 +63,7 @@ export default function Cart() {
           {catalogueError && <p className={r.note}>We couldn’t load pack sizes and delivery details. Fresh mushrooms deliver only in Dehradun.</p>}
           <Link href="/shop" className={p.textAction}>Continue shopping</Link>
         </section>
-        <OrderSummary subtotal={subtotal} count={count} savings={savings} delivery={delivery} pinRef={pinRef}>
+        <OrderSummary subtotal={subtotal} count={count} savings={savings} delivery={delivery} pinRef={pinRef} stockIssue={stockIssue}>
           <FreshConflict ref={conflictRef} pin={delivery.checkedPin} delivery={zone ?? "pantry"} lines={blocked}
             change={{ label: "Try another PIN", onClick: () => { pinRef.current?.focus(); pinRef.current?.select(); } }} />
         </OrderSummary>

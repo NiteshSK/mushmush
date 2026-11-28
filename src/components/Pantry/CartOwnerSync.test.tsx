@@ -53,7 +53,7 @@ describe("CartOwnerSync", () => {
     const { store, rerender } = mount({ items: [old] }, { status: "unauthenticated" });
     await waitFor(() => expect(store.getState().cartReducer.items[0]).toMatchObject({ slug: "cumin-seeds", stockQuantity: 2, quantity: 2, price: 149 }));
     expect(global.fetch).toHaveBeenCalledTimes(1);
-    expect(global.fetch).toHaveBeenCalledWith("/api/products?limit=100");
+    expect(global.fetch).toHaveBeenCalledWith("/api/products?ids=50&limit=100", { cache: "no-store" });
     rerender({ status: "authenticated", email: A });
     expect(global.fetch).toHaveBeenCalledTimes(1);
   });
@@ -69,7 +69,7 @@ describe("CartOwnerSync", () => {
     await act(async () => { await Promise.resolve(); });
     expect(global.fetch).toHaveBeenCalledTimes(1);
     // A legacy page adds a line without a slug: one more lookup, for that product only.
-    act(() => { store.dispatch(addItemToCart({ id: 7, title: "Legacy add", price: 1, quantity: 1 })); });
+    act(() => { store.dispatch(addItemToCart({ id: 7, title: "Legacy add", price: 1, quantity: 1, stockQuantity: 2 })); });
     await act(async () => { await Promise.resolve(); });
     expect(global.fetch).toHaveBeenCalledTimes(2);
     act(() => { store.dispatch(removeItemFromCart(7)); });

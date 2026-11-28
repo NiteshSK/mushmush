@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 import { absoluteUrl } from "@/lib/site";
+import { COLLECTIONS, collectionPath } from "@/components/Shop/collections";
 
 // Rebuilt at most once an hour, so new products and articles appear without a deploy.
 export const revalidate = 3600;
@@ -8,6 +9,8 @@ export const revalidate = 3600;
 const STATIC_PAGES: { path: string; priority: number; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"] }[] = [
   { path: "/", priority: 1, changeFrequency: "daily" },
   { path: "/shop", priority: 0.9, changeFrequency: "daily" },
+  // Shop collections: /shop/dried-mushrooms, /shop/spices and the others.
+  ...COLLECTIONS.map(collection => ({ path: collectionPath(collection), priority: 0.8, changeFrequency: "weekly" as const })),
   { path: "/training", priority: 0.8, changeFrequency: "weekly" },
   { path: "/about-us", priority: 0.6, changeFrequency: "monthly" },
   { path: "/blogs", priority: 0.6, changeFrequency: "weekly" },

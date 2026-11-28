@@ -15,6 +15,7 @@ const sampleItem = {
   price: 350,
   discountedPrice: 300,
   quantity: 1,
+  stockQuantity: 20,
   imgs: { thumbnails: ["/img.jpg"], previews: ["/img.jpg"] },
 };
 
@@ -23,6 +24,7 @@ const sampleItem2 = {
   title: "Lion's Mane",
   price: 550,
   quantity: 1,
+  stockQuantity: 20,
   imgs: { thumbnails: ["/img2.jpg"], previews: ["/img2.jpg"] },
 };
 

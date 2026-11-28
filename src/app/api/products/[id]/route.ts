@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { staffSession } from '@/lib/admin'
 import { prisma } from '@/lib/prisma'
-import { availablePacks } from '@/lib/inventory'
+import { availablePacks, isPackQuantity } from '@/lib/inventory'
 
 // GET /api/products/[id] - Fetch single product by ID
 export async function GET(
@@ -47,9 +47,12 @@ export async function GET(
     const averageRating = product.reviews.length > 0 
       ? product.reviews.reduce((sum, review) => sum + review.rating, 0) / product.reviews.length
       : 0
+    const stockQuantity = product.inStock ? availablePacks(product.quantity, product.measurementValue, product.measurementType) : 0
 
     return NextResponse.json({
       ...product,
+      stockQuantity,
+      inStock: stockQuantity > 0,
       averageRating,
       reviewCount: product.reviews.length
     })
@@ -99,7 +102,7 @@ export async function PUT(
       return NextResponse.json({ error: "Choose a delivery class" }, { status: 400 });
     }
     if (price !== undefined && (!Number.isFinite(price) || price <= 0) ||
-        measurementValue !== undefined && (!Number.isInteger(measurementValue) || measurementValue <= 0) ||
+        measurementValue !== undefined && !isPackQuantity(measurementValue) ||
         categories !== undefined && (!Array.isArray(categories) || !categories.every(Number.isInteger))) {
       return NextResponse.json({ error: "Check the price, pack size and categories." }, { status: 400 });
     }

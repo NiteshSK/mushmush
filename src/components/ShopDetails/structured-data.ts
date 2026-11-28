@@ -2,7 +2,8 @@ import type { Product } from "@/types/product";
 import { SITE_NAME, absoluteUrl } from "@/lib/site";
 import { isFreshMushroom } from "../Pantry/catalogue";
 import { plainText } from "./content";
-import { allPhotos, isSoldOut, shelf } from "./product-facts";
+import { sellablePackLimit } from "@/lib/inventory";
+import { allPhotos, shelf } from "./product-facts";
 
 /**
  * schema.org structured data for one product page: the Product with its offer, and the breadcrumb.
@@ -22,6 +23,7 @@ export function productJsonLd(product: PageProduct) {
   const url = absoluteUrl(productPath(product.slug));
   // The shopper pays the discounted price when one applies (computeProductDiscount in src/lib/product-pricing.ts).
   const price = product.discountedPrice ?? product.price;
+  const stock = sellablePackLimit(product);
   const description = plainText(product.description ?? "");
   const seller = { "@type": "Organization", name: SITE_NAME, url: absoluteUrl("/") };
   return {
@@ -38,7 +40,7 @@ export function productJsonLd(product: PageProduct) {
       url,
       priceCurrency: "INR",
       price: priceText(price),
-      availability: isSoldOut(product) ? "https://schema.org/OutOfStock" : "https://schema.org/InStock",
+      ...(stock !== null && { availability: stock === 0 ? "https://schema.org/OutOfStock" : "https://schema.org/InStock" }),
       itemCondition: "https://schema.org/NewCondition",
       seller,
       // Fresh mushrooms are delivered in Dehradun only.

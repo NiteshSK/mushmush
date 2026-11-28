@@ -87,3 +87,15 @@ describe("Training programme page", () => {
     expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
   });
 });
+
+describe("Training programme page with server data", () => {
+  it("renders the course at once, without loading it in the browser", () => {
+    (global.fetch as jest.Mock).mockClear();
+    (useSession as jest.Mock).mockReturnValue({ status: "loading", data: null });
+    render(<TrainingSchedule programSlug="oyster-mushroom-training" initial={{ program, days: schedule }} />);
+    expect(global.fetch).not.toHaveBeenCalled();
+    expect(screen.getByRole("heading", { level: 1, name: "Oyster Mushroom Training" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Fundamentals & Substrate Preparation" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Instructors" })).toBeInTheDocument();
+  });
+});

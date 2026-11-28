@@ -29,6 +29,7 @@ type Call = { url: string; body: unknown };
 let calls: Call[];
 let verifyCount: number;
 let refuseFresh = false;
+let refuseStock = false;
 
 function mockServer() {
   calls = [];
@@ -50,6 +51,7 @@ function mockServer() {
     if (url === "/api/checkout/verify-and-place-order") {
       verifyCount++;
       if (refuseFresh) return json(400, { code: "UNDELIVERABLE", error: "Fresh mushrooms deliver only to approved Dehradun PINs. Remove fresh items to ship your pantry goods across India." });
+      if (refuseStock) return json(409, { code: "STOCK", stockErrors: ["Cumin Seeds only has 1 pack left."] });
       return verifyCount === 1
         ? json(409, { code: "TOTAL_MISMATCH", error: "Prices changed", pricing })
         : json(200, { success: true, order: { id: "o1", orderNumber: "KOS-1", total: pricing.total, status: "PENDING" }, paymentToken: token, trackingUrl: "/track?order=KOS-1&token=t", pricing });
@@ -89,6 +91,7 @@ beforeEach(() => {
   (global.fetch as jest.Mock).mockReset();
   sessionStorage.clear();
   refuseFresh = false;
+  refuseStock = false;
   mockServer();
 });
 
@@ -134,6 +137,22 @@ describe("checkout", () => {
     expect(screen.getByText("Pending verification")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Track this order" })).toHaveAttribute("href", "/track?order=KOS-1&token=t");
     expect(screen.queryByText(/payment confirmed/i)).not.toBeInTheDocument();
+  });
+
+  it("sends the shopper back to the bag if stock changes while the code dialog is open", async () => {
+    refuseStock = true;
+    renderCheckout([line(cumin, 2)]);
+    await enterPin("110001");
+    fillDetails("110001");
+    fireEvent.click(screen.getByRole("button", { name: "Send verification code" }));
+    const otpDialog = await screen.findByRole("dialog", { name: "Verify your email" });
+    fireEvent.change(within(otpDialog).getByLabelText("6-digit code"), { target: { value: "123456" } });
+    fireEvent.click(within(otpDialog).getByRole("button", { name: "Verify and place order" }));
+
+    const message = await screen.findByText("Cumin Seeds only has 1 pack left.");
+    expect(within(message).getByRole("link", { name: "Review bag" })).toHaveAttribute("href", "/cart");
+    expect(screen.getByRole("button", { name: "Send verification code" })).toBeDisabled();
+    expect(otpDialog).not.toBeInTheDocument();
   });
 
   it("keeps the order awaiting payment when the shopper closes the UPI dialog", async () => {

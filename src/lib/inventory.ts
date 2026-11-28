@@ -9,6 +9,19 @@
  * size of one sellable pack (e.g. 100 gm = one pack).
  */
 
+export const MAX_ORDER_PACKS = 2_147_483_647; // OrderItem.quantity is a PostgreSQL integer.
+export const MAX_BULK_STOCK = Number.MAX_SAFE_INTEGER; // Preserve increments of one base unit.
+
+export function isPackQuantity(value: unknown): value is number {
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 1 && value <= MAX_ORDER_PACKS;
+}
+
+/** A missing or invalid stock response is unknown. An explicitly paused product has no sellable packs. */
+export function sellablePackLimit(product: { stockQuantity?: number | null; inStock?: boolean }): number | null {
+  if (product.inStock === false || product.stockQuantity === 0) return 0;
+  return isPackQuantity(product.stockQuantity) ? product.stockQuantity : null;
+}
+
 /** Convert an admin-entered value + unit into base units (grams or ml). */
 export function toBaseUnits(value: number, unit: string): number {
   switch (unit.toLowerCase()) {
@@ -62,8 +75,9 @@ export function availablePacks(
   measurementType: string
 ): number {
   const packSizeInBase = toBaseUnits(measurementValue, measurementType);
-  if (packSizeInBase <= 0) return 0;
-  return Math.floor(quantity / packSizeInBase);
+  if (!Number.isFinite(quantity) || quantity <= 0 || quantity > MAX_BULK_STOCK ||
+      !Number.isFinite(packSizeInBase) || packSizeInBase <= 0) return 0;
+  return Math.min(MAX_ORDER_PACKS, Math.floor(quantity / packSizeInBase));
 }
 
 /**

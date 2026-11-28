@@ -152,6 +152,13 @@ export const schedulePath = (slug: string) => `/training/${encodeURIComponent(sl
 
 export type Listing = { program: TrainingProgram; batch: Batch; hours: string | null };
 
+/** A programme with its timetable days. `days` is null when the timetable failed to load. */
+export type Course = { program: TrainingProgram; days: ScheduleDay[] | null };
+
+/** The listing facts for one course, shared by the server render and loadListings. */
+export const toListing = ({ program, days }: Course, today = indiaToday()): Listing =>
+  ({ program, batch: batchOf(days, today), hours: days ? sharedHours(days) : null });
+
 /** Programmes with their batch dates; shared by the training page, the homepage and search. */
 export async function loadListings(): Promise<Listing[]> {
   const response = await fetch("/api/training-programs");
@@ -162,9 +169,9 @@ export async function loadListings(): Promise<Listing[]> {
       const schedule = await fetch(`/api/training-programs/${program.id}/schedule`);
       if (!schedule.ok) throw new Error();
       const days: ScheduleDay[] = await schedule.json();
-      return { program, batch: batchOf(days), hours: sharedHours(days) };
+      return toListing({ program, days });
     } catch {
-      return { program, batch: batchOf(null), hours: null };
+      return toListing({ program, days: null });
     }
   }));
 }

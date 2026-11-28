@@ -26,8 +26,8 @@ const catalogue = [
 const line = (p: ReturnType<typeof product>, quantity: number, extra = {}) =>
   ({ id: p.id, slug: p.slug, title: p.title, price: p.price, quantity, stockQuantity: p.stockQuantity, imgs: p.imgs, ...extra });
 
-function renderWith(ui: React.ReactElement, items: ReturnType<typeof line>[]) {
-  (useProducts as jest.Mock).mockReturnValue({ products: catalogue, loading: false, error: null });
+function renderWith(ui: React.ReactElement, items: ReturnType<typeof line>[], products = catalogue) {
+  (useProducts as jest.Mock).mockReturnValue({ products, loading: false, error: null });
   const store = configureStore({ reducer: { cartReducer }, preloadedState: { cartReducer: { items } } });
   render(<Provider store={store}>{ui}</Provider>);
   return store;
@@ -74,6 +74,25 @@ describe("/cart", () => {
     renderWith(<Cart />, [line(catalogue[2], 5, { stockQuantity: undefined })]);
     expect(screen.getByTestId("bag-line-grow-bag")).toHaveTextContent("Only 3 left. Reduce the quantity to 3.");
     expect(screen.getByRole("button", { name: "Oyster Grow Bag: no more in stock" })).toBeDisabled();
+    expect(screen.queryByRole("link", { name: "Go to checkout" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Remove one Oyster Grow Bag" }));
+    expect(screen.getByLabelText("3 in bag")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Go to checkout" })).toBeInTheDocument();
+  });
+
+  it("requires a verified stock count even when the bag has an older count", () => {
+    renderWith(<Cart />, [line(catalogue[0], 1)], [{ ...catalogue[0], stockQuantity: NaN }]);
+    expect(screen.getByRole("button", { name: "Cumin Seeds: stock not verified" })).toBeDisabled();
+    expect(screen.getByText("We couldn’t verify stock. Refresh or try again.")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Go to checkout" })).not.toBeInTheDocument();
+  });
+
+  it("lets shoppers remove a product the live catalogue no longer carries", () => {
+    renderWith(<Cart />, [line(catalogue[0], 1)], []);
+    expect(screen.getByText("Sold out. Remove it to continue.")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Go to checkout" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Remove Cumin Seeds from bag" }));
+    expect(screen.getByRole("heading", { name: "Your bag is empty." })).toBeInTheDocument();
   });
 
   it("gives an empty bag a way back to the shop", () => {

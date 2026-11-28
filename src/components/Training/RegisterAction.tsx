@@ -54,7 +54,9 @@ function describe(registration: Registration) {
  * A registration stays pending until an admin verifies the UPI payment.
  */
 export default function RegisterAction({ program, returnTo, note, open = true }: Props) {
-  const { data: session, status } = useSession();
+  const sessionState = useSession();
+  const session = sessionState?.data;
+  const status = sessionState?.status;
   const [registration, setRegistration] = useState<Registration | null>(null);
   const [registering, setRegistering] = useState(false);
   const [paying, setPaying] = useState(false);
@@ -124,9 +126,9 @@ export default function RegisterAction({ program, returnTo, note, open = true }:
         <button type="button" className={pantry.primaryAction} onClick={() => setRegistering(true)} aria-describedby={noteId}>
           Register
         </button>
-      ) : status === "loading" ? (
-        <button type="button" className={pantry.primaryAction} disabled aria-describedby={noteId}>Register</button>
       ) : (
+        // Also while the session loads, so the server HTML has a working link. Sign-in sends a
+        // shopper who is already signed in straight back to this page.
         <a className={pantry.primaryAction} href={`/auth/signin?callbackUrl=${encodeURIComponent(returnTo)}`} aria-describedby={noteId}>
           Register
         </a>

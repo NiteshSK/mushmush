@@ -14,6 +14,7 @@ const mockProduct: ChatProduct = {
   discountPercentage: 0,
   hasDiscount: false,
   inStock: true,
+  stockQuantity: 20,
   imgs: { thumbnails: ['/images/oyster-thumb.jpg'], previews: [] },
   averageRating: 4.5,
   reviewCount: 12,
