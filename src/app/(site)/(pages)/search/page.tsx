@@ -7,6 +7,8 @@ import PantryLoader from "@/components/Pantry/PantryLoader";
 export const metadata: Metadata = {
   title: "Search the pantry | Kosvana",
   description: "Search Kosvana’s dried mushrooms, spices, dry fruits and seeds.",
+  // Result pages repeat the shop; keep them out of the index but let crawlers follow product links.
+  robots: { index: false, follow: true },
 };
 
 export default function SearchPage() {

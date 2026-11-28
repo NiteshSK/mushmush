@@ -3,11 +3,12 @@ import { getShippingSummary } from "@/components/Help/shipping";
 import TermsPage from "@/components/Legal/TermsPage";
 import PantryShell from "@/components/Pantry/PantryShell";
 import { publicContactDetails } from "@/lib/public-contact";
+import { shareMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Terms of sale | Kosvana",
-  description: "How ordering, prices, UPI payment, delivery, cancellation, returns and complaints work at Kosvana.",
-};
+const title = "Terms of sale | Kosvana";
+const description = "How ordering, prices, UPI payment, delivery, cancellation, returns and complaints work at Kosvana.";
+
+export const metadata: Metadata = { title, description, ...shareMetadata({ path: "/terms", title, description }) };
 
 // Contact details come from global_configs and fees from shipping_zones; refresh them hourly.
 export const revalidate = 3600;

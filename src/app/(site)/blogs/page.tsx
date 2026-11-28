@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { JournalIndex } from "@/components/Read/Listing";
 import { pageNumber } from "@/components/Read/format";
+import { shareMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "Journal | Kosvana",
-  description: "Step-by-step guides to growing and cooking mushrooms at home, from Kosvana in Herbertpur, Dehradun.",
-};
+const title = "Journal | Kosvana";
+const description = "Step-by-step guides to growing and cooking mushrooms at home, from Kosvana in Herbertpur, Dehradun.";
+
+export const metadata: Metadata = { title, description, ...shareMetadata({ path: "/blogs", title, description }) };
 
 type Props = { searchParams: Promise<{ page?: string | string[] }> };
 

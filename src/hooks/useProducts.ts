@@ -1,15 +1,19 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { productsApi, Product } from '@/lib/api'
 
+/**
+ * Products from /api/products. Pass `initialProducts` (loaded on the server for the same params)
+ * to render them at once and skip the first fetch; a later change of params fetches as usual.
+ */
 export function useProducts(params?: {
   category?: string
   featured?: boolean
   inStock?: boolean
   page?: number
   limit?: number
-}) {
-  const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
+}, initialProducts?: Product[]) {
+  const [products, setProducts] = useState<Product[]>(initialProducts ?? [])
+  const [loading, setLoading] = useState(!initialProducts)
   const [error, setError] = useState<string | null>(null)
   const [pagination, setPagination] = useState({
     page: 1,
@@ -18,7 +22,14 @@ export function useProducts(params?: {
     totalPages: 0
   })
 
+  const paramsKey = JSON.stringify(params ?? {})
+  // The params the server data belongs to. Kept (not cleared) on the first run, so the
+  // second effect run in React Strict Mode does not fetch the same products again.
+  const initialKey = useRef(initialProducts ? paramsKey : null)
+
   useEffect(() => {
+    if (initialKey.current === paramsKey) return
+    initialKey.current = null
     const fetchProducts = async () => {
       try {
         setLoading(true)
@@ -41,7 +52,7 @@ export function useProducts(params?: {
     params?.page, 
     params?.limit,
     // Add JSON.stringify to ensure object changes trigger re-fetch
-    JSON.stringify(params)
+    paramsKey
   ])
 
   return { products, loading, error, pagination }

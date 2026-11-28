@@ -2,6 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { useSession } from "next-auth/react";
+import { renderToString } from "react-dom/server";
 import cartReducer from "@/redux/features/cart-slice";
 import ShopDetails from "./index";
 
@@ -290,5 +291,62 @@ describe("Product details", () => {
     await act(async () => { fireEvent.click(save); });
     expect(wishlist.removeFromWishlist).toHaveBeenCalledWith(50, { confirm: false });
     expect(within(panel()).getByRole("status").textContent).toBe("Removed from your wishlist.");
+  });
+});
+
+describe("Product details from the server", () => {
+  const renderWith = (product: object, slug = "cumin-seeds") => {
+    const store = configureStore({ reducer: { cartReducer } });
+    return <Provider store={store}><ShopDetails slug={slug} initialProduct={product as never} /></Provider>;
+  };
+  // JSDOM has a window, so react-redux picks useLayoutEffect, which renderToString warns about. Next.js renders without a window.
+  const quietServer = (element: React.ReactElement) => {
+    const spy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+    try { return renderToString(element); } finally { spy.mockRestore(); }
+  };
+
+  it("puts the title, pack, price, stock, summary and photo with its name in the first HTML", () => {
+    const html = quietServer(renderWith(cumin));
+    expect(html).toMatch(/<h1[^>]*>Cumin Seeds<\/h1>/);
+    expect(html).toMatch(/200 g/);
+    expect(html).toMatch(/₹149/);
+    expect(html).toMatch(/In stock/);
+    expect(html).toMatch(/Cumin Seeds \(Jeera\) are an essential spice\./);
+    expect(html).toMatch(/<img[^>]*alt="Cumin Seeds"/);
+    expect(html).not.toMatch(/Opening the product/);
+    expect(html).not.toMatch(/aria-busy="true"/);
+  });
+
+  it("says Sold out in the first HTML when no pack is left", () => {
+    const html = quietServer(renderWith({ ...cumin, inStock: true, stockQuantity: 0 }));
+    expect(html).toMatch(/Sold out/);
+    expect(html).not.toMatch(/Add to bag/);
+  });
+
+  it("shows the server product at once, then refreshes the price quietly from the API", async () => {
+    let answer: (value: unknown) => void = () => undefined;
+    serve(cumin);
+    global.fetch = jest.fn((url: string) => url.startsWith("/api/products?slug=")
+      ? new Promise(resolve => { answer = resolve; })
+      : json({ body: url.startsWith("/api/reviews") ? { reviews: [], totalReviews: 0, averageRating: 0 } : { products: [pepper] } })) as jest.Mock;
+    render(renderWith(cumin));
+    expect(screen.getByRole("heading", { level: 1, name: "Cumin Seeds" })).toBeTruthy();
+    expect(screen.queryByText("Opening the product…")).toBeNull();
+    expect(panel().textContent).toMatch(/₹149/);
+    expect(global.fetch).toHaveBeenCalledWith("/api/products?slug=cumin-seeds", expect.anything());
+    await act(async () => { answer(await json({ body: { products: [{ ...cumin, discountedPrice: 129, hasDiscount: true, discountPercentage: 13 }] } })); });
+    expect(panel().textContent).toMatch(/₹129Was ₹149.*13% off/);
+  });
+
+  it("keeps the server product when the refresh fails or finds nothing", async () => {
+    serve(null, { product: [{ status: 500 }] });
+    await act(async () => { render(renderWith(cumin)); });
+    expect(screen.queryByRole("alert")).toBeNull();
+    expect(screen.getByRole("heading", { level: 1, name: "Cumin Seeds" })).toBeTruthy();
+
+    cleanup();
+    serve(null);
+    await act(async () => { render(renderWith(cumin)); });
+    expect(screen.getByRole("heading", { level: 1, name: "Cumin Seeds" })).toBeTruthy();
   });
 });

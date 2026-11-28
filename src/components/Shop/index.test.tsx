@@ -152,6 +152,14 @@ describe("Himalayan pantry shop", () => {
     expect(screen.getByRole("link", { name: /Spawn and grow bags/ })).toHaveAttribute("href", "/#grow");
   });
 
+  it("hands the server catalogue to useProducts so the first render lists the products", () => {
+    openShop("category=spices");
+    expect(useProducts).toHaveBeenLastCalledWith({ limit: 100 }, undefined);
+    (useProducts as jest.Mock).mockClear();
+    render(<Provider store={configureStore({ reducer: { cartReducer } })}><Shop initialProducts={catalogue as never} /></Provider>);
+    expect(useProducts).toHaveBeenLastCalledWith({ limit: 100 }, catalogue);
+  });
+
   it("has no grow link when the catalogue has no grow products", () => {
     openShop();
     expect(screen.queryByRole("link", { name: /Spawn and grow bags/ })).toBeNull();

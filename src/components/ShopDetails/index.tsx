@@ -13,8 +13,9 @@ import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { useSession } from "next-auth/react";
 import NotifyMeModal from "../NotifyMeModal";
 import { useOpenPanel } from "../Pantry/PantryShell";
-import { GROW_CATEGORY, deliveryScope, isFreshMushroom, isGrowProduct, packLabel, productKind, rupees, sentenceCase } from "../Pantry/catalogue";
+import { deliveryScope, isGrowProduct, packLabel, productKind, rupees } from "../Pantry/catalogue";
 import { productSections, slugWords } from "./content";
+import { isSoldOut, photos, shelf } from "./product-facts";
 import Gallery from "./Gallery";
 import ProductInformation from "./ProductInformation";
 import Reviews, { Stars } from "./Reviews";
@@ -28,28 +29,7 @@ const LOW_STOCK = 10;
 const WHATSAPP = "https://wa.me/917618362662";
 /** Sign-in returns the shopper to this product. */
 const signInHref = (slug: string) => `/auth/signin?callbackUrl=${encodeURIComponent(`/shop-details/${slug}`)}`;
-const shelfOrder = ["spices", "dry-fruits", "seeds", "edible", "medicinal", "powders", "tinctures"];
-// Shopper-facing names for the short mushroom category titles stored in the database ("Edible", "Medicinal", "Dry Powder").
-const shelfNames: Record<string, string> = { edible: "Edible mushrooms", medicinal: "Medicinal mushrooms", powders: "Mushroom powders" };
-
-export type Shelf = { slug: string; title: string; href: string; grow: boolean };
-
-/**
- * The shelf a product belongs to, for the breadcrumb and related packs. Fresh mushrooms belong to the edible shelf.
- * Spawn and grow bags belong to "Grow your own", even where the catalogue still files them under Seeds:
- * the slug stays the stored category (for the related fetch), but the name and link are the grow band.
- */
-function shelf(product: Product): Shelf | undefined {
-  const categories = (product.categories ?? []).map(({ category }) => category);
-  const rank = (slug: string) => { const i = shelfOrder.indexOf(slug); return i < 0 ? shelfOrder.length : i; };
-  const grow = isGrowProduct(product);
-  const primary = (grow && categories.find(category => category.slug === GROW_CATEGORY))
-    || (isFreshMushroom(product) && categories.find(category => category.slug === "edible"))
-    || categories.slice().sort((a, b) => rank(a.slug) - rank(b.slug))[0];
-  if (!primary) return undefined;
-  if (grow) return { slug: primary.slug, title: "Grow your own", href: "/#grow", grow };
-  return { slug: primary.slug, title: shelfNames[primary.slug] ?? sentenceCase(primary.title), href: `/shop?category=${encodeURIComponent(primary.slug)}`, grow };
-}
+export type { Shelf } from "./product-facts";
 
 /** Spawn and grow bags are growing supplies. Say so before the shopper adds one, and point to training and bulk orders. */
 function GrowNote() {
@@ -63,8 +43,6 @@ function GrowNote() {
   </div>;
 }
 
-const photos = (product: Product) => Array.from(new Set([...(product.imgs?.previews ?? []), ...(product.imgs?.thumbnails ?? [])].filter(Boolean)));
-
 /** The bare /shop-details entry: older pages stored the chosen product in Redux or localStorage before navigating. */
 function storedProduct(fromStore?: Partial<Product>): Partial<Product> | null {
   if (fromStore?.slug || fromStore?.id) return fromStore;
@@ -74,11 +52,16 @@ function storedProduct(fromStore?: Partial<Product>): Partial<Product> | null {
   } catch { return null; }
 }
 
-function useProductDetails(slug?: string) {
+/**
+ * The product to show. With server data the page renders it at once (crawlers and the first paint
+ * read it from the HTML), then refreshes it quietly from /api/products. A failed refresh keeps the server copy.
+ */
+function useProductDetails(slug?: string, initialProduct?: Product) {
   const router = useRouter();
   const fromStore = useAppSelector(state => state.productDetailsReducer?.value);
-  const [load, setLoad] = useState<Load>({ status: "loading" });
+  const [load, setLoad] = useState<Load>(initialProduct ? { status: "ready", product: initialProduct } : { status: "loading" });
   const [attempt, setAttempt] = useState(0);
+  const quiet = Boolean(initialProduct) && attempt === 0;
 
   useEffect(() => {
     let query = slug ? `slug=${encodeURIComponent(slug)}` : "";
@@ -90,14 +73,15 @@ function useProductDetails(slug?: string) {
     }
     if (!query) { setLoad({ status: "none" }); return; }
     const controller = new AbortController();
-    setLoad({ status: "loading" });
+    if (!quiet) setLoad({ status: "loading" });
     fetch(`/api/products?${query}`, { signal: controller.signal })
       .then(response => response.ok ? response.json() : Promise.reject(new Error(String(response.status))))
       .then(data => {
         const product: Product | undefined = (data.products ?? []).find((item: Product) => slug ? item.slug === slug : item.id === id);
-        setLoad(product ? { status: "ready", product } : { status: "missing" });
+        if (product) setLoad({ status: "ready", product });
+        else if (!quiet) setLoad({ status: "missing" });
       })
-      .catch(() => { if (!controller.signal.aborted) setLoad({ status: "error" }); });
+      .catch(() => { if (!controller.signal.aborted && !quiet) setLoad({ status: "error" }); });
     return () => controller.abort();
     // The stored product is only a one-time fallback for the bare entry.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -111,7 +95,7 @@ function BuyControl({ product, onNotify }: { product: Product; onNotify: () => v
   const dispatch = useDispatch<AppDispatch>();
   const quantity = useAppSelector(selectCartItems).find(item => item.id === product.id)?.quantity ?? 0;
   const stock = product.stockQuantity ?? Infinity;
-  const soldOut = !product.inStock || stock < 1;
+  const soldOut = isSoldOut(product);
 
   const add = () => dispatch(addItemToCart({ id: product.id, slug: product.slug, title: product.title, imgs: product.imgs, price: product.price,
     discountedPrice: product.discountedPrice ?? undefined, stockQuantity: product.stockQuantity, quantity: 1 }));
@@ -206,7 +190,7 @@ function ProductView({ product }: { product: Product }) {
 
   const price = product.discountedPrice ?? product.price;
   const stock = product.stockQuantity ?? Infinity;
-  const soldOut = !product.inStock || stock < 1;
+  const soldOut = isSoldOut(product);
   const scope = deliveryScope(product);
   const kind = productKind(product);
   const category = shelf(product);
@@ -306,9 +290,12 @@ function ProductView({ product }: { product: Product }) {
   </>;
 }
 
-/** Product details for /shop-details/[slug] and the bare /shop-details entry. Prices come from /api/products as served. */
-export default function ShopDetails({ slug }: { slug?: string }) {
-  const { load, retry } = useProductDetails(slug);
+/**
+ * Product details for /shop-details/[slug] and the bare /shop-details entry. Prices come from /api/products as served;
+ * the slug page passes the same product from the server (src/lib/catalogue-server.ts) as `initialProduct`.
+ */
+export default function ShopDetails({ slug, initialProduct }: { slug?: string; initialProduct?: Product }) {
+  const { load, retry } = useProductDetails(slug, initialProduct);
   return <main id="main" className={`${pantry.page} ${styles.detail}`} aria-busy={load.status === "loading"}>
     {load.status === "loading" ? <><p className={pantry.srOnly} role="status">Opening the product…</p><Loading /></>
       : load.status === "ready" ? <ProductView key={load.product.id} product={load.product} />

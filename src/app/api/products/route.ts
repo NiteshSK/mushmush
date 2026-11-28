@@ -2,8 +2,7 @@ import { staffSession } from "@/lib/admin";
 import { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { availablePacks, formatBulkQuantity } from '@/lib/inventory'
-import { activeDiscountsInclude, computeProductDiscount } from '@/lib/product-pricing'
+import { listCatalogueProducts } from '@/lib/catalogue-server'
 
 // GET /api/products - Fetch all products with optional filtering
 export async function GET(request: NextRequest) {
@@ -18,7 +17,7 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '10')))
     const skip = (page - 1) * limit
 
-    const where: any = { archivedAt: null }
+    const where: Prisma.ProductWhereInput = { archivedAt: null }
     
     // If ID is provided, fetch single product
     if (id) {
@@ -48,100 +47,8 @@ export async function GET(request: NextRequest) {
       where.inStock = true
     }
 
-    let products, total;
-    
-    try {
-      // Try to fetch products with discounts
-      [products, total] = await Promise.all([
-        prisma.product.findMany({
-          where,
-          include: {
-            categories: {
-              include: {
-                category: true
-              }
-            },
-            reviews: {
-              select: {
-                rating: true
-              }
-            },
-            // Same active-discount rule as server-side order pricing
-            discounts: activeDiscountsInclude()
-          },
-          skip,
-          take: limit,
-          orderBy: {
-            createdAt: 'desc'
-          }
-        }),
-        prisma.product.count({ where })
-      ]);
-    } catch (error) {
-      // Fallback: fetch products without discounts if table doesn't exist
-      // Fallback: fetch products without discounts table
-      [products, total] = await Promise.all([
-        prisma.product.findMany({
-          where,
-          include: {
-            categories: {
-              include: {
-                category: true
-              }
-            },
-            reviews: {
-              select: {
-                rating: true
-              }
-            }
-          },
-          skip,
-          take: limit,
-          orderBy: {
-            createdAt: 'desc'
-          }
-        }),
-        prisma.product.count({ where })
-      ]);
-      
-      // Add empty discounts array to each product
-      products = products.map(product => ({
-        ...product,
-        discounts: []
-      }));
-    }
-
-    // Products added within the last 14 days are automatically tagged "New"
-    const newThreshold = new Date();
-    newThreshold.setDate(newThreshold.getDate() - 14);
-
-    // Calculate average rating, stock status, and dynamic pricing for each product
-    const productsWithRatings = products.map(product => {
-      // Calculate average rating
-      const averageRating = product.reviews.length > 0 
-        ? product.reviews.reduce((sum, review) => sum + review.rating, 0) / product.reviews.length
-        : 0;
-
-      // Calculate discounted price ONLY if active discount records exist.
-      // Shared with server-side order pricing (src/lib/product-pricing.ts).
-      const { discountedPrice, discountPercentage } = computeProductDiscount(product.price, product.discounts);
-
-      const packs = availablePacks(product.quantity, product.measurementValue, product.measurementType);
-
-      return {
-        ...product,
-        averageRating,
-        reviewCount: product.reviews.length,
-        isOutOfStock: !product.inStock,
-        stockQuantity: packs,
-        bulkQuantity: product.quantity,
-        bulkDisplay: formatBulkQuantity(product.quantity, product.measurementType),
-        discountedPrice,
-        discountPercentage: Math.round(discountPercentage),
-        hasDiscount: discountedPrice !== null,
-        isNew: product.createdAt >= newThreshold
-      };
-    })
+    // Same query, discount and stock rules as the server-rendered product pages.
+    const { products: productsWithRatings, total } = await listCatalogueProducts({ where, skip, take: limit })
 
     return NextResponse.json({
       products: productsWithRatings,

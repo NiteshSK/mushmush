@@ -8,6 +8,11 @@ export type InfoRow = { label: string; value: string };
 export type Benefit = { label: string; text: string };
 
 const plain = (html: string) => html.replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
+
+const entities: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: "\"", "#39": "'", apos: "'" };
+
+/** Stored copy as plain text, with tags removed and common entities decoded. */
+export const plainText = (html: string) => plain(html ?? "").replace(/&(amp|lt|gt|quot|#39|apos);/g, (_, name: string) => entities[name]);
 const isStorage = (text: string) => /^(storage|shelf life|how to store)\b/i.test(text.trim());
 
 /** Some stored copy repeats its own section title as a leading <h2>, e.g. "Specifications:". */
